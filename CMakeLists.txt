@@ -8,6 +8,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(SFML_STATIC_LIBRARIES TRUE)
 
+# Absolute path where you installed SFML
 set(CUSTOM_SFML_HOME "D:/work_mine/CPP/SFML-2.6.0")
 
 file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*.hpp")

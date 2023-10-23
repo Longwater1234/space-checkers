@@ -20,7 +20,7 @@ using Kete = std::unique_ptr<chk::Piece>;
  * @param blockList empty list of cells
  * @param font      for text inside cells
  */
-void drawCheckerboard(std::vector<Block>& blockList, const sf::Font& font)
+void drawCheckerboard(std::vector<Block> &blockList, const sf::Font &font)
 {
 	int counter = 32;
 	for (size_t row = 0; row < NUM_ROWS; row++)
@@ -58,7 +58,7 @@ void drawCheckerboard(std::vector<Block>& blockList, const sf::Font& font)
  * Create new checker pieces, each with own position, and add them to vector<Pieces>
  * @param pieceList destination
  */
-void drawAllPieces(std::vector<Kete>& pieceList)
+void drawAllPieces(std::vector<Kete> &pieceList)
 {
 	for (size_t row = 0; row < NUM_ROWS; row++)
 	{
@@ -84,7 +84,6 @@ void drawAllPieces(std::vector<Kete>& pieceList)
 		}
 	}
 }
-
 
 int main()
 {
@@ -117,8 +116,8 @@ int main()
 	chk::Player p1(chk::PlayerType::PLAYER_1);
 	chk::Player p2(chk::PlayerType::PLAYER_2);
 
-	//Give each player their own pieces
-	for (const auto& kete : keteList)
+	// Give each player their own pieces
+	for (const auto &kete : keteList)
 	{
 		if (kete->getPieceType() == chk::PieceType::Red)
 		{
@@ -149,12 +148,12 @@ int main()
 		}
 
 		window.clear();
-		for (auto& block : blockList)
+		for (auto &block : blockList)
 		{
 			window.draw(*block);
 		}
 
-		for (auto& piece : keteList)
+		for (auto &piece : keteList)
 		{
 			window.draw(*piece);
 		}
