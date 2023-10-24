@@ -1,14 +1,14 @@
 #pragma once
 
-#include <string>
-#include <stack>
 #include "Piece.hpp"
+#include <stack>
+#include <string>
 
 namespace chk
 {
 enum class PlayerType
 {
-    //RED
+    // RED
     PLAYER_1 = 4883834,
     // BLACK
     PLAYER_2 = 8594839
@@ -16,13 +16,13 @@ enum class PlayerType
 
 class Player
 {
-public:
+  public:
     Player(PlayerType player_type);
     void Player::givePiece(const chk::Piece &piece);
     void Player::losePiece();
     [[nodiscard]] size_t getPieceCount() const;
 
-private:
+  private:
     std::string name_;
     std::stack<Piece> basket_;
 };
@@ -64,4 +64,4 @@ inline size_t Player::getPieceCount() const
 {
     return this->basket_.size();
 }
-}
+} // namespace chk
