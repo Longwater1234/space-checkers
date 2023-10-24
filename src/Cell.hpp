@@ -1,22 +1,23 @@
 #pragma once
-#include <SFML/Graphics/Drawable.hpp>
-#include <SFML/Graphics/RectangleShape.hpp>
-#include <SFML/Graphics/Text.hpp>
 #include <SFML/Graphics/Color.hpp>
+#include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Graphics/Font.hpp>
-#include <SFML/Graphics/RenderTarget.hpp>
+#include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/Graphics/RenderStates.hpp>
+#include <SFML/Graphics/RenderTarget.hpp>
+#include <SFML/Graphics/Text.hpp>
 #include <string>
 
 namespace chk
 {
 class Cell final : public sf::Drawable
 {
-public:
+  public:
     Cell(const sf::RectangleShape &rec, const sf::Vector2f &pos, int index);
+    bool containsPoint(sf::Vector2i &pos) const;
     void setFont(const sf::Font &font);
 
-private:
+  private:
     sf::RectangleShape rec_;
     int index_;
     sf::Text sfText;
@@ -47,6 +48,19 @@ inline Cell::Cell(const sf::RectangleShape &rec, const sf::Vector2f &pos, const 
     this->sfText = text;
 }
 
+/**
+ * Check whether mouse is hovering over this Cell
+ * @param pos Mouse position relative to Window
+ */
+inline bool Cell::containsPoint(sf::Vector2i &pos) const
+{
+    return this->rec_.getGlobalBounds().contains(pos.x, pos.y);
+}
+
+/**
+ * Set the given font over this cell
+ * @param font sf::Font loaded from disk
+ */
 inline void Cell::setFont(const sf::Font &font)
 {
     this->myFont = font;

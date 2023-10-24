@@ -2,6 +2,7 @@
 #include "Piece.hpp"
 #include "Player.hpp"
 #include <SFML/Graphics.hpp>
+#include <SFML/Window/Mouse.hpp>
 #include <algorithm>
 #include <memory>
 #include <vector>
@@ -146,10 +147,15 @@ int main()
                 window.close();
             }
         }
+        auto mousePos = sf::Mouse::getPosition(window);
 
         window.clear();
         for (auto &block : blockList)
         {
+            if (block.get()->containsPoint(mousePos))
+            {
+                statusText.setString("over me");
+            }
             window.draw(*block);
         }
 
