@@ -13,10 +13,10 @@ enum class PieceType
     Black = 78885,
 };
 
-constexpr auto BLACK_NORMAL = "resources/normal_black.png";
-constexpr auto BLACK_KING = "resources/king_black.png";
-constexpr auto RED_NORMAL = "resources/normal_red.png";
-constexpr auto RED_KING = "resources/king_red.png";
+constexpr auto BLACK_NORMAL = "resources/black_normal.png";
+constexpr auto BLACK_KING = "resources/black_king.png";
+constexpr auto RED_NORMAL = "resources/red_normal.png";
+constexpr auto RED_KING = "resources/red_king.png";
 
 class Piece final : public sf::Drawable, public sf::Transformable
 {

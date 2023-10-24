@@ -22,7 +22,7 @@ using Kete = std::unique_ptr<chk::Piece>;
  */
 void drawCheckerboard(std::vector<Block> &blockList, const sf::Font &font)
 {
-    size_t counter = 32;
+    int counter = 32;
     for (size_t row = 0; row < NUM_ROWS; row++)
     {
         for (size_t col = 0; col < NUM_COLS; col++)
