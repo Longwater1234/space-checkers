@@ -51,3 +51,5 @@ bld/
 *.exe
 *.out
 *.app
+*.zip
+*.rar

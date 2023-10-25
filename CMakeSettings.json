@@ -13,8 +13,13 @@
       "variables": [
         {
           "name": "CMAKE_INSTALL_PREFIX",
-          "value": "D:/work_mine/CPP/checkers-cpp/out/install/x64-Debug",
+          "value": "${projectDir}/out/install/x64-Debug",
           "type": "PATH"
+        },
+        {
+          "name": "CMAKE_BUILD_TYPE",
+          "value": "Debug",
+          "type": "STRING"
         }
       ]
     },
@@ -31,8 +36,13 @@
       "variables": [
         {
           "name": "CMAKE_INSTALL_PREFIX",
-          "value": "D:/work_mine/CPP/checkers-cpp/out/install/x64-Release",
+          "value": "${projectDir}/out/install/x64-Release",
           "type": "PATH"
+        },
+        {
+          "name": "CMAKE_BUILD_TYPE",
+          "value": "Release",
+          "type": "STRING"
         }
       ]
     }
