@@ -125,14 +125,16 @@ int main()
     {
         if (kete->getPieceType() == chk::PieceType::Red)
         {
-            p1.givePiece(*kete);
+            p1.givePiece(std::move(kete));
         }
         else
         {
-            p2.givePiece(*kete);
+            p2.givePiece(std::move(kete));
         }
     }
 
+    keteList.clear();
+    
     // THE STATUS TEXT
     sf::Text statusText;
     statusText.setFont(font);
@@ -161,11 +163,11 @@ int main()
 
         for (auto &piece : p1.getOwnPieces())
         {
-            window.draw(piece);
+            window.draw(*piece.get());
         }
         for (auto &piece : p2.getOwnPieces())
         {
-            window.draw(piece);
+            window.draw(*piece.get());
         }
 
         window.draw(statusText);

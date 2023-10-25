@@ -26,12 +26,9 @@ class Piece final : public sf::Drawable, public sf::Transformable
     PieceType getPieceType() const;
     void activateKing();
     bool getIsKing() const;
-    void moveCustom(float posX, float posY);
+    void moveCustom(const float posX, const float posY);
     // Custom equality operator
-    bool operator==(const Piece &other) const
-    {
-        return this->index == other.index;
-    }
+    bool operator==(const Piece &other) const;
 
   private:
     sf::Texture texture;
@@ -51,7 +48,6 @@ inline Piece::Piece(const sf::CircleShape &circle, const PieceType pType, const 
     sf::Texture localTxr;
     if (pieceType == PieceType::Red)
     {
-        /* code */
         if (localTxr.loadFromFile(RED_NORMAL))
         {
             this->texture = localTxr;
@@ -108,7 +104,8 @@ inline void Piece::activateKing()
 }
 
 /**
- * get whether dir is king
+ * get whether this piece is king
+ * @return TRUE or FALSE
  */
 inline bool Piece::getIsKing() const
 {
@@ -124,6 +121,11 @@ inline void Piece::moveCustom(const float posX, const float posY)
 {
     // TODO Validate move, and verify if is King.
     this->setPosition(sf::Vector2f(posX, posY));
+}
+
+inline bool Piece::operator==(const Piece &other) const
+{
+    return this->index == other.index;
 }
 
 } // namespace chk
