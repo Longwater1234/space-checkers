@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Piece.hpp"
-#include <stack>
+#include <list>
 #include <string>
 
 namespace chk
@@ -18,13 +18,14 @@ class Player
 {
   public:
     Player(PlayerType player_type);
-    void Player::givePiece(const chk::Piece &piece);
-    void Player::losePiece();
+    void givePiece(const chk::Piece &piece);
+    void losePiece(const chk::Piece &captured);
+    const std::list<Piece> getOwnPieces() const;
     [[nodiscard]] size_t getPieceCount() const;
 
   private:
     std::string name_;
-    std::stack<Piece> basket_;
+    std::list<Piece> basket_;
 };
 
 inline Player::Player(PlayerType player_type)
@@ -45,15 +46,25 @@ inline Player::Player(PlayerType player_type)
  */
 inline void Player::givePiece(const chk::Piece &piece)
 {
-    this->basket_.push(piece);
+    this->basket_.emplace_back(std::move(piece));
 }
 
 /**
- * \brief When a player's piece is captured, -1 from stack
+ * When a player's piece is captured, -1 from list
+ * @param captured  the captured piece
  */
-inline void Player::losePiece()
+inline void Player::losePiece(const chk::Piece &captured)
 {
-    this->basket_.pop();
+    this->basket_.remove_if([&captured](const Piece &p) { return p == captured; });
+}
+
+/**
+ * get all pieces this player owns
+ * @return list of pieces
+ */
+inline const std::list<Piece> Player::getOwnPieces() const
+{
+    return this->basket_;
 }
 
 /**

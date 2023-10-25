@@ -1,9 +1,9 @@
 #pragma once
-#include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Graphics/CircleShape.hpp>
-#include <SFML/Graphics/Texture.hpp>
-#include <SFML/Graphics/RenderTarget.hpp>
+#include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Graphics/RenderStates.hpp>
+#include <SFML/Graphics/RenderTarget.hpp>
+#include <SFML/Graphics/Texture.hpp>
 
 namespace chk
 {
@@ -21,27 +21,32 @@ constexpr auto RED_KING = "resources/red_king.png";
 class Piece final : public sf::Drawable, public sf::Transformable
 {
 
-public:
-    Piece(const sf::CircleShape &circle, const PieceType pType);
+  public:
+    Piece(const sf::CircleShape &circle, const PieceType pType, const unsigned int idx_);
     PieceType getPieceType() const;
     void activateKing();
     bool getIsKing() const;
     void moveCustom(float posX, float posY);
+    // Custom equality operator
+    bool operator==(const Piece &other) const
+    {
+        return this->index == other.index;
+    }
 
-private:
+  private:
     sf::Texture texture;
+    unsigned int index;
     sf::CircleShape myCircle;
     PieceType pieceType;
     bool isKing = false;
     void Piece::draw(sf::RenderTarget &target, sf::RenderStates states) const override;
-
 };
 
-inline Piece::Piece(const sf::CircleShape &circle, const PieceType pType)
+inline Piece::Piece(const sf::CircleShape &circle, const PieceType pType, const unsigned int idx_)
 {
     this->myCircle = circle;
     this->pieceType = pType;
-    this->isKing = false;
+    this->index = idx_;
 
     sf::Texture localTxr;
     if (pieceType == PieceType::Red)
@@ -117,8 +122,8 @@ inline bool Piece::getIsKing() const
  */
 inline void Piece::moveCustom(const float posX, const float posY)
 {
-    //TODO Validate move, and verify if is King. 
+    // TODO Validate move, and verify if is King.
     this->setPosition(sf::Vector2f(posX, posY));
 }
 
-}
+} // namespace chk

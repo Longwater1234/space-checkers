@@ -61,6 +61,7 @@ void drawCheckerboard(std::vector<Block> &blockList, const sf::Font &font)
  */
 void drawAllPieces(std::vector<Kete> &pieceList)
 {
+    int idx = 0;
     for (size_t row = 0; row < NUM_ROWS; row++)
     {
         for (size_t col = 0; col < NUM_COLS; col++)
@@ -71,14 +72,15 @@ void drawAllPieces(std::vector<Kete> &pieceList)
                 sf::CircleShape circle(50.0f);
                 const float x = (col % NUM_COLS) * 100.0f;
                 circle.setPosition(sf::Vector2f(x, row * 100.0f));
+                idx++;
                 if (row < 3)
                 {
-                    auto kete = std::make_unique<chk::Piece>(circle, chk::PieceType::Black);
+                    auto kete = std::make_unique<chk::Piece>(circle, chk::PieceType::Black, idx);
                     pieceList.emplace_back(std::move(kete));
                 }
                 else if (row > 4)
                 {
-                    auto kete = std::make_unique<chk::Piece>(circle, chk::PieceType::Red);
+                    auto kete = std::make_unique<chk::Piece>(circle, chk::PieceType::Red, idx);
                     pieceList.emplace_back(std::move(kete));
                 }
             }
@@ -110,15 +112,16 @@ int main()
 
     drawCheckerboard(blockList, font);
 
+    // CREATE YOUR TWO PLAYERS
+    chk::Player p1(chk::PlayerType::PLAYER_1);
+    chk::Player p2(chk::PlayerType::PLAYER_2);
+
     // NOW DRAW all PIECES ON BOARD
     std::vector<Kete> keteList;
     drawAllPieces(keteList);
 
-    chk::Player p1(chk::PlayerType::PLAYER_1);
-    chk::Player p2(chk::PlayerType::PLAYER_2);
-
     // Give each player their own pieces
-    for (const auto &kete : keteList)
+    for (auto &kete : keteList)
     {
         if (kete->getPieceType() == chk::PieceType::Red)
         {
@@ -133,7 +136,8 @@ int main()
     // THE STATUS TEXT
     sf::Text statusText;
     statusText.setFont(font);
-    statusText.setString("Now Playing!");
+    std::string jamani = std::to_string(keteList.size());
+    statusText.setString("Now playing! Pieces: " + jamani);
     statusText.setCharacterSize(16u);
     statusText.setFillColor(sf::Color::White);
     statusText.setPosition(sf::Vector2f(0, 825));
@@ -148,20 +152,20 @@ int main()
             }
         }
         auto mousePos = sf::Mouse::getPosition(window);
-
         window.clear();
+
         for (auto &block : blockList)
         {
-            if (block.get()->containsPoint(mousePos))
-            {
-                statusText.setString("over me");
-            }
             window.draw(*block);
         }
 
-        for (auto &piece : keteList)
+        for (auto &piece : p1.getOwnPieces())
         {
-            window.draw(*piece);
+            window.draw(piece);
+        }
+        for (auto &piece : p2.getOwnPieces())
+        {
+            window.draw(piece);
         }
 
         window.draw(statusText);

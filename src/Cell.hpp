@@ -58,7 +58,7 @@ inline bool Cell::containsPoint(sf::Vector2i &pos) const
 }
 
 /**
- * Set the given font over this cell
+ * Set the given font to this cell
  * @param font sf::Font loaded from disk
  */
 inline void Cell::setFont(const sf::Font &font)
