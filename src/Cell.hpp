@@ -14,7 +14,6 @@ class Cell final : public sf::Drawable
 {
   public:
     Cell(const sf::RectangleShape &rec, const sf::Vector2f &pos, int index);
-    bool containsPoint(sf::Vector2i &pos) const;
     void setFont(const sf::Font &font);
 
   private:
@@ -46,15 +45,6 @@ inline Cell::Cell(const sf::RectangleShape &rec, const sf::Vector2f &pos, const 
     text.setString(std::to_string(this->index_));
     text.setPosition(pos);
     this->sfText = text;
-}
-
-/**
- * Check whether mouse is hovering over this Cell
- * @param pos Mouse position relative to Window
- */
-inline bool Cell::containsPoint(sf::Vector2i &pos) const
-{
-    return this->rec_.getGlobalBounds().contains(pos.x, pos.y);
 }
 
 /**

@@ -27,7 +27,7 @@ class Piece final : public sf::Drawable, public sf::Transformable
     void activateKing();
     bool getIsKing() const;
     void moveCustom(const float posX, const float posY);
-    // Custom equality operator
+    bool containsPoint(sf::Vector2i &pos) const;
     bool operator==(const Piece &other) const;
 
   private:
@@ -123,6 +123,21 @@ inline void Piece::moveCustom(const float posX, const float posY)
     this->setPosition(sf::Vector2f(posX, posY));
 }
 
+/**
+ * \brief Check whether mouse cursor is currently over this piece
+ * \param pos Mouse position relative to main Window
+ * \return TRUE or FALSE
+ */
+inline bool Piece::containsPoint(sf::Vector2i &pos) const
+{
+    return this->myCircle.getGlobalBounds().contains(static_cast<float>(pos.x), static_cast<float>(pos.y));
+}
+
+/**
+ * \brief Custom equality operator. Compares 2 pieces
+ * \param other The other Piece
+ * \return TRUE or FALSE
+ */
 inline bool Piece::operator==(const Piece &other) const
 {
     return this->index == other.index;

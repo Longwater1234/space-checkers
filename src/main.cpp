@@ -133,8 +133,9 @@ int main()
         }
     }
 
+    // we don't need this list anymore
     keteList.clear();
-    
+
     // THE STATUS TEXT
     sf::Text statusText;
     statusText.setFont(font);
@@ -163,11 +164,11 @@ int main()
 
         for (auto &piece : p1.getOwnPieces())
         {
-            window.draw(*piece.get());
+            window.draw(*piece);
         }
         for (auto &piece : p2.getOwnPieces())
         {
-            window.draw(*piece.get());
+            window.draw(*piece);
         }
 
         window.draw(statusText);

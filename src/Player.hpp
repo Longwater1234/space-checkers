@@ -64,7 +64,7 @@ inline void Player::losePiece(const chk::Piece &captured)
 }
 
 /**
- * get all pieces this player owns
+ * Get all pieces this player owns
  * @return list of pieces
  */
 inline const std::list<PiecePtr> &Player::getOwnPieces() const
