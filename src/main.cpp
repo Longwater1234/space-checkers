@@ -133,14 +133,13 @@ int main()
         }
     }
 
-    // we don't need this list anymore
+    // we don't need this anymore
     keteList.clear();
 
     // THE STATUS TEXT
     sf::Text statusText;
     statusText.setFont(font);
-    std::string jamani = std::to_string(keteList.size());
-    statusText.setString("Now playing! Pieces: " + jamani);
+    statusText.setString("Now playing!");
     statusText.setCharacterSize(16u);
     statusText.setFillColor(sf::Color::White);
     statusText.setPosition(sf::Vector2f(0, 825));
@@ -157,18 +156,26 @@ int main()
         auto mousePos = sf::Mouse::getPosition(window);
         window.clear();
 
-        for (auto &block : blockList)
+        for (auto &cell : blockList)
         {
-            window.draw(*block);
+            window.draw(*cell);
         }
 
-        for (auto &piece : p1.getOwnPieces())
+        for (auto &red_piece : p1.getOwnPieces())
         {
-            window.draw(*piece);
+            if (red_piece->containsPoint(mousePos))
+            {
+                red_piece->addOutline();
+            }
+            else
+            {
+                red_piece->removeOutline();
+            }
+            window.draw(*red_piece);
         }
-        for (auto &piece : p2.getOwnPieces())
+        for (auto &black_piece : p2.getOwnPieces())
         {
-            window.draw(*piece);
+            window.draw(*black_piece);
         }
 
         window.draw(statusText);

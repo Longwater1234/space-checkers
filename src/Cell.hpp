@@ -21,18 +21,8 @@ class Cell final : public sf::Drawable
     int index_;
     sf::Text sfText;
     sf::Font myFont;
-    void Cell::draw(sf::RenderTarget &target, sf::RenderStates states) const override;
+    void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
 };
-
-inline void Cell::draw(sf::RenderTarget &target, sf::RenderStates states) const
-{
-
-    target.draw(rec_);
-    if (index_ != 0)
-    {
-        target.draw(sfText);
-    }
-}
 
 inline Cell::Cell(const sf::RectangleShape &rec, const sf::Vector2f &pos, const int index)
 {
@@ -45,6 +35,16 @@ inline Cell::Cell(const sf::RectangleShape &rec, const sf::Vector2f &pos, const 
     text.setString(std::to_string(this->index_));
     text.setPosition(pos);
     this->sfText = text;
+}
+
+inline void Cell::draw(sf::RenderTarget &target, sf::RenderStates states) const
+{
+
+    target.draw(rec_, states);
+    if (index_ != 0)
+    {
+        target.draw(sfText, states);
+    }
 }
 
 /**

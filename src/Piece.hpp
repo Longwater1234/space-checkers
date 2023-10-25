@@ -27,7 +27,9 @@ class Piece final : public sf::Drawable, public sf::Transformable
     void activateKing();
     bool getIsKing() const;
     void moveCustom(const float posX, const float posY);
-    bool containsPoint(sf::Vector2i &pos) const;
+    bool containsPoint(const sf::Vector2i &pos) const;
+    void addOutline();
+    void removeOutline();
     bool operator==(const Piece &other) const;
 
   private:
@@ -36,7 +38,7 @@ class Piece final : public sf::Drawable, public sf::Transformable
     sf::CircleShape myCircle;
     PieceType pieceType;
     bool isKing = false;
-    void Piece::draw(sf::RenderTarget &target, sf::RenderStates states) const override;
+    void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
 };
 
 inline Piece::Piece(const sf::CircleShape &circle, const PieceType pType, const unsigned int idx_)
@@ -90,6 +92,7 @@ inline void Piece::activateKing()
         if (localTxr.loadFromFile(RED_KING))
         {
             this->texture = localTxr;
+
             this->myCircle.setTexture(&this->texture);
         }
     }
@@ -105,7 +108,7 @@ inline void Piece::activateKing()
 
 /**
  * get whether this piece is king
- * @return TRUE or FALSE
+ * \return TRUE or FALSE
  */
 inline bool Piece::getIsKing() const
 {
@@ -114,8 +117,8 @@ inline bool Piece::getIsKing() const
 
 /**
  * move piece across board to global position (x,y)
- * @param posX by x position
- * @param posY the y position
+ * \param posX by x position
+ * \param posY the y position
  */
 inline void Piece::moveCustom(const float posX, const float posY)
 {
@@ -128,9 +131,26 @@ inline void Piece::moveCustom(const float posX, const float posY)
  * \param pos Mouse position relative to main Window
  * \return TRUE or FALSE
  */
-inline bool Piece::containsPoint(sf::Vector2i &pos) const
+inline bool Piece::containsPoint(const sf::Vector2i &pos) const
 {
     return this->myCircle.getGlobalBounds().contains(static_cast<float>(pos.x), static_cast<float>(pos.y));
+}
+
+/**
+ * \brief Highlight with yellow outline when focused
+ */
+inline void chk::Piece::addOutline()
+{
+    this->myCircle.setOutlineColor(sf::Color::Yellow);
+    this->myCircle.setOutlineThickness(5.0f);
+}
+
+/**
+ * \brief Removes the outline
+ */
+inline void Piece::removeOutline()
+{
+    this->myCircle.setOutlineThickness(0);
 }
 
 /**
