@@ -5,6 +5,7 @@
 #include <SFML/Window/Mouse.hpp>
 #include <algorithm>
 #include <memory>
+#include <random>
 #include <vector>
 
 constexpr uint16_t NUM_ROWS = 8;
@@ -61,7 +62,9 @@ void drawCheckerboard(std::vector<Block> &blockList, const sf::Font &font)
  */
 void drawAllPieces(std::vector<Kete> &pieceList)
 {
-    int idx = 0;
+    std::random_device randomDevice;
+    std::mt19937 randEngine(randomDevice());
+    std::uniform_int_distribution<int> dist(1, 100);
     for (size_t row = 0; row < NUM_ROWS; row++)
     {
         for (size_t col = 0; col < NUM_COLS; col++)
@@ -72,15 +75,14 @@ void drawAllPieces(std::vector<Kete> &pieceList)
                 sf::CircleShape circle(50.0f);
                 const float x = (col % NUM_COLS) * 100.0f;
                 circle.setPosition(sf::Vector2f(x, row * 100.0f));
-                idx++;
                 if (row < 3)
                 {
-                    auto kete = std::make_unique<chk::Piece>(circle, chk::PieceType::Black, idx);
+                    auto kete = std::make_unique<chk::Piece>(circle, chk::PieceType::Black, dist(randEngine));
                     pieceList.emplace_back(std::move(kete));
                 }
                 else if (row > 4)
                 {
-                    auto kete = std::make_unique<chk::Piece>(circle, chk::PieceType::Red, idx);
+                    auto kete = std::make_unique<chk::Piece>(circle, chk::PieceType::Red, dist(randEngine));
                     pieceList.emplace_back(std::move(kete));
                 }
             }
@@ -112,9 +114,9 @@ int main()
 
     drawCheckerboard(blockList, font);
 
-    // CREATE YOUR TWO PLAYERS
-    chk::Player p1(chk::PlayerType::PLAYER_1);
-    chk::Player p2(chk::PlayerType::PLAYER_2);
+    // CREATE YOUR TWO unique PLAYERS
+    auto p1 = std::make_unique<chk::Player>(chk::PlayerType::PLAYER_1);
+    auto p2 = std::make_unique<chk::Player>(chk::PlayerType::PLAYER_2);
 
     // NOW DRAW all PIECES ON BOARD
     std::vector<Kete> keteList;
@@ -125,11 +127,11 @@ int main()
     {
         if (kete->getPieceType() == chk::PieceType::Red)
         {
-            p1.givePiece(std::move(kete));
+            p1->givePiece(std::move(kete));
         }
         else
         {
-            p2.givePiece(std::move(kete));
+            p2->givePiece(std::move(kete));
         }
     }
 
@@ -137,12 +139,13 @@ int main()
     keteList.clear();
 
     // THE STATUS TEXT
-    sf::Text statusText;
-    statusText.setFont(font);
-    statusText.setString("Now playing!");
-    statusText.setCharacterSize(16u);
-    statusText.setFillColor(sf::Color::White);
-    statusText.setPosition(sf::Vector2f(0, 825));
+    sf::Text txtPanel;
+    txtPanel.setFont(font);
+    std::string statusText;
+    txtPanel.setString("Now playing!");
+    txtPanel.setCharacterSize(16u);
+    txtPanel.setFillColor(sf::Color::White);
+    txtPanel.setPosition(sf::Vector2f(0, 825));
 
     while (window.isOpen())
     {
@@ -161,24 +164,31 @@ int main()
             window.draw(*cell);
         }
 
-        for (auto &red_piece : p1.getOwnPieces())
+        for (const auto &red_piece : p1->getOwnPieces())
         {
             if (red_piece->containsPoint(mousePos))
             {
                 red_piece->addOutline();
+                if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
+                {
+                    // TODO handle move here
+                    statusText = "clicked " + std::to_string(red_piece->getIndex());
+                }
             }
             else
             {
                 red_piece->removeOutline();
+                // statusText.setString("");
             }
             window.draw(*red_piece);
         }
-        for (auto &black_piece : p2.getOwnPieces())
+        for (const auto &black_piece : p2->getOwnPieces())
         {
             window.draw(*black_piece);
         }
 
-        window.draw(statusText);
+        txtPanel.setString(statusText);
+        window.draw(txtPanel);
         window.display();
     }
     return EXIT_SUCCESS;

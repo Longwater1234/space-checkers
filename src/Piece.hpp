@@ -30,6 +30,7 @@ class Piece final : public sf::Drawable, public sf::Transformable
     bool containsPoint(const sf::Vector2i &pos) const;
     void addOutline();
     void removeOutline();
+    unsigned int getIndex() const;
     bool operator==(const Piece &other) const;
 
   private:
@@ -151,6 +152,14 @@ inline void chk::Piece::addOutline()
 inline void Piece::removeOutline()
 {
     this->myCircle.setOutlineThickness(0);
+}
+
+/**
+ * Get piece index
+ */
+inline unsigned int Piece::getIndex() const
+{
+    return this->index;
 }
 
 /**
