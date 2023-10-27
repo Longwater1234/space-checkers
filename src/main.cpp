@@ -17,6 +17,8 @@ constexpr auto FONT_PATH = "resources/open-sans.regular.ttf";
 using Block = std::unique_ptr<chk::Cell>;
 using Kete = std::unique_ptr<chk::Piece>;
 
+uint16_t currentlyClicked = 0;
+
 /**
  * draw red and white checkboard cells
  * @param blockList empty list of cells
@@ -90,6 +92,10 @@ void drawAllPieces(std::vector<Kete> &pieceList)
     }
 }
 
+void showPossibleLandings(std::vector<Block> &blockList, Block &currentCell, Kete &piece)
+{
+}
+
 int main()
 {
     auto window = sf::RenderWindow{sf::VideoMode(800u, 900u), "Checkers CPP", sf::Style::Titlebar | sf::Style::Close};
@@ -161,6 +167,13 @@ int main()
 
         for (auto &cell : blockList)
         {
+            if (cell->containsPoint(mousePos))
+            {
+                if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
+                {
+                    statusText = "Clicked Cell " + std::to_string(cell->getIndex());
+                }
+            }
             window.draw(*cell);
         }
 
@@ -172,7 +185,8 @@ int main()
                 if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
                 {
                     // TODO handle move here
-                    statusText = "clicked " + std::to_string(red_piece->getIndex());
+                    currentlyClicked = red_piece->getIndex();
+                    statusText = "Clicked Piece " + std::to_string(red_piece->getIndex());
                 }
             }
             else

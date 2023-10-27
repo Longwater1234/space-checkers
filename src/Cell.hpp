@@ -15,6 +15,8 @@ class Cell final : public sf::Drawable
   public:
     Cell(const sf::RectangleShape &rec, const sf::Vector2f &pos, int index);
     void setFont(const sf::Font &font);
+    bool containsPoint(const sf::Vector2i &pos) const;
+    const int getIndex() const;
 
   private:
     sf::RectangleShape rec_;
@@ -54,6 +56,24 @@ inline void Cell::draw(sf::RenderTarget &target, sf::RenderStates states) const
 inline void Cell::setFont(const sf::Font &font)
 {
     this->myFont = font;
+}
+
+/**
+ * \brief Check whether mouse cursor is currently over this Cell
+ * \param pos Mouse position relative to main Window
+ * \return TRUE or FALSE
+ */
+inline bool Cell::containsPoint(const sf::Vector2i &pos) const
+{
+    return this->rec_.getGlobalBounds().contains(static_cast<float>(pos.x), static_cast<float>(pos.y));
+}
+
+/**
+ * Get index of this cell
+ */
+inline const int Cell::getIndex() const
+{
+    return this->index_;
 }
 
 } // namespace chk
