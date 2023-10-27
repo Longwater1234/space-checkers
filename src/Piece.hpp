@@ -22,11 +22,11 @@ class Piece final : public sf::Drawable, public sf::Transformable
 {
 
   public:
-    Piece(const sf::CircleShape &circle, const PieceType pType, const unsigned int idx_);
+    Piece(const sf::CircleShape &circle, PieceType pType, unsigned int idx_);
     PieceType getPieceType() const;
     void activateKing();
     bool getIsKing() const;
-    void moveCustom(const float posX, const float posY);
+    void moveCustom(float posX, float posY);
     bool containsPoint(const sf::Vector2i &pos) const;
     void addOutline();
     void removeOutline();

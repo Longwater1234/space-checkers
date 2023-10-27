@@ -22,10 +22,10 @@ using PiecePtr = std::unique_ptr<chk::Piece>;
 class Player
 {
   public:
-    Player(PlayerType player_type);
+    explicit Player(PlayerType player_type);
     void givePiece(PiecePtr piece);
     void losePiece(const chk::Piece &captured);
-    const std::list<PiecePtr> &getOwnPieces() const;
+    [[nodiscard]] const std::list<PiecePtr> &getOwnPieces() const;
     [[nodiscard]] size_t getPieceCount() const;
 
   private:

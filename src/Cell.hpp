@@ -16,7 +16,7 @@ class Cell final : public sf::Drawable
     Cell(const sf::RectangleShape &rec, const sf::Vector2f &pos, int index);
     void setFont(const sf::Font &font);
     bool containsPoint(const sf::Vector2i &pos) const;
-    const int getIndex() const;
+    int getIndex() const;
 
   private:
     sf::RectangleShape rec_;
@@ -71,7 +71,7 @@ inline bool Cell::containsPoint(const sf::Vector2i &pos) const
 /**
  * Get index of this cell
  */
-inline const int Cell::getIndex() const
+inline int Cell::getIndex() const
 {
     return this->index_;
 }

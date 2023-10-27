@@ -53,3 +53,4 @@ bld/
 *.app
 *.zip
 *.rar
+/cmake-build-*/
