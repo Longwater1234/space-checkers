@@ -30,12 +30,12 @@ class Piece final : public sf::Drawable, public sf::Transformable
     bool containsPoint(const sf::Vector2i &pos) const;
     void addOutline();
     void removeOutline();
-    unsigned int getIndex() const;
+    unsigned int getId() const;
     bool operator==(const Piece &other) const;
 
   private:
     sf::Texture texture;
-    unsigned int index;
+    unsigned int id;
     sf::CircleShape myCircle;
     PieceType pieceType;
     bool isKing = false;
@@ -46,7 +46,7 @@ inline Piece::Piece(const sf::CircleShape &circle, const PieceType pType, const 
 {
     this->myCircle = circle;
     this->pieceType = pType;
-    this->index = idx_;
+    this->id = idx_;
 
     sf::Texture localTxr;
     if (pieceType == PieceType::Red)
@@ -155,11 +155,11 @@ inline void Piece::removeOutline()
 }
 
 /**
- * Get piece index
+ * Get piece's id
  */
-inline unsigned int Piece::getIndex() const
+inline unsigned int Piece::getId() const
 {
-    return this->index;
+    return this->id;
 }
 
 /**
@@ -169,7 +169,7 @@ inline unsigned int Piece::getIndex() const
  */
 inline bool Piece::operator==(const Piece &other) const
 {
-    return this->index == other.index;
+    return this->id == other.id;
 }
 
 } // namespace chk

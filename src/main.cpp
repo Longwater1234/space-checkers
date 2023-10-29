@@ -16,7 +16,6 @@ constexpr auto FONT_PATH = "resources/open-sans.regular.ttf";
 using Block = std::unique_ptr<chk::Cell>;
 using Kete = std::unique_ptr<chk::Piece>;
 
-
 int main()
 {
     auto window = sf::RenderWindow{sf::VideoMode(800u, 900u), "Checkers CPP", sf::Style::Titlebar | sf::Style::Close};
@@ -93,7 +92,12 @@ int main()
             {
                 if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
                 {
-                    statusText = "Clicked Cell " + std::to_string(cell->getIndex());
+                    //                    gameState.setTargetCell(cell->getIndex());
+                    if (gameState.checkCanMove())
+                    {
+                        // TODO handle move piece here;
+                        // auto pieceId = gameState.getSelectedPieceId();
+                    }
                 }
             }
             window.draw(*cell);
@@ -106,15 +110,12 @@ int main()
                 red_piece->addOutline();
                 if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
                 {
-                    // TODO handle move here
-                    red_piece->getIndex();
-                    statusText = "Clicked Piece " + std::to_string(red_piece->getIndex());
+                    statusText = "Clicked piece " + std::to_string(red_piece->getId());
                 }
             }
             else
             {
                 red_piece->removeOutline();
-                // statusText.setString("");
             }
             window.draw(*red_piece);
         }

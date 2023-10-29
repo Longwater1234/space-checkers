@@ -30,24 +30,18 @@ class GameState
   public:
     static void drawCheckerboard(std::vector<Block> &blockList, const sf::Font &font);
     static void drawAllPieces(std::vector<Kete> &pieceList);
-
-
-  public:
-    [[nodiscard]] uint16_t getTargetCell() const;
-    void setTargetCell(uint16_t targetCell_);
-    [[nodiscard]] uint16_t getSelectedPiece() const;
-    void setSelectedPiece(uint16_t selectedPiece_);
+    [[nodiscard]] bool checkCanMove() const;
 
   private:
+    // target clicked cell
     uint16_t targetCell;
-    uint16_t selectedPiece;
-
+    // currently clicked piece
+    uint16_t selectedPieceId;
 };
-
 
 GameState::GameState()
 {
-    this->selectedPiece = 0;
+    this->selectedPieceId = 0;
     this->targetCell = 0;
 }
 
@@ -76,7 +70,7 @@ inline void GameState::drawCheckerboard(std::vector<Block> &blockList, const sf:
             }
             else
             {
-                // Odd cell, SET DARKER RED
+                // Odd cell, SET DARKER color (USED by Pieces)
                 sf::RectangleShape darkRect(sf::Vector2f(100.f, 100.f));
                 darkRect.setFillColor(sf::Color{82, 55, 27});
                 float x = (col % NUM_COLS) * 100.0f;
@@ -91,7 +85,7 @@ inline void GameState::drawCheckerboard(std::vector<Block> &blockList, const sf:
 }
 
 /**
- * Create new checker pieces, each with own position, and add them to Collection
+ * Create new checker pieces, each with own position, and add them to given vector
  * @param pieceList destination
  */
 inline void GameState::drawAllPieces(std::vector<Kete> &pieceList)
@@ -124,24 +118,13 @@ inline void GameState::drawAllPieces(std::vector<Kete> &pieceList)
     }
 }
 
-uint16_t GameState::getTargetCell() const
+/**
+ * check if the move is valid
+ * @return TRUE or false
+ */
+inline bool GameState::checkCanMove() const
 {
-    return targetCell;
-}
-
-void GameState::setTargetCell(uint16_t targetCell_)
-{
-    GameState::targetCell = targetCell_;
-}
-
-uint16_t GameState::getSelectedPiece() const
-{
-    return selectedPiece;
-}
-
-void GameState::setSelectedPiece(uint16_t selectedPiece_)
-{
-    GameState::selectedPiece = selectedPiece_;
+    return this->selectedPieceId != 0;
 }
 
 } // namespace chk
