@@ -17,8 +17,6 @@ constexpr auto FONT_PATH = "resources/open-sans.regular.ttf";
 using Block = std::unique_ptr<chk::Cell>;
 using Kete = std::unique_ptr<chk::Piece>;
 
-uint16_t currentlyClicked = 0;
-
 /**
  * draw red and white checkboard cells
  * @param blockList empty list of cells
@@ -126,6 +124,7 @@ int main()
 
     // NOW DRAW all PIECES ON BOARD
     std::vector<Kete> keteList;
+    keteList.reserve(NUM_PIECES);
     drawAllPieces(keteList);
 
     // Give each player their own pieces
@@ -185,7 +184,7 @@ int main()
                 if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
                 {
                     // TODO handle move here
-                    currentlyClicked = red_piece->getIndex();
+                    red_piece->getIndex();
                     statusText = "Clicked Piece " + std::to_string(red_piece->getIndex());
                 }
             }
