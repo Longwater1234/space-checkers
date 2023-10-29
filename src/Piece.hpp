@@ -26,7 +26,7 @@ class Piece final : public sf::Drawable, public sf::Transformable
     PieceType getPieceType() const;
     void activateKing();
     bool getIsKing() const;
-    void moveCustom(float posX, float posY);
+    void setPositionCustom(const sf::Vector2f &pos);
     bool containsPoint(const sf::Vector2i &pos) const;
     void addOutline();
     void removeOutline();
@@ -117,17 +117,6 @@ inline bool Piece::getIsKing() const
 }
 
 /**
- * move piece across board to global position (x,y)
- * \param posX by x position
- * \param posY the y position
- */
-inline void Piece::moveCustom(const float posX, const float posY)
-{
-    // TODO Validate move, and verify if is King.
-    this->setPosition(sf::Vector2f(posX, posY));
-}
-
-/**
  * \brief Check whether mouse cursor is currently over this piece
  * \param pos Mouse position relative to main Window
  * \return TRUE or FALSE
@@ -170,6 +159,16 @@ inline unsigned int Piece::getId() const
 inline bool Piece::operator==(const Piece &other) const
 {
     return this->id == other.id;
+}
+
+/**
+ * Move the cell to the given position
+ * @param position
+ */
+void Piece::setPositionCustom(const sf::Vector2f &position)
+{
+    // TODO please validate movement!!!
+    this->myCircle.setPosition(position);
 }
 
 } // namespace chk

@@ -37,6 +37,12 @@ class GameState
     uint16_t targetCell;
     // currently clicked piece
     uint16_t selectedPieceId;
+
+  public:
+    uint16_t getTargetCell() const;
+    void setTargetCell(uint16_t targetCell_);
+    uint16_t getSelectedPieceId() const;
+    void setSelectedPieceId(uint16_t selectedPieceId_);
 };
 
 GameState::GameState()
@@ -125,6 +131,26 @@ inline void GameState::drawAllPieces(std::vector<Kete> &pieceList)
 inline bool GameState::checkCanMove() const
 {
     return this->selectedPieceId != 0;
+}
+
+uint16_t GameState::getTargetCell() const
+{
+    return targetCell;
+}
+
+void GameState::setTargetCell(uint16_t targetCell_)
+{
+    GameState::targetCell = targetCell_;
+}
+
+uint16_t GameState::getSelectedPieceId() const
+{
+    return selectedPieceId;
+}
+
+void GameState::setSelectedPieceId(uint16_t selectedPieceId_)
+{
+    GameState::selectedPieceId = selectedPieceId_;
 }
 
 } // namespace chk
