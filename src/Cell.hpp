@@ -10,17 +10,21 @@
 
 namespace chk
 {
-class Cell final : public sf::Drawable, public sf::Transformable
+class Cell final : public sf::Drawable
 {
   public:
     Cell(const sf::RectangleShape &rec, const sf::Vector2f &pos, int index);
     void setFont(const sf::Font &font);
     bool containsPoint(const sf::Vector2i &pos) const;
+    const sf::Vector2f &getCellPos() const;
     int getIndex() const;
 
   private:
     sf::RectangleShape rec_;
     int index_;
+    sf::Vector2f cell_pos;
+
+  private:
     sf::Text sfText;
     sf::Font myFont;
     void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
@@ -30,7 +34,7 @@ inline Cell::Cell(const sf::RectangleShape &rec, const sf::Vector2f &pos, const 
 {
     this->rec_ = rec;
     this->index_ = index;
-    this->setPosition(pos);
+    this->cell_pos = pos;
 
     sf::Text text;
     text.setFont(this->myFont);
@@ -75,6 +79,15 @@ inline bool Cell::containsPoint(const sf::Vector2i &pos) const
 inline int Cell::getIndex() const
 {
     return this->index_;
+}
+
+/**
+ * Get the position of this cell
+ * @return local x,y position
+ */
+const inline sf::Vector2f &Cell::getCellPos() const
+{
+    return this->cell_pos;
 }
 
 } // namespace chk

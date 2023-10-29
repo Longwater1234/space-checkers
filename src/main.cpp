@@ -93,18 +93,18 @@ int main()
                 if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
                 {
                     gameState.setTargetCell(cell->getIndex());
-                   /* if (gameState.checkCanMove())
-                    {
-                        // TODO handle move piece here;
-                        auto pieceId = gameState.getSelectedPieceId();
-                        for (auto &piece : p1->getOwnPieces())
-                        {
-                            if (piece->getId() == pieceId)
-                            {
-                                piece->setPositionCustom(cell->getPosition());
-                            }
-                        }
-                    }*/
+                    /* if (gameState.checkCanMove())
+                     {
+                         // TODO handle move piece here;
+                         auto pieceId = gameState.getSelectedPieceId();
+                         for (auto &piece : p1->getOwnPieces())
+                         {
+                             if (piece->getId() == pieceId)
+                             {
+                                 piece->setPositionCustom(cell->getCellPos());
+                             }
+                         }
+                     }*/
                 }
             }
             window.draw(*cell);
