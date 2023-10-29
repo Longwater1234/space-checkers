@@ -27,6 +27,7 @@ class Player
     void losePiece(const chk::Piece &captured);
     [[nodiscard]] const std::list<PiecePtr> &getOwnPieces() const;
     [[nodiscard]] size_t getPieceCount() const;
+    bool operator==(Player &other) const;
 
   private:
     std::string name_;
@@ -79,5 +80,15 @@ inline const std::list<PiecePtr> &Player::getOwnPieces() const
 inline size_t Player::getPieceCount() const
 {
     return this->basket_.size();
+}
+
+/**
+ * Custom equality operator
+ * @param other the other Player
+ * @return true if their names equal
+ */
+bool Player::operator==(Player &other) const
+{
+    return this->name_ == other.name_;
 }
 } // namespace chk

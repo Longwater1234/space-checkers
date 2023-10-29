@@ -18,7 +18,7 @@ find_package(SFML REQUIRED COMPONENTS "graphics" "window" "system")
 if(WIN32)
 	add_executable(space-checkers WIN32 ${SOURCES}) 
 else()
-    add_executable(space-checkers ${SOURCES}) 
+    add_executable(space-checkers ${SOURCES})
 endif()
 target_link_libraries(space-checkers PRIVATE sfml-main sfml-graphics sfml-window sfml-system) 
 

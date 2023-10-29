@@ -1,0 +1,147 @@
+//
+// Created by Davis on 10/29/2023.
+//
+#pragma once
+
+#include "Cell.hpp"
+#include "Piece.hpp"
+#include <memory>
+#include <random>
+#include <unordered_map>
+namespace chk
+{
+using Block = std::unique_ptr<chk::Cell>;
+using Kete = std::unique_ptr<chk::Piece>;
+
+constexpr uint16_t NUM_ROWS = 8;
+constexpr uint16_t NUM_COLS = 8;
+
+using Block = std::unique_ptr<chk::Cell>;
+using Kete = std::unique_ptr<chk::Piece>;
+
+/**
+ * Overall game state
+ */
+class GameState
+{
+  public:
+    GameState();
+
+  public:
+    static void drawCheckerboard(std::vector<Block> &blockList, const sf::Font &font);
+    static void drawAllPieces(std::vector<Kete> &pieceList);
+
+
+  public:
+    [[nodiscard]] uint16_t getTargetCell() const;
+    void setTargetCell(uint16_t targetCell_);
+    [[nodiscard]] uint16_t getSelectedPiece() const;
+    void setSelectedPiece(uint16_t selectedPiece_);
+
+  private:
+    uint16_t targetCell;
+    uint16_t selectedPiece;
+
+};
+
+
+GameState::GameState()
+{
+    this->selectedPiece = 0;
+    this->targetCell = 0;
+}
+
+/**
+ * draw red and white checkerboard cells
+ * @param blockList empty list of cells
+ * @param font      for text inside cells
+ */
+inline void GameState::drawCheckerboard(std::vector<Block> &blockList, const sf::Font &font)
+{
+    int counter = 32;
+    for (size_t row = 0; row < NUM_ROWS; row++)
+    {
+        for (size_t col = 0; col < NUM_COLS; col++)
+        {
+            if ((row + col) % 2 == 0)
+            {
+                // even CELL, set LIGHTER color
+                sf::RectangleShape lightRec(sf::Vector2f(100.f, 100.f));
+                lightRec.setFillColor(sf::Color{255, 225, 151});
+                float x = (col % NUM_COLS) * 100.0f;
+                lightRec.setPosition(sf::Vector2f(x, row * 100.0f));
+                auto whiteBlock = std::make_unique<chk::Cell>(lightRec, lightRec.getPosition(), 0);
+                whiteBlock->setFont(font);
+                blockList.emplace_back(std::move(whiteBlock));
+            }
+            else
+            {
+                // Odd cell, SET DARKER RED
+                sf::RectangleShape darkRect(sf::Vector2f(100.f, 100.f));
+                darkRect.setFillColor(sf::Color{82, 55, 27});
+                float x = (col % NUM_COLS) * 100.0f;
+                darkRect.setPosition(sf::Vector2f(x, row * 100.0f));
+                auto redBlock = std::make_unique<chk::Cell>(darkRect, darkRect.getPosition(), counter);
+                redBlock->setFont(font);
+                blockList.emplace_back(std::move(redBlock));
+                counter--;
+            }
+        }
+    }
+}
+
+/**
+ * Create new checker pieces, each with own position, and add them to Collection
+ * @param pieceList destination
+ */
+inline void GameState::drawAllPieces(std::vector<Kete> &pieceList)
+{
+    std::random_device randomDevice;
+    std::mt19937 randEngine(randomDevice());
+    std::uniform_int_distribution<int> dist(1, 100);
+    for (size_t row = 0; row < NUM_ROWS; row++)
+    {
+        for (size_t col = 0; col < NUM_COLS; col++)
+        {
+            if ((row + col) % 2 != 0)
+            {
+                // Put piece on Odd cells only
+                sf::CircleShape circle(50.0f);
+                const float x = (col % NUM_COLS) * 100.0f;
+                circle.setPosition(sf::Vector2f(x, row * 100.0f));
+                if (row < 3)
+                {
+                    auto kete = std::make_unique<chk::Piece>(circle, chk::PieceType::Black, dist(randEngine));
+                    pieceList.emplace_back(std::move(kete));
+                }
+                else if (row > 4)
+                {
+                    auto kete = std::make_unique<chk::Piece>(circle, chk::PieceType::Red, dist(randEngine));
+                    pieceList.emplace_back(std::move(kete));
+                }
+            }
+        }
+    }
+}
+
+uint16_t GameState::getTargetCell() const
+{
+    return targetCell;
+}
+
+void GameState::setTargetCell(uint16_t targetCell_)
+{
+    GameState::targetCell = targetCell_;
+}
+
+uint16_t GameState::getSelectedPiece() const
+{
+    return selectedPiece;
+}
+
+void GameState::setSelectedPiece(uint16_t selectedPiece_)
+{
+    GameState::selectedPiece = selectedPiece_;
+}
+
+} // namespace chk
