@@ -5,6 +5,7 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Window/Mouse.hpp>
 #include <algorithm>
+#include <iostream>
 #include <memory>
 #include <vector>
 
@@ -51,11 +52,11 @@ int main()
     {
         if (kete->getPieceType() == chk::PieceType::Red)
         {
-            p1->givePiece(std::move(kete));
+            p1->givePiece(std::ref(kete));
         }
         else
         {
-            p2->givePiece(std::move(kete));
+            p2->givePiece(std::ref(kete));
         }
     }
 
@@ -78,6 +79,24 @@ int main()
             if (event.type == sf::Event::Closed)
             {
                 window.close();
+            }
+            if (event.type == sf::Event::MouseButtonPressed && sf::Mouse::isButtonPressed(sf::Mouse::Left))
+            {
+                // ONE-SHOT click, NOT CONTINUOUS hold
+                 // continue only if less mouse.y < 800
+                // - find out what cell got clicked, SKIP 0 indexed cells. (check intersection!!)
+                // -  Also check if this cell already hosts a PIECE. (skip if yes)
+                // -  if selectedPiece != NULL,  move the damn piece to that empty cell
+                // - Later you may want to skip pieces of Non-playing character.
+                // -  reset selected piece, set selectedPiece = NULL. Repeat cycle
+                const auto clickedPos = sf::Mouse::getPosition(window);
+                if (gameState->getSelectedPieceId() != 0 && clickedPos.y < 800u)
+                {
+                    // DO STUFF HERE
+                    std::cout << "x=" << clickedPos.x << " y=" << clickedPos.y << std::endl;
+                    gameState->setSelectedPieceId(0);
+
+                }
             }
         }
         auto mousePos = sf::Mouse::getPosition(window);

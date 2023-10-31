@@ -73,7 +73,8 @@ inline void Piece::draw(sf::RenderTarget &target, sf::RenderStates states) const
 }
 
 /**
- * get piece type, whether black or red
+ * Get piece type, whether it's Black or Red
+ * @return the pieceType
  */
 inline PieceType Piece::getPieceType() const
 {
@@ -81,7 +82,7 @@ inline PieceType Piece::getPieceType() const
 }
 
 /**
- * set piece as King. Will also change Piece Texture
+ * Set piece as King. Will also change its texture
  */
 inline void Piece::activateKing()
 {
@@ -109,17 +110,18 @@ inline void Piece::activateKing()
 
 /**
  * get whether this piece is king
- * \return TRUE or FALSE
+ * @return TRUE or FALSE
  */
 inline bool Piece::getIsKing() const
 {
     return this->isKing;
 }
 
+
 /**
- * \brief Check whether mouse cursor is currently over this piece
- * \param pos Mouse position relative to main Window
- * \return TRUE or FALSE
+ * Check whether mouse cursor is currently over this piece
+ * @param pos Mouse position relative to main Window
+ * @return TRUE or FALSE
  */
 inline bool Piece::containsPoint(const sf::Vector2i &pos) const
 {
@@ -136,7 +138,7 @@ inline void chk::Piece::addOutline()
 }
 
 /**
- * \brief Removes the outline
+ * Removes the outline
  */
 inline void Piece::removeOutline()
 {

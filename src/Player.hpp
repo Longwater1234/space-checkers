@@ -23,7 +23,7 @@ class Player
 {
   public:
     explicit Player(PlayerType player_type);
-    void givePiece(PiecePtr piece);
+    void givePiece(PiecePtr &piecePtr);
     void losePiece(const chk::Piece &target);
     [[nodiscard]] const std::vector<PiecePtr> &getOwnPieces() const;
     [[nodiscard]] size_t getPieceCount() const;
@@ -47,10 +47,10 @@ inline Player::Player(PlayerType player_type)
 }
 
 /**
- * \brief Give Player full ownership of this piece
- * \param piece Checker piece
+ * Give Player full ownership of this piece
+ * @param piece unique_ptr of piece
  */
-inline void Player::givePiece(PiecePtr piece)
+inline void Player::givePiece(PiecePtr &piece)
 {
     this->basket_.emplace_back(std::move(piece));
 }
