@@ -38,9 +38,9 @@ class GameState
     uint16_t selectedPieceId;
 
   public:
-    uint16_t getTargetCell() const;
-    void setTargetCell(const uint16_t &targetCell_);
-    uint16_t getSelectedPieceId() const;
+    [[nodiscard]] uint16_t getTargetCell() const;
+    void setTargetCell(const uint16_t &cell);
+    [[nodiscard]] uint16_t getSelectedPieceId() const;
     void setSelectedPieceId(const uint16_t &pieceId);
 };
 
@@ -137,9 +137,9 @@ uint16_t GameState::getTargetCell() const
     return targetCell;
 }
 
-void GameState::setTargetCell(const uint16_t &targetCell_)
+void GameState::setTargetCell(const uint16_t &cell)
 {
-    GameState::targetCell = targetCell_;
+    GameState::targetCell = cell;
 }
 
 uint16_t GameState::getSelectedPieceId() const

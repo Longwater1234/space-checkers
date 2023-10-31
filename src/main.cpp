@@ -93,7 +93,7 @@ int main()
                     gameState->setTargetCell(cell->getIndex());
                     if (cell->containsPoint(mousePos) && sf::Mouse::isButtonPressed(sf::Mouse::Left))
                     {
-                        gameState->setTargetCell(cell.get()->getIndex());
+                        gameState->setTargetCell(cell->getIndex());
                         if (cell->getIndex() == 0)
                         {
                             gameState->setSelectedPieceId(0);

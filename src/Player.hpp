@@ -61,9 +61,8 @@ inline void Player::givePiece(PiecePtr piece)
  */
 inline void Player::losePiece(const chk::Piece &target)
 {
-    //    this->basket_.erase(std::remove_if(this->basket_.begin(), this->basket_.end(),
-    //                                       [&target](const Kete &piecePtr) { return *piecePtr == target; }),
-    //                        this->basket_.end());
+    // for std::list ONLY
+    //   this->basket_.remove_if([&captured](const PiecePtr &piece) { return *piece == captured; });
 
     for (auto it = this->basket_.begin(); it != this->basket_.end();)
     {
