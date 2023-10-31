@@ -22,30 +22,31 @@ class Piece final : public sf::Drawable, public sf::Transformable
 {
 
   public:
-    Piece(const sf::CircleShape &circle, const PieceType pType, const unsigned int idx_);
+    Piece(const sf::CircleShape &circle, const PieceType &pType, uint16_t idx_);
     PieceType getPieceType() const;
     void activateKing();
     bool getIsKing() const;
-    void moveCustom(const float posX, const float posY);
     bool containsPoint(const sf::Vector2i &pos) const;
+    void moveCustom(const sf::Vector2f &pos);
     void addOutline();
     void removeOutline();
+    int getId() const;
     bool operator==(const Piece &other) const;
 
   private:
     sf::Texture texture;
-    unsigned int index;
+    uint16_t id;
     sf::CircleShape myCircle;
     PieceType pieceType;
     bool isKing = false;
     void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
 };
 
-inline Piece::Piece(const sf::CircleShape &circle, const PieceType pType, const unsigned int idx_)
+inline Piece::Piece(const sf::CircleShape &circle, const PieceType &pType, const uint16_t idx_)
 {
     this->myCircle = circle;
     this->pieceType = pType;
-    this->index = idx_;
+    this->id = idx_;
 
     sf::Texture localTxr;
     if (pieceType == PieceType::Red)
@@ -72,7 +73,8 @@ inline void Piece::draw(sf::RenderTarget &target, sf::RenderStates states) const
 }
 
 /**
- * get piece type, whether black or red
+ * Get piece type, whether it's Black or Red
+ * @return the pieceType
  */
 inline PieceType Piece::getPieceType() const
 {
@@ -80,7 +82,7 @@ inline PieceType Piece::getPieceType() const
 }
 
 /**
- * set piece as King. Will also change Piece Texture
+ * Set piece as King. Will also change its texture
  */
 inline void Piece::activateKing()
 {
@@ -88,11 +90,9 @@ inline void Piece::activateKing()
     sf::Texture localTxr;
     if (pieceType == PieceType::Red)
     {
-        /* code */
         if (localTxr.loadFromFile(RED_KING))
         {
-            this->texture = localTxr;
-
+            this->texture = std::move_if_noexcept(localTxr);
             this->myCircle.setTexture(&this->texture);
         }
     }
@@ -100,7 +100,7 @@ inline void Piece::activateKing()
     {
         if (localTxr.loadFromFile(BLACK_KING))
         {
-            this->texture = localTxr;
+            this->texture = std::move_if_noexcept(localTxr);
             this->myCircle.setTexture(&this->texture);
         }
     }
@@ -108,7 +108,7 @@ inline void Piece::activateKing()
 
 /**
  * get whether this piece is king
- * \return TRUE or FALSE
+ * @return TRUE or FALSE
  */
 inline bool Piece::getIsKing() const
 {
@@ -116,20 +116,9 @@ inline bool Piece::getIsKing() const
 }
 
 /**
- * move piece across board to global position (x,y)
- * \param posX by x position
- * \param posY the y position
- */
-inline void Piece::moveCustom(const float posX, const float posY)
-{
-    // TODO Validate move, and verify if is King.
-    this->setPosition(sf::Vector2f(posX, posY));
-}
-
-/**
- * \brief Check whether mouse cursor is currently over this piece
- * \param pos Mouse position relative to main Window
- * \return TRUE or FALSE
+ * Check whether mouse cursor is currently over this piece
+ * @param pos Mouse position relative to main Window
+ * @return TRUE or FALSE
  */
 inline bool Piece::containsPoint(const sf::Vector2i &pos) const
 {
@@ -146,7 +135,7 @@ inline void chk::Piece::addOutline()
 }
 
 /**
- * \brief Removes the outline
+ * Removes the outline
  */
 inline void Piece::removeOutline()
 {
@@ -154,13 +143,30 @@ inline void Piece::removeOutline()
 }
 
 /**
- * \brief Custom equality operator. Compares 2 pieces
- * \param other The other Piece
- * \return TRUE or FALSE
+ * Get piece's id
+ */
+inline int Piece::getId() const
+{
+    return this->id;
+}
+
+/**
+ * Custom equality operator
+ * @param other The other Piece
+ * @return TRUE or FALSE
  */
 inline bool Piece::operator==(const Piece &other) const
 {
-    return this->index == other.index;
+    return this->id == other.id;
+}
+
+/**
+ * Move the cell to the given position
+ * @param pos
+ */
+inline void Piece::moveCustom(const sf::Vector2f &pos)
+{
+    this->myCircle.setPosition(pos.x, pos.y);
 }
 
 } // namespace chk
