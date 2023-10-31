@@ -73,9 +73,10 @@ inline bool Cell::containsPoint(const sf::Vector2i &pos) const
     return this->rec_.getGlobalBounds().contains(static_cast<float>(pos.x), static_cast<float>(pos.y));
 }
 
-/**
- * Get id of this cell
- */
+ /**
+  * Get index of this cell
+  * @return index value
+  */
 inline int Cell::getIndex() const
 {
     return this->index_;

@@ -16,7 +16,7 @@ constexpr auto FONT_PATH = "resources/open-sans.regular.ttf";
 int main()
 {
     auto window = sf::RenderWindow{sf::VideoMode(800u, 900u), "Checkers CPP", sf::Style::Titlebar | sf::Style::Close};
-    window.setFramerateLimit(60u);
+    window.setFramerateLimit(30u);
 
     sf::Image appIcon;
     if (appIcon.loadFromFile(ICON_PATH))
@@ -85,32 +85,6 @@ int main()
 
         for (auto &cell : blockList)
         {
-            if (cell->containsPoint(mousePos))
-            {
-                if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
-                {
-                    gameState->setTargetCell(cell->getIndex());
-                    if (cell->getIndex() == 0)
-                    {
-                        gameState->setSelectedPieceId(0);
-                    }
-                    if (gameState->checkCanMove())
-                    {
-                        // TODO HANDLE MOVE HERE
-                        int pieceId = gameState->getSelectedPieceId();
-
-                        for (auto &pp : p1->getOwnPieces())
-                        {
-                            if (pieceId == pp->getId())
-                            {
-                                pp->moveCustom(cell->getCellPos());
-                                gameState->setSelectedPieceId(0);
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
             window.draw(*cell);
         }
 
@@ -128,7 +102,6 @@ int main()
             else
             {
                 red_piece->removeOutline();
-                // gameState->setSelectedPieceId(0);
             }
             window.draw(*red_piece);
         }

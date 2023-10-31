@@ -5,6 +5,7 @@
 
 #include "Cell.hpp"
 #include "Piece.hpp"
+#include "Player.hpp"
 #include <memory>
 #include <random>
 #include <unordered_map>
@@ -42,6 +43,7 @@ class GameState
     void setTargetCell(const uint16_t &cell);
     [[nodiscard]] uint16_t getSelectedPieceId() const;
     void setSelectedPieceId(const uint16_t &pieceId);
+    void handleMovePiece(const std::unique_ptr<chk::Player> &player, const std::unique_ptr<chk::Cell> &cell);
 };
 
 inline GameState::GameState()
@@ -118,6 +120,35 @@ inline void GameState::drawAllPieces(std::vector<Kete> &pieceList)
                     auto kete = std::make_unique<chk::Piece>(circle, chk::PieceType::Red, dist(randEngine));
                     pieceList.emplace_back(std::move(kete));
                 }
+            }
+        }
+    }
+}
+
+/**
+ * Place the piece on clicked cell
+ * @param player current player
+ * @param cell target cell
+ */
+void GameState::handleMovePiece(const std::unique_ptr<chk::Player> &player, const std::unique_ptr<chk::Cell> &cell)
+{
+    this->setTargetCell(cell->getIndex());
+    if (cell->getIndex() == 0)
+    {
+        this->setSelectedPieceId(0);
+    }
+    if (this->checkCanMove())
+    {
+        // TODO HANDLE MOVE HERE
+        int pieceId = this->getSelectedPieceId();
+
+        for (auto &pp : player->getOwnPieces())
+        {
+            if (pieceId == pp->getId())
+            {
+                pp->moveCustom(cell->getCellPos());
+                this->setSelectedPieceId(0);
+                break;
             }
         }
     }
