@@ -5,7 +5,6 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Window/Mouse.hpp>
 #include <algorithm>
-#include <iostream>
 #include <memory>
 #include <vector>
 
@@ -35,7 +34,7 @@ int main()
         perror("cannot find file");
         exit(EXIT_FAILURE);
     }
-    auto gameState = std::make_unique<chk::GameState>();
+    auto gameState = std::make_shared<chk::GameState>();
     gameState->drawCheckerboard(blockList, font);
 
     // CREATE YOUR TWO unique PLAYERS
@@ -91,27 +90,22 @@ int main()
                 if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
                 {
                     gameState->setTargetCell(cell->getIndex());
-                    if (cell->containsPoint(mousePos) && sf::Mouse::isButtonPressed(sf::Mouse::Left))
+                    if (cell->getIndex() == 0)
                     {
-                        gameState->setTargetCell(cell->getIndex());
-                        if (cell->getIndex() == 0)
-                        {
-                            gameState->setSelectedPieceId(0);
-                        }
-                        if (gameState->checkCanMove())
-                        {
-                            // TODO HANDLE MOVE HERE
-                            int pieceId = gameState->getSelectedPieceId();
+                        gameState->setSelectedPieceId(0);
+                    }
+                    if (gameState->checkCanMove())
+                    {
+                        // TODO HANDLE MOVE HERE
+                        int pieceId = gameState->getSelectedPieceId();
 
-                            for (auto &pp : p1->getOwnPieces())
+                        for (auto &pp : p1->getOwnPieces())
+                        {
+                            if (pieceId == pp->getId())
                             {
-                                if (pieceId == pp->getId())
-                                {
-                                    std::cout << "piece id is " << pp->getId() << std::endl;
-                                    pp->moveCustom(cell->getCellPos());
-                                    gameState->setSelectedPieceId(0);
-                                    break;
-                                }
+                                pp->moveCustom(cell->getCellPos());
+                                gameState->setSelectedPieceId(0);
+                                break;
                             }
                         }
                     }
