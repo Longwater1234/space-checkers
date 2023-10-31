@@ -30,7 +30,7 @@ class Piece final : public sf::Drawable, public sf::Transformable
     void moveCustom(const sf::Vector2f &pos);
     void addOutline();
     void removeOutline();
-    uint16_t getId() const;
+    int getId() const;
     bool operator==(const Piece &other) const;
 
   private:
@@ -145,7 +145,7 @@ inline void Piece::removeOutline()
 /**
  * Get piece's id
  */
-inline uint16_t Piece::getId() const
+inline int Piece::getId() const
 {
     return this->id;
 }

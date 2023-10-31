@@ -1,7 +1,5 @@
-#include "Cell.hpp"
+
 #include "GameState.hpp"
-#include "Piece.hpp"
-#include "Player.hpp"
 #include <SFML/Graphics.hpp>
 #include <SFML/Window/Mouse.hpp>
 #include <algorithm>
@@ -82,7 +80,7 @@ int main()
             if (event.type == sf::Event::MouseButtonPressed && sf::Mouse::isButtonPressed(sf::Mouse::Left))
             {
                 const auto clickedPos = sf::Mouse::getPosition(window);
-                if (gameState->getSelectedPieceId() != -1 && clickedPos.y <= 800u)
+                if (gameState->checkCanMove() && clickedPos.y <= 800u)
                 {
                     for (auto &cell : blockList)
                     {
@@ -93,7 +91,6 @@ int main()
                             break;
                         }
                     }
-                    gameState->setSelectedPieceId(-1);
                 }
             }
         }

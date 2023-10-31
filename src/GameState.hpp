@@ -36,20 +36,22 @@ class GameState
     // next destination of selected piece
     int targetCell;
     // currently clicked piece
-    int16_t selectedPieceId;
+    int selectedPieceId;
+    bool hasLanded;
 
   public:
     [[nodiscard]] int getTargetCell() const;
     void setTargetCell(const int &cell_idx);
-    [[nodiscard]] int16_t getSelectedPieceId() const;
-    void setSelectedPieceId(const int16_t &pieceId);
-    void handleMovePiece(const std::unique_ptr<chk::Player> &player, const std::unique_ptr<chk::Cell> &cell) const;
+    [[nodiscard]] int getSelectedPieceId() const;
+    void setSelectedPieceId(const int &pieceId);
+    void handleMovePiece(const std::unique_ptr<chk::Player> &player, const std::unique_ptr<chk::Cell> &cell);
 };
 
 inline GameState::GameState()
 {
     this->selectedPieceId = -1;
     this->targetCell = -1;
+    this->hasLanded = true;
 }
 
 /**
@@ -132,16 +134,13 @@ inline void GameState::drawAllPieces(std::vector<Kete> &pieceList)
  * @param cell target cell
  */
 void GameState::handleMovePiece(const std::unique_ptr<chk::Player> &player,
-                                const std::unique_ptr<chk::Cell> &cell) const
+                                const Block &cell)
 {
-    if (this->getSelectedPieceId() == -1)
-    {
-        return;
-    }
     const int idx = player->getPieceVecIndex(this->getSelectedPieceId());
     std::cout << "vector Piece index " << idx << std::endl;
     std::cout << "rand_id " << this->getSelectedPieceId() << std::endl;
     player->getOwnPieces()[idx]->moveCustom(cell->getCellPos());
+    this->hasLanded = true;
 }
 
 /**l
@@ -150,7 +149,7 @@ void GameState::handleMovePiece(const std::unique_ptr<chk::Player> &player,
  */
 inline bool GameState::checkCanMove() const
 {
-    return this->selectedPieceId != 0;
+    return this->selectedPieceId != -1 && this->hasLanded;
 }
 
 int GameState::getTargetCell() const
@@ -167,7 +166,7 @@ void GameState::setTargetCell(const int &cell_idx)
     GameState::targetCell = cell_idx;
 }
 
-int16_t GameState::getSelectedPieceId() const
+int GameState::getSelectedPieceId() const
 {
     return selectedPieceId;
 }
@@ -176,7 +175,7 @@ int16_t GameState::getSelectedPieceId() const
  * store current clicked PieceId
  * @param pieceId the piece id
  */
-inline void GameState::setSelectedPieceId(const int16_t &pieceId)
+inline void GameState::setSelectedPieceId(const int &pieceId)
 {
     this->selectedPieceId = pieceId;
 }
