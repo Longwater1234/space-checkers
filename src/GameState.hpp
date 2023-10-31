@@ -24,10 +24,9 @@ using Kete = std::unique_ptr<chk::Piece>;
  */
 class GameState
 {
-  public:
-    GameState();
 
   public:
+    GameState();
     static void drawCheckerboard(std::vector<Block> &blockList, const sf::Font &font);
     static void drawAllPieces(std::vector<Kete> &pieceList);
     [[nodiscard]] bool checkCanMove() const;
@@ -40,12 +39,12 @@ class GameState
 
   public:
     uint16_t getTargetCell() const;
-    void setTargetCell(uint16_t targetCell_);
+    void setTargetCell(const uint16_t &targetCell_);
     uint16_t getSelectedPieceId() const;
-    void setSelectedPieceId(uint16_t selectedPieceId_);
+    void setSelectedPieceId(const uint16_t &pieceId);
 };
 
-GameState::GameState()
+inline GameState::GameState()
 {
     this->selectedPieceId = 0;
     this->targetCell = 0;
@@ -130,7 +129,7 @@ inline void GameState::drawAllPieces(std::vector<Kete> &pieceList)
  */
 inline bool GameState::checkCanMove() const
 {
-    return this->selectedPieceId != 0;
+    return this->selectedPieceId != 0 && this->targetCell != 0;
 }
 
 uint16_t GameState::getTargetCell() const
@@ -138,7 +137,7 @@ uint16_t GameState::getTargetCell() const
     return targetCell;
 }
 
-void GameState::setTargetCell(uint16_t targetCell_)
+void GameState::setTargetCell(const uint16_t &targetCell_)
 {
     GameState::targetCell = targetCell_;
 }
@@ -148,9 +147,11 @@ uint16_t GameState::getSelectedPieceId() const
     return selectedPieceId;
 }
 
-void GameState::setSelectedPieceId(uint16_t selectedPieceId_)
+/**
+ * store current selectedPieceId
+ */
+inline void GameState::setSelectedPieceId(const uint16_t &pieceId)
 {
-    GameState::selectedPieceId = selectedPieceId_;
+    this->selectedPieceId = pieceId;
 }
-
 } // namespace chk

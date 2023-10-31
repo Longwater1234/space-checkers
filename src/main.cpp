@@ -5,6 +5,7 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Window/Mouse.hpp>
 #include <algorithm>
+#include <iostream>
 #include <memory>
 #include <vector>
 
@@ -12,9 +13,6 @@ constexpr uint16_t NUM_PIECES = 24;
 constexpr uint16_t NUM_CELLS = 64;
 constexpr auto ICON_PATH = "resources/icons8-checkers-16.png";
 constexpr auto FONT_PATH = "resources/open-sans.regular.ttf";
-
-using Block = std::unique_ptr<chk::Cell>;
-using Kete = std::unique_ptr<chk::Piece>;
 
 int main()
 {
@@ -29,7 +27,7 @@ int main()
     }
 
     // CREATE CHECKERBOARD
-    std::vector<Block> blockList;
+    std::vector<chk::Block> blockList;
     blockList.reserve(NUM_CELLS);
     sf::Font font;
     if (!font.loadFromFile(FONT_PATH))
@@ -37,17 +35,17 @@ int main()
         perror("cannot find file");
         exit(EXIT_FAILURE);
     }
-    chk::GameState gameState;
-    gameState.drawCheckerboard(blockList, font);
+    auto gameState = std::make_unique<chk::GameState>();
+    gameState->drawCheckerboard(blockList, font);
 
     // CREATE YOUR TWO unique PLAYERS
     auto p1 = std::make_unique<chk::Player>(chk::PlayerType::PLAYER_1);
     auto p2 = std::make_unique<chk::Player>(chk::PlayerType::PLAYER_2);
 
     // NOW DRAW all PIECES ON BOARD
-    std::vector<Kete> keteList;
+    std::vector<chk::Kete> keteList;
     keteList.reserve(NUM_PIECES);
-    gameState.drawAllPieces(keteList);
+    gameState->drawAllPieces(keteList);
 
     // Give each player their own pieces
     for (auto &kete : keteList)
@@ -92,19 +90,31 @@ int main()
             {
                 if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
                 {
-                    gameState.setTargetCell(cell->getIndex());
-                    /* if (gameState.checkCanMove())
-                     {
-                         // TODO handle move piece here;
-                         auto pieceId = gameState.getSelectedPieceId();
-                         for (auto &piece : p1->getOwnPieces())
-                         {
-                             if (piece->getId() == pieceId)
-                             {
-                                 piece->setPositionCustom(cell->getCellPos());
-                             }
-                         }
-                     }*/
+                    gameState->setTargetCell(cell->getIndex());
+                    if (cell->containsPoint(mousePos) && sf::Mouse::isButtonPressed(sf::Mouse::Left))
+                    {
+                        gameState->setTargetCell(cell.get()->getIndex());
+                        if (cell->getIndex() == 0)
+                        {
+                            gameState->setSelectedPieceId(0);
+                        }
+                        if (gameState->checkCanMove())
+                        {
+                            // TODO HANDLE MOVE HERE
+                            int pieceId = gameState->getSelectedPieceId();
+
+                            for (auto &pp : p1->getOwnPieces())
+                            {
+                                if (pieceId == pp->getId())
+                                {
+                                    std::cout << "piece id is " << pp->getId() << std::endl;
+                                    pp->moveCustom(cell->getCellPos());
+                                    gameState->setSelectedPieceId(0);
+                                    break;
+                                }
+                            }
+                        }
+                    }
                 }
             }
             window.draw(*cell);
@@ -117,9 +127,14 @@ int main()
                 red_piece->addOutline();
                 if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
                 {
-                    gameState.setSelectedPieceId(red_piece->getId());
+                    gameState->setSelectedPieceId(red_piece->getId());
                     statusText = "Clicked piece " + std::to_string(red_piece->getId());
                 }
+            }
+            else
+            {
+                red_piece->removeOutline();
+                // gameState->setSelectedPieceId(0);
             }
             window.draw(*red_piece);
         }
