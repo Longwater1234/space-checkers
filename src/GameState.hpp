@@ -37,7 +37,8 @@ class GameState
     int targetCell;
     // currently clicked piece
     int selectedPieceId;
-    bool hasLanded;
+    // previously selected piece
+    int oldSelectedId;
 
   public:
     [[nodiscard]] int getTargetCell() const;
@@ -51,7 +52,7 @@ inline GameState::GameState()
 {
     this->selectedPieceId = -1;
     this->targetCell = -1;
-    this->hasLanded = true;
+    this->oldSelectedId = 0;
 }
 
 /**
@@ -133,14 +134,17 @@ inline void GameState::drawAllPieces(std::vector<Kete> &pieceList)
  * @param player current player
  * @param cell target cell
  */
-void GameState::handleMovePiece(const std::unique_ptr<chk::Player> &player,
-                                const Block &cell)
+void GameState::handleMovePiece(const std::unique_ptr<chk::Player> &player, const Block &cell)
 {
+
+    if (oldSelectedId == selectedPieceId)
+    {
+        return;
+    }
     const int idx = player->getPieceVecIndex(this->getSelectedPieceId());
     std::cout << "vector Piece index " << idx << std::endl;
-    std::cout << "rand_id " << this->getSelectedPieceId() << std::endl;
     player->getOwnPieces()[idx]->moveCustom(cell->getCellPos());
-    this->hasLanded = true;
+    this->oldSelectedId = this->getSelectedPieceId();
 }
 
 /**l
@@ -149,7 +153,7 @@ void GameState::handleMovePiece(const std::unique_ptr<chk::Player> &player,
  */
 inline bool GameState::checkCanMove() const
 {
-    return this->selectedPieceId != -1 && this->hasLanded;
+    return this->selectedPieceId != -1;
 }
 
 int GameState::getTargetCell() const
@@ -166,14 +170,14 @@ void GameState::setTargetCell(const int &cell_idx)
     GameState::targetCell = cell_idx;
 }
 
-int GameState::getSelectedPieceId() const
+inline int GameState::getSelectedPieceId() const
 {
     return selectedPieceId;
 }
 
 /**
  * store current clicked PieceId
- * @param pieceId the piece id
+ * @param pieceId the new piece id
  */
 inline void GameState::setSelectedPieceId(const int &pieceId)
 {
