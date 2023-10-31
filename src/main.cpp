@@ -5,7 +5,6 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Window/Mouse.hpp>
 #include <algorithm>
-#include <iostream>
 #include <memory>
 #include <vector>
 
@@ -13,8 +12,6 @@ constexpr uint16_t NUM_PIECES = 24;
 constexpr uint16_t NUM_CELLS = 64;
 constexpr auto ICON_PATH = "resources/icons8-checkers-16.png";
 constexpr auto FONT_PATH = "resources/open-sans.regular.ttf";
-
-
 
 int main()
 {
@@ -84,18 +81,19 @@ int main()
             }
             if (event.type == sf::Event::MouseButtonPressed && sf::Mouse::isButtonPressed(sf::Mouse::Left))
             {
-                // ONE-SHOT click, NOT CONTINUOUS hold
-                // continue only if less mouse.y < 800
-                // - find out what cell got clicked, SKIP 0 indexed cells. (check intersection!!)
-                // -  Also check if this cell already hosts a PIECE. (skip if yes)
-                // -  if selectedPiece != NULL,  move the damn piece to that empty cell
-                // - Later you may want to skip pieces of Non-playing character.
-                // -  reset selected piece, set selectedPiece = NULL. Repeat cycle
                 const auto clickedPos = sf::Mouse::getPosition(window);
-                if (gameState->getSelectedPieceId() != 0 && clickedPos.y <= 800u)
+                if (gameState->getSelectedPieceId() != -1 && clickedPos.y <= 800u)
                 {
-                    std::cout << "x=" << clickedPos.x << " y=" << clickedPos.y << std::endl;
-                    gameState->setSelectedPieceId(0);
+                    for (auto &cell : blockList)
+                    {
+                        if (cell->containsPoint(clickedPos) && cell->getIndex() != -1)
+                        {
+                            gameState->handleMovePiece(p1, cell);
+                            gameState->setSelectedPieceId(-1);
+                            break;
+                        }
+                    }
+                    gameState->setSelectedPieceId(-1);
                 }
             }
         }

@@ -2,6 +2,7 @@
 
 #include "Piece.hpp"
 #include <algorithm>
+#include <map>
 #include <memory>
 #include <string>
 #include <vector>
@@ -27,15 +28,20 @@ class Player
     void losePiece(const chk::Piece &target);
     [[nodiscard]] const std::vector<PiecePtr> &getOwnPieces() const;
     [[nodiscard]] size_t getPieceCount() const;
+    [[nodiscard]] int getPieceVecIndex(const int &pieceId);
     bool operator==(Player &other) const;
 
   private:
     std::string name_;
     std::vector<PiecePtr> basket_;
+    // map of piece_id --> vector index
+    std::map<int, int> cellMap;
+    int counter;
 };
 
 inline Player::Player(PlayerType player_type)
 {
+    this->counter = 0;
     if (player_type == PlayerType::PLAYER_1)
     {
         this->name_ = "RED";
@@ -52,6 +58,7 @@ inline Player::Player(PlayerType player_type)
  */
 inline void Player::givePiece(PiecePtr &piece)
 {
+    cellMap[piece->getId()] = counter++;
     this->basket_.emplace_back(std::move(piece));
 }
 
@@ -61,8 +68,6 @@ inline void Player::givePiece(PiecePtr &piece)
  */
 inline void Player::losePiece(const chk::Piece &target)
 {
-    // for std::list ONLY
-    //   this->basket_.remove_if([&captured](const PiecePtr &piece) { return *piece == captured; });
 
     for (auto it = this->basket_.begin(); it != this->basket_.end();)
     {
@@ -93,6 +98,17 @@ inline const std::vector<PiecePtr> &Player::getOwnPieces() const
 inline size_t Player::getPieceCount() const
 {
     return this->basket_.size();
+}
+
+/**
+ * Get vector index of selected piece by this player
+ * @param pieceId the selected PieceId, stored in gameState
+ * @return index inside Vector
+ */
+inline int Player::getPieceVecIndex(const int &pieceId)
+{
+
+    return cellMap[pieceId];
 }
 
 /**

@@ -6,9 +6,9 @@
 #include "Cell.hpp"
 #include "Piece.hpp"
 #include "Player.hpp"
+#include <iostream>
 #include <memory>
 #include <random>
-#include <unordered_map>
 namespace chk
 {
 using Block = std::unique_ptr<chk::Cell>;
@@ -36,20 +36,19 @@ class GameState
     // next destination of selected piece
     int targetCell;
     // currently clicked piece
-    uint16_t selectedPieceId;
+    int16_t selectedPieceId;
 
   public:
     [[nodiscard]] int getTargetCell() const;
     void setTargetCell(const int &cell_idx);
-    [[nodiscard]] uint16_t getSelectedPieceId() const;
-    void setSelectedPieceId(const uint16_t &pieceId);
-    void handleMovePiece(const std::unique_ptr<chk::Player> &player, const std::unique_ptr<chk::Cell> &cell);
-    void moveThePiece(std::vector<chk::Block> &blockList, const sf::Vector2i &clickedPos);
+    [[nodiscard]] int16_t getSelectedPieceId() const;
+    void setSelectedPieceId(const int16_t &pieceId);
+    void handleMovePiece(const std::unique_ptr<chk::Player> &player, const std::unique_ptr<chk::Cell> &cell) const;
 };
 
 inline GameState::GameState()
 {
-    this->selectedPieceId = 0;
+    this->selectedPieceId = -1;
     this->targetCell = -1;
 }
 
@@ -100,24 +99,25 @@ inline void GameState::drawAllPieces(std::vector<Kete> &pieceList)
 {
     std::random_device randomDevice;
     std::mt19937 randEngine(randomDevice());
-    std::uniform_int_distribution<uint16_t > dist(1, 269);
+    std::uniform_int_distribution<uint16_t> dist(1, 269);
     for (uint16_t row = 0; row < NUM_ROWS; row++)
     {
         for (uint16_t col = 0; col < NUM_COLS; col++)
         {
             if ((row + col) % 2 != 0)
             {
-                // Put piece on Odd cells only
                 sf::CircleShape circle(50.0f);
                 const float x = (col % NUM_COLS) * 100.0f;
                 circle.setPosition(sf::Vector2f(x, row * 100.0f));
                 if (row < 3)
                 {
+                    // Top cells, put BLACK piece
                     auto kete = std::make_unique<chk::Piece>(circle, chk::PieceType::Black, dist(randEngine));
                     pieceList.emplace_back(std::move(kete));
                 }
                 else if (row > 4)
                 {
+                    // Bottom cell, put RED piece
                     auto kete = std::make_unique<chk::Piece>(circle, chk::PieceType::Red, dist(randEngine));
                     pieceList.emplace_back(std::move(kete));
                 }
@@ -127,60 +127,30 @@ inline void GameState::drawAllPieces(std::vector<Kete> &pieceList)
 }
 
 /**
- * Place the piece on clicked cell
+ * Move the selected piece to clicked cell
  * @param player current player
  * @param cell target cell
  */
-void GameState::handleMovePiece(const std::unique_ptr<chk::Player> &player, const std::unique_ptr<chk::Cell> &cell)
+void GameState::handleMovePiece(const std::unique_ptr<chk::Player> &player,
+                                const std::unique_ptr<chk::Cell> &cell) const
 {
-    this->setTargetCell(cell->getIndex());
-    if (cell->getIndex() == 0)
+    if (this->getSelectedPieceId() == -1)
     {
-        this->setSelectedPieceId(0);
+        return;
     }
-    if (this->checkCanMove())
-    {
-        // TODO HANDLE MOVE HERE
-        int pieceId = this->getSelectedPieceId();
-
-        for (auto &pp : player->getOwnPieces())
-        {
-            if (pieceId == pp->getId())
-            {
-                pp->moveCustom(cell->getCellPos());
-                this->setSelectedPieceId(0);
-                break;
-            }
-        }
-    }
+    const int idx = player->getPieceVecIndex(this->getSelectedPieceId());
+    std::cout << "vector Piece index " << idx << std::endl;
+    std::cout << "rand_id " << this->getSelectedPieceId() << std::endl;
+    player->getOwnPieces()[idx]->moveCustom(cell->getCellPos());
 }
 
-/**
- * Actually move the piece to the clicked position
- * @param blockList list of cells
- * @param clickedPos target cell
- */
-void GameState::moveThePiece(std::vector<chk::Block> &blockList, const sf::Vector2i &clickedPos)
-{
-    for (auto &cell : blockList)
-    {
-        if (cell->containsPoint(clickedPos))
-        {
-            // TODO perform move here!
-            int myCell = cell->getIndex();
-            uint16_t pieceId = this->getSelectedPieceId();
-            break;
-        }
-    }
-}
-
-/**
+/**l
  * check if the move is valid
  * @return TRUE or false
  */
 inline bool GameState::checkCanMove() const
 {
-    return this->selectedPieceId != 0 && this->targetCell != -1;
+    return this->selectedPieceId != 0;
 }
 
 int GameState::getTargetCell() const
@@ -197,7 +167,7 @@ void GameState::setTargetCell(const int &cell_idx)
     GameState::targetCell = cell_idx;
 }
 
-uint16_t GameState::getSelectedPieceId() const
+int16_t GameState::getSelectedPieceId() const
 {
     return selectedPieceId;
 }
@@ -206,8 +176,9 @@ uint16_t GameState::getSelectedPieceId() const
  * store current clicked PieceId
  * @param pieceId the piece id
  */
-inline void GameState::setSelectedPieceId(const uint16_t &pieceId)
+inline void GameState::setSelectedPieceId(const int16_t &pieceId)
 {
     this->selectedPieceId = pieceId;
 }
+
 } // namespace chk
