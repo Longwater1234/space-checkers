@@ -14,6 +14,8 @@ constexpr uint16_t NUM_CELLS = 64;
 constexpr auto ICON_PATH = "resources/icons8-checkers-16.png";
 constexpr auto FONT_PATH = "resources/open-sans.regular.ttf";
 
+
+
 int main()
 {
     auto window = sf::RenderWindow{sf::VideoMode(800u, 900u), "Checkers CPP", sf::Style::Titlebar | sf::Style::Close};
@@ -90,9 +92,8 @@ int main()
                 // - Later you may want to skip pieces of Non-playing character.
                 // -  reset selected piece, set selectedPiece = NULL. Repeat cycle
                 const auto clickedPos = sf::Mouse::getPosition(window);
-                if (gameState->getSelectedPieceId() != 0 && clickedPos.y < 800u)
+                if (gameState->getSelectedPieceId() != 0 && clickedPos.y <= 800u)
                 {
-                    // DO STUFF HERE
                     std::cout << "x=" << clickedPos.x << " y=" << clickedPos.y << std::endl;
                     gameState->setSelectedPieceId(0);
                 }

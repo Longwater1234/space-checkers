@@ -22,7 +22,7 @@ class Piece final : public sf::Drawable, public sf::Transformable
 {
 
   public:
-    Piece(const sf::CircleShape &circle, const PieceType &pType, unsigned int idx_);
+    Piece(const sf::CircleShape &circle, const PieceType &pType, uint16_t idx_);
     PieceType getPieceType() const;
     void activateKing();
     bool getIsKing() const;
@@ -30,19 +30,19 @@ class Piece final : public sf::Drawable, public sf::Transformable
     void moveCustom(const sf::Vector2f &pos);
     void addOutline();
     void removeOutline();
-    unsigned int getId() const;
+    uint16_t getId() const;
     bool operator==(const Piece &other) const;
 
   private:
     sf::Texture texture;
-    unsigned int id;
+    uint16_t id;
     sf::CircleShape myCircle;
     PieceType pieceType;
     bool isKing = false;
     void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
 };
 
-inline Piece::Piece(const sf::CircleShape &circle, const PieceType &pType, const unsigned int idx_)
+inline Piece::Piece(const sf::CircleShape &circle, const PieceType &pType, const uint16_t idx_)
 {
     this->myCircle = circle;
     this->pieceType = pType;
@@ -145,7 +145,7 @@ inline void Piece::removeOutline()
 /**
  * Get piece's id
  */
-inline unsigned int Piece::getId() const
+inline uint16_t Piece::getId() const
 {
     return this->id;
 }
