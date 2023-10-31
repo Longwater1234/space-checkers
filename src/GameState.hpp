@@ -36,21 +36,21 @@ class GameState
     // next destination of selected piece
     int targetCell;
     // currently clicked piece
-    int selectedPieceId;
+    int currentPieceId;
     // previously selected piece
     int oldSelectedId;
 
   public:
     [[nodiscard]] int getTargetCell() const;
     void setTargetCell(const int &cell_idx);
-    [[nodiscard]] int getSelectedPieceId() const;
-    void setSelectedPieceId(const int &pieceId);
+    [[nodiscard]] int getCurrentPieceId() const;
+    void setCurrentPieceId(const int &pieceId);
     void handleMovePiece(const std::unique_ptr<chk::Player> &player, const std::unique_ptr<chk::Cell> &cell);
 };
 
 inline GameState::GameState()
 {
-    this->selectedPieceId = -1;
+    this->currentPieceId = -1;
     this->targetCell = -1;
     this->oldSelectedId = 0;
 }
@@ -137,14 +137,14 @@ inline void GameState::drawAllPieces(std::vector<Kete> &pieceList)
 void GameState::handleMovePiece(const std::unique_ptr<chk::Player> &player, const Block &cell)
 {
 
-    if (oldSelectedId == selectedPieceId)
+    if (oldSelectedId == currentPieceId)
     {
         return;
     }
-    const int idx = player->getPieceVecIndex(this->getSelectedPieceId());
+    const int idx = player->getPieceVecIndex(this->getCurrentPieceId());
     std::cout << "vector Piece index " << idx << std::endl;
     player->getOwnPieces()[idx]->moveCustom(cell->getCellPos());
-    this->oldSelectedId = this->getSelectedPieceId();
+    this->oldSelectedId = this->getCurrentPieceId();
 }
 
 /**l
@@ -153,7 +153,7 @@ void GameState::handleMovePiece(const std::unique_ptr<chk::Player> &player, cons
  */
 inline bool GameState::checkCanMove() const
 {
-    return this->selectedPieceId != -1;
+    return this->currentPieceId != -1;
 }
 
 int GameState::getTargetCell() const
@@ -170,18 +170,18 @@ void GameState::setTargetCell(const int &cell_idx)
     GameState::targetCell = cell_idx;
 }
 
-inline int GameState::getSelectedPieceId() const
+inline int GameState::getCurrentPieceId() const
 {
-    return selectedPieceId;
+    return currentPieceId;
 }
 
 /**
- * store current clicked PieceId
+ * store currently clicked PieceId
  * @param pieceId the new piece id
  */
-inline void GameState::setSelectedPieceId(const int &pieceId)
+inline void GameState::setCurrentPieceId(const int &pieceId)
 {
-    this->selectedPieceId = pieceId;
+    this->currentPieceId = pieceId;
 }
 
 } // namespace chk

@@ -87,7 +87,7 @@ int main()
                         if (cell->containsPoint(clickedPos) && cell->getIndex() != -1)
                         {
                             gameState->handleMovePiece(p1, cell);
-                            gameState->setSelectedPieceId(-1);
+                            gameState->setCurrentPieceId(-1);
                             break;
                         }
                     }
@@ -109,7 +109,7 @@ int main()
                 red_piece->addOutline();
                 if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
                 {
-                    gameState->setSelectedPieceId(red_piece->getId());
+                    gameState->setCurrentPieceId(red_piece->getId());
                     statusText = "Clicked piece " + std::to_string(red_piece->getId());
                 }
             }
