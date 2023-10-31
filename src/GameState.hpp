@@ -33,7 +33,7 @@ class GameState
     [[nodiscard]] bool checkCanMove() const;
 
   private:
-    // target cell index,
+    // next destination of selected piece
     int targetCell;
     // currently clicked piece
     uint16_t selectedPieceId;
@@ -49,7 +49,7 @@ class GameState
 inline GameState::GameState()
 {
     this->selectedPieceId = 0;
-    this->targetCell = 0;
+    this->targetCell = -1;
 }
 
 /**
@@ -70,7 +70,7 @@ inline void GameState::drawCheckerboard(std::vector<Block> &blockList, const sf:
                 sf::RectangleShape lightRec(sf::Vector2f(100.f, 100.f));
                 lightRec.setFillColor(sf::Color{255, 225, 151});
                 float x = (col % NUM_COLS) * 100.0f;
-                lightRec.setPosition(sf::Vector2f(x, static_cast<float>(row) * 100.0f));
+                lightRec.setPosition(sf::Vector2f(x, row * 100.0f));
                 auto whiteBlock = std::make_unique<chk::Cell>(lightRec, lightRec.getPosition(), -1);
                 whiteBlock->setFont(font);
                 blockList.emplace_back(std::move(whiteBlock));
@@ -81,7 +81,7 @@ inline void GameState::drawCheckerboard(std::vector<Block> &blockList, const sf:
                 sf::RectangleShape darkRect(sf::Vector2f(100.f, 100.f));
                 darkRect.setFillColor(sf::Color{82, 55, 27});
                 float x = (col % NUM_COLS) * 100.0f;
-                darkRect.setPosition(sf::Vector2f(x, static_cast<float>(row) * 100.0f));
+                darkRect.setPosition(sf::Vector2f(x, row * 100.0f));
                 auto redBlock = std::make_unique<chk::Cell>(darkRect, darkRect.getPosition(), counter);
                 redBlock->setFont(font);
                 blockList.emplace_back(std::move(redBlock));
@@ -109,7 +109,7 @@ inline void GameState::drawAllPieces(std::vector<Kete> &pieceList)
                 // Put piece on Odd cells only
                 sf::CircleShape circle(50.0f);
                 const float x = (col % NUM_COLS) * 100.0f;
-                circle.setPosition(sf::Vector2f(x, static_cast<float>(row) * 100.0f));
+                circle.setPosition(sf::Vector2f(x, row * 100.0f));
                 if (row < 3)
                 {
                     auto kete = std::make_unique<chk::Piece>(circle, chk::PieceType::Black, dist(randEngine));
@@ -160,7 +160,7 @@ void GameState::handleMovePiece(const std::unique_ptr<chk::Player> &player, cons
  */
 inline bool GameState::checkCanMove() const
 {
-    return this->selectedPieceId != 0 && this->targetCell != 0;
+    return this->selectedPieceId != 0 && this->targetCell != -1;
 }
 
 uint16_t GameState::getTargetCell() const

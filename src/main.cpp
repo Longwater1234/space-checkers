@@ -83,7 +83,7 @@ int main()
             if (event.type == sf::Event::MouseButtonPressed && sf::Mouse::isButtonPressed(sf::Mouse::Left))
             {
                 // ONE-SHOT click, NOT CONTINUOUS hold
-                 // continue only if less mouse.y < 800
+                // continue only if less mouse.y < 800
                 // - find out what cell got clicked, SKIP 0 indexed cells. (check intersection!!)
                 // -  Also check if this cell already hosts a PIECE. (skip if yes)
                 // -  if selectedPiece != NULL,  move the damn piece to that empty cell
@@ -95,7 +95,6 @@ int main()
                     // DO STUFF HERE
                     std::cout << "x=" << clickedPos.x << " y=" << clickedPos.y << std::endl;
                     gameState->setSelectedPieceId(0);
-
                 }
             }
         }

@@ -22,7 +22,7 @@ class Piece final : public sf::Drawable, public sf::Transformable
 {
 
   public:
-    Piece(const sf::CircleShape &circle, PieceType pType, unsigned int idx_);
+    Piece(const sf::CircleShape &circle, const PieceType &pType, unsigned int idx_);
     PieceType getPieceType() const;
     void activateKing();
     bool getIsKing() const;
@@ -42,7 +42,7 @@ class Piece final : public sf::Drawable, public sf::Transformable
     void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
 };
 
-inline Piece::Piece(const sf::CircleShape &circle, const PieceType pType, const unsigned int idx_)
+inline Piece::Piece(const sf::CircleShape &circle, const PieceType &pType, const unsigned int idx_)
 {
     this->myCircle = circle;
     this->pieceType = pType;
@@ -90,11 +90,9 @@ inline void Piece::activateKing()
     sf::Texture localTxr;
     if (pieceType == PieceType::Red)
     {
-        /* code */
         if (localTxr.loadFromFile(RED_KING))
         {
-            this->texture = localTxr;
-
+            this->texture = std::move_if_noexcept(localTxr);
             this->myCircle.setTexture(&this->texture);
         }
     }
@@ -102,7 +100,7 @@ inline void Piece::activateKing()
     {
         if (localTxr.loadFromFile(BLACK_KING))
         {
-            this->texture = localTxr;
+            this->texture = std::move_if_noexcept(localTxr);
             this->myCircle.setTexture(&this->texture);
         }
     }
@@ -116,7 +114,6 @@ inline bool Piece::getIsKing() const
 {
     return this->isKing;
 }
-
 
 /**
  * Check whether mouse cursor is currently over this piece
@@ -154,9 +151,9 @@ inline unsigned int Piece::getId() const
 }
 
 /**
- * \brief Custom equality operator. Compares 2 pieces
- * \param other The other Piece
- * \return TRUE or FALSE
+ * Custom equality operator
+ * @param other The other Piece
+ * @return TRUE or FALSE
  */
 inline bool Piece::operator==(const Piece &other) const
 {

@@ -48,7 +48,7 @@ inline void Cell::draw(sf::RenderTarget &target, sf::RenderStates states) const
 {
 
     target.draw(rec_, states);
-    if (index_ != 0)
+    if (index_ != -1)
     {
         target.draw(sfText, states);
     }
@@ -73,10 +73,10 @@ inline bool Cell::containsPoint(const sf::Vector2i &pos) const
     return this->rec_.getGlobalBounds().contains(static_cast<float>(pos.x), static_cast<float>(pos.y));
 }
 
- /**
-  * Get index of this cell
-  * @return index value
-  */
+/**
+ * Get index of this cell
+ * @return index value
+ */
 inline int Cell::getIndex() const
 {
     return this->index_;
