@@ -40,7 +40,7 @@ int main()
     auto p2 = std::make_unique<chk::Player>(chk::PlayerType::PLAYER_2);
 
     // NOW DRAW all PIECES ON BOARD
-    std::vector<chk::Kete> keteList;
+    std::vector<chk::PiecePtr > keteList;
     keteList.reserve(NUM_PIECES);
     gameState->drawAllPieces(keteList);
 

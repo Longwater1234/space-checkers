@@ -15,8 +15,8 @@ file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*.hpp")
 set(SFML_DIR ${CUSTOM_SFML_HOME}/lib/cmake/SFML)
 find_package(SFML REQUIRED COMPONENTS "graphics" "window" "system")
 
-if(WIN32)
-	add_executable(space-checkers WIN32 ${SOURCES})
+if (WIN32)
+    add_executable(space-checkers WIN32 ${SOURCES})
 else()
     add_executable(space-checkers ${SOURCES})
 endif()
@@ -26,12 +26,14 @@ target_link_libraries(space-checkers PRIVATE sfml-main sfml-graphics sfml-window
 include_directories(${CUSTOM_SFML_HOME}/include)
 
 # show warnings (depending on CXX compiler)
-target_compile_options(space-checkers PRIVATE
-		$<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>: -Wall>
-		$<$<CXX_COMPILER_ID:MSVC>: /W4>)
+if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    target_compile_options(space-checkers PRIVATE /W4)
+else()
+    target_compile_options(space-checkers PRIVATE -Wall)
+endif()
 
 # COPY resources folder to destination
 add_custom_command(
-	TARGET space-checkers POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/resources $<TARGET_FILE_DIR:space-checkers>/resources
+        TARGET space-checkers POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/resources $<TARGET_FILE_DIR:space-checkers>/resources
 )

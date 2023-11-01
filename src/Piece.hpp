@@ -22,7 +22,7 @@ class Piece final : public sf::Drawable, public sf::Transformable
 {
 
   public:
-    Piece(const sf::CircleShape &circle, const PieceType &pType, uint16_t idx_);
+    Piece(const sf::CircleShape &circle, const PieceType &pType, uint16_t id_);
     PieceType getPieceType() const;
     void activateKing();
     bool getIsKing() const;
@@ -42,11 +42,11 @@ class Piece final : public sf::Drawable, public sf::Transformable
     void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
 };
 
-inline Piece::Piece(const sf::CircleShape &circle, const PieceType &pType, const uint16_t idx_)
+inline Piece::Piece(const sf::CircleShape &circle, const PieceType &pType, const uint16_t id_)
 {
     this->myCircle = circle;
     this->pieceType = pType;
-    this->id = idx_;
+    this->id = id_;
 
     sf::Texture localTxr;
     if (pieceType == PieceType::Red)

@@ -35,7 +35,7 @@ class Player
     std::string name_;
     std::vector<PiecePtr> basket_;
     // map of piece_id --> vector index
-    std::map<int, int> cellMap;
+    std::map<int, int> pieceMap;
     int counter;
 };
 
@@ -58,7 +58,7 @@ inline Player::Player(PlayerType player_type)
  */
 inline void Player::givePiece(PiecePtr &piece)
 {
-    cellMap[piece->getId()] = counter++;
+    pieceMap[piece->getId()] = counter++;
     this->basket_.emplace_back(std::move(piece));
 }
 
@@ -107,7 +107,7 @@ inline size_t Player::getPieceCount() const
  */
 inline int Player::getPieceVecIndex(const int &pieceId)
 {
-    return cellMap[pieceId];
+    return pieceMap[pieceId];
 }
 
 /**
