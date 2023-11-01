@@ -49,11 +49,11 @@ int main()
     {
         if (kete->getPieceType() == chk::PieceType::Red)
         {
-            p1->givePiece(std::ref(kete));
+            p1->givePiece(kete);
         }
         else
         {
-            p2->givePiece(std::ref(kete));
+            p2->givePiece(kete);
         }
     }
 
@@ -77,6 +77,7 @@ int main()
             {
                 window.close();
             }
+
             if (event.type == sf::Event::MouseButtonPressed && sf::Mouse::isButtonPressed(sf::Mouse::Left))
             {
                 const auto clickedPos = sf::Mouse::getPosition(window);
@@ -87,10 +88,10 @@ int main()
                         if (cell->containsPoint(clickedPos) && cell->getIndex() != -1)
                         {
                             gameState->handleMovePiece(p1, cell);
-                            gameState->setCurrentPieceId(-1);
                             break;
                         }
                     }
+                    gameState->setCurrentPieceId(-1);
                 }
             }
         }

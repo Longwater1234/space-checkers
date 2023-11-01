@@ -35,7 +35,7 @@ class Piece final : public sf::Drawable, public sf::Transformable
 
   private:
     sf::Texture texture;
-    uint16_t id;
+    int id;
     sf::CircleShape myCircle;
     PieceType pieceType;
     bool isKing = false;

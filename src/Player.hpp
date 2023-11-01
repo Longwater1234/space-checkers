@@ -101,13 +101,12 @@ inline size_t Player::getPieceCount() const
 }
 
 /**
- * Get vector index of selected piece by this player
- * @param pieceId the selected PieceId, stored in gameState
+ * Get index of selected piece by this player
+ * @param pieceId the selected PieceId
  * @return index inside Vector
  */
 inline int Player::getPieceVecIndex(const int &pieceId)
 {
-
     return cellMap[pieceId];
 }
 

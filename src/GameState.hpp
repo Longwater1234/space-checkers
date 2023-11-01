@@ -136,15 +136,15 @@ inline void GameState::drawAllPieces(std::vector<Kete> &pieceList)
  */
 void GameState::handleMovePiece(const std::unique_ptr<chk::Player> &player, const Block &cell)
 {
-
+    // TODO MAKE SURE cell HAS NO VACANT
     if (oldSelectedId == currentPieceId)
     {
         return;
     }
-    const int idx = player->getPieceVecIndex(this->getCurrentPieceId());
+    const int idx = player->getPieceVecIndex(currentPieceId);
     std::cout << "vector Piece index " << idx << std::endl;
     player->getOwnPieces()[idx]->moveCustom(cell->getCellPos());
-    this->oldSelectedId = this->getCurrentPieceId();
+    this->oldSelectedId = currentPieceId;
 }
 
 /**l
