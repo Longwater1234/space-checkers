@@ -141,20 +141,22 @@ inline void GameState::drawAllPieces(std::vector<chk::PiecePtr> &pieceList)
  */
 void GameState::handleMovePiece(const std::unique_ptr<chk::Player> &player, const Block &cell)
 {
-    // TODO MAKE SURE cell HAS NO VACANT
-    if (gameMap.find(cell->getIndex()) != gameMap.end())
+
+    const auto pieceId = getCurrentPieceId(cell->getIndex());
+    if (pieceId != -1)
     {
-        std::cout << "occupied ! " << std::endl;
-        return;
+        this->setCurrentPieceId(pieceId);
+        std::cout << "found someone! PieceId: " << pieceId << std::endl;
     }
-    const int idx = player->getPieceVecIndex(currentPieceId);
+    const int idx = player->getPieceVecIndex(pieceId);
     std::cout << "vector Piece index " << idx << std::endl;
     player->getOwnPieces()[idx]->moveCustom(cell->getCellPos());
     this->oldSelectedId = currentPieceId;
-    gameMap[cell->getIndex()] = currentPieceId;
+    // gameMap[cell->getIndex()] = currentPieceId;
+    // this->currentPieceId = -1;
 }
 
-/**l
+/**
  * check if the move is valid
  * @return TRUE or false
  */
@@ -187,13 +189,17 @@ inline void GameState::setCurrentPieceId(const int &pieceId)
 }
 
 /***
- * Get from hashMap, the selected PieceId placed at this cell_index
+ * Get from hashMap, the PieceId placed at this cell_index
  * @param cell_idx the clicked cell
  * @return pieceId or -1 if not found
  */
 inline int GameState::getCurrentPieceId(const int &cell_idx)
 {
-    return this->gameMap[cell_idx];
+    if (this->gameMap.find(cell_idx) != gameMap.end())
+    {
+        return gameMap[cell_idx];
+    };
+    return -1;
 }
 
 /**

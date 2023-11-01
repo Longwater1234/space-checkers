@@ -83,7 +83,7 @@ int main()
             if (event.type == sf::Event::MouseButtonPressed && sf::Mouse::isButtonPressed(sf::Mouse::Left))
             {
                 const auto clickedPos = sf::Mouse::getPosition(window);
-                if (gameState->checkCanMove() && clickedPos.y <= 800u)
+                if (clickedPos.y <= 800u)
                 {
                     for (auto &cell : blockList)
                     {
@@ -93,10 +93,11 @@ int main()
                             break;
                         }
                     }
-                    gameState->setCurrentPieceId(-1);
                 }
+                gameState->setCurrentPieceId(-1);
             }
         }
+
         auto mousePos = sf::Mouse::getPosition(window);
         window.clear();
 
@@ -110,11 +111,6 @@ int main()
             if (red_piece->containsPoint(mousePos))
             {
                 red_piece->addOutline();
-                if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
-                {
-                    gameState->setCurrentPieceId(red_piece->getId());
-                    statusText = "Clicked piece " + std::to_string(red_piece->getId());
-                }
             }
             else
             {
