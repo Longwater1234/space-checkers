@@ -46,7 +46,7 @@ class GameState
   public:
     [[nodiscard]] int getTargetCell() const;
     void setTargetCell(const int &cell_idx);
-    [[nodiscard]] inline int getCurrentPieceId(const int &cell_idx);
+    [[nodiscard]] inline int getCachedPieceId(const int &cell_idx);
     void setCurrentPieceId(const int &pieceId);
     void handleMovePiece(const std::unique_ptr<chk::Player> &player, const std::unique_ptr<chk::Cell> &cell);
 };
@@ -142,13 +142,12 @@ inline void GameState::drawAllPieces(std::vector<chk::PiecePtr> &pieceList)
 void GameState::handleMovePiece(const std::unique_ptr<chk::Player> &player, const Block &cell)
 {
 
-    const auto pieceId = getCurrentPieceId(cell->getIndex());
-    if (pieceId != -1)
-    {
-        this->setCurrentPieceId(pieceId);
-        std::cout << "found someone! PieceId: " << pieceId << std::endl;
+    if(gameMap.find(cell->getIndex()) != gameMap.end()) {
+        // CELL HAS PIECE, SO NOW THIS IS CLICKED!!!! SAVE IT TO STATE.
+        this->setCurrentPieceId(gameMap[cell->getIndex()]);
     }
-    const int idx = player->getPieceVecIndex(pieceId);
+
+    const int idx = player->getPieceVecIndex(currentPieceId);
     std::cout << "vector Piece index " << idx << std::endl;
     player->getOwnPieces()[idx]->moveCustom(cell->getCellPos());
     this->oldSelectedId = currentPieceId;
@@ -193,7 +192,7 @@ inline void GameState::setCurrentPieceId(const int &pieceId)
  * @param cell_idx the clicked cell
  * @return pieceId or -1 if not found
  */
-inline int GameState::getCurrentPieceId(const int &cell_idx)
+inline int GameState::getCachedPieceId(const int &cell_idx)
 {
     if (this->gameMap.find(cell_idx) != gameMap.end())
     {

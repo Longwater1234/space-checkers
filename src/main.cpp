@@ -94,7 +94,7 @@ int main()
                         }
                     }
                 }
-                gameState->setCurrentPieceId(-1);
+                //gameState->setCurrentPieceId(-1);
             }
         }
 
