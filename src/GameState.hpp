@@ -40,6 +40,8 @@ class GameState
     int oldSelectedId;
     // map of cell_index --> piece_id
     std::map<int, int> gameMap;
+    // flag to check if cache is filled
+    bool alreadyCached;
 
   public:
     [[nodiscard]] int getTargetCell() const;
@@ -54,7 +56,8 @@ inline GameState::GameState()
     this->currentPieceId = -1;
     this->targetCell = -1;
     this->oldSelectedId = 0;
-    this->gameMap = {{}};
+    this->alreadyCached = false;
+    //    this->gameMap = {{}};
 }
 
 /**
@@ -139,8 +142,9 @@ inline void GameState::drawAllPieces(std::vector<chk::PiecePtr> &pieceList)
 void GameState::handleMovePiece(const std::unique_ptr<chk::Player> &player, const Block &cell)
 {
     // TODO MAKE SURE cell HAS NO VACANT
-    if (oldSelectedId == currentPieceId)
+    if (gameMap.find(cell->getIndex()) != gameMap.end())
     {
+        std::cout << "occupied ! " << std::endl;
         return;
     }
     const int idx = player->getPieceVecIndex(currentPieceId);
@@ -199,16 +203,23 @@ inline int GameState::getCurrentPieceId(const int &cell_idx)
  */
 void GameState::matchCellsToPieces(const std::vector<chk::PiecePtr> &pieceList, const std::vector<Block> &cellList)
 {
-    for (const auto &piece : pieceList)
+    if (this->alreadyCached)
     {
-        for (const auto &cell : cellList)
+        return;
+    }
+
+    for (const auto &cell : cellList)
+    {
+        for (const auto &piece : pieceList)
         {
-            if (cell->containsPoint(piece->getPosition()))
+            if (cell->getIndex() != -1 && cell->containsOrigin(piece->getMyPos()))
             {
-                this->gameMap[cell->getIndex()] = piece->getId();
+                this->gameMap[cell.get()->getIndex()] = piece.get()->getId();
             }
         }
     }
+    this->alreadyCached = true;
+    std::cout << "map size " << gameMap.size() << std::endl;
 }
 
 } // namespace chk

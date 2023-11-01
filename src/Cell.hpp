@@ -16,7 +16,7 @@ class Cell final : public sf::Drawable
     Cell(const sf::RectangleShape &rec, const sf::Vector2f &pos, int index);
     void setFont(const sf::Font &font);
     bool containsPoint(const sf::Vector2i &pos) const;
-    bool containsPoint(const sf::Vector2f &pos) const;
+    bool containsOrigin(const sf::Vector2f &pos) const;
     const sf::Vector2f &getCellPos() const;
     int getIndex() const;
 
@@ -79,9 +79,9 @@ inline bool Cell::containsPoint(const sf::Vector2i &pos) const
  * @param pos 2D position (float) relative to main window
  * @return TRUE or FALSE
  */
-bool Cell::containsPoint(const sf::Vector2f &pos) const
+bool Cell::containsOrigin(const sf::Vector2f &pos) const
 {
-    return this->rec_.getGlobalBounds().contains(pos);
+    return this->cell_pos.x == pos.x && this->cell_pos.y == pos.y;
 }
 
 /**
@@ -101,6 +101,5 @@ const inline sf::Vector2f &Cell::getCellPos() const
 {
     return this->cell_pos;
 }
-
 
 } // namespace chk

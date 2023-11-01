@@ -30,13 +30,17 @@ class Piece final : public sf::Drawable, public sf::Transformable
     void moveCustom(const sf::Vector2f &pos);
     void addOutline();
     void removeOutline();
-    int getId() const;
+    const int &getId() const;
+    const sf::Vector2f &getMyPos() const;
     bool operator==(const Piece &other) const;
 
   private:
     sf::Texture texture;
     int id;
     sf::CircleShape myCircle;
+    sf::Vector2f myPos;
+
+  private:
     PieceType pieceType;
     bool isKing = false;
     void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
@@ -47,6 +51,7 @@ inline Piece::Piece(const sf::CircleShape &circle, const PieceType &pType, const
     this->myCircle = circle;
     this->pieceType = pType;
     this->id = id_;
+    this->myPos = circle.getPosition();
 
     sf::Texture localTxr;
     if (pieceType == PieceType::Red)
@@ -145,7 +150,7 @@ inline void Piece::removeOutline()
 /**
  * Get piece's id
  */
-inline int Piece::getId() const
+const inline int &Piece::getId() const
 {
     return this->id;
 }
@@ -167,6 +172,15 @@ inline bool Piece::operator==(const Piece &other) const
 inline void Piece::moveCustom(const sf::Vector2f &pos)
 {
     this->myCircle.setPosition(pos.x, pos.y);
+}
+
+/**
+ * Get piece position, relative to window
+ * @return x,y position of piece
+ */
+const sf::Vector2f &Piece::getMyPos() const
+{
+    return myPos;
 }
 
 } // namespace chk
