@@ -18,7 +18,8 @@ find_package(SFML REQUIRED COMPONENTS "graphics" "window" "system")
 if (WIN32)
     add_executable(space-checkers WIN32 ${SOURCES})
 else()
-    add_executable(space-checkers ${SOURCES})
+    add_executable(space-checkers ${SOURCES}
+            src/CircularBuffer.hpp)
 endif()
 
 # include SFML headers and libs

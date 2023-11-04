@@ -1,4 +1,5 @@
 
+#include "CircularBuffer.hpp"
 #include "GameState.hpp"
 #include <SFML/Graphics.hpp>
 #include <SFML/Window/Mouse.hpp>
@@ -62,6 +63,8 @@ int main()
     // we don't need this anymore
     keteList.clear();
 
+    chk::CircularBuffer<int> circularBuffer(1);
+
     // THE STATUS TEXT
     sf::Text txtPanel;
     txtPanel.setFont(font);
@@ -89,12 +92,29 @@ int main()
                     {
                         if (cell->containsPoint(clickedPos) && cell->getIndex() != -1)
                         {
-                            gameState->handleMovePiece(p1, cell);
+                            // CHECK IF IT HAS CHILD
+                            int pieceId = gameState->getCachedPieceId(cell->getIndex());
+                            if (pieceId != -1)
+                            {
+                                // store the child in buffer!
+                                circularBuffer.addItem(pieceId);
+                            }
+                            else
+                            {
+                                // IT'S VACANT!!! SO let's try to move a piece here!
+                                // FIRST MAKE SURE BUFFER IS NOT EMPTY!
+                                if (!circularBuffer.isEmpty())
+                                {
+                                    const int movablePieceId = circularBuffer.getTop();
+                                    gameState->setCurrentPieceId(movablePieceId);
+                                    gameState->handleMovePiece(p1, cell);
+                                    circularBuffer.clean();
+                                }
+                            }
                             break;
                         }
                     }
                 }
-                //gameState->setCurrentPieceId(-1);
             }
         }
 
