@@ -219,9 +219,9 @@ void GameState::matchCellsToPieces(const std::vector<chk::PiecePtr> &pieceList, 
         return;
     }
 
-    for (const auto &cell : cellList)
+    for (const auto &piece : pieceList)
     {
-        for (const auto &piece : pieceList)
+        for (const auto &cell : cellList)
         {
             if (cell->getIndex() != -1 && cell->containsOrigin(piece->getMyPos()))
             {
@@ -230,7 +230,7 @@ void GameState::matchCellsToPieces(const std::vector<chk::PiecePtr> &pieceList, 
         }
     }
     this->alreadyCached = true;
-    std::cout << "map size " << gameMap.size() << std::endl;
+    std::cout << "map buf_size " << gameMap.size() << std::endl;
 }
 
 } // namespace chk

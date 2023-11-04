@@ -8,7 +8,7 @@
 namespace chk
 {
 /**
- * Custom list with size limit. If max maxCapacity is reached, the first
+ * Custom list with buf_size limit. If max maxCapacity is reached, the first
  * item (index 0) is removed (FIFO), before inserting the new element in.
  */
 template <typename T> class CircularBuffer
@@ -27,7 +27,7 @@ template <typename T> class CircularBuffer
 
   private:
     int maxCapacity = 0; // max Capacity
-    size_t size = 0;     // size of the buffer
+    size_t buf_size = 0;     // buf_size of the buffer
     std::deque<T> buffer;
 };
 
@@ -51,13 +51,15 @@ template <typename T> bool CircularBuffer<T>::isEmpty() const
 }
 
 /**
- * Get the first in queue
+ * Get the first in queue (front)
  * @tparam T any type
  * @return The first element in queue
  */
 template <typename T> T &CircularBuffer<T>::getTop()
 {
-    return static_cast<T &>(buffer.at(0));
+    auto val = static_cast<T &>(buffer.at(0));
+    buffer.pop_front();
+    return val;
 }
 
 /**
@@ -85,6 +87,6 @@ template <typename T> void CircularBuffer<T>::addItem(T item)
         buffer.pop_front();
     }
     buffer.push_back(item);
-    size++;
+    buf_size++;
 }
 } // namespace chk

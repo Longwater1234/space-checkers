@@ -12,6 +12,37 @@ constexpr uint16_t NUM_CELLS = 64;
 constexpr auto ICON_PATH = "resources/icons8-checkers-16.png";
 constexpr auto FONT_PATH = "resources/open-sans.regular.ttf";
 
+/**
+ * Handles when player taps a cell
+ * @param gameState game state
+ * @param p1 currentPlayer
+ * @param buffer stores last clicked PieceId
+ * @param cell tapped cell
+ */
+inline void handleCellTap(std::shared_ptr<chk::GameState> &gameState, const std::unique_ptr<chk::Player> &p1,
+                          chk::CircularBuffer<int> &buffer, const std::unique_ptr<chk::Cell> &cell)
+{
+    // CHECK IF IT HAS CHILD
+    int pieceId = gameState->getCachedPieceId(cell->getIndex());
+    if (pieceId != -1)
+    {
+        // store the child in buffer!
+        buffer.addItem(pieceId);
+    }
+    else
+    {
+        // IT'S VACANT!!! SO let's try to move a piece here!
+        // FIRST MAKE SURE BUFFER IS NOT EMPTY!
+        if (!buffer.isEmpty())
+        {
+            const int movablePieceId = buffer.getTop();
+            gameState->setCurrentPieceId(movablePieceId);
+            gameState->handleMovePiece(p1, cell);
+            buffer.clean();
+        }
+    }
+}
+
 int main()
 {
     auto window = sf::RenderWindow{sf::VideoMode(800u, 900u), "Checkers CPP", sf::Style::Titlebar | sf::Style::Close};
@@ -92,25 +123,8 @@ int main()
                     {
                         if (cell->containsPoint(clickedPos) && cell->getIndex() != -1)
                         {
-                            // CHECK IF IT HAS CHILD
-                            int pieceId = gameState->getCachedPieceId(cell->getIndex());
-                            if (pieceId != -1)
-                            {
-                                // store the child in buffer!
-                                circularBuffer.addItem(pieceId);
-                            }
-                            else
-                            {
-                                // IT'S VACANT!!! SO let's try to move a piece here!
-                                // FIRST MAKE SURE BUFFER IS NOT EMPTY!
-                                if (!circularBuffer.isEmpty())
-                                {
-                                    const int movablePieceId = circularBuffer.getTop();
-                                    gameState->setCurrentPieceId(movablePieceId);
-                                    gameState->handleMovePiece(p1, cell);
-                                    circularBuffer.clean();
-                                }
-                            }
+                            std::cout << "clicked cell index " << cell->getIndex() << std::endl;
+                            handleCellTap(gameState, p1, circularBuffer, cell);
                             break;
                         }
                     }
