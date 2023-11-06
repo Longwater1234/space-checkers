@@ -32,8 +32,10 @@ class GameState
     [[nodiscard]] bool checkCanMove() const;
 
   private:
-    // next destination of selected piece
+    // target cell Index of selected piece
     int targetCell;
+    // source cell Index of selected piece
+    int sourceCell;
     // currently clicked piece
     int currentPieceId;
     // previously selected piece
@@ -42,23 +44,22 @@ class GameState
     std::map<int, int> gameMap;
     // flag to check if cache is filled
     bool alreadyCached;
-    bool hasLanded;
 
   public:
     [[nodiscard]] int getTargetCell() const;
-    void setTargetCell(const int &cell_idx);
     [[nodiscard]] inline int getCachedPieceId(const int &cell_idx);
     void setCurrentPieceId(const int &pieceId);
-    void handleMovePiece(const std::unique_ptr<chk::Player> &player, const std::unique_ptr<chk::Cell> &cell);
+    void setSourceCell(const int &src_cell);
+    void handleMovePiece(const std::unique_ptr<chk::Player> &player, const Block &destCell);
 };
 
 inline GameState::GameState()
 {
     this->currentPieceId = -1;
     this->targetCell = -1;
+    this->sourceCell = -1;
     this->oldSelectedId = 0;
     this->alreadyCached = false;
-    this->hasLanded = false;
 }
 
 /**
@@ -138,26 +139,16 @@ inline void GameState::drawAllPieces(std::vector<chk::PiecePtr> &pieceList)
 /**
  * Move the selected piece to clicked cell, and update the gameMap
  * @param player current player
- * @param cell target cell
+ * @param destCell target cell
  */
-void GameState::handleMovePiece(const std::unique_ptr<chk::Player> &player, const Block &cell)
+void GameState::handleMovePiece(const std::unique_ptr<chk::Player> &player, const Block &destCell)
 {
-
-    // FIRST, CHECK IF THIS CELL HAS CHILD (a piece staying on it)
-    //    if (gameMap.find(cell->getIndex()) != gameMap.end())
-    //    {
-    //        // CELL HAS PIECE, SO NOW THIS IS THE piece we want to move!!!! JUST SAVE IT TO local STATE.
-    //        // Next time, if cell is empty, you will move it to destination cell.
-    //        this->setCurrentPieceId(gameMap[cell->getIndex()]);
-    //        //this->hasLanded = false;
-    //        return;
-    //    }
-
     const int idx = player->getPieceVecIndex(this->currentPieceId);
-    std::cout << "moving piece index " << idx << " to target cell  " << cell->getIndex() << std::endl;
-    player->getOwnPieces()[idx]->moveCustom(cell->getCellPos());
+    std::cout << "moving piece index " << idx << " to target cell  " << destCell->getIndex() << std::endl;
+    player->getOwnPieces()[idx]->moveCustom(destCell->getCellPos());
     this->oldSelectedId = currentPieceId;
-    gameMap[cell->getIndex()] = currentPieceId;
+    gameMap.erase(this->sourceCell);            // Make old location empty!
+    gameMap[destCell->getIndex()] = currentPieceId; // fill in new position
     // this->hasLanded = true;
 }
 
@@ -176,21 +167,21 @@ int GameState::getTargetCell() const
 }
 
 /**
- * Store currently selected Cell
- * @param cell_idx cell index
- */
-void GameState::setTargetCell(const int &cell_idx)
-{
-    GameState::targetCell = cell_idx;
-}
-
-/**
- * store currently clicked PieceId
+ * Store currently clicked PieceId
  * @param pieceId the new piece id
  */
 inline void GameState::setCurrentPieceId(const int &pieceId)
 {
     this->currentPieceId = pieceId;
+}
+
+/**
+ * Store the cell idx from which the piece is LEAVING
+ * @param src_cell index of the cell
+ */
+inline void GameState::setSourceCell(const int &src_cell)
+{
+    this->sourceCell = src_cell;
 }
 
 /***

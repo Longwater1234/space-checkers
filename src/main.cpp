@@ -15,31 +15,33 @@ constexpr auto FONT_PATH = "resources/open-sans.regular.ttf";
 /**
  * Handles when player taps a cell
  * @param gameState game state
- * @param p1 currentPlayer
+ * @param player currentPlayer
  * @param buffer stores last clicked PieceId
  * @param cell tapped cell
  */
-inline void handleCellTap(std::shared_ptr<chk::GameState> &gameState, const std::unique_ptr<chk::Player> &p1,
+inline void handleCellTap(std::shared_ptr<chk::GameState> &gameState, const std::unique_ptr<chk::Player> &player,
                           chk::CircularBuffer<int> &buffer, const std::unique_ptr<chk::Cell> &cell)
 {
     // CHECK IF IT HAS CHILD
     int pieceId = gameState->getCachedPieceId(cell->getIndex());
     if (pieceId != -1)
     {
-        // store the child in buffer!
+        // YES HAS CHILD, keep it in buffer! (we are going to move it later)
+        std::cout << "piece id " << pieceId << std::endl;
+        // ALSO, store the source cell index
+        gameState->setSourceCell(cell->getIndex());
         buffer.addItem(pieceId);
     }
     else
     {
-        // IT'S VACANT!!! SO let's try to move a piece here!
-        // FIRST MAKE SURE BUFFER IS NOT EMPTY!
+        // IT'S VACANT!!! SO let's try to move a piece (from buffer) here!
         if (!buffer.isEmpty())
         {
             const int movablePieceId = buffer.getTop();
             gameState->setCurrentPieceId(movablePieceId);
-            gameState->handleMovePiece(p1, cell);
-            buffer.clean();
+            gameState->handleMovePiece(player, cell);
         }
+        buffer.clean();
     }
 }
 
