@@ -4,7 +4,6 @@
 #include <SFML/Graphics/RenderStates.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Graphics/Texture.hpp>
-#include <SFML/System/Clock.hpp>
 
 namespace chk
 {
@@ -18,6 +17,7 @@ constexpr auto BLACK_NORMAL = "resources/black_normal.png";
 constexpr auto BLACK_KING = "resources/black_king.png";
 constexpr auto RED_NORMAL = "resources/red_normal.png";
 constexpr auto RED_KING = "resources/red_king.png";
+constexpr auto SIZE_CELL = 100.0f; // length of square cell
 
 class Piece final : public sf::Drawable, public sf::Transformable
 {
@@ -32,14 +32,12 @@ class Piece final : public sf::Drawable, public sf::Transformable
     void addOutline();
     void removeOutline();
     const int &getId() const;
-    const sf::Vector2f &getMyPos() const;
     bool operator==(const Piece &other) const;
 
   private:
     sf::Texture texture;
-    int id;
+    int id; // random ID assigned at start
     sf::CircleShape myCircle;
-    sf::Vector2f myPos;
 
   private:
     PieceType pieceType;
@@ -52,7 +50,7 @@ inline Piece::Piece(const sf::CircleShape &circle, const PieceType &pType, const
     this->myCircle = circle;
     this->pieceType = pType;
     this->id = id_;
-    this->myPos = circle.getPosition();
+    this->setPosition(circle.getPosition());
 
     sf::Texture localTxr;
     if (pieceType == PieceType::Red)
@@ -132,7 +130,7 @@ inline bool Piece::containsPoint(const sf::Vector2i &pos) const
 }
 
 /**
- * \brief Highlight with yellow outline when focused
+ * Highlight with yellow outline when focused
  */
 inline void chk::Piece::addOutline()
 {
@@ -167,23 +165,29 @@ inline bool Piece::operator==(const Piece &other) const
 }
 
 /**
- * Move the cell to the given position
- * @param pos
+ * Validate movement, then Move the cell to the given position.
+ * @param pos destination
  */
 inline void Piece::moveCustom(const sf::Vector2f &pos)
 {
-    const float deltaX = pos.x - this->myPos.x;
-    const float deltaY = pos.y - this->myPos.y;
-    this->myCircle.move(deltaX, deltaY);
-}
+    const float deltaX = pos.x - this->getPosition().x;
+    const float deltaY = pos.y - this->getPosition().y;
 
-/**
- * Get piece position, relative to window
- * @return x,y position of piece
- */
-const sf::Vector2f &Piece::getMyPos() const
-{
-    return myPos;
+    if (std::abs(deltaX) > 100 || std::abs(deltaY) > 100)
+    {
+        return;
+    }
+    if (this->pieceType == PieceType::Red && deltaY > 0.0f && !this->isKing)
+    {
+        return;
+    }
+    if (this->pieceType == PieceType::Black && deltaY < 0.0f && !this->isKing)
+    {
+        return;
+    }
+
+    this->myCircle.setPosition(pos.x, pos.y);
+    this->setPosition(myCircle.getPosition());
 }
 
 } // namespace chk

@@ -13,8 +13,8 @@ namespace chk
 {
 using Block = std::unique_ptr<chk::Cell>;
 
-constexpr uint16_t NUM_ROWS = 8;
-constexpr uint16_t NUM_COLS = 8;
+constexpr size_t NUM_ROWS = 8;
+constexpr size_t NUM_COLS = 8;
 
 using Block = std::unique_ptr<chk::Cell>;
 
@@ -63,17 +63,17 @@ inline GameState::GameState()
 inline void GameState::drawCheckerboard(std::vector<Block> &blockList, const sf::Font &font)
 {
     int counter = 32;
-    for (uint16_t row = 0; row < NUM_ROWS; row++)
+    for (size_t row = 0; row < NUM_ROWS; row++)
     {
-        for (uint16_t col = 0; col < NUM_COLS; col++)
+        for (size_t col = 0; col < NUM_COLS; col++)
         {
             if ((row + col) % 2 == 0)
             {
                 // even CELL, set LIGHTER color (UNUSED)
                 sf::RectangleShape lightRec(sf::Vector2f(100.f, 100.f));
                 lightRec.setFillColor(sf::Color{255, 225, 151});
-                float x = (col % NUM_COLS) * 100.0f;
-                lightRec.setPosition(sf::Vector2f(x, row * 100.0f));
+                float x = (col % NUM_COLS) * chk::SIZE_CELL;
+                lightRec.setPosition(sf::Vector2f(x, row * chk::SIZE_CELL));
                 auto whiteBlock = std::make_unique<chk::Cell>(lightRec, lightRec.getPosition(), -1);
                 whiteBlock->setFont(font);
                 blockList.emplace_back(std::move(whiteBlock));
@@ -83,8 +83,8 @@ inline void GameState::drawCheckerboard(std::vector<Block> &blockList, const sf:
                 // Odd cell, SET DARKER color (USED BY PIECES)
                 sf::RectangleShape darkRect(sf::Vector2f(100.f, 100.f));
                 darkRect.setFillColor(sf::Color{82, 55, 27});
-                float x = (col % NUM_COLS) * 100.0f;
-                darkRect.setPosition(sf::Vector2f(x, row * 100.0f));
+                float x = (col % NUM_COLS) * chk::SIZE_CELL;
+                darkRect.setPosition(sf::Vector2f(x, row * chk::SIZE_CELL));
                 auto redBlock = std::make_unique<chk::Cell>(darkRect, darkRect.getPosition(), counter);
                 redBlock->setFont(font);
                 blockList.emplace_back(std::move(redBlock));
@@ -103,15 +103,15 @@ inline void GameState::drawAllPieces(std::vector<chk::PiecePtr> &pieceList)
     std::random_device randomDevice;
     std::mt19937 randEngine(randomDevice());
     std::uniform_int_distribution<int> dist(1, 269);
-    for (uint16_t row = 0; row < NUM_ROWS; row++)
+    for (size_t row = 0; row < NUM_ROWS; row++)
     {
-        for (uint16_t col = 0; col < NUM_COLS; col++)
+        for (size_t col = 0; col < NUM_COLS; col++)
         {
             if ((row + col) % 2 != 0)
             {
                 sf::CircleShape circle(50.0f);
-                const float x = (col % NUM_COLS) * 100.0f;
-                circle.setPosition(sf::Vector2f(x, row * 100.0f));
+                const float x = (col % NUM_COLS) * chk::SIZE_CELL;
+                circle.setPosition(sf::Vector2f(x, row * chk::SIZE_CELL));
                 if (row < 3)
                 {
                     // Top cells, put BLACK piece
@@ -198,7 +198,7 @@ void GameState::matchCellsToPieces(const std::vector<chk::PiecePtr> &pieceList, 
     {
         for (const auto &cell : cellList)
         {
-            if (cell->getIndex() != -1 && cell->containsOrigin(piece->getMyPos()))
+            if (cell->getIndex() != -1 && cell->containsOrigin(piece->getPosition()))
             {
                 this->gameMap[cell.get()->getIndex()] = piece.get()->getId();
             }

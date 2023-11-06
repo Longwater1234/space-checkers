@@ -29,7 +29,7 @@ template <typename T> class CircularBuffer
   private:
     int maxCapacity = 0; // max Capacity
     size_t buf_size = 0; // size of the buffer
-    std::deque<T> buffer;
+    std::deque<T> buffer; //actual store of elements
 
   public:
     bool operator==(const CircularBuffer &other) const

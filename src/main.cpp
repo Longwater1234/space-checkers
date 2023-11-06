@@ -8,7 +8,6 @@
 #include <vector>
 
 constexpr uint16_t NUM_PIECES = 24;
-constexpr uint16_t NUM_CELLS = 64;
 constexpr auto ICON_PATH = "resources/icons8-checkers-16.png";
 constexpr auto FONT_PATH = "resources/open-sans.regular.ttf";
 
@@ -48,7 +47,7 @@ inline void handleCellTap(std::shared_ptr<chk::GameState> &gameState, const std:
 int main()
 {
     auto window = sf::RenderWindow{sf::VideoMode(800u, 900u), "Checkers CPP", sf::Style::Titlebar | sf::Style::Close};
-    window.setFramerateLimit(30u);
+    window.setFramerateLimit(60u);
 
     sf::Image appIcon;
     if (appIcon.loadFromFile(ICON_PATH))
@@ -59,7 +58,7 @@ int main()
 
     // CREATE CHECKERBOARD
     std::vector<chk::Block> blockList;
-    blockList.reserve(NUM_CELLS);
+    blockList.reserve(chk::NUM_COLS * chk::NUM_COLS);
     sf::Font font;
     if (!font.loadFromFile(FONT_PATH))
     {
