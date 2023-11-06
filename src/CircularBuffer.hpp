@@ -8,13 +8,14 @@
 namespace chk
 {
 /**
- * Custom list with buf_size limit. If max maxCapacity is reached, the first
- * item (index 0) is removed (FIFO), before inserting the new element in.
+ * Custom Storage with strict size limit. If `maxCapacity` is reached, remove the first added item
+ * before inserting the new element in. Works in FIFO policy
  */
 template <typename T> class CircularBuffer
 {
 
   public:
+    // Constructor, sets maxCapacity which cannot be changed later
     explicit CircularBuffer(int maxCapacity) : maxCapacity(maxCapacity)
     {
         buffer.resize(maxCapacity);
@@ -27,8 +28,14 @@ template <typename T> class CircularBuffer
 
   private:
     int maxCapacity = 0; // max Capacity
-    size_t buf_size = 0;     // buf_size of the buffer
+    size_t buf_size = 0; // size of the buffer
     std::deque<T> buffer;
+
+  public:
+    bool operator==(const CircularBuffer &other) const
+    {
+        return this->buffer == other.buffer;
+    }
 };
 
 /**

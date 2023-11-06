@@ -4,6 +4,7 @@
 #include <SFML/Graphics/RenderStates.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Graphics/Texture.hpp>
+#include <SFML/System/Clock.hpp>
 
 namespace chk
 {
@@ -171,7 +172,9 @@ inline bool Piece::operator==(const Piece &other) const
  */
 inline void Piece::moveCustom(const sf::Vector2f &pos)
 {
-    this->myCircle.setPosition(pos.x, pos.y);
+    const float deltaX = pos.x - this->myPos.x;
+    const float deltaY = pos.y - this->myPos.y;
+    this->myCircle.move(deltaX, deltaY);
 }
 
 /**

@@ -17,7 +17,7 @@ class Cell final : public sf::Drawable
     void setFont(const sf::Font &font);
     bool containsPoint(const sf::Vector2i &pos) const;
     bool containsOrigin(const sf::Vector2f &pos) const;
-    const sf::Vector2f &getCellPos() const;
+    const sf::Vector2f &getPos() const;
     int getIndex() const;
 
   private:
@@ -97,7 +97,7 @@ inline int Cell::getIndex() const
  * Get the position of this cell
  * @return local x,y position
  */
-const inline sf::Vector2f &Cell::getCellPos() const
+const inline sf::Vector2f &Cell::getPos() const
 {
     return this->cell_pos;
 }

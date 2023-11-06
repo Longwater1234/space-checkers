@@ -17,13 +17,13 @@ find_package(SFML REQUIRED COMPONENTS "graphics" "window" "system")
 
 if (WIN32)
     add_executable(space-checkers WIN32 ${SOURCES})
+    target_link_libraries(space-checkers PRIVATE sfml-main sfml-graphics sfml-window sfml-system)
 else()
-    add_executable(space-checkers ${SOURCES}
-            src/CircularBuffer.hpp)
+    add_executable(space-checkers ${SOURCES})
+    target_link_libraries(space-checkers PRIVATE sfml-graphics sfml-window sfml-system)
 endif()
 
-# include SFML headers and libs
-target_link_libraries(space-checkers PRIVATE sfml-main sfml-graphics sfml-window sfml-system)
+# include SFML headers
 include_directories(${CUSTOM_SFML_HOME}/include)
 
 # show warnings (depending on CXX compiler)

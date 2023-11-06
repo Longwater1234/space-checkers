@@ -44,7 +44,6 @@ class GameState
   public:
     [[nodiscard]] int getTargetCell() const;
     [[nodiscard]] inline int getCachedPieceId(const int &cell_idx);
-    void setCurrentPieceId(const int &pieceId);
     void setSourceCell(const int &src_cell);
     void handleMovePiece(const std::unique_ptr<chk::Player> &player, const Block &destCell, const int &currentPieceId);
 };
@@ -140,7 +139,7 @@ void GameState::handleMovePiece(const std::unique_ptr<chk::Player> &player, cons
                                 const int &currentPieceId)
 {
     const int idx = player->getPieceVecIndex(currentPieceId);
-    player->getOwnPieces()[idx]->moveCustom(destCell->getCellPos());
+    player->getOwnPieces()[idx]->moveCustom(destCell->getPos());
     gameMap.erase(this->sourceCell);                // set old location empty!
     gameMap[destCell->getIndex()] = currentPieceId; // fill in the new location
 }
@@ -206,7 +205,7 @@ void GameState::matchCellsToPieces(const std::vector<chk::PiecePtr> &pieceList, 
         }
     }
     this->alreadyCached = true;
-    std::cout << "map buf_size " << gameMap.size() << std::endl;
+    std::cout << "hashmap size " << gameMap.size() << std::endl;
 }
 
 } // namespace chk

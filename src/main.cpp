@@ -13,33 +13,34 @@ constexpr auto ICON_PATH = "resources/icons8-checkers-16.png";
 constexpr auto FONT_PATH = "resources/open-sans.regular.ttf";
 
 /**
- * Handles when player taps a cell
+ * When player taps a cell
  * @param gameState game state
  * @param player currentPlayer
- * @param buffer stores last clicked PieceId
- * @param cell tapped cell
+ * @param buffer Temporary store for clicked Pieces
+ * @param cell Tapped cell
  */
 inline void handleCellTap(std::shared_ptr<chk::GameState> &gameState, const std::unique_ptr<chk::Player> &player,
                           chk::CircularBuffer<int> &buffer, const std::unique_ptr<chk::Cell> &cell)
 {
-    // CHECK IF cell HAS CHILD
+    // CHECK IF cell has Piece
     int pieceId = gameState->getCachedPieceId(cell->getIndex());
     if (pieceId != -1)
     {
-        // YES HAS CHILD, keep it in buffer!
+        // YES HAS Piece, keep it in buffer!
         std::cout << "piece id " << pieceId << std::endl;
         gameState->setSourceCell(cell->getIndex());
         buffer.addItem(pieceId);
     }
     else
     {
-        // CELL IS VACANT!! Let's move a piece (from buffer) here!
-        // First, verify if Buffer has data
+        // It's Empty! Let's move a piece (from buffer) here!
+        //  First, verify if Buffer has data
         if (!buffer.isEmpty())
         {
             const int movablePieceId = buffer.getTop();
             gameState->handleMovePiece(player, cell, movablePieceId);
         }
+        // dont forget to clean up!
         buffer.clean();
     }
 }
@@ -95,7 +96,7 @@ int main()
     // we don't need this anymore
     keteList.clear();
 
-    //for temporary storing selected pieceId
+    // Our temp store with maxCap of 1
     chk::CircularBuffer<int> circularBuffer(1);
 
     // THE STATUS TEXT
@@ -109,6 +110,7 @@ int main()
 
     while (window.isOpen())
     {
+
         for (auto event = sf::Event{}; window.pollEvent(event);)
         {
             if (event.type == sf::Event::Closed)
@@ -119,13 +121,14 @@ int main()
             if (event.type == sf::Event::MouseButtonPressed && sf::Mouse::isButtonPressed(sf::Mouse::Left))
             {
                 const auto clickedPos = sf::Mouse::getPosition(window);
+                /* Check window bounds */
                 if (clickedPos.y <= 800u)
                 {
                     for (auto &cell : blockList)
                     {
                         if (cell->containsPoint(clickedPos) && cell->getIndex() != -1)
                         {
-                            std::cout << "clicked cell index " << cell->getIndex() << std::endl;
+                            statusText = "Tapped cell index " + std::to_string(cell->getIndex());
                             handleCellTap(gameState, p1, circularBuffer, cell);
                             break;
                         }
