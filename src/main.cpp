@@ -22,24 +22,23 @@ constexpr auto FONT_PATH = "resources/open-sans.regular.ttf";
 inline void handleCellTap(std::shared_ptr<chk::GameState> &gameState, const std::unique_ptr<chk::Player> &player,
                           chk::CircularBuffer<int> &buffer, const std::unique_ptr<chk::Cell> &cell)
 {
-    // CHECK IF IT HAS CHILD
+    // CHECK IF cell HAS CHILD
     int pieceId = gameState->getCachedPieceId(cell->getIndex());
     if (pieceId != -1)
     {
-        // YES HAS CHILD, keep it in buffer! (we are going to move it later)
+        // YES HAS CHILD, keep it in buffer!
         std::cout << "piece id " << pieceId << std::endl;
-        // ALSO, store the source cell index
         gameState->setSourceCell(cell->getIndex());
         buffer.addItem(pieceId);
     }
     else
     {
-        // IT'S VACANT!!! SO let's try to move a piece (from buffer) here!
+        // CELL IS VACANT!! Let's move a piece (from buffer) here!
+        // First, verify if Buffer has data
         if (!buffer.isEmpty())
         {
             const int movablePieceId = buffer.getTop();
-            gameState->setCurrentPieceId(movablePieceId);
-            gameState->handleMovePiece(player, cell);
+            gameState->handleMovePiece(player, cell, movablePieceId);
         }
         buffer.clean();
     }
@@ -96,6 +95,7 @@ int main()
     // we don't need this anymore
     keteList.clear();
 
+    //for temporary storing selected pieceId
     chk::CircularBuffer<int> circularBuffer(1);
 
     // THE STATUS TEXT

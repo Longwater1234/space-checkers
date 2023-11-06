@@ -57,7 +57,7 @@ template <typename T> bool CircularBuffer<T>::isEmpty() const
  */
 template <typename T> T &CircularBuffer<T>::getTop()
 {
-    return static_cast<T &>(buffer.at(0));
+    return static_cast<T &>(buffer.front());
 }
 
 /**
