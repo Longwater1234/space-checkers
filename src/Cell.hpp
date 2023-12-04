@@ -19,10 +19,13 @@ class Cell final : public sf::Drawable
     bool containsOrigin(const sf::Vector2f &pos) const;
     const sf::Vector2f &getPos() const;
     int getIndex() const;
+    void setisEvenRow(const bool &is_even);
+    bool getIsEvenRow() const;
 
   private:
     sf::RectangleShape rec_;
     int index_;
+    bool isEvenRow = false;
     sf::Vector2f cell_pos;
 
   private:
@@ -51,6 +54,7 @@ inline void Cell::draw(sf::RenderTarget &target, sf::RenderStates states) const
     target.draw(rec_, states);
     if (index_ != -1)
     {
+        // only draw text on some cells
         target.draw(sfText, states);
     }
 }
@@ -62,6 +66,11 @@ inline void Cell::draw(sf::RenderTarget &target, sf::RenderStates states) const
 inline void Cell::setFont(const sf::Font &font)
 {
     this->myFont = font;
+}
+
+
+inline bool Cell::getIsEvenRow() const {
+    return this->isEvenRow;
 }
 
 /**
@@ -76,7 +85,7 @@ inline bool Cell::containsPoint(const sf::Vector2i &pos) const
 
 /**
  * Check whether object is within this Cell location
- * @param pos 2D position (float) relative to main window
+ * @param pos xy position (float) relative to main window
  * @return TRUE or FALSE
  */
 bool Cell::containsOrigin(const sf::Vector2f &pos) const
@@ -92,6 +101,15 @@ inline int Cell::getIndex() const
 {
     return this->index_;
 }
+
+/**
+ * Set whether this cell's row is even
+ */
+inline void Cell::setisEvenRow(const bool &is_even)
+{
+    this->isEvenRow = is_even;
+}
+
 
 /**
  * Get the position of this cell

@@ -54,3 +54,4 @@ bld/
 *.zip
 *.rar
 /cmake-build-*/
+**/.DS_Store

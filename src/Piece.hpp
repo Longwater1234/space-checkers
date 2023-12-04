@@ -1,4 +1,5 @@
 #pragma once
+#include "ResourcePath.hpp"
 #include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Graphics/RenderStates.hpp>
@@ -13,11 +14,11 @@ enum class PieceType
     Black = 78885,
 };
 
-constexpr auto BLACK_NORMAL = "resources/black_normal.png";
-constexpr auto BLACK_KING = "resources/black_king.png";
-constexpr auto RED_NORMAL = "resources/red_normal.png";
-constexpr auto RED_KING = "resources/red_king.png";
-constexpr auto SIZE_CELL = 100.0f; // length of square cell
+constexpr auto BLACK_NORMAL = "black_normal.png";
+constexpr auto BLACK_KING = "black_king.png";
+constexpr auto RED_NORMAL = "red_normal.png";
+constexpr auto RED_KING = "red_king.png";
+constexpr auto SIZE_CELL = 75.0f; // length of square cell
 
 class Piece final : public sf::Drawable, public sf::Transformable
 {
@@ -36,10 +37,8 @@ class Piece final : public sf::Drawable, public sf::Transformable
 
   private:
     sf::Texture texture;
-    int id; // random ID assigned at start
+    int id; // random positive ID assigned at Launch
     sf::CircleShape myCircle;
-
-  private:
     PieceType pieceType;
     bool isKing = false;
     void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
@@ -55,7 +54,7 @@ inline Piece::Piece(const sf::CircleShape &circle, const PieceType &pType, const
     sf::Texture localTxr;
     if (pieceType == PieceType::Red)
     {
-        if (localTxr.loadFromFile(RED_NORMAL))
+        if (localTxr.loadFromFile(getResourcePath(RED_NORMAL)))
         {
             this->texture = localTxr;
             this->myCircle.setTexture(&this->texture);
@@ -63,7 +62,7 @@ inline Piece::Piece(const sf::CircleShape &circle, const PieceType &pType, const
     }
     else
     {
-        if (localTxr.loadFromFile(BLACK_NORMAL))
+        if (localTxr.loadFromFile(getResourcePath(BLACK_NORMAL)))
         {
             this->texture = localTxr;
             this->myCircle.setTexture(&this->texture);
@@ -94,7 +93,7 @@ inline void Piece::activateKing()
     sf::Texture localTxr;
     if (pieceType == PieceType::Red)
     {
-        if (localTxr.loadFromFile(RED_KING))
+        if (localTxr.loadFromFile(getResourcePath(RED_KING)))
         {
             this->texture = std::move_if_noexcept(localTxr);
             this->myCircle.setTexture(&this->texture);
@@ -102,7 +101,7 @@ inline void Piece::activateKing()
     }
     else
     {
-        if (localTxr.loadFromFile(BLACK_KING))
+        if (localTxr.loadFromFile(getResourcePath(BLACK_KING)))
         {
             this->texture = std::move_if_noexcept(localTxr);
             this->myCircle.setTexture(&this->texture);
@@ -165,8 +164,9 @@ inline bool Piece::operator==(const Piece &other) const
 }
 
 /**
- * Validate movement, then Move the cell to the given position.
+ * Validate first, then Move the Piece to the given position.
  * @param pos destination
+ * @return TRUE if successful, else FALSE
  */
 inline bool Piece::moveCustom(const sf::Vector2f &pos)
 {

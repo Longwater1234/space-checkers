@@ -8,14 +8,14 @@
 namespace chk
 {
 /**
- * Custom Storage with strict size limit. If `maxCapacity` is reached, remove the first added item
+ * Rotating container with strict size limit. If `maxCapacity` is reached, remove the first added item
  * before inserting the new element in. Works in FIFO policy
  */
 template <typename T> class CircularBuffer
 {
 
   public:
-    // Constructor, sets maxCapacity which cannot be changed later
+    // Constructor, sets maxCapacity limit
     explicit CircularBuffer(int maxCapacity) : maxCapacity(maxCapacity)
     {
         buffer.resize(maxCapacity);
@@ -27,9 +27,9 @@ template <typename T> class CircularBuffer
     void clean();
 
   private:
-    int maxCapacity = 0; // max Capacity
-    size_t buf_size = 0; // size of the buffer
-    std::deque<T> buffer; //actual store of elements
+    int maxCapacity = 0;  // max Capacity
+    size_t buf_size = 0;  // size of the buffer
+    std::deque<T> buffer; // actual store of elements
 
   public:
     bool operator==(const CircularBuffer &other) const
@@ -58,13 +58,15 @@ template <typename T> bool CircularBuffer<T>::isEmpty() const
 }
 
 /**
- * Get the first in queue (front)
+ * Pop out the first in queue (front)
  * @tparam T any type
  * @return The first element in queue
  */
 template <typename T> T &CircularBuffer<T>::getTop()
 {
-    return static_cast<T &>(buffer.front());
+    T &val = buffer.front();
+    buffer.pop_front(); // remove it
+    return val;
 }
 
 /**
@@ -75,7 +77,7 @@ template <typename T> void CircularBuffer<T>::printAll()
 {
     for (const auto &item : buffer)
     {
-        std::cout << item << std::endl;
+        std::cout << item << '\n';
     }
 }
 

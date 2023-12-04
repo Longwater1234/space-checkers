@@ -1,6 +1,7 @@
 
 #include "CircularBuffer.hpp"
-#include "GameState.hpp"
+#include "GameManager.hpp"
+#include "ResourcePath.hpp"
 #include <SFML/Graphics.hpp>
 #include <SFML/Window/Mouse.hpp>
 #include <algorithm>
@@ -8,49 +9,46 @@
 #include <vector>
 
 constexpr uint16_t NUM_PIECES = 24;
-constexpr auto ICON_PATH = "resources/icons8-checkers-16.png";
-constexpr auto FONT_PATH = "resources/open-sans.regular.ttf";
+constexpr auto ICON_PATH = "win-icon-16.png";
+constexpr auto FONT_PATH = "open-sans.regular.ttf";
 
 /**
  * When player taps a cell
- * @param gameState game state
+ * @param manager game manager
  * @param player currentPlayer
  * @param buffer Temporary store for clicked Pieces
  * @param cell Tapped cell
  */
-inline void handleCellTap(std::shared_ptr<chk::GameState> &gameState, const std::unique_ptr<chk::Player> &player,
-                          chk::CircularBuffer<int> &buffer, const std::unique_ptr<chk::Cell> &cell)
+void handleCellTap(std::shared_ptr<chk::GameManager> &manager, const std::unique_ptr<chk::Player> &player,
+                   chk::CircularBuffer<int> &buffer, const std::unique_ptr<chk::Cell> &cell)
 {
     // CHECK IF cell has Piece
-    int pieceId = gameState->getCachedPieceId(cell->getIndex());
+    int pieceId = manager->getPieceFromCell(cell->getIndex());
     if (pieceId != -1)
     {
-        // YES HAS Piece, keep it in buffer!
-        std::cout << "piece id " << pieceId << std::endl;
-        gameState->setSourceCell(cell->getIndex());
+        // YES HAS Piece, keep source in buffer!
+        manager->setSourceCell(cell->getIndex());
         buffer.addItem(pieceId);
     }
     else
     {
-        // It's Empty! Let's move a piece (from buffer) here!
-        //  First, verify if Buffer has data
+        // Cell is Empty! Let's move a piece (from buffer) here!
+        //  First, verify if Buffer not empty
         if (!buffer.isEmpty())
         {
             const int movablePieceId = buffer.getTop();
-            gameState->handleMovePiece(player, cell, movablePieceId);
+            manager->handleMovePiece(player, cell, movablePieceId);
         }
-        // dont forget to clean up!
-        buffer.clean();
     }
 }
 
 int main()
 {
-    auto window = sf::RenderWindow{sf::VideoMode(800u, 900u), "Checkers CPP", sf::Style::Titlebar | sf::Style::Close};
+    auto window = sf::RenderWindow{sf::VideoMode(600u, 700u), "Checkers CPP", sf::Style::Titlebar | sf::Style::Close};
     window.setFramerateLimit(60u);
 
     sf::Image appIcon;
-    if (appIcon.loadFromFile(ICON_PATH))
+    if (appIcon.loadFromFile(getResourcePath(ICON_PATH)))
     {
         auto dims = appIcon.getSize();
         window.setIcon(dims.x, dims.y, appIcon.getPixelsPtr());
@@ -60,13 +58,14 @@ int main()
     std::vector<chk::Block> blockList;
     blockList.reserve(chk::NUM_COLS * chk::NUM_COLS);
     sf::Font font;
-    if (!font.loadFromFile(FONT_PATH))
+    if (!font.loadFromFile(getResourcePath(FONT_PATH)))
     {
         perror("cannot find file");
         exit(EXIT_FAILURE);
     }
-    auto gameState = std::make_shared<chk::GameState>();
-    gameState->drawCheckerboard(blockList, font);
+
+    auto manager = std::make_shared<chk::GameManager>();
+    manager->drawCheckerboard(blockList, font);
 
     // CREATE YOUR TWO unique PLAYERS
     auto p1 = std::make_unique<chk::Player>(chk::PlayerType::PLAYER_1);
@@ -75,9 +74,8 @@ int main()
     // NOW DRAW all PIECES ON BOARD
     std::vector<chk::PiecePtr> keteList;
     keteList.reserve(NUM_PIECES);
-    gameState->drawAllPieces(keteList);
-
-    gameState->matchCellsToPieces(keteList, blockList);
+    manager->drawAllPieces(keteList);
+    manager->matchCellsToPieces(keteList, blockList);
 
     // Give each player their own pieces
     for (auto &kete : keteList)
@@ -105,7 +103,7 @@ int main()
     txtPanel.setString("Now playing!");
     txtPanel.setCharacterSize(16u);
     txtPanel.setFillColor(sf::Color::White);
-    txtPanel.setPosition(sf::Vector2f(0, 825));
+    txtPanel.setPosition(sf::Vector2f(0, 650));
 
     while (window.isOpen())
     {
@@ -121,14 +119,21 @@ int main()
             {
                 const auto clickedPos = sf::Mouse::getPosition(window);
                 /* Check window bounds */
-                if (clickedPos.y <= 800u)
+                if (clickedPos.y <= 600u)
                 {
                     for (auto &cell : blockList)
                     {
                         if (cell->containsPoint(clickedPos) && cell->getIndex() != -1)
                         {
                             statusText = "Tapped cell index " + std::to_string(cell->getIndex());
-                            handleCellTap(gameState, p1, circularBuffer, cell);
+                            if (manager->isPlayerRedTurn())
+                            {
+                                handleCellTap(manager, p1, circularBuffer, cell);
+                            }
+                            else
+                            {
+                                handleCellTap(manager, p2, circularBuffer, cell);
+                            }
                             break;
                         }
                     }
@@ -144,21 +149,29 @@ int main()
             window.draw(*cell);
         }
 
-        for (const auto &red_piece : p1->getOwnPieces())
+        for (const auto &red_pair : p1->getOwnPieces())
         {
-            if (red_piece->containsPoint(mousePos))
+            if (manager->isPlayerRedTurn() && red_pair.second->containsPoint(mousePos))
             {
-                red_piece->addOutline();
+                red_pair.second->addOutline();
             }
             else
             {
-                red_piece->removeOutline();
+                red_pair.second->removeOutline();
             }
-            window.draw(*red_piece);
+            window.draw(*red_pair.second);
         }
-        for (const auto &black_piece : p2->getOwnPieces())
+        for (const auto &black_pair : p2->getOwnPieces())
         {
-            window.draw(*black_piece);
+            if (!manager->isPlayerRedTurn() && black_pair.second->containsPoint(mousePos))
+            {
+                black_pair.second->addOutline();
+            }
+            else
+            {
+                black_pair.second->removeOutline();
+            }
+            window.draw(*black_pair.second);
         }
 
         txtPanel.setString(statusText);
