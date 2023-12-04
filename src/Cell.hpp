@@ -16,12 +16,16 @@ class Cell final : public sf::Drawable
     Cell(const sf::RectangleShape &rec, const sf::Vector2f &pos, int index);
     void setFont(const sf::Font &font);
     bool containsPoint(const sf::Vector2i &pos) const;
-    const sf::Vector2f &getCellPos() const;
+    bool containsOrigin(const sf::Vector2f &pos) const;
+    const sf::Vector2f &getPos() const;
     int getIndex() const;
+    void setisEvenRow(const bool &is_even);
+    bool getIsEvenRow() const;
 
   private:
     sf::RectangleShape rec_;
     int index_;
+    bool isEvenRow = false;
     sf::Vector2f cell_pos;
 
   private:
@@ -50,6 +54,7 @@ inline void Cell::draw(sf::RenderTarget &target, sf::RenderStates states) const
     target.draw(rec_, states);
     if (index_ != -1)
     {
+        // only draw text on some cells
         target.draw(sfText, states);
     }
 }
@@ -63,14 +68,29 @@ inline void Cell::setFont(const sf::Font &font)
     this->myFont = font;
 }
 
+
+inline bool Cell::getIsEvenRow() const {
+    return this->isEvenRow;
+}
+
 /**
- * \brief Check whether mouse cursor is currently over this Cell
- * \param pos Mouse position relative to main Window
- * \return TRUE or FALSE
+ * Check whether mouse cursor is within this Cell
+ * @param pos 2D position (int) relative to main Window
+ * @return TRUE or FALSE
  */
 inline bool Cell::containsPoint(const sf::Vector2i &pos) const
 {
     return this->rec_.getGlobalBounds().contains(static_cast<float>(pos.x), static_cast<float>(pos.y));
+}
+
+/**
+ * Check whether object is within this Cell location
+ * @param pos xy position (float) relative to main window
+ * @return TRUE or FALSE
+ */
+bool Cell::containsOrigin(const sf::Vector2f &pos) const
+{
+    return this->cell_pos.x == pos.x && this->cell_pos.y == pos.y;
 }
 
 /**
@@ -83,10 +103,19 @@ inline int Cell::getIndex() const
 }
 
 /**
+ * Set whether this cell's row is even
+ */
+inline void Cell::setisEvenRow(const bool &is_even)
+{
+    this->isEvenRow = is_even;
+}
+
+
+/**
  * Get the position of this cell
  * @return local x,y position
  */
-const inline sf::Vector2f &Cell::getCellPos() const
+const inline sf::Vector2f &Cell::getPos() const
 {
     return this->cell_pos;
 }

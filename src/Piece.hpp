@@ -1,4 +1,5 @@
 #pragma once
+#include "ResourcePath.hpp"
 #include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Graphics/RenderStates.hpp>
@@ -13,45 +14,47 @@ enum class PieceType
     Black = 78885,
 };
 
-constexpr auto BLACK_NORMAL = "resources/black_normal.png";
-constexpr auto BLACK_KING = "resources/black_king.png";
-constexpr auto RED_NORMAL = "resources/red_normal.png";
-constexpr auto RED_KING = "resources/red_king.png";
+constexpr auto BLACK_NORMAL = "black_normal.png";
+constexpr auto BLACK_KING = "black_king.png";
+constexpr auto RED_NORMAL = "red_normal.png";
+constexpr auto RED_KING = "red_king.png";
+constexpr auto SIZE_CELL = 75.0f; // length of square cell
 
 class Piece final : public sf::Drawable, public sf::Transformable
 {
 
   public:
-    Piece(const sf::CircleShape &circle, const PieceType &pType, uint16_t idx_);
+    Piece(const sf::CircleShape &circle, const PieceType &pType, uint16_t id_);
     PieceType getPieceType() const;
     void activateKing();
     bool getIsKing() const;
     bool containsPoint(const sf::Vector2i &pos) const;
-    void moveCustom(const sf::Vector2f &pos);
+    bool moveCustom(const sf::Vector2f &pos);
     void addOutline();
     void removeOutline();
-    int getId() const;
+    const int &getId() const;
     bool operator==(const Piece &other) const;
 
   private:
     sf::Texture texture;
-    uint16_t id;
+    int id; // random positive ID assigned at Launch
     sf::CircleShape myCircle;
     PieceType pieceType;
     bool isKing = false;
     void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
 };
 
-inline Piece::Piece(const sf::CircleShape &circle, const PieceType &pType, const uint16_t idx_)
+inline Piece::Piece(const sf::CircleShape &circle, const PieceType &pType, const uint16_t id_)
 {
     this->myCircle = circle;
     this->pieceType = pType;
-    this->id = idx_;
+    this->id = id_;
+    this->setPosition(circle.getPosition());
 
     sf::Texture localTxr;
     if (pieceType == PieceType::Red)
     {
-        if (localTxr.loadFromFile(RED_NORMAL))
+        if (localTxr.loadFromFile(getResourcePath(RED_NORMAL)))
         {
             this->texture = localTxr;
             this->myCircle.setTexture(&this->texture);
@@ -59,7 +62,7 @@ inline Piece::Piece(const sf::CircleShape &circle, const PieceType &pType, const
     }
     else
     {
-        if (localTxr.loadFromFile(BLACK_NORMAL))
+        if (localTxr.loadFromFile(getResourcePath(BLACK_NORMAL)))
         {
             this->texture = localTxr;
             this->myCircle.setTexture(&this->texture);
@@ -90,7 +93,7 @@ inline void Piece::activateKing()
     sf::Texture localTxr;
     if (pieceType == PieceType::Red)
     {
-        if (localTxr.loadFromFile(RED_KING))
+        if (localTxr.loadFromFile(getResourcePath(RED_KING)))
         {
             this->texture = std::move_if_noexcept(localTxr);
             this->myCircle.setTexture(&this->texture);
@@ -98,7 +101,7 @@ inline void Piece::activateKing()
     }
     else
     {
-        if (localTxr.loadFromFile(BLACK_KING))
+        if (localTxr.loadFromFile(getResourcePath(BLACK_KING)))
         {
             this->texture = std::move_if_noexcept(localTxr);
             this->myCircle.setTexture(&this->texture);
@@ -126,7 +129,7 @@ inline bool Piece::containsPoint(const sf::Vector2i &pos) const
 }
 
 /**
- * \brief Highlight with yellow outline when focused
+ * Highlight with yellow outline when focused
  */
 inline void chk::Piece::addOutline()
 {
@@ -145,7 +148,7 @@ inline void Piece::removeOutline()
 /**
  * Get piece's id
  */
-inline int Piece::getId() const
+const inline int &Piece::getId() const
 {
     return this->id;
 }
@@ -161,12 +164,31 @@ inline bool Piece::operator==(const Piece &other) const
 }
 
 /**
- * Move the cell to the given position
- * @param pos
+ * Validate first, then Move the Piece to the given position.
+ * @param pos destination
+ * @return TRUE if successful, else FALSE
  */
-inline void Piece::moveCustom(const sf::Vector2f &pos)
+inline bool Piece::moveCustom(const sf::Vector2f &pos)
 {
+    const float deltaX = pos.x - this->getPosition().x;
+    const float deltaY = pos.y - this->getPosition().y;
+
+    if (std::abs(deltaX) > 100 || std::abs(deltaY) > 100)
+    {
+        return false;
+    }
+    if (this->pieceType == PieceType::Red && deltaY > 0.0f && !this->isKing)
+    {
+        return false;
+    }
+    if (this->pieceType == PieceType::Black && deltaY < 0.0f && !this->isKing)
+    {
+        return false;
+    }
+
     this->myCircle.setPosition(pos.x, pos.y);
+    this->setPosition(myCircle.getPosition());
+    return true;
 }
 
 } // namespace chk
