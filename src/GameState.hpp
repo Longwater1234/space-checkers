@@ -139,7 +139,10 @@ void GameState::handleMovePiece(const std::unique_ptr<chk::Player> &player, cons
                                 const int &currentPieceId)
 {
     const int idx = player->getPieceVecIndex(currentPieceId);
-    player->getOwnPieces()[idx]->moveCustom(destCell->getPos());
+    bool ok = player->getOwnPieces()[idx]->moveCustom(destCell->getPos());
+    if (!ok) {
+     return;
+    }   
     gameMap.erase(this->sourceCell);                // set old location empty!
     gameMap[destCell->getIndex()] = currentPieceId; // fill in the new location
 }

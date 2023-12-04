@@ -28,7 +28,7 @@ class Piece final : public sf::Drawable, public sf::Transformable
     void activateKing();
     bool getIsKing() const;
     bool containsPoint(const sf::Vector2i &pos) const;
-    void moveCustom(const sf::Vector2f &pos);
+    bool moveCustom(const sf::Vector2f &pos);
     void addOutline();
     void removeOutline();
     const int &getId() const;
@@ -168,26 +168,27 @@ inline bool Piece::operator==(const Piece &other) const
  * Validate movement, then Move the cell to the given position.
  * @param pos destination
  */
-inline void Piece::moveCustom(const sf::Vector2f &pos)
+inline bool Piece::moveCustom(const sf::Vector2f &pos)
 {
     const float deltaX = pos.x - this->getPosition().x;
     const float deltaY = pos.y - this->getPosition().y;
 
     if (std::abs(deltaX) > 100 || std::abs(deltaY) > 100)
     {
-        return;
+        return false;
     }
     if (this->pieceType == PieceType::Red && deltaY > 0.0f && !this->isKing)
     {
-        return;
+        return false;
     }
     if (this->pieceType == PieceType::Black && deltaY < 0.0f && !this->isKing)
     {
-        return;
+        return false;
     }
 
     this->myCircle.setPosition(pos.x, pos.y);
     this->setPosition(myCircle.getPosition());
+    return true;
 }
 
 } // namespace chk
