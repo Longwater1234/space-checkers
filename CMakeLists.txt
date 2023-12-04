@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.18 FATAL_ERROR)
 
-project("space-checkers")
+project("SpaceCheckers" VERSION 1.0)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
@@ -16,11 +16,11 @@ set(SFML_DIR ${CUSTOM_SFML_HOME}/lib/cmake/SFML)
 find_package(SFML REQUIRED COMPONENTS "graphics" "window" "system")
 
 if (WIN32)
-    add_executable(space-checkers WIN32 ${SOURCES})
-    target_link_libraries(space-checkers PRIVATE sfml-main sfml-graphics sfml-window sfml-system)
+    add_executable(SpaceCheckers WIN32 ${SOURCES})
+    target_link_libraries(SpaceCheckers PRIVATE sfml-main sfml-graphics sfml-window sfml-system)
 else()
-    add_executable(space-checkers ${SOURCES})
-    target_link_libraries(space-checkers PRIVATE sfml-graphics sfml-window sfml-system)
+    add_executable(SpaceCheckers ${SOURCES})
+    target_link_libraries(SpaceCheckers PRIVATE sfml-graphics sfml-window sfml-system)
 endif()
 
 # include SFML headers
@@ -28,13 +28,13 @@ include_directories(${CUSTOM_SFML_HOME}/include)
 
 # show warnings (depending on CXX compiler)
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    target_compile_options(space-checkers PRIVATE /W4)
+    target_compile_options(${CMAKE_PROJECT_NAME} PRIVATE /W4)
 else()
-    target_compile_options(space-checkers PRIVATE -Wall)
+    target_compile_options(${CMAKE_PROJECT_NAME} PRIVATE -Wall)
 endif()
 
 # COPY resources folder to destination
 add_custom_command(
-        TARGET space-checkers POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/resources $<TARGET_FILE_DIR:space-checkers>/resources
+        TARGET SpaceCheckers POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/resources $<TARGET_FILE_DIR:SpaceCheckers>/resources
 )
