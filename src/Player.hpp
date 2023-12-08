@@ -2,9 +2,9 @@
 
 #include "Piece.hpp"
 #include <algorithm>
-#include <unordered_map>
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace chk
@@ -25,17 +25,17 @@ class Player
   public:
     explicit Player(PlayerType player_type);
     void givePiece(PiecePtr &piecePtr);
-    void losePiece(const uint16_t &targetId);
+    void captureEnemy( PiecePtr &targetPiece);
     const std::unordered_map<int, chk::PiecePtr> &getOwnPieces() const;
     [[nodiscard]] size_t getPieceCount() const;
-    [[nodiscard]] std::string getName() const;
+    [[nodiscard]] const std::string &getName() const;
     [[nodiscard]] PlayerType getPlayerType() const;
     [[nodiscard]] bool hasThisPiece(const int &pieceId);
     [[nodiscard]] bool movePiece(const int &pieceId, const sf::Vector2f &dest);
     bool operator==(Player &other) const;
 
   private:
-    //name of this player (RED or BLACK)
+    // name of this player (RED or BLACK)
     std::string name_;
     // my pieceId --> its Pointer
     std::unordered_map<int, chk::PiecePtr> basket_;
@@ -54,7 +54,7 @@ inline Player::Player(PlayerType player_type)
 }
 
 /**
- * Give Player full ownership of this piece
+ * Give this Player full ownership of this piece
  * @param piece unique_ptr of piece
  */
 inline void Player::givePiece(chk::PiecePtr &piece)
@@ -66,9 +66,12 @@ inline void Player::givePiece(chk::PiecePtr &piece)
  * When a player's piece is captured, -1 from list
  * @param target  the captured piece Id
  */
-inline void Player::losePiece(const uint16_t &targetId)
+inline void Player::captureEnemy(chk::PiecePtr &targetPiece)
 {
-    this->basket_.erase(targetId);
+    //TODO FIX THIS
+    //this->basket_.erase(targetId);
+    targetPiece.get_deleter()(targetPiece.release());
+
 }
 
 /**
@@ -92,7 +95,7 @@ inline PlayerType Player::getPlayerType() const
  * get this player's name
  * @return either RED or BLACK
  */
-inline std::string Player::getName() const
+inline const std::string &Player::getName() const
 {
     return this->name_;
 }

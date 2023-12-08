@@ -151,7 +151,7 @@ void GameManager::handleMovePiece(const std::unique_ptr<chk::Player> &player, co
     }
     gameMap.erase(this->sourceCell);                // set old location empty!
     gameMap[destCell->getIndex()] = currentPieceId; // fill in the new location
-    this->playerRedTurn = !this->playerRedTurn;
+    this->playerRedTurn = !this->playerRedTurn;     // toggle turns
     if (this->checkDangerRHS(player, destCell) || this->checkDangerLHS(player, destCell))
     {
         std::cout << player->getName() << " is in danger" << std::endl;
@@ -189,7 +189,7 @@ inline bool GameManager::checkDangerLHS(const std::unique_ptr<chk::Player> &play
     int deltaBehind = destCell->getIsEvenRow() ? 5 : 4;
     int mSign = 1;
 
-    if (destCell->getPos().x == 0 || static_cast<int>(destCell->getPos().x) >= 7 * chk::SIZE_CELL)
+    if (destCell->getPos().x == 0 || destCell->getPos().x >= 7 * chk::SIZE_CELL)
     {
         // SAFE at either edges
         return false;

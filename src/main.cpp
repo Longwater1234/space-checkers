@@ -92,6 +92,7 @@ int main()
 
     // we don't need this anymore
     keteList.clear();
+    // std::cout << "size of keteList " << sizeof(keteList) << std::endl;
 
     // Our temp store with maxCap of 1
     chk::CircularBuffer<int> circularBuffer(1);
@@ -119,7 +120,7 @@ int main()
             {
                 const auto clickedPos = sf::Mouse::getPosition(window);
                 /* Check window bounds */
-                if (clickedPos.y <= 600u)
+                if (clickedPos.y <= chk::SIZE_CELL * 8)
                 {
                     for (auto &cell : blockList)
                     {
