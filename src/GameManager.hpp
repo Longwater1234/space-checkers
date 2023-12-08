@@ -40,8 +40,10 @@ class GameManager
     bool playerRedTurn = true;
 
   private:
-    bool checkNorthWest(const std::unique_ptr<chk::Player> &player, const Block &destCell);
-    bool checkNorthEast(const std::unique_ptr<chk::Player> &player, const Block &destCell);
+    bool checkDangerLHS(const std::unique_ptr<chk::Player> &player, const Block &destCell);
+    bool checkDangerRHS(const std::unique_ptr<chk::Player> &player, const Block &destCell);
+    bool checkForCaptureLHS(const std::unique_ptr<chk::Player> &player, const Block &destCell);
+    bool checkForCaptureRHS(const std::unique_ptr<chk::Player> &player, const Block &destCell);
 
   public:
     [[nodiscard]] bool isPlayerRedTurn() const;
@@ -65,9 +67,9 @@ inline GameManager::GameManager()
 inline void GameManager::drawCheckerboard(std::vector<Block> &blockList, const sf::Font &font)
 {
     int counter = 32;
-    for (size_t row = 0; row < NUM_ROWS; row++)
+    for (uint16_t row = 0; row < NUM_ROWS; row++)
     {
-        for (size_t col = 0; col < NUM_COLS; col++)
+        for (uint16_t col = 0; col < NUM_COLS; col++)
         {
             if ((row + col) % 2 == 0)
             {
@@ -105,7 +107,7 @@ inline void GameManager::drawAllPieces(std::vector<chk::PiecePtr> &pieceList)
 {
     std::random_device randomDevice;
     std::mt19937 randEngine(randomDevice());
-    std::uniform_int_distribution<uint16_t> dist(1, 269);
+    std::uniform_int_distribution<uint16_t> dist(1, 16549);
     for (size_t row = 0; row < NUM_ROWS; row++)
     {
         for (size_t col = 0; col < NUM_COLS; col++)
@@ -150,16 +152,16 @@ void GameManager::handleMovePiece(const std::unique_ptr<chk::Player> &player, co
     gameMap.erase(this->sourceCell);                // set old location empty!
     gameMap[destCell->getIndex()] = currentPieceId; // fill in the new location
     this->playerRedTurn = !this->playerRedTurn;
-    if (this->checkNorthEast(player, destCell) || this->checkNorthWest(player, destCell))
+    if (this->checkDangerRHS(player, destCell) || this->checkDangerLHS(player, destCell))
     {
         std::cout << player->getName() << " is in danger" << std::endl;
     }
 }
 
 /**
- * Whether it's Red player's turn 
+ * Whether it's Red player's turn
  * @return TRUE or FALSE
-*/
+ */
 inline bool GameManager::isPlayerRedTurn() const
 {
     return this->playerRedTurn;
@@ -179,7 +181,7 @@ inline void GameManager::setSourceCell(const int &src_cell)
  * @param player unique ptr of player
  * @param destCell the just moved-in cell
  */
-inline bool GameManager::checkNorthWest(const std::unique_ptr<chk::Player> &player, const Block &destCell)
+inline bool GameManager::checkDangerLHS(const std::unique_ptr<chk::Player> &player, const Block &destCell)
 {
     bool hasEmptyCellBehind = false;
     bool hasEnemyAhead = false;
@@ -187,8 +189,9 @@ inline bool GameManager::checkNorthWest(const std::unique_ptr<chk::Player> &play
     int deltaBehind = destCell->getIsEvenRow() ? 5 : 4;
     int mSign = 1;
 
-    if (destCell->getPos().x == 0 || destCell->getPos().x == 8 * chk::SIZE_CELL)
+    if (destCell->getPos().x == 0 || static_cast<int>(destCell->getPos().x) >= 7 * chk::SIZE_CELL)
     {
+        // SAFE at either edges
         return false;
     }
 
@@ -199,7 +202,6 @@ inline bool GameManager::checkNorthWest(const std::unique_ptr<chk::Player> &play
         std::swap(deltaForward, deltaBehind);
     }
 
-    /* red player */
     int cellAheadIdx = destCell->getIndex() + (deltaForward * mSign);
     int pieceId_NW = this->getPieceFromCell(cellAheadIdx);
     hasEnemyAhead = (pieceId_NW == -1) ? false : !player->hasThisPiece(pieceId_NW);
@@ -208,11 +210,7 @@ inline bool GameManager::checkNorthWest(const std::unique_ptr<chk::Player> &play
     int pieceId_SE = this->getPieceFromCell(cellBelowRight);
     hasEmptyCellBehind = pieceId_SE == -1;
 
-    if (hasEnemyAhead && hasEmptyCellBehind)
-    {
-        return true;
-    }
-    return false;
+    return (hasEnemyAhead && hasEmptyCellBehind);
 }
 
 /**
@@ -220,7 +218,7 @@ inline bool GameManager::checkNorthWest(const std::unique_ptr<chk::Player> &play
  * @param player unique ptr of player
  * @param destCell the just moved-in cell
  */
-bool GameManager::checkNorthEast(const std::unique_ptr<chk::Player> &player, const Block &destCell)
+bool GameManager::checkDangerRHS(const std::unique_ptr<chk::Player> &player, const Block &destCell)
 {
     bool hasEmptyCellBehind = false;
     bool hasEnemyAhead = false;
@@ -228,8 +226,9 @@ bool GameManager::checkNorthEast(const std::unique_ptr<chk::Player> &player, con
     int deltaBehind = destCell->getIsEvenRow() ? 4 : 3;
     int mSign = 1;
 
-    if (destCell->getPos().x == 0 || destCell->getPos().x == 8 * chk::SIZE_CELL)
+    if (destCell->getPos().x == 0 || destCell->getPos().x >= 7 * chk::SIZE_CELL)
     {
+        // SAFE at either edges
         return false;
     }
 
@@ -240,20 +239,15 @@ bool GameManager::checkNorthEast(const std::unique_ptr<chk::Player> &player, con
         std::swap(deltaForward, deltaBehind);
     }
 
-    /* red player */
     int cellAheadIdx = destCell->getIndex() + (deltaForward * mSign);
-    int pieceId_NE = this->getPieceFromCell(cellAheadIdx);
+    int pieceId_NE = this->getPieceFromCell(cellAheadIdx); // north East
     hasEnemyAhead = (pieceId_NE == -1) ? false : !player->hasThisPiece(pieceId_NE);
 
     int cellBelowRight = destCell->getIndex() - (deltaBehind * mSign);
-    int pieceId_SW = this->getPieceFromCell(cellBelowRight);
+    int pieceId_SW = this->getPieceFromCell(cellBelowRight); // south West
     hasEmptyCellBehind = pieceId_SW == -1;
 
-    if (hasEnemyAhead && hasEmptyCellBehind)
-    {
-        return true;
-    }
-    return false;
+    return (hasEnemyAhead && hasEmptyCellBehind);
 }
 
 /**
@@ -267,7 +261,7 @@ inline int GameManager::getPieceFromCell(const int &cell_idx)
     if (this->gameMap.find(cell_idx) != gameMap.end())
     {
         return gameMap[cell_idx];
-    };
+    }
     return -1;
 }
 
@@ -282,7 +276,6 @@ void GameManager::matchCellsToPieces(const std::vector<chk::PiecePtr> &pieceList
     {
         return;
     }
-
     for (const auto &piece : pieceList)
     {
         for (const auto &cell : cells)
@@ -292,6 +285,7 @@ void GameManager::matchCellsToPieces(const std::vector<chk::PiecePtr> &pieceList
                 this->gameMap[cell->getIndex()] = piece->getId();
             }
         }
+        // fout << std::endl;
     }
     this->alreadyCached = true;
     std::cout << "hashmap size " << gameMap.size() << std::endl;

@@ -44,7 +44,7 @@ void handleCellTap(std::shared_ptr<chk::GameManager> &manager, const std::unique
 
 int main()
 {
-    auto window = sf::RenderWindow{sf::VideoMode(600u, 700u), "SpaceCheckers", sf::Style::Titlebar | sf::Style::Close};
+    auto window = sf::RenderWindow{sf::VideoMode(600u, 700u), "Checkers CPP", sf::Style::Titlebar | sf::Style::Close};
     window.setFramerateLimit(60u);
 
     sf::Image appIcon;
@@ -125,7 +125,7 @@ int main()
                     {
                         if (cell->containsPoint(clickedPos) && cell->getIndex() != -1)
                         {
-                            statusText = "Tapped cell index " + std::to_string(cell->getIndex());
+                            statusText = "Tapped cell row " + std::to_string(cell->getIndex());
                             if (manager->isPlayerRedTurn())
                             {
                                 handleCellTap(manager, p1, circularBuffer, cell);

@@ -168,10 +168,10 @@ inline bool Piece::operator==(const Piece &other) const
  * @param pos destination
  * @return TRUE if successful, else FALSE
  */
-inline bool Piece::moveCustom(const sf::Vector2f &pos)
+inline bool Piece::moveCustom(const sf::Vector2f &destPos)
 {
-    const float deltaX = pos.x - this->getPosition().x;
-    const float deltaY = pos.y - this->getPosition().y;
+    const float deltaX = destPos.x - this->getPosition().x;
+    const float deltaY = destPos.y - this->getPosition().y;
 
     if (std::abs(deltaX) > 100 || std::abs(deltaY) > 100)
     {
@@ -186,7 +186,7 @@ inline bool Piece::moveCustom(const sf::Vector2f &pos)
         return false;
     }
 
-    this->myCircle.setPosition(pos.x, pos.y);
+    this->myCircle.setPosition(destPos.x, destPos.y);
     this->setPosition(myCircle.getPosition());
     return true;
 }
