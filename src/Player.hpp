@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <memory>
 #include <string>
+#include <deque>
 #include <unordered_map>
 #include <vector>
 
@@ -24,8 +25,8 @@ class Player
 {
   public:
     explicit Player(PlayerType player_type);
-    void givePiece(PiecePtr &piecePtr);
-    void captureEnemy( PiecePtr &targetPiece);
+    void recievePiece(PiecePtr &piecePtr);
+    void losePiece(const int &targetId);
     const std::unordered_map<int, chk::PiecePtr> &getOwnPieces() const;
     [[nodiscard]] size_t getPieceCount() const;
     [[nodiscard]] const std::string &getName() const;
@@ -39,6 +40,8 @@ class Player
     std::string name_;
     // my pieceId --> its Pointer
     std::unordered_map<int, chk::PiecePtr> basket_;
+    //next-in-line pieces to capture Enemy
+    std::deque<int> hunters;
 };
 
 inline Player::Player(PlayerType player_type)
@@ -57,7 +60,7 @@ inline Player::Player(PlayerType player_type)
  * Give this Player full ownership of this piece
  * @param piece unique_ptr of piece
  */
-inline void Player::givePiece(chk::PiecePtr &piece)
+inline void Player::recievePiece(chk::PiecePtr &piece)
 {
     basket_[piece->getId()] = std::move_if_noexcept(piece);
 }
@@ -66,12 +69,9 @@ inline void Player::givePiece(chk::PiecePtr &piece)
  * When a player's piece is captured, -1 from list
  * @param target  the captured piece Id
  */
-inline void Player::captureEnemy(chk::PiecePtr &targetPiece)
+inline void Player::losePiece(const int &targetId)
 {
-    //TODO FIX THIS
-    //this->basket_.erase(targetId);
-    targetPiece.get_deleter()(targetPiece.release());
-
+    this->basket_.erase(targetId);
 }
 
 /**

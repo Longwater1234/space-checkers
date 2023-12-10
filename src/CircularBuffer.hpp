@@ -79,6 +79,7 @@ template <typename T> void CircularBuffer<T>::printAll()
     {
         std::cout << item << '\n';
     }
+    std::cout << std::endl;
 }
 
 /**

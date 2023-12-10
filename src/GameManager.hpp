@@ -34,7 +34,7 @@ class GameManager
     int sourceCell;
     // map of cell_index --> piece_id
     std::map<int, int> gameMap;
-    // flag to check if cache is filled
+    // flag to check if cache is already filled
     bool alreadyCached;
     // whether it's player Red's turn
     bool playerRedTurn = true;
@@ -108,9 +108,9 @@ inline void GameManager::drawAllPieces(std::vector<chk::PiecePtr> &pieceList)
     std::random_device randomDevice;
     std::mt19937 randEngine(randomDevice());
     std::uniform_int_distribution<uint16_t> dist(1, 16549);
-    for (size_t row = 0; row < NUM_ROWS; row++)
+    for (uint16_t row = 0; row < NUM_ROWS; row++)
     {
-        for (size_t col = 0; col < NUM_COLS; col++)
+        for (uint16_t col = 0; col < NUM_COLS; col++)
         {
             if ((row + col) % 2 != 0)
             {
@@ -285,7 +285,6 @@ void GameManager::matchCellsToPieces(const std::vector<chk::PiecePtr> &pieceList
                 this->gameMap[cell->getIndex()] = piece->getId();
             }
         }
-        // fout << std::endl;
     }
     this->alreadyCached = true;
     std::cout << "hashmap size " << gameMap.size() << std::endl;

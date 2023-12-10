@@ -82,11 +82,11 @@ int main()
     {
         if (kete->getPieceType() == chk::PieceType::Red)
         {
-            p1->givePiece(kete);
+            p1->recievePiece(kete);
         }
         else
         {
-            p2->givePiece(kete);
+            p2->recievePiece(kete);
         }
     }
 
