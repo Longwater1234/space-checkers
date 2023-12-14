@@ -7,8 +7,8 @@
 
 ////////////////////////////////////////////////////////////
 /// \brief Get file path specified
-/// \param relativePath file path inside `Resources` dir
-/// \return The path to the file relative to the resources folder
-///
+/// \param relativePath relative to `Resources/` directory
+/// \return The absolute file path
+
 ////////////////////////////////////////////////////////////
 std::string getResourcePath(const std::string& relativePath);

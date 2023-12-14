@@ -13,35 +13,33 @@ namespace chk
 class Cell final : public sf::Drawable
 {
   public:
-    Cell(const sf::RectangleShape &rec, const sf::Vector2f &pos, int index);
-    void setFont(const sf::Font &font);
+    Cell(int idx, const sf::RectangleShape &rec, const sf::Vector2f &pos, const sf::Font &font);
     bool containsPoint(const sf::Vector2i &pos) const;
     bool containsOrigin(const sf::Vector2f &pos) const;
     const sf::Vector2f &getPos() const;
     int getIndex() const;
     void setisEvenRow(const bool &is_even);
     bool getIsEvenRow() const;
+    void showMoveHint();
+    void hideMoveHint();
 
   private:
     sf::RectangleShape rec_;
     int index_;
     bool isEvenRow = false;
     sf::Vector2f cell_pos;
-
-  private:
     sf::Text sfText;
-    sf::Font myFont;
     void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
 };
 
-inline Cell::Cell(const sf::RectangleShape &rec, const sf::Vector2f &pos, const int index)
+inline Cell::Cell(const int idx, const sf::RectangleShape &rec, const sf::Vector2f &pos, const sf::Font &font)
 {
     this->rec_ = rec;
-    this->index_ = index;
+    this->index_ = idx;
     this->cell_pos = pos;
 
     sf::Text text;
-    text.setFont(this->myFont);
+    text.setFont(font);
     text.setFillColor(sf::Color{255u, 255u, 255u, 100u});
     text.setString(std::to_string(this->index_));
     text.setPosition(pos);
@@ -54,28 +52,36 @@ inline void Cell::draw(sf::RenderTarget &target, sf::RenderStates states) const
     target.draw(rec_, states);
     if (index_ != -1)
     {
-        // only draw text on some cells
+        // only draw text on Dark cells
         target.draw(sfText, states);
     }
 }
 
-/**
- * Set the given font to this cell
- * @param font sf::Font loaded from disk
- */
-inline void Cell::setFont(const sf::Font &font)
+inline bool Cell::getIsEvenRow() const
 {
-    this->myFont = font;
-}
-
-
-inline bool Cell::getIsEvenRow() const {
     return this->isEvenRow;
 }
 
 /**
+ * Draw outline around target cell (for forced jumps)
+ */
+inline void Cell::showMoveHint()
+{
+    this->rec_.setOutlineColor(sf::Color::Green);
+    this->rec_.setOutlineThickness(5.0f);
+}
+
+/**
+ * Remove the outline
+ */
+inline void Cell::hideMoveHint()
+{
+    this->rec_.setOutlineThickness(0);
+}
+
+/**
  * Check whether mouse cursor is within this Cell
- * @param pos 2D position (int) relative to main Window
+ * @param pos position x,y (int) relative to main Window
  * @return TRUE or FALSE
  */
 inline bool Cell::containsPoint(const sf::Vector2i &pos) const
@@ -84,11 +90,11 @@ inline bool Cell::containsPoint(const sf::Vector2i &pos) const
 }
 
 /**
- * Check whether object is within this Cell location
- * @param pos xy position (float) relative to main window
+ * Check whether given object's position is within this Cell
+ * @param pos position x,y (float) relative to main window
  * @return TRUE or FALSE
  */
-bool Cell::containsOrigin(const sf::Vector2f &pos) const
+inline bool Cell::containsOrigin(const sf::Vector2f &pos) const
 {
     return this->cell_pos.x == pos.x && this->cell_pos.y == pos.y;
 }
@@ -109,7 +115,6 @@ inline void Cell::setisEvenRow(const bool &is_even)
 {
     this->isEvenRow = is_even;
 }
-
 
 /**
  * Get the position of this cell

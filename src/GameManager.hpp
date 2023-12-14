@@ -6,16 +6,19 @@
 #include "Cell.hpp"
 #include "Piece.hpp"
 #include "Player.hpp"
+#include <SFML/Graphics/Text.hpp>
 #include <iostream>
 #include <memory>
 #include <random>
+#include <unordered_map>
+#include <utility>
+#include <vector>
 namespace chk
 {
 using Block = std::unique_ptr<chk::Cell>;
+using PlayerPtr = std::unique_ptr<chk::Player>;
 constexpr size_t NUM_ROWS = 8;
 constexpr size_t NUM_COLS = 8;
-
-using Block = std::unique_ptr<chk::Cell>;
 
 /**
  * Overall game state
@@ -25,31 +28,41 @@ class GameManager
 
   public:
     GameManager();
-    static void drawCheckerboard(std::vector<Block> &blockList, const sf::Font &font);
+    void drawCheckerboard(const sf::Font &font);
+    // void showTargetCells(const std::set<int> &keySet) const;
     static void drawAllPieces(std::vector<chk::PiecePtr> &pieceList);
-    void matchCellsToPieces(const std::vector<chk::PiecePtr> &pieceList, const std::vector<Block> &cellList);
+    [[nodiscard]] const std::unordered_map<uint16_t, int> &getForcedJumps() const;
+    void updateMessage(const std::string &msg);
+    [[nodiscard]] const std::string &getCurrentMsg() const;
+    void matchCellsToPieces(const std::vector<chk::PiecePtr> &pieceList);
 
   private:
     // source cell Index of selected piece
     int sourceCell;
+    // checkerboard cells
+    std::vector<chk::Block> blockList;
     // map of cell_index --> piece_id
     std::map<int, int> gameMap;
     // flag to check if cache is already filled
     bool alreadyCached;
     // whether it's player Red's turn
     bool playerRedTurn = true;
+    // current display message
+    std::string currentMsg;
+    // For keeping PieceId forced to jump to matching CellIndex
+    std::unordered_map<uint16_t, int> forcedMoves;
 
   private:
-    bool checkDangerLHS(const std::unique_ptr<chk::Player> &player, const Block &destCell);
-    bool checkDangerRHS(const std::unique_ptr<chk::Player> &player, const Block &destCell);
-    bool checkForCaptureLHS(const std::unique_ptr<chk::Player> &player, const Block &destCell);
-    bool checkForCaptureRHS(const std::unique_ptr<chk::Player> &player, const Block &destCell);
+    bool checkDangerLHS(const chk::PlayerPtr &player, const Block &destCell);
+    bool checkDangerRHS(const chk::PlayerPtr &player, const Block &destCell);
+    // bool checkForCaptureLHS(const std::unique_ptr<chk::Player> &player, const Block &destCell);
+    // bool checkForCaptureRHS(const std::unique_ptr<chk::Player> &player, const Block &destCell);
 
   public:
     [[nodiscard]] bool isPlayerRedTurn() const;
     [[nodiscard]] inline int getPieceFromCell(const int &cell_idx);
+    [[nodiscard]] const std::vector<chk::Block> &getBlockList() const;
     void setSourceCell(const int &src_cell);
-    // bool checkDangerRight(const std::unique_ptr<chk::Player> &player, const Block &destCell);
     void handleMovePiece(const std::unique_ptr<chk::Player> &player, const Block &destCell, const int &currentPieceId);
 };
 
@@ -57,14 +70,49 @@ inline GameManager::GameManager()
 {
     this->sourceCell = -1;
     this->alreadyCached = false;
+    this->blockList.reserve(chk::NUM_COLS * chk::NUM_COLS);
 }
 
 /**
- * Create red and black checkerboard cells, with Position
- * @param blockList empty list of cells
- * @param font      font loaded from file
+ * Get pair of pieceID's forced to JUMP to matching cellIndex
+ * @return a pair of PieceId--> cellIndex
  */
-inline void GameManager::drawCheckerboard(std::vector<Block> &blockList, const sf::Font &font)
+inline const std::unordered_map<uint16_t, int> &GameManager::getForcedJumps() const
+{
+    return this->forcedMoves;
+}
+
+/**
+ * Update main window message
+ */
+inline void GameManager::updateMessage(const std::string &msg)
+{
+    this->currentMsg = msg;
+}
+
+/**
+ * Get current message passed from Main
+ * @return string value of mesage
+ */
+inline const std::string &GameManager::getCurrentMsg() const
+{
+    return this->currentMsg;
+}
+
+/**
+ * \brief Get list of all checkboard cells
+ * \return vector of unique_ptr of Cells
+ */
+inline const std::vector<chk::Block> &GameManager::getBlockList() const
+{
+    return this->blockList;
+}
+
+/**
+ * Create checkerboard cells, labeled with an index using given font
+ * @param font      for text labels
+ */
+inline void GameManager::drawCheckerboard(const sf::Font &font)
 {
     int counter = 32;
     for (uint16_t row = 0; row < NUM_ROWS; row++)
@@ -73,13 +121,12 @@ inline void GameManager::drawCheckerboard(std::vector<Block> &blockList, const s
         {
             if ((row + col) % 2 == 0)
             {
-                // even CELL, set LIGHTER color (UNUSED)
+                // even CELL, set LIGHTER color (unused)
                 sf::RectangleShape lightRec(sf::Vector2f(chk::SIZE_CELL, chk::SIZE_CELL));
                 lightRec.setFillColor(sf::Color{255, 225, 151});
                 float x = (col % NUM_COLS) * chk::SIZE_CELL;
                 lightRec.setPosition(sf::Vector2f(x, row * chk::SIZE_CELL));
-                auto whiteBlock = std::make_unique<chk::Cell>(lightRec, lightRec.getPosition(), -1);
-                whiteBlock->setFont(font);
+                auto whiteBlock = std::make_unique<chk::Cell>(-1, lightRec, lightRec.getPosition(), font);
                 blockList.emplace_back(std::move_if_noexcept(whiteBlock));
             }
             else
@@ -89,8 +136,7 @@ inline void GameManager::drawCheckerboard(std::vector<Block> &blockList, const s
                 darkRect.setFillColor(sf::Color{82, 55, 27});
                 float x = (col % NUM_COLS) * chk::SIZE_CELL;
                 darkRect.setPosition(sf::Vector2f(x, row * chk::SIZE_CELL));
-                auto redBlock = std::make_unique<chk::Cell>(darkRect, darkRect.getPosition(), counter);
-                redBlock->setFont(font);
+                auto redBlock = std::make_unique<chk::Cell>(counter, darkRect, darkRect.getPosition(), font);
                 redBlock->setisEvenRow(row % 2 == 0);
                 blockList.emplace_back(std::move_if_noexcept(redBlock));
                 counter--;
@@ -98,6 +144,25 @@ inline void GameManager::drawCheckerboard(std::vector<Block> &blockList, const s
         }
     }
 }
+
+/*
+ * Highlight destination cells for forced jump
+ * @param keySet cell indexes
+inline void GameManager::showTargetCells(const std::set<int> &keySet) const
+{
+    for (const auto &idx : keySet)
+    {
+        for (const auto &cell : this->blockList)
+        {
+            if(idx == cell->getIndex())
+            {
+                cell->showMoveHint();
+                break;
+            }
+        }
+    }
+}
+*/
 
 /**
  * Create new checker pieces, each with own position, and add them to given vector
@@ -140,21 +205,21 @@ inline void GameManager::drawAllPieces(std::vector<chk::PiecePtr> &pieceList)
  * @param destCell target cell
  * @param currentPieceId the selected PieceId
  */
-void GameManager::handleMovePiece(const std::unique_ptr<chk::Player> &player, const Block &destCell,
-                                  const int &currentPieceId)
+inline void GameManager::handleMovePiece(const std::unique_ptr<chk::Player> &player, const Block &destCell,
+                                         const int &currentPieceId)
 {
-    bool success = player->movePiece(currentPieceId, destCell->getPos());
-    // VERIFY IF move IS SUCCESSFUL
+    // VERIFY if piece move is completed
+    const bool success = player->movePiece(currentPieceId, destCell->getPos());
     if (!success)
     {
         return;
     }
     gameMap.erase(this->sourceCell);                // set old location empty!
     gameMap[destCell->getIndex()] = currentPieceId; // fill in the new location
-    this->playerRedTurn = !this->playerRedTurn;     // toggle turns
+    this->playerRedTurn = !this->playerRedTurn;     // toggle player turns
     if (this->checkDangerRHS(player, destCell) || this->checkDangerLHS(player, destCell))
     {
-        std::cout << player->getName() << " is in danger" << std::endl;
+        std::cout << player->getName() << " is in DANGER!" << std::endl;
     }
 }
 
@@ -181,7 +246,7 @@ inline void GameManager::setSourceCell(const int &src_cell)
  * @param player unique ptr of player
  * @param destCell the just moved-in cell
  */
-inline bool GameManager::checkDangerLHS(const std::unique_ptr<chk::Player> &player, const Block &destCell)
+inline bool GameManager::checkDangerLHS(const chk::PlayerPtr &player, const Block &destCell)
 {
     bool hasEmptyCellBehind = false;
     bool hasEnemyAhead = false;
@@ -210,7 +275,13 @@ inline bool GameManager::checkDangerLHS(const std::unique_ptr<chk::Player> &play
     int pieceId_SE = this->getPieceFromCell(cellBelowRight);
     hasEmptyCellBehind = pieceId_SE == -1;
 
-    return (hasEnemyAhead && hasEmptyCellBehind);
+    bool inDanger = false;
+    if (hasEnemyAhead && hasEmptyCellBehind)
+    {
+        inDanger = true;
+        this->forcedMoves.emplace(pieceId_NW, cellBelowRight);
+    }
+    return inDanger;
 }
 
 /**
@@ -218,7 +289,7 @@ inline bool GameManager::checkDangerLHS(const std::unique_ptr<chk::Player> &play
  * @param player unique ptr of player
  * @param destCell the just moved-in cell
  */
-bool GameManager::checkDangerRHS(const std::unique_ptr<chk::Player> &player, const Block &destCell)
+inline bool GameManager::checkDangerRHS(const chk::PlayerPtr &player, const Block &destCell)
 {
     bool hasEmptyCellBehind = false;
     bool hasEnemyAhead = false;
@@ -243,11 +314,17 @@ bool GameManager::checkDangerRHS(const std::unique_ptr<chk::Player> &player, con
     int pieceId_NE = this->getPieceFromCell(cellAheadIdx); // north East
     hasEnemyAhead = (pieceId_NE == -1) ? false : !player->hasThisPiece(pieceId_NE);
 
-    int cellBelowRight = destCell->getIndex() - (deltaBehind * mSign);
-    int pieceId_SW = this->getPieceFromCell(cellBelowRight); // south West
+    int cellBelowLeft = destCell->getIndex() - (deltaBehind * mSign);
+    int pieceId_SW = this->getPieceFromCell(cellBelowLeft); // south West
     hasEmptyCellBehind = pieceId_SW == -1;
 
-    return (hasEnemyAhead && hasEmptyCellBehind);
+    bool inDanger = false;
+    if (hasEnemyAhead && hasEmptyCellBehind)
+    {
+        inDanger = true;
+        this->forcedMoves.emplace(pieceId_NE, cellBelowLeft);
+    }
+    return inDanger;
 }
 
 /**
@@ -260,7 +337,7 @@ inline int GameManager::getPieceFromCell(const int &cell_idx)
 {
     if (this->gameMap.find(cell_idx) != gameMap.end())
     {
-        return gameMap[cell_idx];
+        return gameMap.at(cell_idx);
     }
     return -1;
 }
@@ -268,9 +345,8 @@ inline int GameManager::getPieceFromCell(const int &cell_idx)
 /**
  * Match the 2 lists, by position, at the beginning of the game, and cache it to Hashmap
  * @param pieceList vector of all pieces
- * @param cellList vector of all cells
  */
-void GameManager::matchCellsToPieces(const std::vector<chk::PiecePtr> &pieceList, const std::vector<Block> &cells)
+inline void GameManager::matchCellsToPieces(const std::vector<chk::PiecePtr> &pieceList)
 {
     if (this->alreadyCached)
     {
@@ -278,11 +354,11 @@ void GameManager::matchCellsToPieces(const std::vector<chk::PiecePtr> &pieceList
     }
     for (const auto &piece : pieceList)
     {
-        for (const auto &cell : cells)
+        for (const auto &cell : this->blockList)
         {
             if (cell->getIndex() != -1 && cell->containsOrigin(piece->getPosition()))
             {
-                this->gameMap[cell->getIndex()] = piece->getId();
+                this->gameMap.emplace(cell->getIndex(), piece->getId());
             }
         }
     }

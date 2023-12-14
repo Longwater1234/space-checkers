@@ -25,19 +25,20 @@ class Piece final : public sf::Drawable, public sf::Transformable
 
   public:
     Piece(const sf::CircleShape &circle, const PieceType &pType, uint16_t id_);
-    PieceType getPieceType() const;
+    [[nodiscard]] const PieceType &getPieceType() const;
     void activateKing();
     bool getIsKing() const;
     bool containsPoint(const sf::Vector2i &pos) const;
-    bool moveCustom(const sf::Vector2f &pos);
+    bool moveCustom(const sf::Vector2f &destPos);
     void addOutline();
+    void markImportant();
     void removeOutline();
-    const int &getId() const;
+    const uint16_t &getId() const;
     bool operator==(const Piece &other) const;
 
   private:
     sf::Texture texture;
-    int id; // random positive ID assigned at Launch
+    uint16_t id; // random positive ID assigned at Launch
     sf::CircleShape myCircle;
     PieceType pieceType;
     bool isKing = false;
@@ -56,7 +57,7 @@ inline Piece::Piece(const sf::CircleShape &circle, const PieceType &pType, const
     {
         if (localTxr.loadFromFile(getResourcePath(RED_NORMAL)))
         {
-            this->texture = localTxr;
+            this->texture = std::move_if_noexcept(localTxr);
             this->myCircle.setTexture(&this->texture);
         }
     }
@@ -64,7 +65,7 @@ inline Piece::Piece(const sf::CircleShape &circle, const PieceType &pType, const
     {
         if (localTxr.loadFromFile(getResourcePath(BLACK_NORMAL)))
         {
-            this->texture = localTxr;
+            this->texture = std::move_if_noexcept(localTxr);
             this->myCircle.setTexture(&this->texture);
         }
     }
@@ -79,7 +80,7 @@ inline void Piece::draw(sf::RenderTarget &target, sf::RenderStates states) const
  * Get piece type, whether it's Black or Red
  * @return the pieceType
  */
-inline PieceType Piece::getPieceType() const
+inline const PieceType &Piece::getPieceType() const
 {
     return this->pieceType;
 }
@@ -133,22 +134,38 @@ inline bool Piece::containsPoint(const sf::Vector2i &pos) const
  */
 inline void chk::Piece::addOutline()
 {
+
     this->myCircle.setOutlineColor(sf::Color::Yellow);
     this->myCircle.setOutlineThickness(5.0f);
 }
 
 /**
- * Removes the outline
+ * Highlight with GREEN outline to show it MUST capture opponent
+ */
+inline void Piece::markImportant()
+{
+    this->myCircle.setOutlineColor(sf::Color::Green);
+    this->myCircle.setOutlineThickness(5.0f);
+}
+
+/**
+ * Removes the outline when no longer in focus
  */
 inline void Piece::removeOutline()
 {
+
+    if (this->myCircle.getOutlineColor() == sf::Color::Green)
+    {
+        // if marked important (GREEN), dont remove
+        return;
+    }
     this->myCircle.setOutlineThickness(0);
 }
 
 /**
  * Get piece's id
  */
-const inline int &Piece::getId() const
+const inline uint16_t &Piece::getId() const
 {
     return this->id;
 }
@@ -165,7 +182,7 @@ inline bool Piece::operator==(const Piece &other) const
 
 /**
  * Validate first, then Move the Piece to the given position.
- * @param pos destination
+ * @param destPos destination
  * @return TRUE if successful, else FALSE
  */
 inline bool Piece::moveCustom(const sf::Vector2f &destPos)

@@ -1,12 +1,10 @@
 #pragma once
 
 #include "Piece.hpp"
-#include <algorithm>
 #include <memory>
+#include <set>
 #include <string>
-#include <deque>
 #include <unordered_map>
-#include <vector>
 
 namespace chk
 {
@@ -18,7 +16,7 @@ enum class PlayerType
     PLAYER_2 = 8594839
 };
 
-// unique pointer of player's Piece
+// alias for unique pointer of player's Piece
 using PiecePtr = std::unique_ptr<chk::Piece>;
 
 class Player
@@ -27,21 +25,20 @@ class Player
     explicit Player(PlayerType player_type);
     void recievePiece(PiecePtr &piecePtr);
     void losePiece(const int &targetId);
-    const std::unordered_map<int, chk::PiecePtr> &getOwnPieces() const;
+    [[nodiscard]] const std::unordered_map<int, chk::PiecePtr> &getOwnPieces() const;
+    void showForcedMoves(const std::set<int> &targetPieces) const;
     [[nodiscard]] size_t getPieceCount() const;
     [[nodiscard]] const std::string &getName() const;
     [[nodiscard]] PlayerType getPlayerType() const;
-    [[nodiscard]] bool hasThisPiece(const int &pieceId);
-    [[nodiscard]] bool movePiece(const int &pieceId, const sf::Vector2f &dest);
-    bool operator==(Player &other) const;
+    [[nodiscard]] bool hasThisPiece(const int &pieceId) const;
+    [[nodiscard]] bool movePiece(const int &pieceId, const sf::Vector2f &destPos) const;
+    bool operator==(const Player &other) const;
 
   private:
     // name of this player (RED or BLACK)
     std::string name_;
     // my pieceId --> its Pointer
     std::unordered_map<int, chk::PiecePtr> basket_;
-    //next-in-line pieces to capture Enemy
-    std::deque<int> hunters;
 };
 
 inline Player::Player(PlayerType player_type)
@@ -58,20 +55,34 @@ inline Player::Player(PlayerType player_type)
 
 /**
  * Give this Player full ownership of this piece
- * @param piece unique_ptr of piece
+ * @param piecePtr unique_ptr of piece
  */
-inline void Player::recievePiece(chk::PiecePtr &piece)
+inline void Player::recievePiece(chk::PiecePtr &piecePtr)
 {
-    basket_[piece->getId()] = std::move_if_noexcept(piece);
+    this->basket_.emplace(piecePtr->getId(), std::move_if_noexcept(piecePtr));
 }
 
 /**
  * When a player's piece is captured, -1 from list
- * @param target  the captured piece Id
+ * @param targetId  the captured piece Id
  */
 inline void Player::losePiece(const int &targetId)
 {
     this->basket_.erase(targetId);
+}
+
+/**
+ * Highlight my pieces that must capture opponent
+ * @param targetPieces set of piece IDs
+ */
+inline void Player::showForcedMoves(const std::set<int> &targetPieces) const
+{
+    if (targetPieces.empty())
+        return;
+    for (const auto &id : targetPieces)
+    {
+        this->basket_.at(id)->markImportant();
+    }
 }
 
 /**
@@ -114,9 +125,9 @@ inline const std::unordered_map<int, chk::PiecePtr> &Player::getOwnPieces() cons
  * @param pieceId the pieceId
  * @return TRUE or FALSE
  */
-inline bool Player::hasThisPiece(const int &pieceId)
+inline bool Player::hasThisPiece(const int &pieceId) const
 {
-    return this->basket_.count(pieceId) > 0;
+    return this->basket_.find(pieceId) != this->basket_.end();
 }
 
 /**
@@ -134,9 +145,9 @@ inline size_t Player::getPieceCount() const
  * @param destPos destination
  * @return success true or FALSE
  */
-inline bool Player::movePiece(const int &pieceId, const sf::Vector2f &destPos)
+inline bool Player::movePiece(const int &pieceId, const sf::Vector2f &destPos) const
 {
-    return this->basket_[pieceId]->moveCustom(destPos);
+    return this->basket_.at(pieceId)->moveCustom(destPos);
 }
 
 /**
@@ -144,7 +155,7 @@ inline bool Player::movePiece(const int &pieceId, const sf::Vector2f &destPos)
  * @param other the other Player
  * @return true if their names equal
  */
-bool Player::operator==(Player &other) const
+inline bool Player::operator==(const Player &other) const
 {
     return this->name_ == other.name_;
 }

@@ -18,7 +18,7 @@ template <typename T> class CircularBuffer
     // Constructor, sets maxCapacity limit
     explicit CircularBuffer(int maxCapacity) : maxCapacity(maxCapacity)
     {
-        buffer.resize(maxCapacity);
+        m_deque_.resize(maxCapacity);
     }
     void addItem(T item);
     T &getTop();
@@ -27,14 +27,14 @@ template <typename T> class CircularBuffer
     void clean();
 
   private:
-    int maxCapacity = 0;  // max Capacity
-    size_t buf_size = 0;  // size of the buffer
-    std::deque<T> buffer; // actual store of elements
+    int maxCapacity = 0;    // max Capacity
+    size_t buf_size = 0;    // size of the buffer
+    std::deque<T> m_deque_; // actual container of elements
 
   public:
     bool operator==(const CircularBuffer &other) const
     {
-        return this->buffer == other.buffer;
+        return this->m_deque_ == other.m_deque_;
     }
 };
 
@@ -44,7 +44,7 @@ template <typename T> class CircularBuffer
  */
 template <typename T> void CircularBuffer<T>::clean()
 {
-    buffer.clear();
+    m_deque_.clear();
 }
 
 /**
@@ -54,7 +54,7 @@ template <typename T> void CircularBuffer<T>::clean()
  */
 template <typename T> bool CircularBuffer<T>::isEmpty() const
 {
-    return buffer.empty();
+    return m_deque_.empty();
 }
 
 /**
@@ -64,9 +64,7 @@ template <typename T> bool CircularBuffer<T>::isEmpty() const
  */
 template <typename T> T &CircularBuffer<T>::getTop()
 {
-    T &val = buffer.front();
-    buffer.pop_front(); // remove it
-    return val;
+    return m_deque_.front();
 }
 
 /**
@@ -75,7 +73,7 @@ template <typename T> T &CircularBuffer<T>::getTop()
  */
 template <typename T> void CircularBuffer<T>::printAll()
 {
-    for (const auto &item : buffer)
+    for (const auto &item : m_deque_)
     {
         std::cout << item << '\n';
     }
@@ -90,11 +88,11 @@ template <typename T> void CircularBuffer<T>::printAll()
 template <typename T> void CircularBuffer<T>::addItem(T item)
 {
     // if full, remove 1st item first
-    if (buffer.size() >= maxCapacity)
+    if (m_deque_.size() >= maxCapacity)
     {
-        buffer.pop_front();
+        m_deque_.pop_front();
     }
-    buffer.push_back(item);
+    m_deque_.push_back(item);
     buf_size++;
 }
 } // namespace chk
