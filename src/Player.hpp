@@ -32,6 +32,7 @@ class Player
     [[nodiscard]] PlayerType getPlayerType() const;
     [[nodiscard]] bool hasThisPiece(const int &pieceId) const;
     [[nodiscard]] bool movePiece(const int &pieceId, const sf::Vector2f &destPos) const;
+    [[nodiscard]] bool captureEnemyWith(const int &pieceId, const sf::Vector2f &destPos) const;
     bool operator==(const Player &other) const;
 
   private:
@@ -68,6 +69,7 @@ inline void Player::recievePiece(chk::PiecePtr &piecePtr)
  */
 inline void Player::losePiece(const int &targetId)
 {
+    // TODO clear unique_ptr from memory!
     this->basket_.erase(targetId);
 }
 
@@ -86,7 +88,7 @@ inline void Player::showForcedMoves(const std::set<int> &targetPieces) const
 }
 
 /**
- * Get player type RED or BLACK
+ * Get player type, RED or BLACK
  *
  *@return enum value
  */
@@ -96,10 +98,7 @@ inline PlayerType Player::getPlayerType() const
     {
         return chk::PlayerType::PLAYER_1;
     }
-    else
-    {
-        return chk::PlayerType::PLAYER_2;
-    }
+    return chk::PlayerType::PLAYER_2;
 }
 
 /**
@@ -142,12 +141,23 @@ inline size_t Player::getPieceCount() const
 /**
  * Get vector index of selected piece by this player
  * @param pieceId the selected PieceId
- * @param destPos destination
+ * @param destPos destination cell
  * @return success true or FALSE
  */
 inline bool Player::movePiece(const int &pieceId, const sf::Vector2f &destPos) const
 {
-    return this->basket_.at(pieceId)->moveCustom(destPos);
+    return this->basket_.at(pieceId)->moveSimple(destPos);
+}
+
+/**
+ * \brief Move the given piece to destPos to complete capture opponent
+ * \param pieceId my pieceId
+ * \param destPos destination cell
+ * \return TRUE if successful or FALSE
+ */
+inline bool Player::captureEnemyWith(const int &pieceId, const sf::Vector2f &destPos) const
+{
+    return this->basket_.at(pieceId)->moveCapture(destPos);
 }
 
 /**

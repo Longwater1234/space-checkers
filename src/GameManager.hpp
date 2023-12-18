@@ -39,17 +39,21 @@ class GameManager
   private:
     // source cell Index of selected piece
     int sourceCell;
+    // target pieceId to be captured;
+    int preyPieceId;
     // checkerboard cells
     std::vector<chk::Block> blockList;
     // map of cell_index --> piece_id
     std::map<int, int> gameMap;
     // flag to check if cache is already filled
-    bool alreadyCached;
+    bool alreadyCached = false;
+    // if all conditions complete for start capturing
+    bool readyForCapture = false;
     // whether it's player Red's turn
     bool playerRedTurn = true;
-    // current display message
+    // bottom display message
     std::string currentMsg;
-    // For keeping PieceId forced to jump to matching CellIndex
+    // Pair(forcedPieceId -> targetCell) For keeping records of pending "forced" captures
     std::unordered_map<uint16_t, int> forcedMoves;
 
   private:
@@ -60,16 +64,18 @@ class GameManager
 
   public:
     [[nodiscard]] bool isPlayerRedTurn() const;
+    [[nodiscard]] bool isReadyForCapture() const;
     [[nodiscard]] inline int getPieceFromCell(const int &cell_idx);
     [[nodiscard]] const std::vector<chk::Block> &getBlockList() const;
     void setSourceCell(const int &src_cell);
     void handleMovePiece(const std::unique_ptr<chk::Player> &player, const Block &destCell, const int &currentPieceId);
+    void handleJumpPiece(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey, const chk::Block &destCell);
 };
 
 inline GameManager::GameManager()
 {
     this->sourceCell = -1;
-    this->alreadyCached = false;
+    this->preyPieceId = -1;
     this->blockList.reserve(chk::NUM_COLS * chk::NUM_COLS);
 }
 
@@ -110,7 +116,7 @@ inline const std::vector<chk::Block> &GameManager::getBlockList() const
 
 /**
  * Create checkerboard cells, labeled with an index using given font
- * @param font      for text labels
+ * @param font used for text labels
  */
 inline void GameManager::drawCheckerboard(const sf::Font &font)
 {
@@ -144,25 +150,6 @@ inline void GameManager::drawCheckerboard(const sf::Font &font)
         }
     }
 }
-
-/*
- * Highlight destination cells for forced jump
- * @param keySet cell indexes
-inline void GameManager::showTargetCells(const std::set<int> &keySet) const
-{
-    for (const auto &idx : keySet)
-    {
-        for (const auto &cell : this->blockList)
-        {
-            if(idx == cell->getIndex())
-            {
-                cell->showMoveHint();
-                break;
-            }
-        }
-    }
-}
-*/
 
 /**
  * Create new checker pieces, each with own position, and add them to given vector
@@ -208,7 +195,7 @@ inline void GameManager::drawAllPieces(std::vector<chk::PiecePtr> &pieceList)
 inline void GameManager::handleMovePiece(const std::unique_ptr<chk::Player> &player, const Block &destCell,
                                          const int &currentPieceId)
 {
-    // VERIFY if piece move is completed
+    // VERIFY if move is completed
     const bool success = player->movePiece(currentPieceId, destCell->getPos());
     if (!success)
     {
@@ -217,9 +204,59 @@ inline void GameManager::handleMovePiece(const std::unique_ptr<chk::Player> &pla
     gameMap.erase(this->sourceCell);                // set old location empty!
     gameMap[destCell->getIndex()] = currentPieceId; // fill in the new location
     this->playerRedTurn = !this->playerRedTurn;     // toggle player turns
+    this->sourceCell = -1;
     if (this->checkDangerRHS(player, destCell) || this->checkDangerLHS(player, destCell))
     {
+        this->preyPieceId = currentPieceId;
         std::cout << player->getName() << " is in DANGER!" << std::endl;
+    }
+}
+
+/**
+ * Handle capturing of "Prey's" pieces by "Hunter", then update gameMap
+ * @param hunter the offensive player
+ * @param prey the defensive player
+ * @param targetCell the destination of hunter
+ */
+inline void GameManager::handleJumpPiece(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,
+                                         const chk::Block &targetCell)
+{
+    // Check if There's a PIECE in this this cell. Cannot Jump to here.
+    if (this->getPieceFromCell(targetCell->getIndex()) != -1)
+        return;
+
+    for (const auto &[piece_id, cell_idx] : this->forcedMoves)
+    {
+        if (cell_idx == targetCell->getIndex())
+        {
+            if (!hunter->captureEnemyWith(piece_id, targetCell->getPos()))
+            {
+                return;
+            }
+            gameMap.erase(this->sourceCell);            // set hunter's old location empty!
+            gameMap[targetCell->getIndex()] = piece_id; // fill in hunter new location
+            prey->losePiece(this->preyPieceId);         // the defensive player loses 1 piece
+            for (auto it = gameMap.begin(); it != gameMap.end(); ++it)
+            {
+                if (it->second == preyPieceId)
+                {
+                    // set Prey's old location empty!
+                    gameMap.erase(it);
+                    break;
+                }
+            }
+            this->playerRedTurn = !this->playerRedTurn; // toggle player turns
+            this->sourceCell = -1;
+            this->preyPieceId = -1;
+            this->forcedMoves.clear();
+            // TODO check for opportunities to capture ANOTHER NOW!
+            if (this->checkDangerRHS(hunter, targetCell) || this->checkDangerLHS(hunter, targetCell))
+            {
+                this->preyPieceId = piece_id;
+                std::cout << hunter->getName() << " is in DANGER!" << std::endl;
+            }
+            break;
+        }
     }
 }
 
@@ -241,6 +278,14 @@ inline void GameManager::setSourceCell(const int &src_cell)
     this->sourceCell = src_cell;
 }
 
+/**
+ * \brief Whether both src_cell is NOT NULL & forcedMoves NOT empty
+ * \return TRUE or FALSE
+ */
+inline bool GameManager::isReadyForCapture() const
+{
+    return this->sourceCell != -1 && !forcedMoves.empty();
+}
 /**
  * check if player who has just moved is in danger (North west)
  * @param player unique ptr of player
@@ -343,7 +388,7 @@ inline int GameManager::getPieceFromCell(const int &cell_idx)
 }
 
 /**
- * Match the 2 lists, by position, at the beginning of the game, and cache it to Hashmap
+ * Match cells to pieces, using location, at the beginning of the game, and cache it to Hashmap
  * @param pieceList vector of all pieces
  */
 inline void GameManager::matchCellsToPieces(const std::vector<chk::PiecePtr> &pieceList)

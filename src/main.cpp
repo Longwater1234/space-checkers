@@ -18,11 +18,11 @@ constexpr auto FONT_PATH = "open-sans.regular.ttf";
  * @param cell selected cell
  */
 void showForcedMoves(const std::unique_ptr<chk::GameManager> &manager, const chk::PlayerPtr &player,
-                       const chk::Block &cell)
+                     const chk::Block &cell)
 {
     const auto &forcedMoves = manager->getForcedJumps();
     const int pieceId = manager->getPieceFromCell(cell->getIndex());
-    if (pieceId > 1 && forcedMoves.find(pieceId) == forcedMoves.end())
+    if (forcedMoves.find(pieceId) == forcedMoves.end())
     {
         // FORCE PLAYER TO DO JUMP, dont proceed until complete JUMP!
         std::set<int> pieceSet;
@@ -32,6 +32,10 @@ void showForcedMoves(const std::unique_ptr<chk::GameManager> &manager, const chk
         }
         player->showForcedMoves(pieceSet);
         manager->updateMessage(player->getName() + " must capture piece!");
+    }
+    else
+    {
+        manager->setSourceCell(cell->getIndex());
     }
 }
 
@@ -71,8 +75,6 @@ void handleCellTap(const std::unique_ptr<chk::GameManager> &manager, const chk::
     }
 }
 
-void handleJumpPiece(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey, const chk::Block &cell);
-
 int main()
 {
     auto window = sf::RenderWindow{sf::VideoMode{600u, 700u}, "Checkers CPP", sf::Style::Titlebar | sf::Style::Close};
@@ -87,7 +89,7 @@ int main()
 
     // LOAD FONT
     sf::Font font;
-    if (!font.loadFromFile(getResourcePath(FONT_PATH )))
+    if (!font.loadFromFile(getResourcePath(FONT_PATH)))
     {
         perror("cannot find file");
         exit(EXIT_FAILURE);
@@ -150,6 +152,13 @@ int main()
                 {
                     for (auto &cell : manager->getBlockList())
                     {
+                        if (cell->containsPoint(clickedPos) && cell->getIndex() != -1 && manager->isReadyForCapture())
+                        {
+                            const auto &hunter = manager->isPlayerRedTurn() ? p1 : p2;
+                            const auto &prey = manager->isPlayerRedTurn() ? p2 : p1;
+                            manager->handleJumpPiece(hunter, prey, cell);
+                            break;
+                        }
                         if (cell->containsPoint(clickedPos) && cell->getIndex() != -1)
                         {
                             const auto &currentPlayer = manager->isPlayerRedTurn() ? p1 : p2;
@@ -163,7 +172,6 @@ int main()
 
         auto mousePos = sf::Mouse::getPosition(window);
         window.clear();
-
         for (const auto &cell : manager->getBlockList())
         {
             window.draw(*cell);
