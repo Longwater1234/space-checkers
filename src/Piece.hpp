@@ -25,19 +25,21 @@ class Piece final : public sf::Drawable, public sf::Transformable
 
   public:
     Piece(const sf::CircleShape &circle, const PieceType &pType, uint16_t id_);
-    PieceType getPieceType() const;
+    [[nodiscard]] const PieceType &getPieceType() const;
     void activateKing();
     bool getIsKing() const;
     bool containsPoint(const sf::Vector2i &pos) const;
-    bool moveCustom(const sf::Vector2f &pos);
+    bool moveSimple(const sf::Vector2f &destPos);
+    bool moveCapture(const sf::Vector2f &destPos);
     void addOutline();
+    void markImportant();
     void removeOutline();
-    const int &getId() const;
+    const uint16_t &getId() const;
     bool operator==(const Piece &other) const;
 
   private:
     sf::Texture texture;
-    int id; // random positive ID assigned at Launch
+    uint16_t id; // random positive ID assigned at Launch
     sf::CircleShape myCircle;
     PieceType pieceType;
     bool isKing = false;
@@ -56,7 +58,7 @@ inline Piece::Piece(const sf::CircleShape &circle, const PieceType &pType, const
     {
         if (localTxr.loadFromFile(getResourcePath(RED_NORMAL)))
         {
-            this->texture = localTxr;
+            this->texture = std::move_if_noexcept(localTxr);
             this->myCircle.setTexture(&this->texture);
         }
     }
@@ -64,7 +66,7 @@ inline Piece::Piece(const sf::CircleShape &circle, const PieceType &pType, const
     {
         if (localTxr.loadFromFile(getResourcePath(BLACK_NORMAL)))
         {
-            this->texture = localTxr;
+            this->texture = std::move_if_noexcept(localTxr);
             this->myCircle.setTexture(&this->texture);
         }
     }
@@ -79,13 +81,13 @@ inline void Piece::draw(sf::RenderTarget &target, sf::RenderStates states) const
  * Get piece type, whether it's Black or Red
  * @return the pieceType
  */
-inline PieceType Piece::getPieceType() const
+inline const PieceType &Piece::getPieceType() const
 {
     return this->pieceType;
 }
 
 /**
- * Set piece as King. Will also change its texture
+ * Set this piece as King. Will also change its color
  */
 inline void Piece::activateKing()
 {
@@ -133,22 +135,37 @@ inline bool Piece::containsPoint(const sf::Vector2i &pos) const
  */
 inline void chk::Piece::addOutline()
 {
+
     this->myCircle.setOutlineColor(sf::Color::Yellow);
     this->myCircle.setOutlineThickness(5.0f);
 }
 
 /**
- * Removes the outline
+ * Highlight with GREEN outline, to indicate it MUST capture opponent
+ */
+inline void Piece::markImportant()
+{
+    this->myCircle.setOutlineColor(sf::Color::Green);
+    this->myCircle.setOutlineThickness(5.0f);
+}
+
+/**
+ * Removes the outline when no longer in focus
  */
 inline void Piece::removeOutline()
 {
+    // if marked important (GREEN), dont remove
+    if (this->myCircle.getOutlineColor() == sf::Color::Green)
+    {
+        return;
+    }
     this->myCircle.setOutlineThickness(0);
 }
 
 /**
  * Get piece's id
  */
-const inline int &Piece::getId() const
+const inline uint16_t &Piece::getId() const
 {
     return this->id;
 }
@@ -164,16 +181,16 @@ inline bool Piece::operator==(const Piece &other) const
 }
 
 /**
- * Validate first, then Move the Piece to the given position.
- * @param pos destination
+ * Simply move piece to given cell. Validate first, then Move the Piece to the given position.
+ * @param destPos destination
  * @return TRUE if successful, else FALSE
  */
-inline bool Piece::moveCustom(const sf::Vector2f &pos)
+inline bool Piece::moveSimple(const sf::Vector2f &destPos)
 {
-    const float deltaX = pos.x - this->getPosition().x;
-    const float deltaY = pos.y - this->getPosition().y;
+    const float deltaX = destPos.x - this->getPosition().x;
+    const float deltaY = destPos.y - this->getPosition().y;
 
-    if (std::abs(deltaX) > 100 || std::abs(deltaY) > 100)
+    if (std::abs(deltaX) > chk::SIZE_CELL || std::abs(deltaY) > chk::SIZE_CELL)
     {
         return false;
     }
@@ -186,8 +203,46 @@ inline bool Piece::moveCustom(const sf::Vector2f &pos)
         return false;
     }
 
-    this->myCircle.setPosition(pos.x, pos.y);
+    this->myCircle.setPosition(destPos.x, destPos.y);
     this->setPosition(myCircle.getPosition());
+    if (this->pieceType == PieceType::Red && destPos.y == 0 ||
+        this->pieceType == PieceType::Black && destPos.y == 7 * chk::SIZE_CELL)
+    {
+        this->activateKing();
+    }
+    return true;
+}
+
+/**
+ * Whne capturing opponent, Validate first, then move the Piece to the given position.
+ * @param destPos destination
+ * @return TRUE if successful, else FALSE
+ */
+inline bool Piece::moveCapture(const sf::Vector2f &destPos)
+{
+    const float deltaX = destPos.x - this->getPosition().x;
+    const float deltaY = destPos.y - this->getPosition().y;
+
+    if (std::abs(deltaX) != 2 * SIZE_CELL && std::abs(deltaY) != 2 * SIZE_CELL)
+    {
+        return false;
+    }
+    if (this->pieceType == PieceType::Red && deltaY > 0.0f && !this->isKing)
+    {
+        return false;
+    }
+    if (this->pieceType == PieceType::Black && deltaY < 0.0f && !this->isKing)
+    {
+        return false;
+    }
+
+    this->myCircle.setPosition(destPos.x, destPos.y);
+    this->setPosition(myCircle.getPosition());
+    if (this->pieceType == PieceType::Red && destPos.y == 0 ||
+        this->pieceType == PieceType::Black && destPos.y == 7 * chk::SIZE_CELL)
+    {
+        this->activateKing();
+    }
     return true;
 }
 
