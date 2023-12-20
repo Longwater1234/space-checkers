@@ -8,7 +8,6 @@
 #include "Piece.hpp"
 #include "Player.hpp"
 #include <SFML/Graphics/Text.hpp>
-#include <fstream>
 #include <iostream>
 #include <memory>
 #include <random>
@@ -397,12 +396,6 @@ inline void GameManager::matchCellsToPieces(const std::vector<chk::PiecePtr> &pi
     {
         return;
     }
-    std::ofstream fout("D:/work_mine/CPP/space-checkers/game_map.txt");
-    if (!fout.good())
-    {
-        perror("cannot create file");
-        exit(EXIT_FAILURE);
-    }
     for (const auto &piece : pieceList)
     {
         for (const auto &cell : this->blockList)
@@ -410,13 +403,9 @@ inline void GameManager::matchCellsToPieces(const std::vector<chk::PiecePtr> &pi
             if (cell->getIndex() != -1 && cell->containsOrigin(piece->getPosition()))
             {
                 this->gameMap.emplace(cell->getIndex(), piece->getId());
-                const std::string playerName = piece->getPieceType() == PieceType::Red ? "RED" : "BLACK";
-                fout << cell->getIndex() << "->" << piece->getId() << "\t " + playerName << "\n";
             }
         }
     }
-    fout << std::endl;
-    fout.close();
     this->alreadyCached = true;
     std::cout << "hashmap size " << gameMap.size() << std::endl;
 }
