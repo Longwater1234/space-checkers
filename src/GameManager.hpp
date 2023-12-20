@@ -3,13 +3,12 @@
 //
 #pragma once
 
+#include "CapturedPiece.hpp"
 #include "Cell.hpp"
-#include "ForcedJump.hpp"
 #include "Piece.hpp"
 #include "Player.hpp"
 #include <SFML/Graphics/Text.hpp>
 #include <fstream>
-#include <iomanip>
 #include <iostream>
 #include <memory>
 #include <random>
@@ -36,14 +35,14 @@ class GameManager
     static void drawAllPieces(std::vector<chk::PiecePtr> &pieceList);
     void updateMessage(const std::string &msg);
     void matchCellsToPieces(const std::vector<chk::PiecePtr> &pieceList);
-    [[nodiscard]] const std::unordered_map<uint16_t, int> &getForcedJumps() const;
+    [[nodiscard]] const std::unordered_map<int, int> &getForcedMoves() const;
     [[nodiscard]] const std::string &getCurrentMsg() const;
 
   private:
     // source cell Index of selected piece
     int sourceCell;
-    // stores forced capture details for opponents
-    std::unique_ptr<ForcedJump> fJump;
+    // keeps details about opponent about to be captured
+    std::unique_ptr<CapturedPiece> capturedPiece;
     // checkerboard cells
     std::vector<chk::Block> blockList;
     // map of cell_index --> piece_id
@@ -55,7 +54,7 @@ class GameManager
     // bottom display message
     std::string currentMsg;
     // Pair(hunterPieceId -> targetCell) For keeping records of pending "forced" captures
-    std::unordered_map<uint16_t, int> forcedMoves;
+    std::unordered_map<int, int> forcedMoves;
 
   private:
     bool checkDangerLHS(const chk::PlayerPtr &player, const Block &destCell);
@@ -76,7 +75,7 @@ class GameManager
 inline GameManager::GameManager()
 {
     this->sourceCell = -1;
-    this->fJump = std::make_unique<ForcedJump>();
+    this->capturedPiece = std::make_unique<CapturedPiece>();
     this->blockList.reserve(chk::NUM_COLS * chk::NUM_COLS);
 }
 
@@ -84,7 +83,7 @@ inline GameManager::GameManager()
  * Get pair of pieceID's forced to JUMP to matching cellIndex
  * @return a pair of PieceId--> cellIndex
  */
-inline const std::unordered_map<uint16_t, int> &GameManager::getForcedJumps() const
+inline const std::unordered_map<int, int> &GameManager::getForcedMoves() const
 {
     return this->forcedMoves;
 }
@@ -211,8 +210,8 @@ inline void GameManager::handleMovePiece(const std::unique_ptr<chk::Player> &pla
     if (dangerRight || dangerLeft)
     {
         // this->preyPieceId = currentPieceId;
-        this->fJump->preyPieceId = currentPieceId;
-        this->fJump->preyCellIdx = destCell->getIndex();
+        this->capturedPiece->preyPieceId = currentPieceId;
+        this->capturedPiece->preyCellIdx = destCell->getIndex();
         std::cout << player->getName() << " is in DANGER!" << std::endl;
     }
 }
@@ -240,12 +239,12 @@ inline void GameManager::handleJumpPiece(const chk::PlayerPtr &hunter, const chk
             }
             gameMap.erase(this->sourceCell);                   // set hunter's old location empty!
             gameMap.emplace(targetCell->getIndex(), piece_id); // fill in hunter new location
-            gameMap.erase(fJump->preyCellIdx);                 // set Prey's old location empty!
-            prey->losePiece(fJump->preyPieceId);               // the defending player loses 1 piece
+            gameMap.erase(this->capturedPiece->preyCellIdx);   // set Prey's old location empty!
+            prey->losePiece(this->capturedPiece->preyPieceId); // the defending player loses 1 piece
             this->playerRedTurn = !this->playerRedTurn;        // toggle player turns
             this->sourceCell = -1;
-            this->fJump->preyCellIdx = -1;
-            this->fJump->preyPieceId = -1;
+            this->capturedPiece->preyCellIdx = -1;
+            this->capturedPiece->preyPieceId = -1;
             this->forcedMoves.clear();
             // TODO check for opportunities to capture ANOTHER NOW!
             const auto dangerRight = this->checkDangerRHS(hunter, targetCell);
@@ -253,8 +252,8 @@ inline void GameManager::handleJumpPiece(const chk::PlayerPtr &hunter, const chk
             if (dangerRight || dangerLeft)
             {
 
-                this->fJump->preyCellIdx = targetCell->getIndex();
-                this->fJump->preyPieceId = piece_id;
+                this->capturedPiece->preyCellIdx = targetCell->getIndex();
+                this->capturedPiece->preyPieceId = gameMap.at(targetCell->getIndex());
                 std::cout << hunter->getName() << " is in DANGER!" << std::endl;
             }
             break;
@@ -399,7 +398,7 @@ inline void GameManager::matchCellsToPieces(const std::vector<chk::PiecePtr> &pi
     {
         return;
     }
-    std::ofstream fout("E:/dotnetapps/space-checkers/game_map.txt");
+    std::ofstream fout("D:/work_mine/CPP/space-checkers/game_map.txt");
     if (!fout.good())
     {
         perror("cannot create file");
@@ -413,7 +412,7 @@ inline void GameManager::matchCellsToPieces(const std::vector<chk::PiecePtr> &pi
             {
                 this->gameMap.emplace(cell->getIndex(), piece->getId());
                 const std::string playerName = piece->getPieceType() == PieceType::Red ? "RED" : "BLACK";
-                fout << cell->getIndex() << "->" << piece->getId() << std::setw(2) << playerName << "\n";
+                fout << cell->getIndex() << "->" << piece->getId() << "\t " + playerName << "\n";
             }
         }
     }

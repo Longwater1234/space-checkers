@@ -69,11 +69,8 @@ inline void Player::recievePiece(chk::PiecePtr &piecePtr)
  */
 inline void Player::losePiece(const int &targetId)
 {
-    if (this->basket_.find(targetId) != this->basket_.end())
-    {
-        const auto count = this->basket_.erase(targetId);
-        std::cout << "count =" << count << std::endl;
-    }
+    const auto count = this->basket_.erase(targetId);
+    std::cout << "count =" << count << std::endl;
 }
 
 /**

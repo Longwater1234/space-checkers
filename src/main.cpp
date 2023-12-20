@@ -20,7 +20,7 @@ constexpr auto FONT_PATH = "open-sans.regular.ttf";
 void showForcedMoves(const std::unique_ptr<chk::GameManager> &manager, const chk::PlayerPtr &player,
                      const chk::Block &cell)
 {
-    const auto &forcedMoves = manager->getForcedJumps();
+    const auto &forcedMoves = manager->getForcedMoves();
     const int pieceId = manager->getPieceFromCell(cell->getIndex());
     if (forcedMoves.find(pieceId) == forcedMoves.end())
     {
@@ -54,7 +54,7 @@ void handleCellTap(const std::unique_ptr<chk::GameManager> &manager, const chk::
     if (pieceId != -1)
     {
         // YES, it has one! CHECK IF THERE IS ANY PENDING "NECESSARY jumps"
-        if (!manager->getForcedJumps().empty())
+        if (!manager->getForcedMoves().empty())
         {
             showForcedMoves(manager, player, cell);
             return;
@@ -69,6 +69,8 @@ void handleCellTap(const std::unique_ptr<chk::GameManager> &manager, const chk::
         if (!buffer.isEmpty())
         {
             const int movablePieceId = buffer.getTop();
+            if (!player->hasThisPiece(movablePieceId))
+                return;
             manager->handleMovePiece(player, cell, movablePieceId);
             buffer.clean();
         }
@@ -160,7 +162,7 @@ int main()
                             circularBuffer.clean();
                             break;
                         }
-                        else if (cell->containsPoint(clickedPos) && cell->getIndex() != -1)
+                        if (cell->containsPoint(clickedPos) && cell->getIndex() != -1)
                         {
                             const auto &currentPlayer = manager->isPlayerRedTurn() ? p1 : p2;
                             handleCellTap(manager, currentPlayer, circularBuffer, cell);
