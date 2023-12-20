@@ -3,7 +3,7 @@
 //
 #pragma once
 
-#include "CapturedPiece.hpp"
+#include "CaptureTarget.hpp"
 #include "Cell.hpp"
 #include "Piece.hpp"
 #include "Player.hpp"
@@ -42,7 +42,7 @@ class GameManager
     // source cell Index of selected piece
     int sourceCell;
     // keeps details about opponent about to be captured
-    std::unique_ptr<CapturedPiece> capturedPiece;
+    std::unique_ptr<CaptureTarget> cTarget;
     // checkerboard cells
     std::vector<chk::Block> blockList;
     // map of cell_index --> piece_id
@@ -75,7 +75,7 @@ class GameManager
 inline GameManager::GameManager()
 {
     this->sourceCell = -1;
-    this->capturedPiece = std::make_unique<CapturedPiece>();
+    this->cTarget = std::make_unique<CaptureTarget>();
     this->blockList.reserve(chk::NUM_COLS * chk::NUM_COLS);
 }
 
@@ -209,9 +209,9 @@ inline void GameManager::handleMovePiece(const std::unique_ptr<chk::Player> &pla
     const auto dangerLeft = this->checkDangerLHS(player, destCell);
     if (dangerRight || dangerLeft)
     {
-        // this->preyPieceId = currentPieceId;
-        this->capturedPiece->preyPieceId = currentPieceId;
-        this->capturedPiece->preyCellIdx = destCell->getIndex();
+        //FIXME check for opportunities the whole board
+        this->cTarget->preyPieceId = currentPieceId;
+        this->cTarget->preyCellIdx = destCell->getIndex();
         std::cout << player->getName() << " is in DANGER!" << std::endl;
     }
 }
@@ -239,21 +239,20 @@ inline void GameManager::handleJumpPiece(const chk::PlayerPtr &hunter, const chk
             }
             gameMap.erase(this->sourceCell);                   // set hunter's old location empty!
             gameMap.emplace(targetCell->getIndex(), piece_id); // fill in hunter new location
-            gameMap.erase(this->capturedPiece->preyCellIdx);   // set Prey's old location empty!
-            prey->losePiece(this->capturedPiece->preyPieceId); // the defending player loses 1 piece
+            gameMap.erase(this->cTarget->preyCellIdx);   // set Prey's old location empty!
+            prey->losePiece(this->cTarget->preyPieceId); // the defending player loses 1 piece
             this->playerRedTurn = !this->playerRedTurn;        // toggle player turns
             this->sourceCell = -1;
-            this->capturedPiece->preyCellIdx = -1;
-            this->capturedPiece->preyPieceId = -1;
+            this->cTarget->preyCellIdx = -1;
+            this->cTarget->preyPieceId = -1;
             this->forcedMoves.clear();
             // TODO check for opportunities to capture ANOTHER NOW!
             const auto dangerRight = this->checkDangerRHS(hunter, targetCell);
             const auto dangerLeft = this->checkDangerLHS(hunter, targetCell);
             if (dangerRight || dangerLeft)
             {
-
-                this->capturedPiece->preyCellIdx = targetCell->getIndex();
-                this->capturedPiece->preyPieceId = gameMap.at(targetCell->getIndex());
+                this->cTarget->preyCellIdx = targetCell->getIndex();
+                this->cTarget->preyPieceId = gameMap.at(targetCell->getIndex());
                 std::cout << hunter->getName() << " is in DANGER!" << std::endl;
             }
             break;
