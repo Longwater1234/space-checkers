@@ -157,9 +157,10 @@ int main()
                             const auto &hunter = manager->isPlayerRedTurn() ? p1 : p2;
                             const auto &prey = manager->isPlayerRedTurn() ? p2 : p1;
                             manager->handleJumpPiece(hunter, prey, cell);
+                            circularBuffer.clean();
                             break;
                         }
-                        if (cell->containsPoint(clickedPos) && cell->getIndex() != -1)
+                        else if (cell->containsPoint(clickedPos) && cell->getIndex() != -1)
                         {
                             const auto &currentPlayer = manager->isPlayerRedTurn() ? p1 : p2;
                             handleCellTap(manager, currentPlayer, circularBuffer, cell);

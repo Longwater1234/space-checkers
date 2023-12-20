@@ -28,7 +28,6 @@ template <typename T> class CircularBuffer
 
   private:
     int maxCapacity = 0;    // max Capacity
-    size_t buf_size = 0;    // size of the buffer
     std::deque<T> m_deque_; // actual container of elements
 
   public:
@@ -93,6 +92,5 @@ template <typename T> void CircularBuffer<T>::addItem(T item)
         m_deque_.pop_front();
     }
     m_deque_.push_back(item);
-    buf_size++;
 }
 } // namespace chk
