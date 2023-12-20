@@ -209,7 +209,7 @@ inline void GameManager::handleMovePiece(const std::unique_ptr<chk::Player> &pla
     const auto dangerLeft = this->checkDangerLHS(player, destCell);
     if (dangerRight || dangerLeft)
     {
-        // this->preyPieceId = currentPieceId;
+        //FIXME check for opportunities the whole board
         this->capturedPiece->preyPieceId = currentPieceId;
         this->capturedPiece->preyCellIdx = destCell->getIndex();
         std::cout << player->getName() << " is in DANGER!" << std::endl;
@@ -251,7 +251,6 @@ inline void GameManager::handleJumpPiece(const chk::PlayerPtr &hunter, const chk
             const auto dangerLeft = this->checkDangerLHS(hunter, targetCell);
             if (dangerRight || dangerLeft)
             {
-
                 this->capturedPiece->preyCellIdx = targetCell->getIndex();
                 this->capturedPiece->preyPieceId = gameMap.at(targetCell->getIndex());
                 std::cout << hunter->getName() << " is in DANGER!" << std::endl;
