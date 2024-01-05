@@ -3,16 +3,17 @@
 #include "ResourcePath.hpp"
 #include <SFML/Graphics.hpp>
 #include <SFML/Window/Mouse.hpp>
+#include <ctime>
 #include <memory>
 #include <set>
 #include <vector>
 
-constexpr uint16_t NUM_PIECES = 24;
+constexpr uint16_t NUM_PIECES = 24u;
 constexpr auto ICON_PATH = "win-icon-16.png";
 constexpr auto FONT_PATH = "open-sans.regular.ttf";
 
 /**
- * When player is forced to capture opponent's piece
+ * When player is forced to capture opponent's piece, highlight their pieces.
  * @param manager game manager
  * @param player current player
  * @param cell selected cell
@@ -24,23 +25,24 @@ void showForcedMoves(const std::unique_ptr<chk::GameManager> &manager, const chk
     const int pieceId = manager->getPieceFromCell(cell->getIndex());
     if (forcedMoves.find(pieceId) == forcedMoves.end())
     {
-        // FORCE PLAYER TO DO JUMP, dont proceed until complete JUMP!
+        // FORCE PLAYER TO DO JUMP, don't proceed until done!
         std::set<int> pieceSet;
-        for (const auto &pair : forcedMoves)
+        for (const auto &[hunter_piece, dest_cell] : forcedMoves)
         {
-            pieceSet.insert(pair.first);
+            pieceSet.insert(hunter_piece);
         }
         player->showForcedMoves(pieceSet);
         manager->updateMessage(player->getName() + " must capture piece!");
     }
     else
     {
+        // SIMPLY STORE CURRENT CELL as source
         manager->setSourceCell(cell->getIndex());
     }
 }
 
 /**
- * When player taps a cell
+ * When current player taps a cell.
  * @param manager game manager
  * @param player currentPlayer
  * @param buffer Temporary store for clicked Pieces
@@ -49,19 +51,22 @@ void showForcedMoves(const std::unique_ptr<chk::GameManager> &manager, const chk
 void handleCellTap(const std::unique_ptr<chk::GameManager> &manager, const chk::PlayerPtr &player,
                    chk::CircularBuffer<int> &buffer, const chk::Block &cell)
 {
+    if (manager->isGameOver())
+        return;
+
     // CHECK IF cell has a Piece
     const int pieceId = manager->getPieceFromCell(cell->getIndex());
     if (pieceId != -1)
     {
-        // YES, it has one! CHECK IF THERE IS ANY PENDING "NECESSARY jumps"
+        // YES, it has one! CHECK IF THERE IS ANY PENDING "forced jumps"
         if (!manager->getForcedMoves().empty())
         {
             showForcedMoves(manager, player, cell);
             return;
         }
         // OTHERWISE, store it in buffer!
-        manager->setSourceCell(cell->getIndex());
         buffer.addItem(pieceId);
+        manager->setSourceCell(cell->getIndex());
     }
     else
     {
@@ -83,15 +88,20 @@ int main()
     window.setFramerateLimit(60u);
 
     sf::Image appIcon;
-    if (appIcon.loadFromFile(getResourcePath(ICON_PATH)))
+    if (appIcon.loadFromFile(chk::getResourcePath(ICON_PATH)))
     {
         auto dims = appIcon.getSize();
         window.setIcon(dims.x, dims.y, appIcon.getPixelsPtr());
     }
 
+    char mama[std::size("YYYY-MM-dd HH:mm:ss")];
+    std::time_t now = std::time(nullptr); // unix milli
+    std::strftime(mama, std::size(mama), "%F %T", std::localtime(&now));
+    std::cout << "now is " << mama << std::endl;
+
     // LOAD FONT
     sf::Font font;
-    if (!font.loadFromFile(getResourcePath(FONT_PATH)))
+    if (!font.loadFromFile(chk::getResourcePath(FONT_PATH)))
     {
         perror("cannot find file");
         exit(EXIT_FAILURE);
@@ -115,11 +125,11 @@ int main()
     {
         if (kete->getPieceType() == chk::PieceType::Red)
         {
-            p1->recievePiece(kete);
+            p1->receivePiece(kete);
         }
         else
         {
-            p2->recievePiece(kete);
+            p2->receivePiece(kete);
         }
     }
 
@@ -127,16 +137,16 @@ int main()
     keteList.clear();
 
     // Our temp store with maxCap of 1
-    chk::CircularBuffer<int> circularBuffer(1);
+    chk::CircularBuffer<int> circularBuffer{1};
 
     // THE STATUS TEXT
     sf::Text txtPanel;
     txtPanel.setFont(font);
     txtPanel.setCharacterSize(16u);
     txtPanel.setFillColor(sf::Color::White);
-    txtPanel.setPosition(sf::Vector2f(0, 650));
+    txtPanel.setPosition(sf::Vector2f{0, 8.5 * chk::SIZE_CELL});
 
-    manager->updateMessage("Now playing!");
+    manager->updateMessage("Now playing! RED starts");
     while (window.isOpen())
     {
         for (auto event = sf::Event{}; window.pollEvent(event);)
@@ -159,6 +169,7 @@ int main()
                             const auto &hunter = manager->isPlayerRedTurn() ? p1 : p2;
                             const auto &prey = manager->isPlayerRedTurn() ? p2 : p1;
                             manager->handleJumpPiece(hunter, prey, cell);
+                            manager->updateMatchStatus(p1, p2);
                             circularBuffer.clean();
                             break;
                         }

@@ -23,10 +23,10 @@ class Player
 {
   public:
     explicit Player(PlayerType player_type);
-    void recievePiece(PiecePtr &piecePtr);
+    void receivePiece(PiecePtr &piecePtr);
     void losePiece(const int &targetId);
     [[nodiscard]] const std::unordered_map<int, chk::PiecePtr> &getOwnPieces() const;
-    void showForcedMoves(const std::set<int> &targetPieces) const;
+    void showForcedMoves(const std::set<int> &hunterPieces) const;
     [[nodiscard]] size_t getPieceCount() const;
     [[nodiscard]] const std::string &getName() const;
     [[nodiscard]] PlayerType getPlayerType() const;
@@ -38,8 +38,9 @@ class Player
   private:
     // name of this player (RED or BLACK)
     std::string name_;
-    // my pieceId --> its Pointer
+    // my pieceId -> its Pointer
     std::unordered_map<int, chk::PiecePtr> basket_;
+
 };
 
 inline Player::Player(PlayerType player_type)
@@ -52,13 +53,14 @@ inline Player::Player(PlayerType player_type)
     {
         this->name_ = "BLACK";
     }
+    // this->next_hunters = {{}};
 }
 
 /**
  * Give this Player full ownership of this piece
  * @param piecePtr unique_ptr of piece
  */
-inline void Player::recievePiece(chk::PiecePtr &piecePtr)
+inline void Player::receivePiece(chk::PiecePtr &piecePtr)
 {
     this->basket_.emplace(piecePtr->getId(), std::move_if_noexcept(piecePtr));
 }
@@ -69,19 +71,18 @@ inline void Player::recievePiece(chk::PiecePtr &piecePtr)
  */
 inline void Player::losePiece(const int &targetId)
 {
-    const auto count = this->basket_.erase(targetId);
-    std::cout << "count =" << count << std::endl;
+    this->basket_.erase(targetId);
 }
 
 /**
  * Highlight my pieces that must capture opponent
- * @param targetPieces set of piece IDs
+ * @param hunterPieces set of piece IDs
  */
-inline void Player::showForcedMoves(const std::set<int> &targetPieces) const
+inline void Player::showForcedMoves(const std::set<int> &hunterPieces) const
 {
-    if (targetPieces.empty())
+    if (hunterPieces.empty())
         return;
-    for (const auto &id : targetPieces)
+    for (const auto &id : hunterPieces)
     {
         this->basket_.at(id)->markImportant();
     }
@@ -131,7 +132,7 @@ inline bool Player::hasThisPiece(const int &pieceId) const
 
 /**
  * \brief How many pieces this player currently have?
- * \return count as int
+ * \return count
  */
 inline size_t Player::getPieceCount() const
 {
@@ -142,7 +143,7 @@ inline size_t Player::getPieceCount() const
  * Get vector index of selected piece by this player
  * @param pieceId the selected PieceId
  * @param destPos destination cell
- * @return success true or FALSE
+ * @return TRUE if successful or FALSE
  */
 inline bool Player::movePiece(const int &pieceId, const sf::Vector2f &destPos) const
 {
@@ -169,4 +170,6 @@ inline bool Player::operator==(const Player &other) const
 {
     return this->name_ == other.name_;
 }
+
+
 } // namespace chk

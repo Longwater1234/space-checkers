@@ -18,14 +18,12 @@ class Cell final : public sf::Drawable
     bool containsOrigin(const sf::Vector2f &pos) const;
     const sf::Vector2f &getPos() const;
     int getIndex() const;
-    void setisEvenRow(const bool &is_even);
+    void setEvenRow(const bool &is_even);
     bool getIsEvenRow() const;
-    void showMoveHint();
-    void hideMoveHint();
 
   private:
     sf::RectangleShape rec_;
-    int index_;
+    int index_; // Darker cells have index in range [1-32]. Lighter cells are all -1
     bool isEvenRow = false;
     sf::Vector2f cell_pos;
     sf::Text sfText;
@@ -52,7 +50,7 @@ inline void Cell::draw(sf::RenderTarget &target, sf::RenderStates states) const
     target.draw(rec_, states);
     if (index_ != -1)
     {
-        // only draw text on Dark cells
+        // only draw text on Darker cells
         target.draw(sfText, states);
     }
 }
@@ -60,23 +58,6 @@ inline void Cell::draw(sf::RenderTarget &target, sf::RenderStates states) const
 inline bool Cell::getIsEvenRow() const
 {
     return this->isEvenRow;
-}
-
-/**
- * Draw outline around target cell (for forced jumps)
- */
-inline void Cell::showMoveHint()
-{
-    this->rec_.setOutlineColor(sf::Color::Green);
-    this->rec_.setOutlineThickness(5.0f);
-}
-
-/**
- * Remove the outline
- */
-inline void Cell::hideMoveHint()
-{
-    this->rec_.setOutlineThickness(0);
 }
 
 /**
@@ -111,7 +92,7 @@ inline int Cell::getIndex() const
 /**
  * Set whether this cell's row is even
  */
-inline void Cell::setisEvenRow(const bool &is_even)
+inline void Cell::setEvenRow(const bool &is_even)
 {
     this->isEvenRow = is_even;
 }
