@@ -10,6 +10,7 @@
 
 namespace chk
 {
+
 class Cell final : public sf::Drawable
 {
   public:

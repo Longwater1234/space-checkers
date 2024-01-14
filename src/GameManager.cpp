@@ -94,7 +94,7 @@ void GameManager::drawAllPieces(std::vector<chk::PiecePtr> &pieceList)
 {
     std::random_device randomDevice;
     std::mt19937 randEngine(randomDevice());
-    std::uniform_int_distribution<uint16_t> dist(1, 54059);
+    std::uniform_int_distribution<uint16_t> dist(1, std::numeric_limits<short>::max());
     for (uint16_t row = 0; row < NUM_ROWS; row++)
     {
         for (uint16_t col = 0; col < NUM_COLS; col++)
@@ -102,7 +102,7 @@ void GameManager::drawAllPieces(std::vector<chk::PiecePtr> &pieceList)
             if ((row + col) % 2 != 0)
             {
                 sf::CircleShape circle(0.5 * chk::SIZE_CELL);
-                const float x = (col % NUM_COLS) * chk::SIZE_CELL;
+                const float x = static_cast<float>(col % NUM_COLS) * chk::SIZE_CELL;
                 circle.setPosition(sf::Vector2f(x, row * chk::SIZE_CELL));
                 if (row < 3)
                 {
@@ -128,7 +128,7 @@ void GameManager::drawAllPieces(std::vector<chk::PiecePtr> &pieceList)
  * @param currentPieceId the selected PieceId
  */
 void GameManager::handleMovePiece(const std::unique_ptr<chk::Player> &player, const Block &destCell,
-                                  const int &currentPieceId)
+                                  const short &currentPieceId)
 {
     if (this->gameOver)
         return;
@@ -152,7 +152,7 @@ void GameManager::handleMovePiece(const std::unique_ptr<chk::Player> &player, co
         std::cout << player->getName() << " is in DANGER!" << std::endl;
         this->updateMessage(player->getName() + " is in DANGER!");
     }
-    // player->identifyTarget(this->gameMap, destCell);
+    // player->identifyTarget(this->gameMap, cell_ptr);
 }
 
 /**
@@ -168,18 +168,18 @@ void GameManager::handleJumpPiece(const chk::PlayerPtr &hunter, const chk::Playe
     if (this->gameOver || this->getPieceFromCell(targetCell->getIndex()) != -1)
         return;
 
-    for (const auto &[piece_id, cell_idx] : this->forcedMoves)
+    for (const auto &[hunterPieceId, cell_idx] : this->forcedMoves)
     {
         if (cell_idx == targetCell->getIndex())
         {
-            if (!hunter->captureEnemyWith(piece_id, targetCell->getPos()))
+            if (!hunter->captureEnemyWith(hunterPieceId, targetCell->getPos()))
             {
                 return;
             }
-            gameMap.erase(this->sourceCell);                   // set hunter's old location empty!
-            gameMap.erase(this->cTarget->preyCellIdx);         // set Prey's old location empty!
-            gameMap.emplace(targetCell->getIndex(), piece_id); // fill in hunter new location
-            prey->losePiece(this->cTarget->preyPieceId);       // the defending player loses 1 piece
+            gameMap.erase(this->sourceCell);                        // set hunter's old location empty!
+            gameMap.erase(this->cTarget->preyCellIdx);              // set Prey's old location empty!
+            gameMap.emplace(targetCell->getIndex(), hunterPieceId); // fill in hunter new location
+            prey->losePiece(this->cTarget->preyPieceId);            // the defending player loses 1 piece
             // FIXME check for more opportunities NOW before toggle Turns
             this->playerRedTurn = !this->playerRedTurn; // toggle player turns
             this->sourceCell = -1;
@@ -258,11 +258,11 @@ bool GameManager::checkDangerLHS(const chk::PlayerPtr &player, const Block &dest
     }
 
     int cellAheadIdx = destCell->getIndex() + (deltaForward * mSign);
-    int pieceId_NW = this->getPieceFromCell(cellAheadIdx);
+    short pieceId_NW = this->getPieceFromCell(cellAheadIdx);
     hasEnemyAhead = pieceId_NW != -1 && !player->hasThisPiece(pieceId_NW);
 
     int cellBelowRight = destCell->getIndex() - (deltaBehind * mSign);
-    int pieceId_SE = this->getPieceFromCell(cellBelowRight);
+    short pieceId_SE = this->getPieceFromCell(cellBelowRight);
     hasEmptyCellBehind = pieceId_SE == -1;
 
     bool inDanger = false;
@@ -305,7 +305,7 @@ bool GameManager::checkDangerRHS(const chk::PlayerPtr &player, const Block &dest
     }
 
     int cellAheadIdx = destCell->getIndex() + (deltaForward * mSign);
-    int pieceId_NE = this->getPieceFromCell(cellAheadIdx); // north East
+    short pieceId_NE = this->getPieceFromCell(cellAheadIdx); // north East
     hasEnemyAhead = pieceId_NE != -1 && !player->hasThisPiece(pieceId_NE);
 
     int cellBelowLeft = destCell->getIndex() - (deltaBehind * mSign);
@@ -325,9 +325,9 @@ bool GameManager::checkDangerRHS(const chk::PlayerPtr &player, const Block &dest
  * Using cached hashmap, get the PieceId placed at this cell_index
  *
  * @param cell_idx the clicked cell
- * @return positive int  or -1 if not found
+ * @return positive int or -1 if not found
  */
-inline int GameManager::getPieceFromCell(const int &cell_idx)
+inline short GameManager::getPieceFromCell(const int &cell_idx)
 {
     if (this->gameMap.find(cell_idx) != gameMap.end())
     {
@@ -346,6 +346,12 @@ void GameManager::matchCellsToPieces(const std::vector<chk::PiecePtr> &pieceList
     {
         return;
     }
+    std::ofstream fout{"D:/work_mine/CPP/space-checkers/game_map.txt"};
+    if (!fout.good())
+    {
+        perror("cannot create file");
+        exit(EXIT_FAILURE);
+    }
     for (const auto &piece : pieceList)
     {
         for (const auto &cell : this->blockList)
@@ -354,10 +360,13 @@ void GameManager::matchCellsToPieces(const std::vector<chk::PiecePtr> &pieceList
             {
                 this->gameMap.emplace(cell->getIndex(), piece->getId());
                 const std::string playerName = piece->getPieceType() == PieceType::Red ? "RED" : "BLACK";
+                fout << cell->getIndex() << "->" << piece->getId() << "\t " + playerName << "\n";
             }
         }
     }
     this->alreadyCached = true;
+    fout << std::endl;
+    fout.close();
     std::cout << "hashmap size " << gameMap.size() << std::endl;
 }
 
@@ -392,6 +401,16 @@ const bool &GameManager::isGameOver() const
 }
 
 /**
+ * Whether the game board contains this cell
+ * @param cell_idx Cell index
+ * @return TRUE if cell on board, else FALSE
+ */
+bool GameManager::boardContainsCell(const int &cell_idx) const
+{
+    return this->gameMap.find(cell_idx) != gameMap.end();
+}
+
+/**
  * Collect all possible next "forced captures" which must be taken
  * @param hunter current player
  */
@@ -399,24 +418,115 @@ inline void GameManager::identifyTargets(const PlayerPtr &hunter)
 {
     for (const auto &cell_ptr : this->blockList)
     {
-        if (gameMap.find(cell_ptr->getIndex()) == gameMap.end())
+        short pieceId = this->getPieceFromCell(cell_ptr->getIndex());
+        if (gameMap.find(cell_ptr->getIndex()) == gameMap.end() || !hunter->hasThisPiece(pieceId))
         {
-            // this CELL not on map!
+            // this CELL is not usable, or piece not OWNED by this Player!
             continue;
         }
+        // FIXME for each piece, only 1 captureTarget struct used.
+        this->collectFrontLHS(hunter, cell_ptr);
+        this->collectFrontRHS(hunter, cell_ptr);
+        const auto &piecePtr = hunter->getOwnPieces().at(pieceId);
+        //        if(piecePtr->getIsKing()) {
+        //            this->collectBehindLHS(hunter, cell_ptr);
+        //            this->collectBehindRHS(hunter, cell_ptr);
+        //        }
+    }
+}
 
-        int pieceId = this->getPieceFromCell(cell_ptr->getIndex());
-        if (hunter->hasThisPiece(pieceId))
-        {
-            const auto &piecePtr = hunter->getOwnPieces().at(pieceId);
-            // FIXME check for opportunity
-            this->checkDangerLHS(hunter, cell_ptr);
-            this->checkDangerRHS(hunter, cell_ptr);
-            if (piecePtr->getIsKing())
-            {
-                // TODO check opportunity behind right
-                // TODO check opportunity behind left
-            }
-        }
+/**
+ * Collect nearby enemies for next "forced" captures (Front RIGHT)
+ * @param hunter player whose turn is next
+ * @param cell_ptr current cell
+ */
+void GameManager::collectFrontRHS(const chk::PlayerPtr &hunter, const Block &cell_ptr)
+{
+    bool enemyOpenBehind = false;
+    bool hasEnemyAhead = false;
+    short deltaForward = cell_ptr->getIsEvenRow() ? 3 : 4;
+    short deltaBehind = cell_ptr->getIsEvenRow() ? 4 : 3;
+    int mSign = 1;
+
+    // if is player Black (PLAYER 2)
+    if (hunter->getPlayerType() == PlayerType::PLAYER_2)
+    {
+        mSign = -1;
+        std::swap(deltaForward, deltaBehind);
+    }
+
+    int cellAheadIdx = cell_ptr->getIndex() + (deltaForward * mSign);
+    if (!this->boardContainsCell(cellAheadIdx))
+    {
+        return;
+    }
+    short pieceId_NE = this->getPieceFromCell(cellAheadIdx); // North East
+    hasEnemyAhead = pieceId_NE != -1 && !hunter->hasThisPiece(pieceId_NE);
+
+    int cellBehindEnemy = cell_ptr->getIndex() - (deltaBehind * mSign);
+    if (!this->boardContainsCell(cellBehindEnemy))
+    {
+        return;
+    }
+    short pieceId_SW = this->getPieceFromCell(cellBehindEnemy); // south West of enemy
+    enemyOpenBehind = pieceId_SW == -1;
+
+    if (hasEnemyAhead && enemyOpenBehind)
+    {
+        CaptureTarget cf;
+        cf.preyCellIdx = pieceId_NE;
+        cf.preyCellIdx = cellAheadIdx;
+        cf.hunterNextCell = cellBehindEnemy;
+        const auto myPieceId = this->getPieceFromCell(cell_ptr->getIndex());
+        hunter->appendNextTarget(std::make_pair(myPieceId, cf));
+    }
+}
+
+/**
+ *  Collect nearby enemies for next "forced" captures (Front LEFT)
+ * @param hunter  player whose turn is next
+ * @param cell_ptr current cell
+ */
+void GameManager::collectFrontLHS(const chk::PlayerPtr &hunter, const Block &cell_ptr)
+{
+    bool enemyOpenBehind = false;
+    bool hasEnemyAhead = false;
+    short deltaForward = cell_ptr->getIsEvenRow() ? 4 : 5;
+    short deltaBehind = cell_ptr->getIsEvenRow() ? 5 : 4;
+    int mSign = 1;
+
+    // if its hunter Black (PLAYER 2)
+    if (hunter->getPlayerType() == PlayerType::PLAYER_2)
+    {
+        mSign = -1;
+        std::swap(deltaForward, deltaBehind);
+    }
+
+    int cellAheadIdx = cell_ptr->getIndex() + (deltaForward * mSign);
+    if (!this->boardContainsCell(cellAheadIdx))
+    {
+        return;
+    }
+
+    short pieceId_NW = this->getPieceFromCell(cellAheadIdx); // North West
+    hasEnemyAhead = pieceId_NW != -1 && !hunter->hasThisPiece(pieceId_NW);
+
+    int cellBehindEnemy = cell_ptr->getIndex() - (deltaBehind * mSign);
+    if (!this->boardContainsCell(cellBehindEnemy))
+    {
+        return;
+    }
+
+    short pieceId_SE = this->getPieceFromCell(cellBehindEnemy); // South East of enemy
+    enemyOpenBehind = pieceId_SE == -1;
+
+    if (hasEnemyAhead && enemyOpenBehind)
+    {
+        CaptureTarget cf;
+        cf.preyCellIdx = pieceId_NW;
+        cf.preyCellIdx = cellAheadIdx;
+        cf.hunterNextCell = cellBehindEnemy;
+        const auto myPieceId = this->getPieceFromCell(cell_ptr->getIndex());
+        hunter->appendNextTarget(std::make_pair(myPieceId, cf));
     }
 }

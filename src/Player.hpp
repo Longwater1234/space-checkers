@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Piece.hpp"
+#include <iostream>
 #include <memory>
 #include <set>
 #include <string>
@@ -24,23 +25,25 @@ class Player
   public:
     explicit Player(PlayerType player_type);
     void receivePiece(PiecePtr &piecePtr);
-    void losePiece(const int &targetId);
-    [[nodiscard]] const std::unordered_map<int, chk::PiecePtr> &getOwnPieces() const;
-    void showForcedMoves(const std::set<int> &hunterPieces) const;
+    void losePiece(const short &targetId);
+    [[nodiscard]] const std::unordered_map<short, chk::PiecePtr> &getOwnPieces() const;
+    void showForcedPieces(const std::set<short> &hunterPieces) const;
+    void appendNextTarget(const std::pair<short, chk::CaptureTarget> &targetPair);
     [[nodiscard]] size_t getPieceCount() const;
     [[nodiscard]] const std::string &getName() const;
     [[nodiscard]] PlayerType getPlayerType() const;
-    [[nodiscard]] bool hasThisPiece(const int &pieceId) const;
-    [[nodiscard]] bool movePiece(const int &pieceId, const sf::Vector2f &destPos) const;
-    [[nodiscard]] bool captureEnemyWith(const int &pieceId, const sf::Vector2f &destPos) const;
+    [[nodiscard]] bool hasThisPiece(const short &pieceId) const;
+    [[nodiscard]] bool movePiece(const short &pieceId, const sf::Vector2f &destPos) const;
+    [[nodiscard]] bool captureEnemyWith(const short &pieceId, const sf::Vector2f &destPos) const;
     bool operator==(const Player &other) const;
 
   private:
     // name of this player (RED or BLACK)
     std::string name_;
     // my pieceId -> its Pointer
-    std::unordered_map<int, chk::PiecePtr> basket_;
-
+    std::unordered_map<short, chk::PiecePtr> basket_;
+    // collection of my next targets (Map<HunterPieceID, CaptureTarget>)
+    std::unordered_map<short, chk::CaptureTarget> next_hunts_{{}};
 };
 
 inline Player::Player(PlayerType player_type)
@@ -53,7 +56,6 @@ inline Player::Player(PlayerType player_type)
     {
         this->name_ = "BLACK";
     }
-    // this->next_hunters = {{}};
 }
 
 /**
@@ -69,16 +71,16 @@ inline void Player::receivePiece(chk::PiecePtr &piecePtr)
  * When a player's piece is captured, -1 from list
  * @param targetId  the captured piece Id
  */
-inline void Player::losePiece(const int &targetId)
+inline void Player::losePiece(const short &targetId)
 {
     this->basket_.erase(targetId);
 }
 
 /**
- * Highlight my pieces that must capture opponent
+ * Highlight all my pieces which must capture the opponent
  * @param hunterPieces set of piece IDs
  */
-inline void Player::showForcedMoves(const std::set<int> &hunterPieces) const
+inline void Player::showForcedPieces(const std::set<short> &hunterPieces) const
 {
     if (hunterPieces.empty())
         return;
@@ -115,7 +117,7 @@ inline const std::string &Player::getName() const
  * Get all pieces this player owns
  * @return list of pieces
  */
-inline const std::unordered_map<int, chk::PiecePtr> &Player::getOwnPieces() const
+inline const std::unordered_map<short, chk::PiecePtr> &Player::getOwnPieces() const
 {
     return this->basket_;
 }
@@ -125,7 +127,7 @@ inline const std::unordered_map<int, chk::PiecePtr> &Player::getOwnPieces() cons
  * @param pieceId the pieceId
  * @return TRUE or FALSE
  */
-inline bool Player::hasThisPiece(const int &pieceId) const
+inline bool Player::hasThisPiece(const short &pieceId) const
 {
     return this->basket_.find(pieceId) != this->basket_.end();
 }
@@ -145,7 +147,7 @@ inline size_t Player::getPieceCount() const
  * @param destPos destination cell
  * @return TRUE if successful or FALSE
  */
-inline bool Player::movePiece(const int &pieceId, const sf::Vector2f &destPos) const
+inline bool Player::movePiece(const short &pieceId, const sf::Vector2f &destPos) const
 {
     return this->basket_.at(pieceId)->moveSimple(destPos);
 }
@@ -156,7 +158,7 @@ inline bool Player::movePiece(const int &pieceId, const sf::Vector2f &destPos) c
  * \param destPos destination cell
  * \return TRUE if successful or FALSE
  */
-inline bool Player::captureEnemyWith(const int &pieceId, const sf::Vector2f &destPos) const
+inline bool Player::captureEnemyWith(const short &pieceId, const sf::Vector2f &destPos) const
 {
     return this->basket_.at(pieceId)->moveCapture(destPos);
 }
@@ -171,5 +173,13 @@ inline bool Player::operator==(const Player &other) const
     return this->name_ == other.name_;
 }
 
+/**
+ * Append the given pair to the local collection of next hunts
+ * @param targetPair Map(HunterId, CaptureTarget)
+ */
+inline void Player::appendNextTarget(const std::pair<short, chk::CaptureTarget> &targetPair)
+{
+    this->next_hunts_.emplace(std::move_if_noexcept(targetPair));
+}
 
 } // namespace chk

@@ -5,9 +5,9 @@
 
 #include "CaptureTarget.hpp"
 #include "Cell.hpp"
-#include "Piece.hpp"
 #include "Player.hpp"
 #include <SFML/Graphics/Text.hpp>
+#include <fstream>
 #include <iostream>
 #include <memory>
 #include <random>
@@ -45,7 +45,7 @@ class GameManager
     // checkerboard cells
     std::vector<chk::Block> blockList;
     // map of cell_index --> piece_id
-    std::map<int, int> gameMap;
+    std::map<int, short> gameMap;
     // flag to check if cache is already filled
     bool alreadyCached = false;
     // whether it's player Red's turn
@@ -54,24 +54,28 @@ class GameManager
     std::string currentMsg;
     // Hashmap(hunterPieceId -> targetCell) For keeping records of pending "forced" captures
     std::unordered_map<uint16_t, int> forcedMoves;
-    // collection of next hunts by Player
-    std::vector<chk::CaptureTarget> next_hunts{};
     // whether match is over
     bool gameOver = false;
 
   private:
+    [[nodiscard]] bool boardContainsCell(const int &cell_idx) const;
     bool checkDangerLHS(const chk::PlayerPtr &player, const Block &destCell);
     bool checkDangerRHS(const chk::PlayerPtr &player, const Block &destCell);
     void identifyTargets(const chk::PlayerPtr &hunter);
+    void collectFrontRHS(const chk::PlayerPtr &hunter, const Block &cell_ptr);
+    void collectFrontLHS(const chk::PlayerPtr &hunter, const Block &cell_ptr);
+    void collectBehindRHS(const chk::PlayerPtr &hunter, const Block &cell_ptr);
+    void collectBehindLHS(const chk::PlayerPtr &hunter, const Block &cell_ptr);
 
   public:
     [[nodiscard]] const bool &isPlayerRedTurn() const;
-    [[nodiscard]] int getPieceFromCell(const int &cell_idx);
+    [[nodiscard]] short getPieceFromCell(const int &cell_idx);
     [[nodiscard]] const std::vector<chk::Block> &getBlockList() const;
     [[nodiscard]] bool isReadyForCapture() const;
     [[nodiscard]] const bool &isGameOver() const;
     void setSourceCell(const int &src_cell);
-    void handleMovePiece(const std::unique_ptr<chk::Player> &player, const Block &destCell, const int &currentPieceId);
+    void handleMovePiece(const std::unique_ptr<chk::Player> &player, const Block &destCell,
+                         const short &currentPieceId);
     void handleJumpPiece(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey, const chk::Block &targetCell);
     void updateMatchStatus(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2);
 };

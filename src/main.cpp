@@ -3,7 +3,6 @@
 #include "ResourcePath.hpp"
 #include <SFML/Graphics.hpp>
 #include <SFML/Window/Mouse.hpp>
-#include <ctime>
 #include <memory>
 #include <set>
 #include <vector>
@@ -22,21 +21,20 @@ void showForcedMoves(const std::unique_ptr<chk::GameManager> &manager, const chk
                      const chk::Block &cell)
 {
     const auto &forcedMoves = manager->getForcedMoves();
-    const int pieceId = manager->getPieceFromCell(cell->getIndex());
+    const short pieceId = manager->getPieceFromCell(cell->getIndex());
     if (forcedMoves.find(pieceId) == forcedMoves.end())
     {
         // FORCE PLAYER TO DO JUMP, don't proceed until done!
-        std::set<int> pieceSet;
+        std::set<short> pieceSet;
         for (const auto &[hunter_piece, dest_cell] : forcedMoves)
         {
             pieceSet.insert(hunter_piece);
         }
-        player->showForcedMoves(pieceSet);
+        player->showForcedPieces(pieceSet);
         manager->updateMessage(player->getName() + " must capture piece!");
     }
     else
     {
-        // SIMPLY STORE CURRENT CELL as source
         manager->setSourceCell(cell->getIndex());
     }
 }
@@ -49,13 +47,13 @@ void showForcedMoves(const std::unique_ptr<chk::GameManager> &manager, const chk
  * @param cell Tapped cell
  */
 void handleCellTap(const std::unique_ptr<chk::GameManager> &manager, const chk::PlayerPtr &player,
-                   chk::CircularBuffer<int> &buffer, const chk::Block &cell)
+                   chk::CircularBuffer<short> &buffer, const chk::Block &cell)
 {
     if (manager->isGameOver())
         return;
 
     // CHECK IF cell has a Piece
-    const int pieceId = manager->getPieceFromCell(cell->getIndex());
+    const short pieceId = manager->getPieceFromCell(cell->getIndex());
     if (pieceId != -1)
     {
         // YES, it has one! CHECK IF THERE IS ANY PENDING "forced jumps"
@@ -73,7 +71,7 @@ void handleCellTap(const std::unique_ptr<chk::GameManager> &manager, const chk::
         // Cell is Empty! Let's move a piece (from buffer) here!
         if (!buffer.isEmpty())
         {
-            const int movablePieceId = buffer.getTop();
+            const short movablePieceId = buffer.getTop();
             if (!player->hasThisPiece(movablePieceId))
                 return;
             manager->handleMovePiece(player, cell, movablePieceId);
@@ -93,11 +91,6 @@ int main()
         auto dims = appIcon.getSize();
         window.setIcon(dims.x, dims.y, appIcon.getPixelsPtr());
     }
-
-    char mama[std::size("YYYY-MM-dd HH:mm:ss")];
-    std::time_t now = std::time(nullptr); // unix milli
-    std::strftime(mama, std::size(mama), "%F %T", std::localtime(&now));
-    std::cout << "now is " << mama << std::endl;
 
     // LOAD FONT
     sf::Font font;
@@ -137,7 +130,7 @@ int main()
     keteList.clear();
 
     // Our temp store with maxCap of 1
-    chk::CircularBuffer<int> circularBuffer{1};
+    chk::CircularBuffer<short> circularBuffer{1};
 
     // THE STATUS TEXT
     sf::Text txtPanel;

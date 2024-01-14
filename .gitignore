@@ -55,3 +55,4 @@ bld/
 *.rar
 /cmake-build-*/
 **/.DS_Store
+game_map.txt

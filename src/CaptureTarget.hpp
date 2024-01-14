@@ -4,19 +4,19 @@
 namespace chk
 {
 /**
- * Keeps details about the Piece about to be captured
+ * Keeps details about the Piece which must be captured next
  */
 struct CaptureTarget
 {
-    int preyPieceId{-1};                     // the piece that MUST be captured
-    int preyCellIdx{-1};                     // the cell hosting this piece
-    std::map<uint16_t, int> hunterMoves{{}}; // map of PieceId -> destCell
+    short preyPieceId{-1};  // the piece that MUST be captured
+    int preyCellIdx{-1};    // the cell hosting this piece
+    int hunterNextCell{-1}; // landing destination of hunter after capturing
 
     // override output operator
     friend std::ostream &operator<<(std::ostream &os, const CaptureTarget &target)
     {
         os << "preyPieceId: " << target.preyPieceId << " preyCellIdx: " << target.preyCellIdx
-           << " size hunterMoves: " << target.hunterMoves.size();
+           << "hunterNextCell: " << target.hunterNextCell;
         return os;
     }
 };
