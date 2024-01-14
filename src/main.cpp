@@ -26,7 +26,7 @@ void showForcedMoves(const std::unique_ptr<chk::GameManager> &manager, const chk
     {
         // FORCE PLAYER TO DO JUMP, don't proceed until done!
         std::set<short> pieceSet;
-        for (const auto &[hunter_piece, dest_cell] : forcedMoves)
+        for (const auto &[hunter_piece, captureTarget] : forcedMoves)
         {
             pieceSet.insert(hunter_piece);
         }
@@ -47,7 +47,7 @@ void showForcedMoves(const std::unique_ptr<chk::GameManager> &manager, const chk
  * @param cell Tapped cell
  */
 void handleCellTap(const std::unique_ptr<chk::GameManager> &manager, const chk::PlayerPtr &player,
-                   chk::CircularBuffer<short> &buffer, const chk::Block &cell)
+                   const chk::PlayerPtr &opponent, chk::CircularBuffer<short> &buffer, const chk::Block &cell)
 {
     if (manager->isGameOver())
         return;
@@ -74,7 +74,7 @@ void handleCellTap(const std::unique_ptr<chk::GameManager> &manager, const chk::
             const short movablePieceId = buffer.getTop();
             if (!player->hasThisPiece(movablePieceId))
                 return;
-            manager->handleMovePiece(player, cell, movablePieceId);
+            manager->handleMovePiece(player, opponent, cell, movablePieceId);
             buffer.clean();
         }
     }
@@ -169,7 +169,8 @@ int main()
                         if (cell->containsPoint(clickedPos) && cell->getIndex() != -1)
                         {
                             const auto &currentPlayer = manager->isPlayerRedTurn() ? p1 : p2;
-                            handleCellTap(manager, currentPlayer, circularBuffer, cell);
+                            const auto &opponent = manager->isPlayerRedTurn() ? p2 : p1;
+                            handleCellTap(manager, currentPlayer, opponent, circularBuffer, cell);
                             break;
                         }
                     }

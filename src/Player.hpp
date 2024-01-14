@@ -28,7 +28,6 @@ class Player
     void losePiece(const short &targetId);
     [[nodiscard]] const std::unordered_map<short, chk::PiecePtr> &getOwnPieces() const;
     void showForcedPieces(const std::set<short> &hunterPieces) const;
-    void appendNextTarget(const std::pair<short, chk::CaptureTarget> &targetPair);
     [[nodiscard]] size_t getPieceCount() const;
     [[nodiscard]] const std::string &getName() const;
     [[nodiscard]] PlayerType getPlayerType() const;
@@ -42,8 +41,7 @@ class Player
     std::string name_;
     // my pieceId -> its Pointer
     std::unordered_map<short, chk::PiecePtr> basket_;
-    // collection of my next targets (Map<HunterPieceID, CaptureTarget>)
-    std::unordered_map<short, chk::CaptureTarget> next_hunts_{{}};
+
 };
 
 inline Player::Player(PlayerType player_type)
@@ -171,15 +169,6 @@ inline bool Player::captureEnemyWith(const short &pieceId, const sf::Vector2f &d
 inline bool Player::operator==(const Player &other) const
 {
     return this->name_ == other.name_;
-}
-
-/**
- * Append the given pair to the local collection of next hunts
- * @param targetPair Map(HunterId, CaptureTarget)
- */
-inline void Player::appendNextTarget(const std::pair<short, chk::CaptureTarget> &targetPair)
-{
-    this->next_hunts_.emplace(std::move_if_noexcept(targetPair));
 }
 
 } // namespace chk

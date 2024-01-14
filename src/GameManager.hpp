@@ -34,14 +34,12 @@ class GameManager
     static void drawAllPieces(std::vector<chk::PiecePtr> &pieceList);
     void updateMessage(const std::string &msg);
     void matchCellsToPieces(const std::vector<chk::PiecePtr> &pieceList);
-    [[nodiscard]] const std::unordered_map<uint16_t, int> &getForcedMoves() const;
+    [[nodiscard]] const std::unordered_map<short, chk::CaptureTarget> &getForcedMoves() const;
     [[nodiscard]] const std::string &getCurrentMsg() const;
 
   private:
     // source cell Index of selected piece
     int sourceCell;
-    // details about opponent to be captured
-    std::unique_ptr<CaptureTarget> cTarget;
     // checkerboard cells
     std::vector<chk::Block> blockList;
     // map of cell_index --> piece_id
@@ -52,10 +50,10 @@ class GameManager
     bool playerRedTurn = true;
     // bottom display message
     std::string currentMsg;
-    // Hashmap(hunterPieceId -> targetCell) For keeping records of pending "forced" captures
-    std::unordered_map<uint16_t, int> forcedMoves;
     // whether match is over
     bool gameOver = false;
+    // collection of my next targets (Map<HunterPieceID, CaptureTarget>)
+    std::unordered_map<short, chk::CaptureTarget> forcedMoves;
 
   private:
     [[nodiscard]] bool boardContainsCell(const int &cell_idx) const;
@@ -74,7 +72,7 @@ class GameManager
     [[nodiscard]] bool isReadyForCapture() const;
     [[nodiscard]] const bool &isGameOver() const;
     void setSourceCell(const int &src_cell);
-    void handleMovePiece(const std::unique_ptr<chk::Player> &player, const Block &destCell,
+    void handleMovePiece(const chk::PlayerPtr &player, const chk::PlayerPtr &opponent, const Block &destCell,
                          const short &currentPieceId);
     void handleJumpPiece(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey, const chk::Block &targetCell);
     void updateMatchStatus(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2);
