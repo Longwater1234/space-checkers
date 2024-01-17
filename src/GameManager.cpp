@@ -214,10 +214,10 @@ void GameManager::setSourceCell(const int &src_cell)
 }
 
 /**
- * \brief Whether both src_cell is NOT NULL & forcedMoves NOT empty
+ * \brief Whether both `src_cell` is NOT NULL & `forcedMoves` NOT empty
  * \return TRUE or FALSE
  */
-bool GameManager::isReadyForCapture() const
+bool GameManager::hasPendingCaptures() const
 {
     return this->sourceCell != -1 && !forcedMoves.empty();
 }
