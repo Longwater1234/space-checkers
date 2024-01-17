@@ -41,7 +41,6 @@ class Player
     std::string name_;
     // my pieceId -> its Pointer
     std::unordered_map<short, chk::PiecePtr> basket_;
-
 };
 
 inline Player::Player(PlayerType player_type)

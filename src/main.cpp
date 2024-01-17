@@ -157,20 +157,21 @@ int main()
                 {
                     for (auto &cell : manager->getBlockList())
                     {
-                        if (cell->containsPoint(clickedPos) && cell->getIndex() != -1 && manager->isReadyForCapture())
+                        if (cell->containsPoint(clickedPos) && cell->getIndex() != -1)
                         {
                             const auto &hunter = manager->isPlayerRedTurn() ? p1 : p2;
                             const auto &prey = manager->isPlayerRedTurn() ? p2 : p1;
-                            manager->handleJumpPiece(hunter, prey, cell);
-                            manager->updateMatchStatus(p1, p2);
-                            circularBuffer.clean();
-                            break;
-                        }
-                        if (cell->containsPoint(clickedPos) && cell->getIndex() != -1)
-                        {
-                            const auto &currentPlayer = manager->isPlayerRedTurn() ? p1 : p2;
-                            const auto &opponent = manager->isPlayerRedTurn() ? p2 : p1;
-                            handleCellTap(manager, currentPlayer, opponent, circularBuffer, cell);
+
+                            if (manager->isReadyForCapture())
+                            {
+                                manager->handleJumpPiece(hunter, prey, cell);
+                                manager->updateMatchStatus(hunter, prey);
+                                circularBuffer.clean();
+                            }
+                            else
+                            {
+                                handleCellTap(manager, hunter, prey, circularBuffer, cell);
+                            }
                             break;
                         }
                     }

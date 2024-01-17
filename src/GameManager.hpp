@@ -7,7 +7,6 @@
 #include "Cell.hpp"
 #include "Player.hpp"
 #include <SFML/Graphics/Text.hpp>
-#include <fstream>
 #include <iostream>
 #include <memory>
 #include <random>
@@ -57,8 +56,7 @@ class GameManager
 
   private:
     [[nodiscard]] bool boardContainsCell(const int &cell_idx) const;
-    bool checkDangerLHS(const chk::PlayerPtr &player, const Block &destCell);
-    bool checkDangerRHS(const chk::PlayerPtr &player, const Block &destCell);
+    [[nodiscard]] bool withinEdges(const int &cell_idx) const;
     void identifyTargets(const chk::PlayerPtr &hunter);
     void collectFrontRHS(const chk::PlayerPtr &hunter, const Block &cell_ptr);
     void collectFrontLHS(const chk::PlayerPtr &hunter, const Block &cell_ptr);
