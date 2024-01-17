@@ -24,7 +24,7 @@ class Piece final : public sf::Drawable, public sf::Transformable
 {
 
   public:
-    Piece(const sf::CircleShape &circle, const PieceType &pType, uint16_t id_);
+    Piece(const sf::CircleShape &circle, const PieceType &pType, short id);
     [[nodiscard]] const PieceType &getPieceType() const;
     void activateKing();
     bool getIsKing() const;
@@ -34,29 +34,29 @@ class Piece final : public sf::Drawable, public sf::Transformable
     void addOutline();
     void markImportant();
     void removeOutline();
-    const uint16_t &getId() const;
+    const short &getId() const;
     bool operator==(const Piece &other) const;
 
   private:
     sf::Texture texture;
-    uint16_t id; // random positive ID assigned at Launch
+    short id_; // random positive ID assigned at Launch
     sf::CircleShape myCircle;
     PieceType pieceType;
     bool isKing = false;
     void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
 };
 
-inline Piece::Piece(const sf::CircleShape &circle, const PieceType &pType, const uint16_t id_)
+inline Piece::Piece(const sf::CircleShape &circle, const PieceType &pType, const short id)
 {
     this->myCircle = circle;
     this->pieceType = pType;
-    this->id = id_;
+    this->id_ = id;
     this->setPosition(circle.getPosition());
 
     sf::Texture localTxr;
     if (pieceType == PieceType::Red)
     {
-        if (localTxr.loadFromFile(getResourcePath(RED_NORMAL)))
+        if (localTxr.loadFromFile(chk::getResourcePath(RED_NORMAL)))
         {
             this->texture = std::move_if_noexcept(localTxr);
             this->myCircle.setTexture(&this->texture);
@@ -64,7 +64,7 @@ inline Piece::Piece(const sf::CircleShape &circle, const PieceType &pType, const
     }
     else
     {
-        if (localTxr.loadFromFile(getResourcePath(BLACK_NORMAL)))
+        if (localTxr.loadFromFile(chk::getResourcePath(BLACK_NORMAL)))
         {
             this->texture = std::move_if_noexcept(localTxr);
             this->myCircle.setTexture(&this->texture);
@@ -95,7 +95,7 @@ inline void Piece::activateKing()
     sf::Texture localTxr;
     if (pieceType == PieceType::Red)
     {
-        if (localTxr.loadFromFile(getResourcePath(RED_KING)))
+        if (localTxr.loadFromFile(chk::getResourcePath(RED_KING)))
         {
             this->texture = std::move_if_noexcept(localTxr);
             this->myCircle.setTexture(&this->texture);
@@ -103,7 +103,7 @@ inline void Piece::activateKing()
     }
     else
     {
-        if (localTxr.loadFromFile(getResourcePath(BLACK_KING)))
+        if (localTxr.loadFromFile(chk::getResourcePath(BLACK_KING)))
         {
             this->texture = std::move_if_noexcept(localTxr);
             this->myCircle.setTexture(&this->texture);
@@ -154,7 +154,7 @@ inline void Piece::markImportant()
  */
 inline void Piece::removeOutline()
 {
-    // if marked important (GREEN), dont remove
+    // if marked important (GREEN), don't remove
     if (this->myCircle.getOutlineColor() == sf::Color::Green)
     {
         return;
@@ -165,9 +165,9 @@ inline void Piece::removeOutline()
 /**
  * Get piece's id
  */
-const inline uint16_t &Piece::getId() const
+const inline short &Piece::getId() const
 {
-    return this->id;
+    return this->id_;
 }
 
 /**
@@ -177,7 +177,7 @@ const inline uint16_t &Piece::getId() const
  */
 inline bool Piece::operator==(const Piece &other) const
 {
-    return this->id == other.id;
+    return this->id_ == other.id_;
 }
 
 /**
@@ -214,7 +214,7 @@ inline bool Piece::moveSimple(const sf::Vector2f &destPos)
 }
 
 /**
- * Whne capturing opponent, Validate first, then move the Piece to the given position.
+ * When capturing opponent, Validate first, then move the Piece to the given position.
  * @param destPos destination
  * @return TRUE if successful, else FALSE
  */

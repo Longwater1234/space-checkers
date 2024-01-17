@@ -16,7 +16,7 @@ template <typename T> class CircularBuffer
 
   public:
     // Constructor, sets maxCapacity limit
-    explicit CircularBuffer(int maxCapacity) : maxCapacity(maxCapacity)
+    explicit CircularBuffer(uint32_t maxCapacity) : maxCapacity(maxCapacity)
     {
         m_deque_.resize(maxCapacity);
     }
@@ -27,14 +27,8 @@ template <typename T> class CircularBuffer
     void clean();
 
   private:
-    int maxCapacity = 0;    // max Capacity
-    std::deque<T> m_deque_; // actual container of elements
-
-  public:
-    bool operator==(const CircularBuffer &other) const
-    {
-        return this->m_deque_ == other.m_deque_;
-    }
+    uint32_t maxCapacity = 0; // max Capacity
+    std::deque<T> m_deque_;   // actual container of elements
 };
 
 /**
@@ -72,11 +66,12 @@ template <typename T> T &CircularBuffer<T>::getTop()
  */
 template <typename T> void CircularBuffer<T>::printAll()
 {
+    std::cout << "[";
     for (const auto &item : m_deque_)
     {
-        std::cout << item << '\n';
+        std::cout << item << ", ";
     }
-    std::cout << std::endl;
+    std::cout << "]" << std::endl;
 }
 
 /**

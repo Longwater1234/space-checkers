@@ -5,10 +5,12 @@
 #include <iostream>
 #include <string>
 
-////////////////////////////////////////////////////////////
-/// \brief Get file path specified
-/// \param relativePath relative to `Resources/` directory
-/// \return The absolute file path
-
-////////////////////////////////////////////////////////////
+namespace chk
+{
+/**
+ * \brief Get absolute path of file specified
+ * \param relativePath relative to `Resources/` directory
+ * \return The absolute file path
+ */
 std::string getResourcePath(const std::string &relativePath);
+} // namespace chk

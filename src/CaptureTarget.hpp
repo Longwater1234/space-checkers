@@ -1,11 +1,23 @@
 #pragma once
+#include <ostream>
 namespace chk
 {
-
+/**
+ * Keeps details about the Piece which must be captured next
+ */
 struct CaptureTarget
 {
-    int preyPieceId{-1}; // the piece that MUST be captured
-    int preyCellIdx{-1}; // the cell hosting this cell
+    short preyPieceId{-1};  // the piece that MUST be captured
+    int preyCellIdx{-1};    // the cell hosting this piece
+    int hunterNextCell{-1}; // landing destination of hunter after capturing
+
+    // override output operator
+    friend std::ostream &operator<<(std::ostream &os, const CaptureTarget &target)
+    {
+        os << "preyPieceId: " << target.preyPieceId << " preyCellIdx: " << target.preyCellIdx
+           << "hunterNextCell: " << target.hunterNextCell;
+        return os;
+    }
 };
 
 } // namespace chk
