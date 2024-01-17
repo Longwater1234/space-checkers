@@ -162,7 +162,7 @@ int main()
                             const auto &hunter = manager->isPlayerRedTurn() ? p1 : p2;
                             const auto &prey = manager->isPlayerRedTurn() ? p2 : p1;
 
-                            if (manager->isReadyForCapture())
+                            if (manager->hasPendingCaptures())
                             {
                                 manager->handleJumpPiece(hunter, prey, cell);
                                 manager->updateMatchStatus(hunter, prey);
