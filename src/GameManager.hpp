@@ -11,6 +11,7 @@
 #include <memory>
 #include <random>
 #include <string>
+#include <stdexcept>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -56,7 +57,7 @@ class GameManager
 
   private:
     [[nodiscard]] bool boardContainsCell(const int &cell_idx) const;
-    [[nodiscard]] bool withinEdges(const int &cell_idx) const;
+    [[nodiscard]] bool awayFromEdge(const int &cell_idx) const;
     void identifyTargets(const chk::PlayerPtr &hunter);
     void collectFrontRHS(const chk::PlayerPtr &hunter, const Block &cell_ptr);
     void collectFrontLHS(const chk::PlayerPtr &hunter, const Block &cell_ptr);

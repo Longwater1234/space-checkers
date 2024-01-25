@@ -17,7 +17,7 @@ constexpr auto FONT_PATH = "open-sans.regular.ttf";
  * @param player current player
  * @param cell selected cell
  */
-void showForcedMoves(const std::unique_ptr<chk::GameManager> &manager, const chk::PlayerPtr &player,
+static void showForcedMoves(const std::unique_ptr<chk::GameManager> &manager, const chk::PlayerPtr &player,
                      const chk::Block &cell)
 {
     const auto &forcedMoves = manager->getForcedMoves();
@@ -46,7 +46,7 @@ void showForcedMoves(const std::unique_ptr<chk::GameManager> &manager, const chk
  * @param buffer Temporary store for clicked Pieces
  * @param cell Tapped cell
  */
-void handleCellTap(const std::unique_ptr<chk::GameManager> &manager, const chk::PlayerPtr &player,
+static void handleCellTap(const std::unique_ptr<chk::GameManager> &manager, const chk::PlayerPtr &player,
                    const chk::PlayerPtr &opponent, chk::CircularBuffer<short> &buffer, const chk::Block &cell)
 {
     if (manager->isGameOver())
@@ -82,7 +82,7 @@ void handleCellTap(const std::unique_ptr<chk::GameManager> &manager, const chk::
 
 int main()
 {
-    auto window = sf::RenderWindow{sf::VideoMode{600u, 700u}, "Checkers CPP", sf::Style::Titlebar | sf::Style::Close};
+    auto window = sf::RenderWindow{sf::VideoMode{600u, 700u}, "SpaceCheckers", sf::Style::Titlebar | sf::Style::Close};
     window.setFramerateLimit(60u);
 
     sf::Image appIcon;

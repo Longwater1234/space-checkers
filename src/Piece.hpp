@@ -87,7 +87,7 @@ inline const PieceType &Piece::getPieceType() const
 }
 
 /**
- * Set this piece as King. Will also change its color
+ * Set this piece as King. Will also change its texture
  */
 inline void Piece::activateKing()
 {
@@ -181,7 +181,7 @@ inline bool Piece::operator==(const Piece &other) const
 }
 
 /**
- * Simply move piece to given cell. Validate first, then Move the Piece to the given position.
+ * Simply move piece to given cell. Validate first, then Move the Piece diagonally to the given position.
  * @param destPos destination
  * @return TRUE if successful, else FALSE
  */
@@ -214,7 +214,7 @@ inline bool Piece::moveSimple(const sf::Vector2f &destPos)
 }
 
 /**
- * When capturing opponent, Validate first, then move the Piece to the given position.
+ * When capturing opponent, Validate first, then move by 2 cells diagonally to the given position.
  * @param destPos destination
  * @return TRUE if successful, else FALSE
  */

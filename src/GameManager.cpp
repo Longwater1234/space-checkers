@@ -148,6 +148,8 @@ void GameManager::handleMovePiece(const chk::PlayerPtr &player, const chk::Playe
         std::cout << player->getName() << " IS IN DANGER " << std::endl;
     }
     this->playerRedTurn = !this->playerRedTurn; // toggle player turns
+    this->updateMessage(player->getName() + " has moved to " + std::to_string(destCell->getIndex()) + ". It's " +
+                        opponent->getName() + "'s turn.");
 }
 
 /**
@@ -163,19 +165,19 @@ void GameManager::handleJumpPiece(const chk::PlayerPtr &hunter, const chk::Playe
     if (this->gameOver || this->getPieceFromCell(targetCell->getIndex()) != -1)
         return;
 
-    for (const auto &[hunterPieceId, captureTarget] : this->forcedMoves)
+    for (const auto &[hunterPieceId, target] : this->forcedMoves)
     {
-        if (captureTarget.hunterNextCell == targetCell->getIndex())
+        if (target.hunterNextCell == targetCell->getIndex())
         {
             if (!hunter->captureEnemyWith(hunterPieceId, targetCell->getPos()))
             {
                 return;
             }
-
+            this->updateMessage(hunter->getName() + " has captured " + prey->getName() + "'s piece!");
             gameMap.erase(this->sourceCell);                        // set hunter's old location empty!
-            gameMap.erase(captureTarget.preyCellIdx);               // set Prey's old location empty!
+            gameMap.erase(target.preyCellIdx);                      // set Prey's old location empty!
             gameMap.emplace(targetCell->getIndex(), hunterPieceId); // fill in hunter new location
-            prey->losePiece(captureTarget.preyPieceId);             // the defending player loses 1 piece
+            prey->losePiece(target.preyPieceId);                    // the defending player loses 1 piece
             // Check for more opportunities NOW before toggle Turns
             this->sourceCell = -1;
             this->forcedMoves.clear();
@@ -189,6 +191,7 @@ void GameManager::handleJumpPiece(const chk::PlayerPtr &hunter, const chk::Playe
             else
             {
                 std::cout << prey->getName() << " IS IN DANGER " << std::endl;
+                this->updateMessage(prey->getName() + " IS IN DANGER ");
             }
             break;
         }
@@ -214,7 +217,7 @@ void GameManager::setSourceCell(const int &src_cell)
 }
 
 /**
- * \brief Whether both `src_cell` is NOT NULL & `forcedMoves` NOT empty
+ * \brief Whether both src_cell is NOT NULL & forcedMoves NOT empty
  * \return TRUE or FALSE
  */
 bool GameManager::hasPendingCaptures() const
@@ -271,7 +274,7 @@ void GameManager::updateMatchStatus(const chk::PlayerPtr &p1, const chk::PlayerP
 {
     if (*p1 == *p2)
     {
-        throw std::exception("cannot pass same Player");
+        throw std::invalid_argument("cannot pass same Player");
     }
     const auto p1Count = p1->getPieceCount();
     const auto p2Count = p2->getPieceCount();
@@ -311,7 +314,7 @@ bool GameManager::boardContainsCell(const int &cell_idx) const
  * \param cell_idx cell index
  * \return TRUE if on edges, else FALSE
  */
-bool GameManager::withinEdges(const int &cell_idx) const
+bool GameManager::awayFromEdge(const int &cell_idx) const
 {
     auto it = std::find_if(blockList.begin(), blockList.end(), [&cell_idx](const chk::Block &cell) {
         return cell->getIndex() == cell_idx && cell->getPos().x > 0 && cell->getPos().x < 7 * chk::SIZE_CELL &&
@@ -376,7 +379,7 @@ void GameManager::collectFrontLHS(const chk::PlayerPtr &hunter, const Block &cel
     }
 
     int cellAheadIdx = cell_ptr->getIndex() + (deltaForward * mSign);
-    if (!this->withinEdges(cellAheadIdx))
+    if (!this->awayFromEdge(cellAheadIdx))
     {
         return;
     }
@@ -433,7 +436,7 @@ void GameManager::collectFrontRHS(const chk::PlayerPtr &hunter, const Block &cel
     }
 
     int cellAheadIdx = cell_ptr->getIndex() + (deltaForward * mSign);
-    if (!this->withinEdges(cellAheadIdx))
+    if (!this->awayFromEdge(cellAheadIdx))
     {
         return;
     }
@@ -489,7 +492,7 @@ void GameManager::collectBehindRHS(const PlayerPtr &hunter, const Block &cell_pt
     }
 
     int cellAheadIdx = cell_ptr->getIndex() - (deltaForward * mSign);
-    if (!this->withinEdges(cellAheadIdx))
+    if (!this->awayFromEdge(cellAheadIdx))
     {
         return;
     }
@@ -545,7 +548,7 @@ void GameManager::collectBehindLHS(const PlayerPtr &hunter, const Block &cell_pt
     }
 
     int cellAheadIdx = cell_ptr->getIndex() - (deltaForward * mSign);
-    if (!this->withinEdges(cellAheadIdx))
+    if (!this->awayFromEdge(cellAheadIdx))
     {
         return;
     }
