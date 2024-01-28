@@ -7,6 +7,9 @@
 #include <set>
 #include <vector>
 
+#include "imgui-SFML.h"
+#include "imgui.h"
+
 constexpr uint16_t NUM_PIECES = 24u;
 constexpr auto ICON_PATH = "win-icon-16.png";
 constexpr auto FONT_PATH = "open-sans.regular.ttf";
@@ -18,7 +21,7 @@ constexpr auto FONT_PATH = "open-sans.regular.ttf";
  * @param cell selected cell
  */
 static void showForcedMoves(const std::unique_ptr<chk::GameManager> &manager, const chk::PlayerPtr &player,
-                     const chk::Block &cell)
+                            const chk::Block &cell)
 {
     const auto &forcedMoves = manager->getForcedMoves();
     const short pieceId = manager->getPieceFromCell(cell->getIndex());
@@ -47,7 +50,7 @@ static void showForcedMoves(const std::unique_ptr<chk::GameManager> &manager, co
  * @param cell Tapped cell
  */
 static void handleCellTap(const std::unique_ptr<chk::GameManager> &manager, const chk::PlayerPtr &player,
-                   const chk::PlayerPtr &opponent, chk::CircularBuffer<short> &buffer, const chk::Block &cell)
+                          const chk::PlayerPtr &opponent, chk::CircularBuffer<short> &buffer, const chk::Block &cell)
 {
     if (manager->isGameOver())
         return;
@@ -84,6 +87,13 @@ int main()
 {
     auto window = sf::RenderWindow{sf::VideoMode{600u, 700u}, "SpaceCheckers", sf::Style::Titlebar | sf::Style::Close};
     window.setFramerateLimit(60u);
+    ImGui::SFML::Init(window);
+
+    ImGuiIO &io = ImGui::GetIO();
+    ImFont *font1 = io.Fonts->AddFontFromFileTTF(chk::getResourcePath(FONT_PATH).c_str(), 18.0f);
+   // io.Fonts->Build();
+
+    // ImGui::PushFont(font1);
 
     sf::Image appIcon;
     if (appIcon.loadFromFile(chk::getResourcePath(ICON_PATH)))
@@ -140,15 +150,16 @@ int main()
     txtPanel.setPosition(sf::Vector2f{0, 8.5 * chk::SIZE_CELL});
 
     manager->updateMessage("Now playing! RED starts");
+    sf::Clock deltaClock;
     while (window.isOpen())
     {
         for (auto event = sf::Event{}; window.pollEvent(event);)
         {
+            ImGui::SFML::ProcessEvent(window, event);
             if (event.type == sf::Event::Closed)
             {
                 window.close();
             }
-
             if (event.type == sf::Event::MouseButtonPressed && sf::Mouse::isButtonPressed(sf::Mouse::Left))
             {
                 const auto clickedPos = sf::Mouse::getPosition(window);
@@ -179,8 +190,28 @@ int main()
             }
         }
 
+        ImGui::SFML::Update(window, deltaClock.restart());
         auto mousePos = sf::Mouse::getPosition(window);
         window.clear();
+        ImGui::Text("Hello"); // use the default font (which is the first loaded font)
+        ImGui::PushFont(font1);
+        const char *items[] = {"AAAA", "BBBB", "CCCC", "DDDD", "EEEE",    "FFFF", "GGGG",
+                               "HHHH", "IIII", "JJJJ", "KKKK", "LLLLLLL", "MMMM", "OOOOOOO"};
+        static int item_current_idx = 0; // He
+        if (ImGui::BeginListBox("listbox 1"))
+        {
+            for (int n = 0; n < IM_ARRAYSIZE(items); n++)
+            {
+                const bool is_selected = (item_current_idx == n);
+                if (ImGui::Selectable(items[n], is_selected))
+                    item_current_idx = n;
+
+                // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+                if (is_selected)
+                    ImGui::SetItemDefaultFocus();
+            }
+            ImGui::EndListBox();
+        }
         for (const auto &cell : manager->getBlockList())
         {
             window.draw(*cell);
@@ -212,8 +243,12 @@ int main()
             window.draw(*black_piece);
         }
         txtPanel.setString(manager->getCurrentMsg());
+
         window.draw(txtPanel);
+        ImGui::SFML::Render(window);
         window.display();
     }
+
+    ImGui::SFML::Shutdown();
     return EXIT_SUCCESS;
 }

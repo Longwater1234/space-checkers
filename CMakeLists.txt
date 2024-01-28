@@ -15,12 +15,14 @@ file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*.hpp")
 set(SFML_DIR ${CUSTOM_SFML_HOME}/lib/cmake/SFML)
 find_package(SFML REQUIRED COMPONENTS "graphics" "window" "system")
 
+add_subdirectory(dependencies)
+
 if (WIN32)
     add_executable(SpaceCheckers WIN32 ${SOURCES} ${CMAKE_SOURCE_DIR}/resources/win-icon.rc)
-    target_link_libraries(SpaceCheckers PRIVATE sfml-main sfml-graphics sfml-window sfml-system)
+    target_link_libraries(SpaceCheckers PRIVATE sfml-main sfml-graphics sfml-window sfml-system ImGui-SFML::ImGui-SFML)
 else()
     add_executable(SpaceCheckers ${SOURCES})
-    target_link_libraries(SpaceCheckers PRIVATE sfml-graphics sfml-window sfml-system)
+    target_link_libraries(SpaceCheckers PRIVATE sfml-graphics sfml-window sfml-system ImGui-SFML::ImGui-SFML)
 endif()
 
 # include SFML headers
