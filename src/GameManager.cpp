@@ -141,7 +141,7 @@ void GameManager::handleMovePiece(const chk::PlayerPtr &player, const chk::Playe
     }
     gameMap.erase(this->sourceCell);                       // set old location empty!
     gameMap.emplace(destCell->getIndex(), currentPieceId); // fill in the new location
-    this->sourceCell = -1;
+    this->sourceCell = -1;                                 // reset source cell
     this->identifyTargets(opponent);
     if (!this->forcedMoves.empty())
     {
@@ -327,7 +327,7 @@ bool GameManager::awayFromEdge(const int &cell_idx) const
  * Collect all possible next "forced captures" which must be taken
  * @param hunter current player
  */
-inline void GameManager::identifyTargets(const PlayerPtr &hunter)
+void GameManager::identifyTargets(const PlayerPtr &hunter)
 {
     this->forcedMoves.clear();
     for (const auto &cell_ptr : this->blockList)
@@ -335,7 +335,7 @@ inline void GameManager::identifyTargets(const PlayerPtr &hunter)
         short pieceId = this->getPieceFromCell(cell_ptr->getIndex());
         if (gameMap.find(cell_ptr->getIndex()) == gameMap.end() || !hunter->hasThisPiece(pieceId))
         {
-            // this CELL is not usable, OR piece not OWNED by player
+            // this CELL is not usable, OR piece not OWNED by hunter
             continue;
         }
         // FIXME for each piece, only 1 captureTarget struct used.
@@ -351,7 +351,7 @@ inline void GameManager::identifyTargets(const PlayerPtr &hunter)
 }
 
 /**
- *  Collect nearby enemies for next "forced" captures (NORTH WEST)
+ * Collect nearby enemies for next "forced" captures (NORTH WEST)
  * @param hunter  player whose turn is next
  * @param cell_ptr current cell of hunter
  */
