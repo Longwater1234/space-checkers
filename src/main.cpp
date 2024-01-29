@@ -82,7 +82,7 @@ static void handleCellTap(const std::unique_ptr<chk::GameManager> &manager, cons
 
 int main()
 {
-    auto window = sf::RenderWindow{sf::VideoMode{600u, 700u}, "SpaceCheckers", sf::Style::Titlebar | sf::Style::Close};
+    auto window = sf::RenderWindow{sf::VideoMode{600, 700}, "SpaceCheckers", sf::Style::Titlebar | sf::Style::Close};
     window.setFramerateLimit(60u);
 
     sf::Image appIcon;
@@ -134,7 +134,6 @@ int main()
 
     // THE STATUS TEXT
     sf::Text txtPanel{"Welcome to Checkers", font, 16u};
-    ;
     txtPanel.setFillColor(sf::Color::White);
     txtPanel.setPosition(sf::Vector2f{0, 8.5 * chk::SIZE_CELL});
 

@@ -7,13 +7,10 @@
 #include "Cell.hpp"
 #include "Player.hpp"
 #include <SFML/Graphics/Text.hpp>
-#include <iostream>
 #include <memory>
 #include <random>
 #include <string>
-#include <stdexcept>
 #include <unordered_map>
-#include <utility>
 #include <vector>
 namespace chk
 {
