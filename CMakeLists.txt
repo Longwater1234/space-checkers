@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(SFML_STATIC_LIBRARIES TRUE)
 
-# Absolute path where you installed SFML
+# Absolute path where you installed precompiled SFML 2.6.x
 set(CUSTOM_SFML_HOME "D:/work_mine/CPP/SFML-2.6.0")
 
 file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*.hpp")
@@ -26,7 +26,7 @@ if (WIN32)
     target_link_libraries(SpaceCheckers PRIVATE sfml-graphics sfml-window sfml-system ImGui-SFML::ImGui-SFML ixwebsocket)
 else()
     add_executable(SpaceCheckers ${SOURCES})
-    target_link_libraries(SpaceCheckers PRIVATE sfml-graphics sfml-window sfml-system ImGui-SFML::ImGui-SFML)
+    target_link_libraries(SpaceCheckers PRIVATE sfml-graphics sfml-window sfml-system ImGui-SFML::ImGui-SFML ixwebsocket)
 endif()
 
 # include SFML headers
