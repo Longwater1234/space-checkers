@@ -1,5 +1,9 @@
 include(FetchContent)
 
+include(CPM.cmake)
+include(zlib.cmake)
+include(mbedtls.cmake)
+include(ixwebsocket.cmake)
 set(IMGUI_VERSION 1.87)
 
 FetchContent_Declare(

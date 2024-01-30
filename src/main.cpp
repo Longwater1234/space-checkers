@@ -1,10 +1,12 @@
 #include "CircularBuffer.hpp"
 #include "GameManager.hpp"
 #include "ResourcePath.hpp"
+#include "WsClient.hpp"
 #include <SFML/Graphics.hpp>
 #include <SFML/Window/Mouse.hpp>
 #include <memory>
 #include <set>
+#include <thread>
 #include <vector>
 
 constexpr uint16_t NUM_PIECES = 24u;
@@ -112,6 +114,10 @@ int main()
     keteList.reserve(NUM_PIECES);
     manager->drawAllPieces(keteList);
     manager->matchCellsToPieces(keteList);
+
+    WsClient wsClient{"wss://echo.websocket.org"};
+    std::thread t1(wsClient); 
+    //t1(wsClient.startChat());
 
     // Give each player their own pieces
     for (auto &kete : keteList)

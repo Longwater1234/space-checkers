@@ -20,6 +20,7 @@ template <typename T> class CircularBuffer
     {
         m_deque_.resize(maxCapacity);
     }
+    CircularBuffer() = delete;
     void addItem(T item);
     T &getTop();
     [[nodiscard]] bool isEmpty() const;
