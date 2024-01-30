@@ -3,7 +3,7 @@
 CPMAddPackage(
     NAME mbedtls
     GIT_REPOSITORY https://gitee.com/zhanghe666/mbedtls.git
-    VERSION 2.25.0
+    GIT_TAG 1c54b5410fd48d6bcada97e30cac417c5c7eea67
     GIT_SHALLOW
     DOWNLOAD_ONLY ON
 )
