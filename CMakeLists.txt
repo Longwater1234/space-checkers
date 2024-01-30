@@ -15,6 +15,10 @@ file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*.hpp")
 set(SFML_DIR ${CUSTOM_SFML_HOME}/lib/cmake/SFML)
 find_package(SFML REQUIRED COMPONENTS "graphics" "window" "system")
 
+# add support for websockets
+option(USE_TLS "Enable TLS support" TRUE)
+option(USE_MBED_TLS "Enable TLS support" TRUE)
+option(USE_ZLIB "Enable zlib support" TRUE)
 add_subdirectory(dependencies)
 
 if (WIN32)

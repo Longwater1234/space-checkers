@@ -2,8 +2,8 @@
 
 CPMAddPackage(
     NAME mbedtls
-    GIT_REPOSITORY https://gitee.com/zephyr-rtos/mbedtls.git
-    GIT_TAG "944e83867fa2d7f0d0c44d7f4934829e9ced2995"
+    GIT_REPOSITORY https://gitee.com/zhanghe666/mbedtls.git
+    VERSION 2.25.0
     GIT_SHALLOW
     DOWNLOAD_ONLY ON
 )
