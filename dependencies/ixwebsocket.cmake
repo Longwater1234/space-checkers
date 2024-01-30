@@ -5,7 +5,6 @@ CPMAddPackage(
     GIT_REPOSITORY https://gitee.com/__xiaoyao__/IXWebSocket.git
     # VERSION 11.0.8
     GIT_TAG 872f516edec86cf1c60d411203ac30b1c180f52e
-    GIT_SHALLOW
     DOWNLOAD_ONLY ON
 )
 

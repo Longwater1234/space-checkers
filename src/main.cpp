@@ -117,7 +117,6 @@ int main()
 
     WsClient wsClient{"wss://echo.websocket.org"};
     std::thread t1(wsClient); 
-    //t1(wsClient.startChat());
 
     // Give each player their own pieces
     for (auto &kete : keteList)
