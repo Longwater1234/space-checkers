@@ -10,7 +10,7 @@ CPMAddPackage(
   NAME imgui
   GIT_REPOSITORY "https://gitee.com/msnh/imgui.git"
   GIT_TAG		3733b5064e1820dc8517fedba2b34bfbdef569ab
-  GIT_SHALLOW
+  GIT_SHALLOW TRUE
 )
 
 
@@ -25,7 +25,7 @@ CPMAddPackage(
   NAME imgui-sfml
   GIT_REPOSITORY "https://gitee.com/i4xin/imgui-sfml.git"
   GIT_TAG        2a4b9dd9b34df61d91e33667dbaf5902c4923867
-  GIT_SHALLOW
+  GIT_SHALLOW TRUE
 )
 
 if(imgui-sfml_ADDED)

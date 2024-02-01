@@ -8,7 +8,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(SFML_STATIC_LIBRARIES TRUE)
 
-# Absolute path where you installed precompiled SFML 2.6.x
+# Absolute path where you installed precompiled SFML
 set(CUSTOM_SFML_HOME "D:/work_mine/CPP/SFML-2.6.0")
 
 file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*.hpp")
@@ -22,8 +22,8 @@ option(USE_ZLIB "Enable zlib support" TRUE)
 add_subdirectory(dependencies)
 
 if (WIN32)
-    add_executable(SpaceCheckers ${SOURCES} ${CMAKE_SOURCE_DIR}/resources/win-icon.rc)
-    target_link_libraries(SpaceCheckers PRIVATE sfml-graphics sfml-window sfml-system ImGui-SFML::ImGui-SFML ixwebsocket)
+    add_executable(SpaceCheckers WIN32 ${SOURCES} ${CMAKE_SOURCE_DIR}/resources/win-icon.rc)
+    target_link_libraries(SpaceCheckers PRIVATE sfml-main sfml-graphics sfml-window sfml-system ImGui-SFML::ImGui-SFML ixwebsocket)
 else()
     add_executable(SpaceCheckers ${SOURCES})
     target_link_libraries(SpaceCheckers PRIVATE sfml-graphics sfml-window sfml-system ImGui-SFML::ImGui-SFML ixwebsocket)
