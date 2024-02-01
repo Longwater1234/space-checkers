@@ -231,7 +231,7 @@ bool GameManager::hasPendingCaptures() const
  * @param cell_idx the clicked cell
  * @return positive int or -1 if not found
  */
-inline short GameManager::getPieceFromCell(const int &cell_idx)
+short GameManager::getPieceFromCell(const int &cell_idx)
 {
     if (this->gameMap.find(cell_idx) != gameMap.end())
     {
