@@ -9,6 +9,10 @@
 #include <thread>
 #include <vector>
 
+#include "imgui-SFML.h"
+#include "imgui.h"
+
+
 constexpr uint16_t NUM_PIECES = 24u;
 constexpr auto ICON_PATH = "win-icon-16.png";
 constexpr auto FONT_PATH = "open-sans.regular.ttf";
@@ -115,8 +119,8 @@ int main()
     manager->drawAllPieces(keteList);
     manager->matchCellsToPieces(keteList);
 
-    WsClient wsClient{"wss://echo.websocket.org"};
-    std::thread t1(wsClient); 
+    //WsClient wsClient{"wss://echo.websocket.org"};
+    //std::thread t1(wsClient); 
 
     // Give each player their own pieces
     for (auto &kete : keteList)
@@ -138,7 +142,7 @@ int main()
     chk::CircularBuffer<short> circularBuffer{1};
 
     // THE STATUS TEXT
-    sf::Text txtPanel{"Welcome to Checkers", font, 16u};
+    sf::Text txtPanel{"Welcome to Checkers", font, 16};
     txtPanel.setFillColor(sf::Color::White);
     txtPanel.setPosition(sf::Vector2f{0, 8.5 * chk::SIZE_CELL});
 

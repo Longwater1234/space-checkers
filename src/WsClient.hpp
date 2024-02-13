@@ -16,7 +16,7 @@ class WsClient
     std::string ip_address;
 };
 
-void WsClient::operator()()
+inline void WsClient::operator()()
 {
     ix::initNetSystem();
 

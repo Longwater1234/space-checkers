@@ -9,17 +9,18 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(SFML_STATIC_LIBRARIES TRUE)
 
 # Absolute path where you installed precompiled SFML
-set(CUSTOM_SFML_HOME "D:/work_mine/CPP/SFML-2.6.0")
+set(CUSTOM_SFML_HOME "D:/work_mine/CPP/SFML-2.6.1")
 
 file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*.hpp")
 set(SFML_DIR ${CUSTOM_SFML_HOME}/lib/cmake/SFML)
 find_package(SFML REQUIRED COMPONENTS "graphics" "window" "system")
-
+find_package(OpenGL REQUIRED)
+ 
 # add support for websockets
 option(USE_TLS "Enable TLS support" TRUE)
 option(USE_MBED_TLS "Enable TLS support" TRUE)
 option(USE_ZLIB "Enable zlib support" TRUE)
-add_subdirectory(dependencies)
+add_subdirectory(dependencies) 
 
 if (WIN32)
     add_executable(SpaceCheckers WIN32 ${SOURCES} ${CMAKE_SOURCE_DIR}/resources/win-icon.rc)

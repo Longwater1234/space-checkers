@@ -80,7 +80,7 @@ void GameManager::drawCheckerboard(const sf::Font &font)
                 auto redBlock = std::make_unique<chk::Cell>(counter, darkRect, darkRect.getPosition(), font);
                 redBlock->setEvenRow(row % 2 == 0);
                 blockList.emplace_back(std::move_if_noexcept(redBlock));
-                counter--;
+                counter--; 
             }
         }
     }
