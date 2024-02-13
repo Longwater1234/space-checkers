@@ -11,7 +11,7 @@
 
 #include "imgui-SFML.h"
 #include "imgui.h"
-
+#include "misc/cpp/imgui_stdlib.h"
 
 constexpr uint16_t NUM_PIECES = 24u;
 constexpr auto ICON_PATH = "win-icon-16.png";
@@ -90,6 +90,13 @@ int main()
 {
     auto window = sf::RenderWindow{sf::VideoMode{600, 700}, "SpaceCheckers", sf::Style::Titlebar | sf::Style::Close};
     window.setFramerateLimit(60u);
+    ImGui::SFML::Init(window);
+
+    // LOAD FONT FOR IMGUI
+    ImGuiIO &io = ImGui::GetIO();
+    ImFont *imfont = io.Fonts->AddFontFromFileTTF(chk::getResourcePath(FONT_PATH).c_str(), 16.0f);
+    IM_ASSERT(imfont != nullptr);
+    ImGui::SFML::UpdateFontTexture();
 
     sf::Image appIcon;
     if (appIcon.loadFromFile(chk::getResourcePath(ICON_PATH)))
@@ -119,8 +126,8 @@ int main()
     manager->drawAllPieces(keteList);
     manager->matchCellsToPieces(keteList);
 
-    //WsClient wsClient{"wss://echo.websocket.org"};
-    //std::thread t1(wsClient); 
+    // WsClient wsClient{"wss://echo.websocket.org"};
+    // std::thread t1(wsClient);
 
     // Give each player their own pieces
     for (auto &kete : keteList)
@@ -145,12 +152,14 @@ int main()
     sf::Text txtPanel{"Welcome to Checkers", font, 16};
     txtPanel.setFillColor(sf::Color::White);
     txtPanel.setPosition(sf::Vector2f{0, 8.5 * chk::SIZE_CELL});
-
     manager->updateMessage("Now playing! RED starts");
+
+    sf::Clock deltaClock;
     while (window.isOpen())
     {
         for (auto event = sf::Event{}; window.pollEvent(event);)
         {
+            ImGui::SFML::ProcessEvent(window, event);
             if (event.type == sf::Event::Closed)
             {
                 window.close();
@@ -185,6 +194,7 @@ int main()
             }
         }
 
+        ImGui::SFML::Update(window, deltaClock.restart());
         auto mousePos = sf::Mouse::getPosition(window);
         window.clear();
         for (const auto &cell : manager->getBlockList())
@@ -220,7 +230,9 @@ int main()
 
         txtPanel.setString(manager->getCurrentMsg());
         window.draw(txtPanel);
+        ImGui::SFML::Render(window);
         window.display();
     }
+    ImGui::SFML::Shutdown();
     return EXIT_SUCCESS;
 }

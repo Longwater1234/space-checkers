@@ -72,6 +72,9 @@ inline Piece::Piece(const sf::CircleShape &circle, const PieceType &pType, const
     }
 }
 
+/**
+ * Override the draw function
+ */
 inline void Piece::draw(sf::RenderTarget &target, sf::RenderStates states) const
 {
     target.draw(this->myCircle, states);

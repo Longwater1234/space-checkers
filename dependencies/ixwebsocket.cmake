@@ -9,6 +9,10 @@ CPMAddPackage(
     DOWNLOAD_ONLY ON
 )
 
+option(USE_TLS "Enable TLS support" TRUE)
+option(USE_MBED_TLS "Enable TLS support" TRUE)
+option(USE_ZLIB "Enable zlib support" TRUE)
+
 if(ixwebsocket_ADDED)
     file(GLOB ixwebsocket_SOURCES ${ixwebsocket_SOURCE_DIR}/ixwebsocket/*.cpp)
     add_library(ixwebsocket STATIC ${ixwebsocket_SOURCES})

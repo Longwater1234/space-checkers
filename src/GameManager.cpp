@@ -80,7 +80,7 @@ void GameManager::drawCheckerboard(const sf::Font &font)
                 auto redBlock = std::make_unique<chk::Cell>(counter, darkRect, darkRect.getPosition(), font);
                 redBlock->setEvenRow(row % 2 == 0);
                 blockList.emplace_back(std::move_if_noexcept(redBlock));
-                counter--; 
+                counter--;
             }
         }
     }
@@ -178,10 +178,10 @@ void GameManager::handleJumpPiece(const chk::PlayerPtr &hunter, const chk::Playe
             gameMap.erase(target.preyCellIdx);                      // set Prey's old location empty!
             gameMap.emplace(targetCell->getIndex(), hunterPieceId); // fill in hunter new location
             prey->losePiece(target.preyPieceId);                    // the defending player loses 1 piece
-            // Check for more opportunities NOW before toggle Turns
-            this->sourceCell = -1;
+
+            this->sourceCell = -1; // reset source cell
             this->forcedMoves.clear();
-            this->identifyTargets(hunter);
+            this->identifyTargets(hunter); // Check for more opportunities NOW before toggle Turns
             if (this->forcedMoves.empty())
             {
                 // NO MORE JUMPS AVAILABLE. SWITCH TURNS, CHECK FOR NEW OPPORTUNITIES

@@ -14,20 +14,16 @@ set(CUSTOM_SFML_HOME "D:/work_mine/CPP/SFML-2.6.1")
 file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*.hpp")
 set(SFML_DIR ${CUSTOM_SFML_HOME}/lib/cmake/SFML)
 find_package(SFML REQUIRED COMPONENTS "graphics" "window" "system")
-find_package(OpenGL REQUIRED)
  
-# add support for websockets
-option(USE_TLS "Enable TLS support" TRUE)
-option(USE_MBED_TLS "Enable TLS support" TRUE)
-option(USE_ZLIB "Enable zlib support" TRUE)
+# add extra deps (imgui + websockets)
 add_subdirectory(dependencies) 
 
 if (WIN32)
     add_executable(SpaceCheckers WIN32 ${SOURCES} ${CMAKE_SOURCE_DIR}/resources/win-icon.rc)
-    target_link_libraries(SpaceCheckers PRIVATE sfml-main sfml-graphics sfml-window sfml-system ImGui-SFML::ImGui-SFML ixwebsocket)
+    target_link_libraries(SpaceCheckers PRIVATE sfml-main sfml-graphics sfml-window sfml-system ImGui-SFML ixwebsocket)
 else()
     add_executable(SpaceCheckers ${SOURCES})
-    target_link_libraries(SpaceCheckers PRIVATE sfml-graphics sfml-window sfml-system ImGui-SFML::ImGui-SFML ixwebsocket)
+    target_link_libraries(SpaceCheckers PRIVATE sfml-graphics sfml-window sfml-system ImGui-SFML ixwebsocket)
 endif()
 
 # include SFML headers
@@ -43,5 +39,5 @@ endif()
 # COPY resources folder to destination
 add_custom_command(
         TARGET SpaceCheckers POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/resources $<TARGET_FILE_DIR:SpaceCheckers>/resources
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/resources $<TARGET_FILE_DIR:${CMAKE_PROJECT_NAME}>/resources
 )
