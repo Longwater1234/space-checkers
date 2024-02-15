@@ -9,10 +9,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(SFML_STATIC_LIBRARIES TRUE)
 
 # Absolute path where you installed precompiled SFML
-set(CUSTOM_SFML_HOME "D:/work_mine/CPP/SFML-2.6.1")
+set(SFML_HOME "D:/work_mine/CPP/SFML-2.6.1")
 
 file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*.hpp")
-set(SFML_DIR ${CUSTOM_SFML_HOME}/lib/cmake/SFML)
+set(SFML_DIR ${SFML_HOME}/lib/cmake/SFML)
 find_package(SFML REQUIRED COMPONENTS "graphics" "window" "system")
  
 # add extra deps (imgui + websockets)
@@ -27,7 +27,7 @@ else()
 endif()
 
 # include SFML headers
-include_directories(${CUSTOM_SFML_HOME}/include)
+include_directories(${SFML_HOME}/include)
 
 # show warnings (depending on C++ compiler)
 if (MSVC)

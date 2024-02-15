@@ -20,7 +20,7 @@ constexpr size_t NUM_ROWS = 8;
 constexpr size_t NUM_COLS = 8;
 
 /**
- * Overall game state
+ * Overall game manager
  */
 class GameManager
 {

@@ -1,19 +1,23 @@
 #pragma once
+#include "GameManager.hpp"
 #include <atomic>
 #include <iostream>
 #include <ixwebsocket/IXNetSystem.h>
 #include <ixwebsocket/IXWebSocket.h>
 #include <string>
 
+namespace chk
+{
 class WsClient
 {
   public:
-    WsClient(const std::string &ipAddress) : ip_address(ipAddress){};
+    WsClient(const std::string &ipAddress, chk::GameManager *mgr) : ip_address(ipAddress), manager_(mgr){};
     WsClient() = delete;
     void operator()();
 
   private:
     std::string ip_address;
+    chk::GameManager *manager_;
 };
 
 inline void WsClient::operator()()
@@ -89,3 +93,4 @@ inline void WsClient::operator()()
         webSocket.send(text);
     }
 }
+} // namespace chk

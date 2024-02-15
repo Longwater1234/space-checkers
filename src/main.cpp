@@ -90,11 +90,11 @@ int main()
 {
     auto window = sf::RenderWindow{sf::VideoMode{600, 700}, "SpaceCheckers", sf::Style::Titlebar | sf::Style::Close};
     window.setFramerateLimit(60u);
-    ImGui::SFML::Init(window);
+    ImGui::SFML::Init(window, false);
 
     // LOAD FONT FOR IMGUI
     ImGuiIO &io = ImGui::GetIO();
-    ImFont *imfont = io.Fonts->AddFontFromFileTTF(chk::getResourcePath(FONT_PATH).c_str(), 16.0f);
+    ImFont *imfont = io.Fonts->AddFontFromFileTTF(chk::getResourcePath(FONT_PATH).c_str(), 16);
     IM_ASSERT(imfont != nullptr);
     ImGui::SFML::UpdateFontTexture();
 
@@ -126,10 +126,6 @@ int main()
     manager->drawAllPieces(keteList);
     manager->matchCellsToPieces(keteList);
 
-    // WsClient wsClient{"wss://echo.websocket.org"};
-    // std::thread t1(wsClient);
-
-    // Give each player their own pieces
     for (auto &kete : keteList)
     {
         if (kete->getPieceType() == chk::PieceType::Red)
@@ -155,6 +151,7 @@ int main()
     manager->updateMessage("Now playing! RED starts");
 
     sf::Clock deltaClock;
+    bool w_open = true;
     while (window.isOpen())
     {
         for (auto event = sf::Event{}; window.pollEvent(event);)
@@ -197,6 +194,27 @@ int main()
         ImGui::SFML::Update(window, deltaClock.restart());
         auto mousePos = sf::Mouse::getPosition(window);
         window.clear();
+        // START IMGUI
+
+        static bool is_secure = false;
+        static bool btn_disabled = false;
+        static std::string ip_address{};
+        if (ImGui::Begin("Connect Window", &w_open, ImGuiWindowFlags_NoResize))
+        {
+            /* code */
+            ImGui::InputText("IP Address", &ip_address);
+            ImGui::Checkbox("Secure", &is_secure);
+            ImGui::BeginDisabled(btn_disabled);
+            if (!ip_address.empty() && ImGui::Button("Connect", ImVec2(100.0f, 0)))
+            {
+                btn_disabled = true;
+                const char *suffix = is_secure ? "wss://" : "ws://";
+                chk::WsClient wsClient{suffix + ip_address, manager.get()};
+                static std::thread *t1 = new std::thread(wsClient);
+            }
+            ImGui::EndDisabled();
+        }
+        ImGui::End();
         for (const auto &cell : manager->getBlockList())
         {
             window.draw(*cell);
