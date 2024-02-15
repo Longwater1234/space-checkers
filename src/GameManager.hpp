@@ -12,6 +12,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <mutex>
 namespace chk
 {
 using Block = std::unique_ptr<chk::Cell>;
@@ -37,7 +38,7 @@ class GameManager
   private:
     // source cell Index of selected piece
     int sourceCell;
-    // checkerboard cells
+    // all checkerboard cells
     std::vector<chk::Block> blockList;
     // map of cell_index --> piece_id
     std::map<int, short> gameMap;
@@ -51,6 +52,8 @@ class GameManager
     bool gameOver = false;
     // collection of my next targets (Map<HunterPieceID, CaptureTarget>)
     std::unordered_map<short, chk::CaptureTarget> forcedMoves;
+    // mutex for atomic updates
+    std::mutex my_mutex_;
 
   private:
     [[nodiscard]] bool boardContainsCell(const int &cell_idx) const;

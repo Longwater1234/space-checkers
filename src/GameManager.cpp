@@ -28,6 +28,7 @@ GameManager::GameManager()
  */
 void GameManager::updateMessage(const std::string &msg)
 {
+    std::lock_guard<std::mutex> lg(my_mutex_);
     this->currentMsg = msg;
 }
 
@@ -180,11 +181,11 @@ void GameManager::handleJumpPiece(const chk::PlayerPtr &hunter, const chk::Playe
             prey->losePiece(target.preyPieceId);                    // the defending player loses 1 piece
 
             this->sourceCell = -1; // reset source cell
-            this->forcedMoves.clear();
-            this->identifyTargets(hunter); // Check for more opportunities NOW before toggle Turns
+            this->forcedMoves.clear(); //reset forced jumps
+            this->identifyTargets(hunter); // Check for extra opportunities NOW!
             if (this->forcedMoves.empty())
             {
-                // NO MORE JUMPS AVAILABLE. SWITCH TURNS, CHECK FOR NEW OPPORTUNITIES
+                // NO MORE JUMPS AVAILABLE. SWITCH TURNS to opponent
                 this->identifyTargets(prey);
                 this->playerRedTurn = !this->playerRedTurn; // toggle player turns
             }

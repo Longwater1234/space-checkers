@@ -199,7 +199,7 @@ int main()
         auto mousePos = sf::Mouse::getPosition(window);
         window.clear();
         // START IMGUI
-        startImguiWindow(manager);
+        //startImguiWindow(manager);
         for (const auto &cell : manager->getBlockList())
         {
             window.draw(*cell);

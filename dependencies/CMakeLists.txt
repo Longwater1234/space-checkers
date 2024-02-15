@@ -24,7 +24,6 @@ if(imgui_ADDED)
 	${IMGUI_INCLUDE_DIR}/misc/cpp/imgui_stdlib.cpp
   )
   include_directories(${imgui_SOURCE_DIR})
-
 endif()
 
 
