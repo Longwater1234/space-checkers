@@ -179,9 +179,10 @@ void GameManager::handleJumpPiece(const chk::PlayerPtr &hunter, const chk::Playe
             gameMap.erase(target.preyCellIdx);                      // set Prey's old location empty!
             gameMap.emplace(targetCell->getIndex(), hunterPieceId); // fill in hunter new location
             prey->losePiece(target.preyPieceId);                    // the defending player loses 1 piece
+            this->sourceCell = -1;                                  // reset source cell
+            this->forcedMoves.clear();                              // reset forced jumps
 
-            this->sourceCell = -1; // reset source cell
-            this->forcedMoves.clear(); //reset forced jumps
+            // FIXME do not RUN this next line if just became KING!
             this->identifyTargets(hunter); // Check for extra opportunities NOW!
             if (this->forcedMoves.empty())
             {
@@ -296,13 +297,13 @@ const bool &GameManager::isGameOver() const
 }
 
 /**
- * Whether the game board contains this cell, and is within range
+ * Whether the game board contains this cell, and is within playable range
  * @param cell_idx Cell index
  * @return TRUE if cell on board, else FALSE
  */
 bool GameManager::boardContainsCell(const int &cell_idx) const
 {
-    auto it = std::find_if(blockList.begin(), blockList.end(), [&cell_idx](const chk::Block &cell) {
+    const auto it = std::find_if(blockList.begin(), blockList.end(), [&cell_idx](const chk::Block &cell) {
         return cell->getIndex() == cell_idx && cell->getPos().x >= 0 && cell->getPos().x <= 7 * chk::SIZE_CELL &&
                cell->getPos().y >= 0 && cell->getPos().y <= 7 * chk::SIZE_CELL;
     });
@@ -316,7 +317,7 @@ bool GameManager::boardContainsCell(const int &cell_idx) const
  */
 bool GameManager::awayFromEdge(const int &cell_idx) const
 {
-    auto it = std::find_if(blockList.begin(), blockList.end(), [&cell_idx](const chk::Block &cell) {
+    const auto it = std::find_if(blockList.begin(), blockList.end(), [&cell_idx](const chk::Block &cell) {
         return cell->getIndex() == cell_idx && cell->getPos().x > 0 && cell->getPos().x < 7 * chk::SIZE_CELL &&
                cell->getPos().y > 0 && cell->getPos().y < 7 * chk::SIZE_CELL;
     });
