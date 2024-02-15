@@ -5,7 +5,6 @@
 #include <ixwebsocket/IXNetSystem.h>
 #include <ixwebsocket/IXWebSocket.h>
 #include <string>
-
 namespace chk
 {
 class WsClient
@@ -35,10 +34,8 @@ inline void WsClient::operator()()
 #endif // _WIN32
     webSocket.setTLSOptions(tlsOptions);
 
-    std::string url(this->ip_address);
-    webSocket.setUrl(url);
-
-    std::cout << "Connecting to " << url << "..." << std::endl;
+    webSocket.setUrl(this->ip_address);
+    std::cout << "Connecting to " << this->ip_address << "..." << std::endl;
 
     // To synchrously wait for connection to be established, use an atomic boolean
     std::atomic_bool connectionReady;

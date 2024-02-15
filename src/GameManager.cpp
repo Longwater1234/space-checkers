@@ -241,7 +241,7 @@ short GameManager::getPieceFromCell(const int &cell_idx)
 }
 
 /**
- * Match cells to pieces at game launch, using location, and cache it to Hashmap
+ * Match cells to pieces at game launch, using position, and cache it to Hashmap
  * @param pieceList vector of all pieces
  */
 void GameManager::matchCellsToPieces(const std::vector<chk::PiecePtr> &pieceList)
@@ -257,7 +257,6 @@ void GameManager::matchCellsToPieces(const std::vector<chk::PiecePtr> &pieceList
             if (cell->getIndex() != -1 && cell->containsOrigin(piece->getPosition()))
             {
                 this->gameMap.emplace(cell->getIndex(), piece->getId());
-                const std::string playerName = piece->getPieceType() == PieceType::Red ? "RED" : "BLACK";
             }
         }
     }
