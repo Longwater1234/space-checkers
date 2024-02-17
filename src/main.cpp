@@ -88,7 +88,7 @@ static void handleCellTap(const std::unique_ptr<chk::GameManager> &manager, cons
 
 /**
  * Forward declaration. For showing imGui window
-*/
+ */
 void startImguiWindow(const std::unique_ptr<chk::GameManager> &manager);
 
 int main()
@@ -199,7 +199,7 @@ int main()
         auto mousePos = sf::Mouse::getPosition(window);
         window.clear();
         // START IMGUI
-        //startImguiWindow(manager);
+        startImguiWindow(manager);
         for (const auto &cell : manager->getBlockList())
         {
             window.draw(*cell);
@@ -246,9 +246,10 @@ void startImguiWindow(const std::unique_ptr<chk::GameManager> &manager)
     static bool w_open = true;
     static bool btn_disabled = false;
     static std::string ip_address{};
-    if (ImGui::Begin("Connect Window", &w_open, ImGuiWindowFlags_NoResize))
+    if (w_open)
     {
         /* code */
+        ImGui::Begin("Connect Window", &w_open, ImGuiWindowFlags_NoResize);
         ImGui::InputText("IP Address", &ip_address);
         ImGui::Checkbox("Secure", &is_secure);
         ImGui::BeginDisabled(btn_disabled);
@@ -256,10 +257,9 @@ void startImguiWindow(const std::unique_ptr<chk::GameManager> &manager)
         {
             btn_disabled = true;
             const char *suffix = is_secure ? "wss://" : "ws://";
-            chk::WsClient wsClient{suffix + ip_address, manager.get()};
-            static std::thread *t1 = new std::thread(wsClient);
+            //chk::WsClient wsClient{suffix + ip_address, manager.get()};
         }
         ImGui::EndDisabled();
+        ImGui::End();
     }
-    ImGui::End();
 }

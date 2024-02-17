@@ -360,19 +360,21 @@ void GameManager::collectFrontLHS(const chk::PlayerPtr &hunter, const Block &cel
 {
     if (hunter->getPlayerType() == PlayerType::PLAYER_1 && cell_ptr->getPos().x == 0)
     {
+        //stop here. IMPOSSIBLE to have enemies on my left.
         return;
     }
     if (hunter->getPlayerType() == PlayerType::PLAYER_2 && cell_ptr->getPos().x >= 7 * chk::SIZE_CELL)
     {
+        // same as above, based on my current "X" position.
         return;
     }
-    bool enemyOpenBehind = false;
+    bool enemyOpenBehind = false; // does enemy piece have empty cell behind him?
     bool hasEnemyAhead = false;
     short deltaForward = cell_ptr->getIsEvenRow() ? 4 : 5;
     short deltaBehindEnemy = cell_ptr->getIsEvenRow() ? 5 : 4;
     int mSign = 1;
 
-    // if its hunter Black (PLAYER 2)
+    // if player piece is Black (PLAYER 2)
     if (hunter->getPlayerType() == PlayerType::PLAYER_2)
     {
         mSign = -1;
@@ -394,7 +396,7 @@ void GameManager::collectFrontLHS(const chk::PlayerPtr &hunter, const Block &cel
         return;
     }
 
-    short pieceId_SE = this->getPieceFromCell(cellBehindEnemy); // South East of enemy
+    short pieceId_SE = this->getPieceFromCell(cellBehindEnemy); // South East
     enemyOpenBehind = pieceId_SE == -1;
 
     if (hasEnemyAhead && enemyOpenBehind)
@@ -417,10 +419,12 @@ void GameManager::collectFrontRHS(const chk::PlayerPtr &hunter, const Block &cel
 {
     if (hunter->getPlayerType() == PlayerType::PLAYER_1 && cell_ptr->getPos().x >= 7 * chk::SIZE_CELL)
     {
+        //stop here, IMPOSSIBLE to have enemies on my right.
         return;
     }
     if (hunter->getPlayerType() == PlayerType::PLAYER_2 && cell_ptr->getPos().x == 0)
     {
+        //SAME as above, based on my "X" position
         return;
     }
     bool enemyOpenBehind = false;
@@ -429,7 +433,7 @@ void GameManager::collectFrontRHS(const chk::PlayerPtr &hunter, const Block &cel
     short deltaBehindEnemy = cell_ptr->getIsEvenRow() ? 4 : 3;
     int mSign = 1;
 
-    // if is player Black (PLAYER 2)
+    // if player piece is Black (PLAYER 2)
     if (hunter->getPlayerType() == PlayerType::PLAYER_2)
     {
         mSign = -1;
@@ -449,7 +453,7 @@ void GameManager::collectFrontRHS(const chk::PlayerPtr &hunter, const Block &cel
     {
         return;
     }
-    short pieceId_SW = this->getPieceFromCell(cellBehindEnemy); // south West of enemy
+    short pieceId_SW = this->getPieceFromCell(cellBehindEnemy); // south West
     enemyOpenBehind = pieceId_SW == -1;
 
     if (hasEnemyAhead && enemyOpenBehind)
@@ -485,7 +489,7 @@ void GameManager::collectBehindRHS(const PlayerPtr &hunter, const Block &cell_pt
     short deltaBehindEnemy = cell_ptr->getIsEvenRow() ? 4 : 5;
     int mSign = +1;
 
-    // if its hunter Black (PLAYER 2)
+    // if player is Black (PLAYER 2)
     if (hunter->getPlayerType() == PlayerType::PLAYER_2)
     {
         mSign = -1;
