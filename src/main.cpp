@@ -6,7 +6,6 @@
 #include <SFML/Window/Mouse.hpp>
 #include <memory>
 #include <set>
-#include <thread>
 #include <vector>
 
 #include "imgui-SFML.h"
@@ -85,10 +84,6 @@ static void handleCellTap(const std::unique_ptr<chk::GameManager> &manager, cons
     }
 }
 
-/**
- * Forward declaration. For showing imGui window
- */
-// void startImguiWindow(const std::unique_ptr<chk::GameManager> &manager);
 
 int main()
 {

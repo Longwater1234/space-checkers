@@ -11,6 +11,7 @@
 #include "imgui-SFML.h"
 #include "imgui.h"
 #include "misc/cpp/imgui_stdlib.h"
+
 namespace chk
 {
 class WsClient
@@ -63,6 +64,7 @@ inline bool WsClient::showConnectionWindow()
         ImGui::EndDisabled();
         ImGui::End();
     }
+    // negate the FALSE value
     return !w_open;
 }
 
@@ -143,11 +145,15 @@ inline void WsClient::tryConnect()
 }
 
 /**
- * Show error from sockets as a popup window
+ * Show error message from websockets as a popup window
  * @param msg The error message
  */
 inline void WsClient::showErrorPopup(std::string_view msg)
 {
+    if (msg.empty())
+    {
+        return;
+    }
     // Always center this window when appearing
     ImVec2 center = ImGui::GetMainViewport()->GetCenter();
     static bool popen = true;
@@ -196,7 +202,7 @@ inline void WsClient::showChatWindow(ix::WebSocket *webSocket)
         ImGui::EndChild();
 
         ImGui::SetCursorPos(ImVec2(0, 300));
-        ImGui::PushItemWidth(300); // NOTE: (Push/Pop)ItemWidth is optional
+        ImGui::PushItemWidth(300);
         ImGui::PopItemWidth();
         static char msgpack[256] = "";
         ImGui::InputText("message", msgpack, IM_ARRAYSIZE(msgpack), ImGuiInputTextFlags_EnterReturnsTrue);
