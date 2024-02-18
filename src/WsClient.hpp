@@ -25,6 +25,7 @@ class WsClient
     std::string final_address;
     chk::GameManager *manager_;
     std::atomic_bool connectionReady;
+    std::atomic_bool popupShown{false};
     std::vector<std::string> messages_{};
     std::mutex mut_;
     void showErrorPopup(const std::string &msg);
@@ -70,7 +71,6 @@ inline bool WsClient::showConnectionWindow()
 inline void WsClient::tryConnect()
 {
     ix::initNetSystem();
-
     // Our websocket object
     static ix::WebSocket webSocket;
 
@@ -105,8 +105,6 @@ inline void WsClient::tryConnect()
         }
         else if (msg->type == ix::WebSocketMessageType::Error)
         {
-            this->showErrorPopup(err);
-            ImGui::OpenPopup("Error");
             this->messages_.push_back("Connection error: " + msg->errorInfo.reason);
             std::cout << "Connection error: " << msg->errorInfo.reason << std::endl;
             this->connectionReady = true;
@@ -125,6 +123,9 @@ inline void WsClient::tryConnect()
     // Handle connection error/timeout
     if (webSocket.getReadyState() != ix::ReadyState::Open)
     {
+        const static std::string err = this->messages_[this->messages_.size() - 1];
+        ImGui::OpenPopup("Error", ImGuiPopupFlags_NoOpenOverExistingPopup);
+        this->showErrorPopup(err);
         return;
     }
 
@@ -144,6 +145,7 @@ inline void WsClient::tryConnect()
         ImGui::BeginChild("chatmessages", ImVec2(300, 200), false);
         for (const auto &msg : this->messages_)
         {
+            std::lock_guard<std::mutex> lg(mut_);
             if (!msg.empty())
             {
                 ImGui::Text(msg.c_str());
@@ -171,22 +173,26 @@ inline void WsClient::tryConnect()
         webSocket.stop();
     }
 }
+
 inline void WsClient::showErrorPopup(const std::string &msg)
 {
-
     // Always center this window when appearing
     ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+    static bool popen = true;
     ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-
-    if (ImGui::BeginPopupModal("Error", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+    if (popen)
     {
-        ImGui::Text(msg.c_str());
-        ImGui::Separator();
-        if (ImGui::Button("OK", ImVec2(120, 0)))
+        if (ImGui::BeginPopupModal("Error", &popen, ImGuiWindowFlags_AlwaysAutoResize))
         {
-            ImGui::CloseCurrentPopup();
-        }
-        ImGui::EndPopup();
+            ImGui::Text(msg.c_str());
+            ImGui::Separator();
+            if (ImGui::Button("OK", ImVec2(120, 0)))
+            {
+                popen = false;
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndPopup();
+        };
     }
 }
 } // namespace chk
