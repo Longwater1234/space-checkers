@@ -25,7 +25,6 @@ class WsClient
     std::string final_address;
     chk::GameManager *manager_;
     std::atomic_bool connectionReady;
-    std::atomic_bool popupShown{false};
     std::vector<std::string> messages_{};
     std::mutex mut_;
     void showErrorPopup(const std::string &msg);
@@ -135,7 +134,7 @@ inline void WsClient::tryConnect()
     //! the ImGui window !!
     if (chatWindow)
     {
-        ImGui::Begin("chat window", &chatWindow);
+        ImGui::Begin("chat window", &chatWindow, ImGuiWindowFlags_NoResize);
         if (!this->connectionReady)
         {
             /* code */
@@ -145,7 +144,6 @@ inline void WsClient::tryConnect()
         ImGui::BeginChild("chatmessages", ImVec2(300, 200), false);
         for (const auto &msg : this->messages_)
         {
-            std::lock_guard<std::mutex> lg(mut_);
             if (!msg.empty())
             {
                 ImGui::Text(msg.c_str());
@@ -168,12 +166,14 @@ inline void WsClient::tryConnect()
         }
         ImGui::End();
     }
-    else
-    {
-        webSocket.stop();
-    }
+
+    // webSocket.stop();
 }
 
+/**
+ * show error from sockets as a popup window
+ * @param msg The error message
+ */
 inline void WsClient::showErrorPopup(const std::string &msg)
 {
     // Always center this window when appearing
