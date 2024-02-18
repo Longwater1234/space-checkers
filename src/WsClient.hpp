@@ -24,9 +24,10 @@ class WsClient
   private:
     std::string final_address;
     chk::GameManager *manager_;
-    std::atomic_bool connectionReady;
+    std::atomic_bool connectionReady{false};
     std::vector<std::string> messages_{};
     std::mutex mut_;
+
     void showErrorPopup(const std::string &msg);
     // void handleChat();
 };
@@ -69,9 +70,16 @@ inline bool WsClient::showConnectionWindow()
  */
 inline void WsClient::tryConnect()
 {
+
     ix::initNetSystem();
     // Our websocket object
+
     static ix::WebSocket webSocket;
+
+    if (webSocket.getReadyState() == ix::ReadyState::Closing)
+    {
+        return;
+    }
 
     // TLS options
     static ix::SocketTLSOptions tlsOptions;
@@ -113,8 +121,11 @@ inline void WsClient::tryConnect()
     // Now that our callback is setup, we can start our background thread and receive messages
     webSocket.start();
 
+    // hearbeat every 30 seconds
+    webSocket.setPingInterval(30);
+
     // Wait for the connection to be ready (either successfully or with an error)
-    while (!connectionReady)
+    while (!connectionReady && webSocket.getReadyState() != ix::ReadyState::Closed)
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
@@ -122,10 +133,14 @@ inline void WsClient::tryConnect()
     // Handle connection error/timeout
     if (webSocket.getReadyState() != ix::ReadyState::Open)
     {
-        const static std::string err = this->messages_[this->messages_.size() - 1];
-        ImGui::OpenPopup("Error", ImGuiPopupFlags_NoOpenOverExistingPopup);
-        this->showErrorPopup(err);
-        return;
+        if (!this->messages_.empty())
+        {
+            const static std::string err = this->messages_[this->messages_.size() - 1];
+            ImGui::OpenPopup("Error", ImGuiPopupFlags_NoOpenOverExistingPopup);
+            this->showErrorPopup(err);
+            webSocket.stop();
+            return;
+        }
     }
 
     static bool chatWindow = true;
