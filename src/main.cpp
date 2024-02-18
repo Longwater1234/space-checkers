@@ -11,7 +11,6 @@
 
 #include "imgui-SFML.h"
 #include "imgui.h"
-#include "misc/cpp/imgui_stdlib.h"
 
 constexpr uint16_t NUM_PIECES = 24u;
 constexpr auto ICON_PATH = "win-icon-16.png";
@@ -89,7 +88,7 @@ static void handleCellTap(const std::unique_ptr<chk::GameManager> &manager, cons
 /**
  * Forward declaration. For showing imGui window
  */
-void startImguiWindow(const std::unique_ptr<chk::GameManager> &manager);
+// void startImguiWindow(const std::unique_ptr<chk::GameManager> &manager);
 
 int main()
 {
@@ -99,6 +98,7 @@ int main()
 
     // LOAD FONT FOR IMGUI
     ImGuiIO &io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     ImFont *imfont = io.Fonts->AddFontFromFileTTF(chk::getResourcePath(FONT_PATH).c_str(), 16);
     IM_ASSERT(imfont != nullptr);
     ImGui::SFML::UpdateFontTexture();
@@ -155,6 +155,8 @@ int main()
     txtPanel.setPosition(sf::Vector2f{0, 8.5 * chk::SIZE_CELL});
     manager->updateMessage("Now playing! RED starts");
 
+    chk::WsClient wsClient{manager.get()};
+
     sf::Clock deltaClock;
     while (window.isOpen())
     {
@@ -199,7 +201,10 @@ int main()
         auto mousePos = sf::Mouse::getPosition(window);
         window.clear();
         // START IMGUI
-        startImguiWindow(manager);
+        if (!wsClient.showConnectionWindow())
+        {
+          wsClient.tryConnect();
+        };
         for (const auto &cell : manager->getBlockList())
         {
             window.draw(*cell);
@@ -238,28 +243,4 @@ int main()
     }
     ImGui::SFML::Shutdown();
     return EXIT_SUCCESS;
-}
-
-void startImguiWindow(const std::unique_ptr<chk::GameManager> &manager)
-{
-    static bool is_secure = false;
-    static bool w_open = true;
-    static bool btn_disabled = false;
-    static std::string ip_address{};
-    if (w_open)
-    {
-        /* code */
-        ImGui::Begin("Connect Window", &w_open, ImGuiWindowFlags_NoResize);
-        ImGui::InputText("IP Address", &ip_address);
-        ImGui::Checkbox("Secure", &is_secure);
-        ImGui::BeginDisabled(btn_disabled);
-        if (!ip_address.empty() && ImGui::Button("Connect", ImVec2(100.0f, 0)))
-        {
-            btn_disabled = true;
-            const char *suffix = is_secure ? "wss://" : "ws://";
-            //chk::WsClient wsClient{suffix + ip_address, manager.get()};
-        }
-        ImGui::EndDisabled();
-        ImGui::End();
-    }
 }

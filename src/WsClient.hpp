@@ -4,59 +4,112 @@
 #include <iostream>
 #include <ixwebsocket/IXNetSystem.h>
 #include <ixwebsocket/IXWebSocket.h>
+#include <mutex>
 #include <string>
+#include <vector>
+
+#include "imgui-SFML.h"
+#include "imgui.h"
+#include "misc/cpp/imgui_stdlib.h"
 namespace chk
 {
 class WsClient
 {
   public:
-    WsClient(const std::string &ipAddress, chk::GameManager *mgr) : ip_address(ipAddress), manager_(mgr){};
+    WsClient(chk::GameManager *mgr) : manager_(mgr){};
     WsClient() = delete;
-    void operator()();
+    bool showConnectionWindow();
+    void tryConnect();
 
   private:
-    std::string ip_address;
+    std::string final_address;
     chk::GameManager *manager_;
+    std::atomic_bool connectionReady;
+    std::vector<std::string> messages_{};
+    std::mutex mut_;
+    void showErrorPopup(const std::string &msg);
+    // void handleChat();
 };
 
-inline void WsClient::operator()()
+/**
+ * show the imgui connection window
+ */
+inline bool WsClient::showConnectionWindow()
+{
+    static bool is_secure = false;
+    static bool w_open = true;
+    static bool btn_disabled = false;
+    // static std::string ip_address{};
+    if (w_open)
+    {
+        /* code */
+        ImGui::SetNextWindowSize(ImVec2(sf::Vector2f(300.0, 300.0)));
+        static char inputUrl[256];
+        ImGui::Begin("Connect Window", nullptr, ImGuiWindowFlags_NoResize);
+        ImGui::InputText("IP Address", inputUrl, IM_ARRAYSIZE(inputUrl));
+        ImGui::Checkbox("Secure", &is_secure);
+        ImGui::BeginDisabled(btn_disabled);
+        if (std::string_view(inputUrl).size() > 0 && ImGui::Button("Connect", ImVec2(100.0f, 0)))
+        {
+            btn_disabled = true;
+            const char *suffix = is_secure ? "wss://" : "ws://";
+            this->final_address = suffix + std::string(inputUrl);
+            memset(inputUrl, NULL, sizeof(inputUrl));
+            ImGui::Text("Connecting to %s...", this->final_address.c_str());
+            w_open = false;
+        }
+        ImGui::EndDisabled();
+        ImGui::End();
+    }
+    return w_open;
+}
+
+/**
+ * infinite loop of socket chat with imgui
+ */
+inline void WsClient::tryConnect()
 {
     ix::initNetSystem();
 
     // Our websocket object
-    ix::WebSocket webSocket;
+    static ix::WebSocket webSocket;
 
     // TLS options
-    ix::SocketTLSOptions tlsOptions;
+    static ix::SocketTLSOptions tlsOptions;
 #ifndef _WIN32
     // Currently system CAs are not supported on non-Windows platforms with mbedtls
     tlsOptions.caFile = "NONE";
 #endif // _WIN32
     webSocket.setTLSOptions(tlsOptions);
 
-    webSocket.setUrl(this->ip_address);
-    std::cout << "Connecting to " << this->ip_address << "..." << std::endl;
+    webSocket.setUrl(this->final_address);
 
     // To synchrously wait for connection to be established, use an atomic boolean
-    std::atomic_bool connectionReady;
 
     // Setup a callback to be fired (in a background thread, watch out for race conditions !)
     // when a message or an event (open, close, error) is received
-    webSocket.setOnMessageCallback([&webSocket, &connectionReady](const ix::WebSocketMessagePtr &msg) {
+    webSocket.setOnMessageCallback([this](const ix::WebSocketMessagePtr &msg) {
         if (msg->type == ix::WebSocketMessageType::Message)
         {
+            std::lock_guard<std::mutex> lg{this->mut_};
+            this->messages_.push_back("Server: " + msg->str);
             std::cout << "Received message: " << msg->str << std::endl;
             std::cout << "> " << std::flush;
         }
         else if (msg->type == ix::WebSocketMessageType::Open)
         {
+            std::lock_guard<std::mutex> lg{this->mut_};
+            // this->messages_.push_back("Connection established");
             std::cout << "Connection established" << std::endl;
-            connectionReady = true;
+            this->connectionReady = true;
         }
         else if (msg->type == ix::WebSocketMessageType::Error)
         {
+            this->showErrorPopup(err);
+            ImGui::OpenPopup("Error");
+            this->messages_.push_back("Connection error: " + msg->errorInfo.reason);
             std::cout << "Connection error: " << msg->errorInfo.reason << std::endl;
-            connectionReady = true;
+            this->connectionReady = true;
         }
     });
 
@@ -75,19 +128,65 @@ inline void WsClient::operator()()
         return;
     }
 
-    // Send an initial message to the server (default to TEXT mode)
-    webSocket.send("Hello from IXWebSocket!");
-
-    // Allow the user to play around
-    while (true)
+    static bool chatWindow = true;
+    ImGui::SetNextWindowSize(ImVec2(400, 400));
+    //!! You might want to use these ^^ values in the OS window instead, and add the ImGuiWindowFlags_NoTitleBar flag in
+    //! the ImGui window !!
+    if (chatWindow)
     {
-        std::string text;
-        std::getline(std::cin, text);
+        ImGui::Begin("chat window", &chatWindow);
+        if (!this->connectionReady)
+        {
+            /* code */
+            ImGui::Text("Connecting to %s...", this->final_address.c_str());
+        }
 
-        if (text.empty())
-            break;
+        ImGui::BeginChild("chatmessages", ImVec2(300, 200), false);
+        for (const auto &msg : this->messages_)
+        {
+            if (!msg.empty())
+            {
+                ImGui::Text(msg.c_str());
+            }
+        }
+        ImGui::EndChild();
 
-        webSocket.send(text);
+        ImGui::SetCursorPos(ImVec2(0, 300));
+        ImGui::PushItemWidth(300); // NOTE: (Push/Pop)ItemWidth is optional
+        ImGui::PopItemWidth();
+        static char msgpack[256] = "";
+        ImGui::InputText("message", msgpack, IM_ARRAYSIZE(msgpack), ImGuiInputTextFlags_EnterReturnsTrue);
+        ImGui::SameLine();
+        if (ImGui::Button("Send", ImVec2(70.0, 0)))
+        {
+            std::lock_guard<std::mutex> lg{this->mut_};
+            this->messages_.push_back("You: " + std::string(msgpack));
+            webSocket.send(msgpack);
+            memset(msgpack, NULL, sizeof(msgpack));
+        }
+        ImGui::End();
+    }
+    else
+    {
+        webSocket.stop();
+    }
+}
+inline void WsClient::showErrorPopup(const std::string &msg)
+{
+
+    // Always center this window when appearing
+    ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+    ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+
+    if (ImGui::BeginPopupModal("Error", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        ImGui::Text(msg.c_str());
+        ImGui::Separator();
+        if (ImGui::Button("OK", ImVec2(120, 0)))
+        {
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndPopup();
     }
 }
 } // namespace chk
