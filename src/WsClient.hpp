@@ -24,16 +24,18 @@ class WsClient
   private:
     std::string final_address;
     chk::GameManager *manager_;
-    std::atomic_bool connectionReady{false};
+    std::atomic_bool connectionReady{false};  // wait for connection to open;
+    std::atomic_bool connectionClosed{false}; // when connection closed
+    std::string errorMsg{};
     std::vector<std::string> messages_{};
     std::mutex mut_;
-
-    void showErrorPopup(const std::string &msg);
-    // void handleChat();
+    void showErrorPopup(std::string_view msg);
+    void showChatWindow(ix::WebSocket *webSocket);
 };
 
 /**
- * show the imgui connection window
+ * Show the imgui connection window, for server address
+ * @return TRUE if CONNECT button is clicked, else FALSE
  */
 inline bool WsClient::showConnectionWindow()
 {
@@ -56,13 +58,12 @@ inline bool WsClient::showConnectionWindow()
             const char *suffix = is_secure ? "wss://" : "ws://";
             this->final_address = suffix + std::string(inputUrl);
             memset(inputUrl, NULL, sizeof(inputUrl));
-            ImGui::Text("Connecting to %s...", this->final_address.c_str());
             w_open = false;
         }
         ImGui::EndDisabled();
         ImGui::End();
     }
-    return w_open;
+    return !w_open;
 }
 
 /**
@@ -73,13 +74,7 @@ inline void WsClient::tryConnect()
 
     ix::initNetSystem();
     // Our websocket object
-
     static ix::WebSocket webSocket;
-
-    if (webSocket.getReadyState() == ix::ReadyState::Closing)
-    {
-        return;
-    }
 
     // TLS options
     static ix::SocketTLSOptions tlsOptions;
@@ -100,60 +95,94 @@ inline void WsClient::tryConnect()
         {
             std::lock_guard<std::mutex> lg{this->mut_};
             this->messages_.push_back("Server: " + msg->str);
-            std::cout << "Received message: " << msg->str << std::endl;
-            std::cout << "> " << std::flush;
         }
         else if (msg->type == ix::WebSocketMessageType::Open)
         {
             std::lock_guard<std::mutex> lg{this->mut_};
-            // this->messages_.push_back("Connection established");
-            std::cout << "Connection established" << std::endl;
+            this->messages_.push_back("Connection established");
             this->connectionReady = true;
         }
         else if (msg->type == ix::WebSocketMessageType::Error)
         {
-            this->messages_.push_back("Connection error: " + msg->errorInfo.reason);
-            std::cout << "Connection error: " << msg->errorInfo.reason << std::endl;
-            this->connectionReady = true;
+            std::lock_guard<std::mutex> lg{this->mut_};
+            errorMsg = "Connection error: " + msg->errorInfo.reason;
+            this->connectionClosed = true;
         }
     });
 
-    // Now that our callback is setup, we can start our background thread and receive messages
-    webSocket.start();
+    // Start our b/ground thread and receive messages (if connection not dead)
+    if (!connectionClosed)
+    {
+        webSocket.start();
+    }
 
-    // hearbeat every 30 seconds
-    webSocket.setPingInterval(30);
+    // ping server every 50 seconds
+    webSocket.setPingInterval(50);
 
     // Wait for the connection to be ready (either successfully or with an error)
     while (!connectionReady && webSocket.getReadyState() != ix::ReadyState::Closed)
     {
+        std::cout << "i ran ! " << std::endl;
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 
     // Handle connection error/timeout
     if (webSocket.getReadyState() != ix::ReadyState::Open)
     {
+        connectionClosed = true;
         if (!this->messages_.empty())
         {
-            const static std::string err = this->messages_[this->messages_.size() - 1];
             ImGui::OpenPopup("Error", ImGuiPopupFlags_NoOpenOverExistingPopup);
-            this->showErrorPopup(err);
+            this->showErrorPopup(errorMsg);
             webSocket.stop();
             return;
         }
     }
 
+    this->showChatWindow(&webSocket);
+}
+
+/**
+ * Show error from sockets as a popup window
+ * @param msg The error message
+ */
+inline void WsClient::showErrorPopup(std::string_view msg)
+{
+    // Always center this window when appearing
+    ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+    static bool popen = true;
+    ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+    if (popen)
+    {
+        if (ImGui::BeginPopupModal("Error", &popen, ImGuiWindowFlags_AlwaysAutoResize))
+        {
+            ImGui::Text(msg.data());
+            ImGui::Separator();
+            if (ImGui::Button("OK", ImVec2(120, 0)))
+            {
+                popen = false;
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndPopup();
+        };
+    }
+}
+
+/**
+ * Show the chat window and handle sending messsages
+ * @param websocket The websocket pointer
+ */
+inline void WsClient::showChatWindow(ix::WebSocket *webSocket)
+{
     static bool chatWindow = true;
     ImGui::SetNextWindowSize(ImVec2(400, 400));
-    //!! You might want to use these ^^ values in the OS window instead, and add the ImGuiWindowFlags_NoTitleBar flag in
-    //! the ImGui window !!
     if (chatWindow)
     {
         ImGui::Begin("chat window", &chatWindow, ImGuiWindowFlags_NoResize);
         if (!this->connectionReady)
         {
             /* code */
-            ImGui::Text("Connecting to %s...", this->final_address.c_str());
+            ImGui::Text("Connecting to %s", this->final_address.c_str());
         }
 
         ImGui::BeginChild("chatmessages", ImVec2(300, 200), false);
@@ -176,38 +205,15 @@ inline void WsClient::tryConnect()
         {
             std::lock_guard<std::mutex> lg{this->mut_};
             this->messages_.push_back("You: " + std::string(msgpack));
-            webSocket.send(msgpack);
+            webSocket->send(msgpack);
             memset(msgpack, NULL, sizeof(msgpack));
         }
         ImGui::End();
     }
-
-    // webSocket.stop();
-}
-
-/**
- * show error from sockets as a popup window
- * @param msg The error message
- */
-inline void WsClient::showErrorPopup(const std::string &msg)
-{
-    // Always center this window when appearing
-    ImVec2 center = ImGui::GetMainViewport()->GetCenter();
-    static bool popen = true;
-    ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-    if (popen)
+    else
     {
-        if (ImGui::BeginPopupModal("Error", &popen, ImGuiWindowFlags_AlwaysAutoResize))
-        {
-            ImGui::Text(msg.c_str());
-            ImGui::Separator();
-            if (ImGui::Button("OK", ImVec2(120, 0)))
-            {
-                popen = false;
-                ImGui::CloseCurrentPopup();
-            }
-            ImGui::EndPopup();
-        };
+        webSocket->stop();
+        this->connectionClosed = true;
     }
 }
 } // namespace chk

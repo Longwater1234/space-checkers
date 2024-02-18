@@ -155,6 +155,8 @@ int main()
     txtPanel.setPosition(sf::Vector2f{0, 8.5 * chk::SIZE_CELL});
     manager->updateMessage("Now playing! RED starts");
 
+    auto wsClient = std::make_unique<chk::WsClient>(manager.get());
+
     sf::Clock deltaClock;
     while (window.isOpen())
     {
@@ -199,11 +201,12 @@ int main()
         auto mousePos = sf::Mouse::getPosition(window);
         window.clear();
         // START IMGUI
-        static chk::WsClient *wsClient = new chk::WsClient(manager.get());
-        if (!wsClient->showConnectionWindow())
+        if (wsClient->showConnectionWindow())
         {
             wsClient->tryConnect();
         }
+
+        // RENDER CHECKERBOARD
         for (const auto &cell : manager->getBlockList())
         {
             window.draw(*cell);
