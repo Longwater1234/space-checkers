@@ -84,7 +84,6 @@ static void handleCellTap(const std::unique_ptr<chk::GameManager> &manager, cons
     }
 }
 
-
 int main()
 {
     auto window = sf::RenderWindow{sf::VideoMode{600, 700}, "SpaceCheckers", sf::Style::Titlebar | sf::Style::Close};

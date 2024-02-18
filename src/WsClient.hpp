@@ -69,12 +69,13 @@ inline bool WsClient::showConnectionWindow()
 }
 
 /**
- * infinite loop of socket chat with imgui
+ * Try to connect to server
  */
 inline void WsClient::tryConnect()
 {
-
+    // Initialize WS
     ix::initNetSystem();
+
     // Our websocket object
     static ix::WebSocket webSocket;
 
@@ -218,6 +219,7 @@ inline void WsClient::showChatWindow(ix::WebSocket *webSocket)
     }
     else
     {
+        // IF THIS WINDOW IS CLOSED, SHUTDOWN socket
         webSocket->stop();
         this->connectionClosed = true;
     }
