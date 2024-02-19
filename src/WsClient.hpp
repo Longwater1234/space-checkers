@@ -25,8 +25,8 @@ class WsClient
   private:
     std::string final_address;
     chk::GameManager *manager_;
-    std::atomic_bool connectionReady{false};  // wait for connection to open;
-    std::atomic_bool connectionClosed{false}; // when connection closed
+    std::atomic_bool isReady{false}; // wait for connection to open;
+    std::atomic_bool isDead{false};  // when connection closed
     std::string errorMsg{};
     std::vector<std::string> messages_{};
     std::mutex mut_;
@@ -103,18 +103,19 @@ inline void WsClient::tryConnect()
         {
             std::lock_guard<std::mutex> lg{this->mut_};
             this->messages_.push_back("Connection established");
-            this->connectionReady = true;
+            this->isReady = true;
         }
         else if (msg->type == ix::WebSocketMessageType::Error)
         {
             std::lock_guard<std::mutex> lg{this->mut_};
             errorMsg = "Connection error: " + msg->errorInfo.reason;
-            this->connectionClosed = true;
+            std::cerr << errorMsg << std::endl;
+            this->isDead = true;
         }
     });
 
     // Start our b/ground thread and receive messages (if connection not dead)
-    if (!connectionClosed)
+    if (!isDead)
     {
         webSocket.start();
     }
@@ -122,24 +123,13 @@ inline void WsClient::tryConnect()
     // ping server every 50 seconds
     webSocket.setPingInterval(50);
 
-    // Wait for the connection to be ready (either successfully or with an error)
-    while (!connectionReady && webSocket.getReadyState() != ix::ReadyState::Closed)
-    {
-        std::cout << "i ran ! " << std::endl;
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    }
-
     // Handle connection error/timeout
-    if (webSocket.getReadyState() != ix::ReadyState::Open)
+    if (webSocket.getReadyState() != ix::ReadyState::Open && isDead)
     {
-        connectionClosed = true;
-        if (!this->messages_.empty())
-        {
-            ImGui::OpenPopup("Error", ImGuiPopupFlags_NoOpenOverExistingPopup);
-            this->showErrorPopup(errorMsg);
-            webSocket.stop();
-            return;
-        }
+        ImGui::OpenPopup("Error", ImGuiPopupFlags_NoOpenOverExistingPopup);
+        this->showErrorPopup(errorMsg);
+        webSocket.stop();
+        return;
     }
 
     this->showChatWindow(&webSocket);
@@ -186,7 +176,7 @@ inline void WsClient::showChatWindow(ix::WebSocket *webSocket)
     if (chatWindow)
     {
         ImGui::Begin("chat window", &chatWindow, ImGuiWindowFlags_NoResize);
-        if (!this->connectionReady)
+        if (!this->isReady)
         {
             /* code */
             ImGui::Text("Connecting to %s", this->final_address.c_str());
@@ -204,24 +194,24 @@ inline void WsClient::showChatWindow(ix::WebSocket *webSocket)
 
         ImGui::SetCursorPos(ImVec2(0, 300));
         ImGui::PushItemWidth(300);
-        ImGui::PopItemWidth();
         static char msgpack[256] = "";
-        ImGui::InputText("message", msgpack, IM_ARRAYSIZE(msgpack), ImGuiInputTextFlags_EnterReturnsTrue);
-        ImGui::SameLine();
-        if (ImGui::Button("Send", ImVec2(70.0, 0)))
+        if (ImGui::InputTextWithHint("<Text", "write message, press Enter", msgpack, IM_ARRAYSIZE(msgpack),
+                                     ImGuiInputTextFlags_EnterReturnsTrue))
         {
+            ImGui::SetItemDefaultFocus();
             std::lock_guard<std::mutex> lg{this->mut_};
             this->messages_.push_back("You: " + std::string(msgpack));
             webSocket->send(msgpack);
             memset(msgpack, NULL, sizeof(msgpack));
         }
+        ImGui::PopItemWidth();
         ImGui::End();
     }
     else
     {
         // IF THIS WINDOW IS CLOSED, SHUTDOWN socket
         webSocket->stop();
-        this->connectionClosed = true;
+        this->isDead = true;
     }
 }
 } // namespace chk
