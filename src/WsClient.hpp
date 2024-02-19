@@ -43,7 +43,6 @@ inline bool WsClient::showConnectionWindow()
     static bool is_secure = false;
     static bool w_open = true;
     static bool btn_disabled = false;
-    // static std::string ip_address{};
     if (w_open)
     {
         /* code */
@@ -69,7 +68,7 @@ inline bool WsClient::showConnectionWindow()
 }
 
 /**
- * Try to connect to server
+ * Try to connect to Server
  */
 inline void WsClient::tryConnect()
 {
@@ -175,7 +174,7 @@ inline void WsClient::showChatWindow(ix::WebSocket *webSocket)
     ImGui::SetNextWindowSize(ImVec2(400, 400));
     if (chatWindow)
     {
-        ImGui::Begin("chat window", &chatWindow, ImGuiWindowFlags_NoResize);
+        ImGui::Begin("Echo Chat", &chatWindow, ImGuiWindowFlags_NoResize);
         if (!this->isReady)
         {
             /* code */
@@ -195,14 +194,17 @@ inline void WsClient::showChatWindow(ix::WebSocket *webSocket)
         ImGui::SetCursorPos(ImVec2(0, 300));
         ImGui::PushItemWidth(300);
         static char msgpack[256] = "";
-        if (ImGui::InputTextWithHint("<Text", "write message, press Enter", msgpack, IM_ARRAYSIZE(msgpack),
+        if (ImGui::InputTextWithHint("Chat", "write message, press Enter", msgpack, IM_ARRAYSIZE(msgpack),
                                      ImGuiInputTextFlags_EnterReturnsTrue))
         {
             ImGui::SetItemDefaultFocus();
-            std::lock_guard<std::mutex> lg{this->mut_};
-            this->messages_.push_back("You: " + std::string(msgpack));
-            webSocket->send(msgpack);
-            memset(msgpack, NULL, sizeof(msgpack));
+            if (!std::string_view(msgpack).empty())
+            {
+                std::lock_guard<std::mutex> lg{this->mut_};
+                this->messages_.push_back("You: " + std::string(msgpack));
+                webSocket->send(msgpack);
+                memset(msgpack, NULL, sizeof(msgpack));
+            }
         }
         ImGui::PopItemWidth();
         ImGui::End();
