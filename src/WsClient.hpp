@@ -196,7 +196,8 @@ inline void WsClient::showChatWindow(ix::WebSocket *webSocket)
         ImGui::PushItemWidth(300);
         static char msgpack[256] = "";
         if (ImGui::InputTextWithHint("Chat", "write message, press Enter", msgpack, IM_ARRAYSIZE(msgpack),
-                                     ImGuiInputTextFlags_EnterReturnsTrue))
+                                     ImGuiInputTextFlags_EnterReturnsTrue) &&
+            this->isReady)
         {
             ImGui::SetItemDefaultFocus();
             if (!std::string_view(msgpack).empty())
