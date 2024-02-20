@@ -97,12 +97,12 @@ inline void WsClient::tryConnect()
         if (msg->type == ix::WebSocketMessageType::Message)
         {
             std::lock_guard<std::mutex> lg{this->mut_};
-            this->messages_.push_back("Server: " + msg->str);
+            this->messages_.emplace_back("Server: " + msg->str);
         }
         else if (msg->type == ix::WebSocketMessageType::Open)
         {
             std::lock_guard<std::mutex> lg{this->mut_};
-            this->messages_.push_back("Connection established");
+            this->messages_.emplace_back("Connection established");
             this->isReady = true;
         }
         else if (msg->type == ix::WebSocketMessageType::Error)
@@ -203,7 +203,7 @@ inline void WsClient::showChatWindow(ix::WebSocket *webSocket)
             if (!std::string_view(msgpack).empty())
             {
                 std::lock_guard<std::mutex> lg{this->mut_};
-                this->messages_.push_back("You: " + std::string(msgpack));
+                this->messages_.emplace_back("You: " + std::string(msgpack));
                 webSocket->send(msgpack);
                 memset(msgpack, 0, sizeof(msgpack));
             }
