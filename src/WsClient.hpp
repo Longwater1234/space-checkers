@@ -199,7 +199,6 @@ inline void WsClient::showChatWindow(ix::WebSocket *webSocket)
                                      ImGuiInputTextFlags_EnterReturnsTrue) &&
             this->isReady)
         {
-            ImGui::SetItemDefaultFocus();
             if (!std::string_view(msgpack).empty())
             {
                 std::lock_guard<std::mutex> lg{this->mut_};
