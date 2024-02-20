@@ -57,7 +57,7 @@ inline bool WsClient::showConnectionWindow()
             btn_disabled = true;
             const char *suffix = is_secure ? "wss://" : "ws://";
             this->final_address = suffix + std::string(inputUrl);
-            memset(inputUrl, NULL, sizeof(inputUrl));
+            memset(inputUrl, 0, sizeof(inputUrl));
             w_open = false;
         }
         ImGui::EndDisabled();
@@ -88,7 +88,8 @@ inline void WsClient::tryConnect()
 
     webSocket.setUrl(this->final_address);
 
-    // To synchrously wait for connection to be established, use an atomic boolean
+    // set inital connection timeout
+    webSocket.setHandshakeTimeout(10);
 
     // Setup a callback to be fired (in a background thread, watch out for race conditions !)
     // when a message or an event (open, close, error) is received
@@ -123,7 +124,7 @@ inline void WsClient::tryConnect()
     webSocket.setPingInterval(50);
 
     // Handle connection error/timeout
-    if (webSocket.getReadyState() != ix::ReadyState::Open && isDead)
+    if (webSocket.getReadyState() != ix::ReadyState::Open && this->isDead)
     {
         ImGui::OpenPopup("Error", ImGuiPopupFlags_NoOpenOverExistingPopup);
         this->showErrorPopup(errorMsg);
@@ -152,7 +153,7 @@ inline void WsClient::showErrorPopup(std::string_view msg)
     {
         if (ImGui::BeginPopupModal("Error", &popen, ImGuiWindowFlags_AlwaysAutoResize))
         {
-            ImGui::Text(msg.data());
+            ImGui::Text("%s", msg.data());
             ImGui::Separator();
             if (ImGui::Button("OK", ImVec2(120, 0)))
             {
@@ -186,7 +187,7 @@ inline void WsClient::showChatWindow(ix::WebSocket *webSocket)
         {
             if (!msg.empty())
             {
-                ImGui::Text(msg.c_str());
+                ImGui::Text("%s", msg.c_str());
             }
         }
         ImGui::EndChild();
@@ -203,7 +204,7 @@ inline void WsClient::showChatWindow(ix::WebSocket *webSocket)
                 std::lock_guard<std::mutex> lg{this->mut_};
                 this->messages_.push_back("You: " + std::string(msgpack));
                 webSocket->send(msgpack);
-                memset(msgpack, NULL, sizeof(msgpack));
+                memset(msgpack, 0, sizeof(msgpack));
             }
         }
         ImGui::PopItemWidth();

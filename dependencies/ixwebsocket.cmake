@@ -9,9 +9,15 @@ CPMAddPackage(
     DOWNLOAD_ONLY ON
 )
 
-option(USE_TLS "Enable TLS support" TRUE)
-option(USE_MBED_TLS "Enable TLS support" TRUE)
-option(USE_ZLIB "Enable zlib support" TRUE)
+find_package(OpenSSL)
+
+if(OpenSSL_FOUND)
+    SET(USE_OPEN_SSL TRUE)
+endif()
+
+SET(USE_TLS TRUE)
+SET(USE_MBED_TLS TRUE)
+SET(USE_ZLIB TRUE)
 
 if(ixwebsocket_ADDED)
     file(GLOB ixwebsocket_SOURCES ${ixwebsocket_SOURCE_DIR}/ixwebsocket/*.cpp)
