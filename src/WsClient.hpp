@@ -49,7 +49,7 @@ inline bool WsClient::showConnectionWindow()
         ImGui::SetNextWindowSize(ImVec2(sf::Vector2f(300.0, 300.0)));
         static char inputUrl[256];
         ImGui::Begin("Connect Window", nullptr, ImGuiWindowFlags_NoResize);
-        ImGui::InputText("IP Address", inputUrl, IM_ARRAYSIZE(inputUrl));
+        ImGui::InputText("Server IP", inputUrl, IM_ARRAYSIZE(inputUrl));
         ImGui::Checkbox("Secure", &is_secure);
         ImGui::BeginDisabled(btn_disabled);
         if (std::string_view(inputUrl).size() > 0 && ImGui::Button("Connect", ImVec2(100.0f, 0)))
