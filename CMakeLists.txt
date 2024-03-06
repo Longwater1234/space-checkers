@@ -17,7 +17,7 @@ set(SFML_HOME "D:/work_mine/CPP/SFML-2.6.1")
 file(GLOB_RECURSE GAME_SRC "src/*.cpp" "src/*.hpp")
 set(SFML_DIR ${SFML_HOME}/lib/cmake/SFML)
 
-find_package(SFML REQUIRED COMPONENTS "graphics" "window" "system")
+find_package(SFML 2.6 REQUIRED COMPONENTS "graphics" "window" "system")
 find_package(OpenGL REQUIRED)
 
 # download extra deps
@@ -27,7 +27,6 @@ if(WIN32)
   add_executable(SpaceCheckers WIN32 ${GAME_SRC} ${CMAKE_SOURCE_DIR}/resources/win-icon.rc)
   target_link_libraries(SpaceCheckers PRIVATE sfml-main)
 elseif(APPLE)
-  # append to src "src/*.mm"
   include(${CMAKE_SOURCE_DIR}/apple_cmake/MacBundle.cmake)
   find_library(FOUNDATION_FRAMEWORK Foundation)
   target_link_libraries(SpaceCheckers PRIVATE ${FOUNDATION_FRAMEWORK})
@@ -35,7 +34,7 @@ else()
   add_executable(SpaceCheckers ${GAME_SRC})
 endif()
 
-# link common libs
+# link all required libraries
 target_link_libraries(SpaceCheckers PRIVATE sfml-graphics sfml-window sfml-system ImGui-SFML
                         ixwebsocket spdlog::spdlog)
 
