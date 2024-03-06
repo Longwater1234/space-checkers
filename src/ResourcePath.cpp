@@ -1,3 +1,4 @@
+// this is for Windows and Linux only
 #ifndef __APPLE__
 #include "ResourcePath.hpp"
 

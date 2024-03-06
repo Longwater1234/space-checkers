@@ -1,5 +1,6 @@
 #include "ResourcePath.hpp"
 
+// this is for Apple MacOS only
 #ifdef __APPLE__
 #import <Foundation/Foundation.h>
 std::string chk::getResourcePath(const std::string& relativePath) {
