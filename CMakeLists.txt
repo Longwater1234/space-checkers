@@ -14,7 +14,7 @@ endif()
 # Absolute path where you installed SFML
 set(SFML_HOME "D:/work_mine/CPP/SFML-2.6.1")
 
-file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*.hpp" "src/*.mm")
+file(GLOB_RECURSE GAME_SRC "src/*.cpp" "src/*.hpp" "src/*.mm")
 set(SFML_DIR ${SFML_HOME}/lib/cmake/SFML)
 
 find_package(SFML REQUIRED COMPONENTS "graphics" "window" "system")
@@ -24,14 +24,14 @@ find_package(OpenGL REQUIRED)
 add_subdirectory(dependencies)
 
 if(WIN32)
-  add_executable(SpaceCheckers WIN32 ${SOURCES} ${CMAKE_SOURCE_DIR}/resources/win-icon.rc)
+  add_executable(SpaceCheckers WIN32 ${GAME_SRC} ${CMAKE_SOURCE_DIR}/resources/win-icon.rc)
   target_link_libraries(SpaceCheckers PRIVATE sfml-main)
 elseif(APPLE)
   include(${CMAKE_SOURCE_DIR}/apple_cmake/MacBundle.cmake)
   find_library(FOUNDATION_FRAMEWORK Foundation)
   target_link_libraries(SpaceCheckers PRIVATE ${FOUNDATION_FRAMEWORK})
 else()
-  add_executable(SpaceCheckers ${SOURCES} OpenGL:GL)
+  add_executable(SpaceCheckers ${GAME_SRC})
 endif()
 
 # link common libs
@@ -49,7 +49,7 @@ else()
 endif()
 
 # COPY resources folder to destination
-if(WIN32)
+if(NOT APPLE)
   add_custom_command(
     TARGET SpaceCheckers
     POST_BUILD
