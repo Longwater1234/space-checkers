@@ -9,7 +9,7 @@ namespace chk
 {
 /**
  * \brief Get absolute path of file specified
- * \param relativePath relative to `Resources/` directory
+ * \param relativePath file relative to `Resources/` directory
  * \return The absolute file path
  */
 std::string getResourcePath(const std::string &relativePath);

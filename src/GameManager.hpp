@@ -7,22 +7,25 @@
 #include "Cell.hpp"
 #include "Player.hpp"
 #include <SFML/Graphics/Text.hpp>
-#include <iostream>
+#include <functional>
 #include <memory>
+#include <mutex>
 #include <random>
 #include <string>
 #include <unordered_map>
-#include <utility>
 #include <vector>
+
 namespace chk
 {
 using Block = std::unique_ptr<chk::Cell>;
 using PlayerPtr = std::unique_ptr<chk::Player>;
+using onMoveSuccessCallback = std::function<void(short, int)>; // callback after moving
+using onJumpSuccess = std::function<void(short, int)>;         // callback after capturing
 constexpr size_t NUM_ROWS = 8;
 constexpr size_t NUM_COLS = 8;
 
 /**
- * Overall game state
+ * Overall game manager
  */
 class GameManager
 {
@@ -31,7 +34,7 @@ class GameManager
     GameManager();
     void drawCheckerboard(const sf::Font &font);
     static void drawAllPieces(std::vector<chk::PiecePtr> &pieceList);
-    void updateMessage(const std::string &msg);
+    void updateMessage(std::string_view msg);
     void matchCellsToPieces(const std::vector<chk::PiecePtr> &pieceList);
     [[nodiscard]] const std::unordered_map<short, chk::CaptureTarget> &getForcedMoves() const;
     [[nodiscard]] const std::string &getCurrentMsg() const;
@@ -39,7 +42,7 @@ class GameManager
   private:
     // source cell Index of selected piece
     int sourceCell;
-    // checkerboard cells
+    // all checkerboard cells
     std::vector<chk::Block> blockList;
     // map of cell_index --> piece_id
     std::map<int, short> gameMap;
@@ -53,10 +56,14 @@ class GameManager
     bool gameOver = false;
     // collection of my next targets (Map<HunterPieceID, CaptureTarget>)
     std::unordered_map<short, chk::CaptureTarget> forcedMoves;
+    // mutex for atomic updates
+    std::mutex my_mutex;
+    // callback after successfully moved piece
+    onMoveSuccessCallback onMoveSuccess_;
 
   private:
     [[nodiscard]] bool boardContainsCell(const int &cell_idx) const;
-    [[nodiscard]] bool withinEdges(const int &cell_idx) const;
+    [[nodiscard]] bool awayFromEdge(const int &cell_idx) const;
     void identifyTargets(const chk::PlayerPtr &hunter);
     void collectFrontRHS(const chk::PlayerPtr &hunter, const Block &cell_ptr);
     void collectFrontLHS(const chk::PlayerPtr &hunter, const Block &cell_ptr);
@@ -74,6 +81,7 @@ class GameManager
                          const short &currentPieceId);
     void handleJumpPiece(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey, const chk::Block &targetCell);
     void updateMatchStatus(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2);
+    void setOnMoveSuccessCallback(const onMoveSuccessCallback &callback);
 };
 
 } // namespace chk

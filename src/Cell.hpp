@@ -56,6 +56,10 @@ inline void Cell::draw(sf::RenderTarget &target, sf::RenderStates states) const
     }
 }
 
+/**
+ * Whether this cell is in even numbered row
+ * @return TRUE or FALSE
+*/
 inline bool Cell::getIsEvenRow() const
 {
     return this->isEvenRow;
@@ -72,7 +76,7 @@ inline bool Cell::containsPoint(const sf::Vector2i &pos) const
 }
 
 /**
- * Check whether given object's position is within this Cell
+ * Check whether given object's center position is within this Cell
  * @param pos position x,y (float) relative to main window
  * @return TRUE or FALSE
  */

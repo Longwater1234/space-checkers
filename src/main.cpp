@@ -1,11 +1,14 @@
 #include "CircularBuffer.hpp"
 #include "GameManager.hpp"
 #include "ResourcePath.hpp"
+#include "WsClient.hpp"
 #include <SFML/Graphics.hpp>
 #include <SFML/Window/Mouse.hpp>
-#include <memory>
 #include <set>
 #include <vector>
+
+#include "imgui-SFML.h"
+#include "imgui.h"
 
 constexpr uint16_t NUM_PIECES = 24u;
 constexpr auto ICON_PATH = "win-icon-16.png";
@@ -17,8 +20,8 @@ constexpr auto FONT_PATH = "open-sans.regular.ttf";
  * @param player current player
  * @param cell selected cell
  */
-void showForcedMoves(const std::unique_ptr<chk::GameManager> &manager, const chk::PlayerPtr &player,
-                     const chk::Block &cell)
+static void showForcedMoves(const std::unique_ptr<chk::GameManager> &manager, const chk::PlayerPtr &player,
+                            const chk::Block &cell)
 {
     const auto &forcedMoves = manager->getForcedMoves();
     const short pieceId = manager->getPieceFromCell(cell->getIndex());
@@ -46,8 +49,8 @@ void showForcedMoves(const std::unique_ptr<chk::GameManager> &manager, const chk
  * @param buffer Temporary store for clicked Pieces
  * @param cell Tapped cell
  */
-void handleCellTap(const std::unique_ptr<chk::GameManager> &manager, const chk::PlayerPtr &player,
-                   const chk::PlayerPtr &opponent, chk::CircularBuffer<short> &buffer, const chk::Block &cell)
+static void handleCellTap(const std::unique_ptr<chk::GameManager> &manager, const chk::PlayerPtr &player,
+                          const chk::PlayerPtr &opponent, chk::CircularBuffer<short> &buffer, const chk::Block &cell)
 {
     if (manager->isGameOver())
         return;
@@ -82,8 +85,16 @@ void handleCellTap(const std::unique_ptr<chk::GameManager> &manager, const chk::
 
 int main()
 {
-    auto window = sf::RenderWindow{sf::VideoMode{600u, 700u}, "Checkers CPP", sf::Style::Titlebar | sf::Style::Close};
+    auto window = sf::RenderWindow{sf::VideoMode{600, 700}, "SpaceCheckers", sf::Style::Titlebar | sf::Style::Close};
     window.setFramerateLimit(60u);
+    ImGui::SFML::Init(window, false);
+
+    // LOAD FONT FOR IMGUI
+    ImGuiIO &io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    ImFont *imfont = io.Fonts->AddFontFromFileTTF(chk::getResourcePath(FONT_PATH).c_str(), 16);
+    IM_ASSERT(imfont != nullptr);
+    ImGui::SFML::UpdateFontTexture();
 
     sf::Image appIcon;
     if (appIcon.loadFromFile(chk::getResourcePath(ICON_PATH)))
@@ -113,7 +124,6 @@ int main()
     manager->drawAllPieces(keteList);
     manager->matchCellsToPieces(keteList);
 
-    // Give each player their own pieces
     for (auto &kete : keteList)
     {
         if (kete->getPieceType() == chk::PieceType::Red)
@@ -133,22 +143,23 @@ int main()
     chk::CircularBuffer<short> circularBuffer{1};
 
     // THE STATUS TEXT
-    sf::Text txtPanel;
-    txtPanel.setFont(font);
-    txtPanel.setCharacterSize(16u);
+    sf::Text txtPanel{"Welcome to Checkers", font, 16};
     txtPanel.setFillColor(sf::Color::White);
     txtPanel.setPosition(sf::Vector2f{0, 8.5 * chk::SIZE_CELL});
-
     manager->updateMessage("Now playing! RED starts");
+
+    auto wsClient = std::make_unique<chk::WsClient>(manager.get());
+
+    sf::Clock deltaClock;
     while (window.isOpen())
     {
         for (auto event = sf::Event{}; window.pollEvent(event);)
         {
+            ImGui::SFML::ProcessEvent(window, event);
             if (event.type == sf::Event::Closed)
             {
                 window.close();
             }
-
             if (event.type == sf::Event::MouseButtonPressed && sf::Mouse::isButtonPressed(sf::Mouse::Left))
             {
                 const auto clickedPos = sf::Mouse::getPosition(window);
@@ -179,8 +190,16 @@ int main()
             }
         }
 
+        ImGui::SFML::Update(window, deltaClock.restart());
         auto mousePos = sf::Mouse::getPosition(window);
         window.clear();
+        // START IMGUI
+        if (wsClient->showConnectionWindow())
+        {
+            wsClient->tryConnect();
+        }
+
+        // RENDER CHECKERBOARD
         for (const auto &cell : manager->getBlockList())
         {
             window.draw(*cell);
@@ -211,9 +230,12 @@ int main()
             }
             window.draw(*black_piece);
         }
+
         txtPanel.setString(manager->getCurrentMsg());
         window.draw(txtPanel);
+        ImGui::SFML::Render(window);
         window.display();
     }
+    ImGui::SFML::Shutdown();
     return EXIT_SUCCESS;
 }

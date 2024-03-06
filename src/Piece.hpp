@@ -72,6 +72,9 @@ inline Piece::Piece(const sf::CircleShape &circle, const PieceType &pType, const
     }
 }
 
+/**
+ * Override the draw function
+ */
 inline void Piece::draw(sf::RenderTarget &target, sf::RenderStates states) const
 {
     target.draw(this->myCircle, states);
@@ -87,7 +90,7 @@ inline const PieceType &Piece::getPieceType() const
 }
 
 /**
- * Set this piece as King. Will also change its color
+ * Set this piece as King. Will also change its texture
  */
 inline void Piece::activateKing()
 {
@@ -181,7 +184,7 @@ inline bool Piece::operator==(const Piece &other) const
 }
 
 /**
- * Simply move piece to given cell. Validate first, then Move the Piece to the given position.
+ * Simply move piece to given cell. Validate first, then Move the Piece diagonally to the given position.
  * @param destPos destination
  * @return TRUE if successful, else FALSE
  */
@@ -205,8 +208,8 @@ inline bool Piece::moveSimple(const sf::Vector2f &destPos)
 
     this->myCircle.setPosition(destPos.x, destPos.y);
     this->setPosition(myCircle.getPosition());
-    if (this->pieceType == PieceType::Red && destPos.y == 0 ||
-        this->pieceType == PieceType::Black && destPos.y == 7 * chk::SIZE_CELL)
+    if ((this->pieceType == PieceType::Red && destPos.y == 0) ||
+        (this->pieceType == PieceType::Black && destPos.y == 7 * chk::SIZE_CELL))
     {
         this->activateKing();
     }
@@ -214,7 +217,7 @@ inline bool Piece::moveSimple(const sf::Vector2f &destPos)
 }
 
 /**
- * When capturing opponent, Validate first, then move the Piece to the given position.
+ * When capturing opponent, Validate first, then move by 2 cells diagonally to the given position.
  * @param destPos destination
  * @return TRUE if successful, else FALSE
  */
@@ -238,8 +241,8 @@ inline bool Piece::moveCapture(const sf::Vector2f &destPos)
 
     this->myCircle.setPosition(destPos.x, destPos.y);
     this->setPosition(myCircle.getPosition());
-    if (this->pieceType == PieceType::Red && destPos.y == 0 ||
-        this->pieceType == PieceType::Black && destPos.y == 7 * chk::SIZE_CELL)
+    if ((this->pieceType == PieceType::Red && destPos.y == 0) ||
+        (this->pieceType == PieceType::Black && destPos.y == 7 * chk::SIZE_CELL))
     {
         this->activateKing();
     }
