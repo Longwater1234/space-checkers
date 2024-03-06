@@ -4,14 +4,13 @@ include(zlib.cmake)
 include(mbedtls.cmake)
 include(ixwebsocket.cmake)
 
-# GET ImGui
+# GET ImGui 1.90.4
 CPMAddPackage(
   NAME imgui
-  GIT_REPOSITORY "https://gitee.com/msnh/imgui.git"
-  GIT_TAG		8491cf36adb2663f16975bc4ebcd871daf5ff8b7
-  GIT_SHALLOW TRUE
-)
-
+  URL "https://github.com/ocornut/imgui/archive/refs/tags/v1.90.4.tar.gz"
+  VERSION		1.90.4
+  DOWNLOAD_EXTRACT_TIMESTAMP TRUE 
+) 
 
 if(imgui_ADDED)
   set(IMGUI_DIR ${imgui_SOURCE_DIR})
@@ -27,15 +26,19 @@ if(imgui_ADDED)
 endif()
 
 
-# GET ImGui-SFML
+# GET ImGui-SFML 2.6
 CPMAddPackage(
   NAME imgui-sfml
-  GIT_REPOSITORY "https://gitee.com/i4xin/imgui-sfml.git"
-  GIT_TAG        2a4b9dd9b34df61d91e33667dbaf5902c4923867
-  GIT_SHALLOW TRUE
+  URL "https://github.com/SFML/imgui-sfml/archive/refs/tags/v2.6.tar.gz"
+  VERSION 2.6
+  DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+  OPTIONS        "IMGUI_SFML_FIND_SFML OFF"
 )
 
-if(imgui-sfml_ADDED)
-  option(IMGUI_SFML_FIND_SFML "Use find_package to find SFML" OFF)
-  option(IMGUI_SFML_IMGUI_DEMO "Build imgui_demo.cpp" ON)
-endif()
+# GET spdlog v1.13
+CPMAddPackage(
+  NAME spdlog
+  URL "https://github.com/gabime/spdlog/archive/refs/tags/v1.13.0.tar.gz"
+  VERSION 1.13.0
+  DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+) 

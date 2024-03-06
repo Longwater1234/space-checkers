@@ -1,10 +1,10 @@
-# zlib v2.25.0 (zlib License)
+# zlib v1.3.0 (zlib License)
 
 CPMAddPackage(
-    NAME zlib
-    GIT_REPOSITORY https://gitee.com/chooosky/zlib.git
-    GIT_TAG 79a0e447a0dfa32979420cb21cfb96d684b2c9d5
-    GIT_SHALLOW
+    NAME zlib 
+    URL   "https://github.com/madler/zlib/archive/refs/tags/v1.3.1.tar.gz"
+    VERSION 1.3.0
+    DOWNLOAD_EXTRACT_TIMESTAMP TRUE
     DOWNLOAD_ONLY ON
 )
 

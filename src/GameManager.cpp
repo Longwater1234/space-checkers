@@ -26,9 +26,9 @@ GameManager::GameManager()
 /**
  * Update main window message
  */
-void GameManager::updateMessage(const std::string &msg)
+void GameManager::updateMessage(std::string_view msg)
 {
-    std::lock_guard<std::mutex> lg(my_mutex_);
+    std::lock_guard<std::mutex> lg(my_mutex);
     this->currentMsg = msg;
 }
 
@@ -147,6 +147,10 @@ void GameManager::handleMovePiece(const chk::PlayerPtr &player, const chk::Playe
     if (!this->forcedMoves.empty())
     {
         std::cout << player->getName() << " IS IN DANGER " << std::endl;
+    }
+    if (this->onMoveSuccess_ != nullptr)
+    {
+        onMoveSuccess_(currentPieceId, destCell->getIndex());
     }
     this->playerRedTurn = !this->playerRedTurn; // toggle player turns
     this->updateMessage(player->getName() + " has moved to " + std::to_string(destCell->getIndex()) + ". It's " +
@@ -288,6 +292,14 @@ void GameManager::updateMatchStatus(const chk::PlayerPtr &p1, const chk::PlayerP
 }
 
 /**
+ * Set callback for when piece is moved succesfully
+ */
+void chk::GameManager::setOnMoveSuccessCallback(const onMoveSuccessCallback &callback)
+{
+    this->onMoveSuccess_ = callback;
+}
+
+/**
  * Whether game is over
  * @return TRUE or FALSE
  */
@@ -325,7 +337,7 @@ bool GameManager::awayFromEdge(const int &cell_idx) const
 }
 
 /**
- * Collect all possible next "forced captures" which must be taken
+ * Collect all possible next "forced captures" which must be taken. Loop entire board.
  * @param hunter current player
  */
 void GameManager::identifyTargets(const PlayerPtr &hunter)
@@ -360,7 +372,7 @@ void GameManager::collectFrontLHS(const chk::PlayerPtr &hunter, const Block &cel
 {
     if (hunter->getPlayerType() == PlayerType::PLAYER_1 && cell_ptr->getPos().x == 0)
     {
-        //stop here. IMPOSSIBLE to have enemies on my left.
+        // stop here. IMPOSSIBLE to have enemies on my left.
         return;
     }
     if (hunter->getPlayerType() == PlayerType::PLAYER_2 && cell_ptr->getPos().x >= 7 * chk::SIZE_CELL)
@@ -368,7 +380,7 @@ void GameManager::collectFrontLHS(const chk::PlayerPtr &hunter, const Block &cel
         // same as above, based on my current "X" position.
         return;
     }
-    bool enemyOpenBehind = false; // does enemy piece have empty cell behind him?
+    bool enemyOpenBehind = false; // does enemy piece have empty cell behind it?
     bool hasEnemyAhead = false;
     short deltaForward = cell_ptr->getIsEvenRow() ? 4 : 5;
     short deltaBehindEnemy = cell_ptr->getIsEvenRow() ? 5 : 4;
@@ -419,12 +431,12 @@ void GameManager::collectFrontRHS(const chk::PlayerPtr &hunter, const Block &cel
 {
     if (hunter->getPlayerType() == PlayerType::PLAYER_1 && cell_ptr->getPos().x >= 7 * chk::SIZE_CELL)
     {
-        //stop here, IMPOSSIBLE to have enemies on my right.
+        // stop here, IMPOSSIBLE to have enemies on my right.
         return;
     }
     if (hunter->getPlayerType() == PlayerType::PLAYER_2 && cell_ptr->getPos().x == 0)
     {
-        //SAME as above, based on my "X" position
+        // SAME as above, based on my "X" position
         return;
     }
     bool enemyOpenBehind = false;

@@ -17,20 +17,21 @@ namespace chk
 class WsClient
 {
   public:
-    WsClient(chk::GameManager *mgr) : manager_(mgr){};
+    explicit WsClient(chk::GameManager *mgr) : manager_(mgr){};
     WsClient() = delete;
     bool showConnectionWindow();
     void tryConnect();
 
   private:
-    std::string final_address;
-    chk::GameManager *manager_;
+    std::string final_address;  // IP or URL of server
+    chk::GameManager *manager_;      // game manager
     std::atomic_bool isReady{false}; // wait for connection to open;
     std::atomic_bool isDead{false};  // when connection closed
     std::string errorMsg{};
-    std::vector<std::string> messages_{};
-    std::mutex mut_;
-    void showErrorPopup(std::string_view msg);
+    std::vector<std::string> messages{};
+    std::mutex mut;
+    bool w_open = true;
+    void showErrorPopup() const;
     void showChatWindow(ix::WebSocket *webSocket);
 };
 
@@ -41,30 +42,31 @@ class WsClient
 inline bool WsClient::showConnectionWindow()
 {
     static bool is_secure = false;
-    static bool w_open = true;
     static bool btn_disabled = false;
+    static bool w_closed = false;
     if (w_open)
     {
         /* code */
         ImGui::SetNextWindowSize(ImVec2(sf::Vector2f(300.0, 300.0)));
         static char inputUrl[256];
         ImGui::Begin("Connect Window", nullptr, ImGuiWindowFlags_NoResize);
-        ImGui::InputText("Server IP", inputUrl, IM_ARRAYSIZE(inputUrl));
+        ImGui::InputText("Server IP", inputUrl, IM_ARRAYSIZE(inputUrl), ImGuiInputTextFlags_CharsNoBlank);
         ImGui::Checkbox("Secure", &is_secure);
         ImGui::BeginDisabled(btn_disabled);
-        if (std::string_view(inputUrl).size() > 0 && ImGui::Button("Connect", ImVec2(100.0f, 0)))
+        if (!std::string_view(inputUrl).empty() && ImGui::Button("Connect", ImVec2(100.0f, 0)))
         {
             btn_disabled = true;
             const char *suffix = is_secure ? "wss://" : "ws://";
             this->final_address = suffix + std::string(inputUrl);
-            memset(inputUrl, 0, sizeof(inputUrl));
             w_open = false;
+            w_closed = true;
+            memset(inputUrl, 0, sizeof(inputUrl));
         }
         ImGui::EndDisabled();
         ImGui::End();
     }
     // negate the FALSE value
-    return !w_open;
+    return w_closed;
 }
 
 /**
@@ -86,7 +88,7 @@ inline void WsClient::tryConnect()
 #endif // _WIN32
     webSocket.setTLSOptions(tlsOptions);
 
-    webSocket.setUrl(this->final_address);
+    webSocket.setUrl(final_address);
 
     // set inital connection timeout
     webSocket.setHandshakeTimeout(10);
@@ -96,26 +98,26 @@ inline void WsClient::tryConnect()
     webSocket.setOnMessageCallback([this](const ix::WebSocketMessagePtr &msg) {
         if (msg->type == ix::WebSocketMessageType::Message)
         {
-            std::lock_guard<std::mutex> lg{this->mut_};
-            this->messages_.emplace_back("Server: " + msg->str);
+            std::lock_guard<std::mutex> lg{this->mut};
+            this->messages.emplace_back("Server: " + msg->str);
         }
         else if (msg->type == ix::WebSocketMessageType::Open)
         {
-            std::lock_guard<std::mutex> lg{this->mut_};
-            this->messages_.emplace_back("Connection established");
+            std::lock_guard lg{this->mut};
+            this->messages.emplace_back("Connection established");
             this->isReady = true;
         }
         else if (msg->type == ix::WebSocketMessageType::Error)
         {
-            std::lock_guard<std::mutex> lg{this->mut_};
+            std::lock_guard lg{this->mut};
             errorMsg = "Connection error: " + msg->errorInfo.reason;
             std::cerr << errorMsg << std::endl;
             this->isDead = true;
         }
     });
 
-    // Start our b/ground thread and receive messages (if connection not dead)
-    if (!isDead)
+    // Start our b/ground thread and receive messages (if websocket not dead)
+    if (!this->isDead)
     {
         webSocket.start();
     }
@@ -127,47 +129,23 @@ inline void WsClient::tryConnect()
     if (webSocket.getReadyState() != ix::ReadyState::Open && this->isDead)
     {
         ImGui::OpenPopup("Error", ImGuiPopupFlags_NoOpenOverExistingPopup);
-        this->showErrorPopup(errorMsg);
+        this->showErrorPopup();
         webSocket.stop();
         return;
     }
+
+    //LISTEN for UI game updates from manager
+    this->manager_->setOnMoveSuccessCallback([this](const short &pieceId, const int &targetCell) {
+        std::cout << " I moved " << pieceId << " to cell index " << targetCell << std::endl;
+        webSocket.send("i played " + std::to_string(pieceId) + " to cell " + std::to_string(targetCell));
+    });
 
     this->showChatWindow(&webSocket);
 }
 
 /**
- * Show error message from websockets as a popup window
- * @param msg The error message
- */
-inline void WsClient::showErrorPopup(std::string_view msg)
-{
-    if (msg.empty())
-    {
-        return;
-    }
-    // Always center this window when appearing
-    ImVec2 center = ImGui::GetMainViewport()->GetCenter();
-    static bool popen = true;
-    ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
-    if (popen)
-    {
-        if (ImGui::BeginPopupModal("Error", &popen, ImGuiWindowFlags_AlwaysAutoResize))
-        {
-            ImGui::Text("%s", msg.data());
-            ImGui::Separator();
-            if (ImGui::Button("OK", ImVec2(120, 0)))
-            {
-                popen = false;
-                ImGui::CloseCurrentPopup();
-            }
-            ImGui::EndPopup();
-        };
-    }
-}
-
-/**
  * Show the chat window and handle sending messsages
- * @param websocket The websocket pointer
+ * @param webSocket The websocket pointer
  */
 inline void WsClient::showChatWindow(ix::WebSocket *webSocket)
 {
@@ -179,15 +157,15 @@ inline void WsClient::showChatWindow(ix::WebSocket *webSocket)
         if (!this->isReady)
         {
             /* code */
-            ImGui::Text("Connecting to %s", this->final_address.c_str());
+            ImGui::Text("Connecting to %s", this->final_address.data());
         }
 
         ImGui::BeginChild("chatmessages", ImVec2(300, 200), false);
-        for (const auto &msg : this->messages_)
+        for (const auto &msg : this->messages)
         {
             if (!msg.empty())
             {
-                ImGui::Text("%s", msg.c_str());
+                ImGui::Text(u8"%s", msg.c_str());
             }
         }
         ImGui::EndChild();
@@ -195,14 +173,14 @@ inline void WsClient::showChatWindow(ix::WebSocket *webSocket)
         ImGui::SetCursorPos(ImVec2(0, 300));
         ImGui::PushItemWidth(300);
         static char msgpack[256] = "";
-        if (ImGui::InputTextWithHint("Chat", "write message, press Enter", msgpack, IM_ARRAYSIZE(msgpack),
+        if (ImGui::InputTextWithHint(".", "Write message, press Enter", msgpack, IM_ARRAYSIZE(msgpack),
                                      ImGuiInputTextFlags_EnterReturnsTrue) &&
             this->isReady)
         {
             if (!std::string_view(msgpack).empty())
             {
-                std::lock_guard<std::mutex> lg{this->mut_};
-                this->messages_.emplace_back("You: " + std::string(msgpack));
+                std::lock_guard lg{this->mut};
+                this->messages.emplace_back("You " + std::string(msgpack));
                 webSocket->send(msgpack);
                 memset(msgpack, 0, sizeof(msgpack));
             }
@@ -217,4 +195,34 @@ inline void WsClient::showChatWindow(ix::WebSocket *webSocket)
         this->isDead = true;
     }
 }
+
+/**
+ * Show error message from websockets as a popup window
+ */
+inline void WsClient::showErrorPopup() const
+{
+    if (this->errorMsg.empty())
+    {
+        return;
+    }
+    // Always center this window when appearing
+    ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+    static bool popen = true;
+    ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+    if (popen)
+    {
+        if (ImGui::BeginPopupModal("Error", &popen, ImGuiWindowFlags_AlwaysAutoResize))
+        {
+            ImGui::Text(u8"%s", this->errorMsg.c_str());
+            ImGui::Separator();
+            if (ImGui::Button("OK", ImVec2(120, 0)))
+            {
+                popen = false;
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndPopup();
+        };
+    }
+}
+
 } // namespace chk

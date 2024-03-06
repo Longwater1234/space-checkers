@@ -2,12 +2,12 @@
 
 CPMAddPackage(
     NAME mbedtls
-    GIT_REPOSITORY https://gitee.com/zhanghe666/mbedtls.git
-    GIT_TAG 1c54b5410fd48d6bcada97e30cac417c5c7eea67
-    GIT_SHALLOW
+    URL "https://github.com/Mbed-TLS/mbedtls/archive/refs/tags/v2.25.0.zip"
+    VERSION 2.25.0
+    DOWNLOAD_EXTRACT_TIMESTAMP TRUE
     DOWNLOAD_ONLY ON
-)
-
+) 
+ 
 if(mbedtls_ADDED)
     file(GLOB mbedtls_SOURCES ${mbedtls_SOURCE_DIR}/library/*.c)
     add_library(mbedtls STATIC ${mbedtls_SOURCES})

@@ -1,19 +1,12 @@
-# IXWebSocket 11.0.8 (BSD-3-Clause License)
+# IXWebSocket 11.4.2 (BSD-3-Clause License)
 
 CPMAddPackage(
     NAME ixwebsocket
-    GIT_REPOSITORY https://gitee.com/__xiaoyao__/IXWebSocket.git
-    # VERSION 11.0.8
-    GIT_TAG 872f516edec86cf1c60d411203ac30b1c180f52e
-	GIT_SHALLOW
+    URL    "https://github.com/machinezone/IXWebSocket/archive/refs/tags/v11.4.2.tar.gz"
+    VERSION 11.4.2
+    DOWNLOAD_EXTRACT_TIMESTAMP TRUE
     DOWNLOAD_ONLY ON
 )
-
-find_package(OpenSSL)
-
-if(OpenSSL_FOUND)
-    SET(USE_OPEN_SSL TRUE)
-endif()
 
 SET(USE_TLS TRUE)
 SET(USE_MBED_TLS TRUE)

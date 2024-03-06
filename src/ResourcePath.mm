@@ -1,11 +1,8 @@
-////////////////////
-// FOR MAC OS ONLY
-///////////////////
-#ifdef __APPLE__
-#include "ResourcePath.h"
-#import <Foundation/Foundation.h>
+#include "ResourcePath.hpp"
 
-std::string getResourcePath(const std::string& relativePath) {
+#ifdef __APPLE__
+#import <Foundation/Foundation.h>
+std::string chk::getResourcePath(const std::string& relativePath) {
     NSBundle* mainBundle = [NSBundle mainBundle];
     NSString* resourcePath = [mainBundle pathForResource:@(relativePath.c_str()) ofType:nil];
     
