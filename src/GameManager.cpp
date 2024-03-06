@@ -286,7 +286,7 @@ void GameManager::updateMatchStatus(const chk::PlayerPtr &p1, const chk::PlayerP
     if (p1Count == 0 || p2Count == 0)
     {
         this->gameOver = true;
-        const std::string winnerName = p1Count > p2Count ? p1->getName() : p2->getName();
+        const std::string &winnerName = p1Count > p2Count ? p1->getName() : p2->getName();
         this->updateMessage("GAME OVER! " + winnerName + " won");
     }
 }
