@@ -23,9 +23,13 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    - name: Create SFML 2.6 folders
+    - shell: cmd
+    - run: mkdir "C:/SFML/"
+    
     - name: Download SFML 2.6 latest
-      shell: pwsh
-      run: Invoke-WebRequest -Uri "https://www.sfml-dev.org/files/SFML-2.6.1-windows-vc15-64-bit.zip" -OutFile "C:/SFML/"
+      shell: cmd
+      run: curl -X GET -fSL "https://www.sfml-dev.org/files/SFML-2.6.1-windows-vc15-64-bit.zip" -o "C:/SFML/SFML-2.6.1-windows-vc15-64-bit.zip"
     
     - name: Unzip SFML
       shell: pwsh
