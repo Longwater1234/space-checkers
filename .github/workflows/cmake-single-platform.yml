@@ -11,7 +11,7 @@ on:
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
-  SFML_HOME: "C:/SFML/SFML-2.6.1"
+  SFML_DIR: "C:/SFML/SFML-2.6.1"
 
 jobs:
   build:
@@ -29,16 +29,16 @@ jobs:
     
     - name: Download SFML 2.6 latest
       shell: cmd
-      run: curl -X GET -fSL "https://www.sfml-dev.org/files/SFML-2.6.1-windows-vc15-64-bit.zip" -o "C:/SFML/SFML-2.6.1-windows-vc15-64-bit.zip"
+      run: curl -fSL "https://www.sfml-dev.org/files/SFML-2.6.1-windows-vc15-64-bit.zip" -o "C:/SFML/SFML-2.6.1-windows-vc15-64-bit.zip"
     
     - name: Unzip SFML
       shell: cmd
-      run: tar -xvf "C:/SFML/SFML-2.6.1-windows-vc15-64-bit.zip" -C ${{env.SFML_HOME}}
+      run: tar -xvf "C:/SFML/SFML-2.6.1-windows-vc15-64-bit.zip" -C "C:/SFML/"
       
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
       # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DSFML_DIR=${{env.SFML_HOME}} -DCMAKE_CXX_COMPILER=cl -DCMAKE_C_COMPILER=cl
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DSFML_DIR=${{env.SFML_DIR}} -DCMAKE_CXX_COMPILER=cl -DCMAKE_C_COMPILER=cl
         
     - name: Build
       # Build your program with the given configuration
