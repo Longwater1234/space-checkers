@@ -91,7 +91,7 @@ void GameManager::drawCheckerboard(const sf::Font &font)
  * Create new checker pieces, each with own position, and add them to given vector
  * @param pieceList destination
  */
-void GameManager::drawAllPieces(std::vector<chk::PiecePtr> &pieceList)
+void GameManager::createAllPieces(std::vector<chk::PiecePtr> &pieceList)
 {
     std::random_device randomDevice;
     std::mt19937 randEngine(randomDevice());
@@ -146,10 +146,11 @@ void GameManager::handleMovePiece(const chk::PlayerPtr &player, const chk::Playe
     this->identifyTargets(opponent);
     if (!this->forcedMoves.empty())
     {
-        std::cout << player->getName() << " IS IN DANGER " << std::endl;
+        spdlog::info(player->getName() + " IS IN DANGER ");
     }
     if (this->onMoveSuccess_ != nullptr)
     {
+        // notify server
         onMoveSuccess_(currentPieceId, destCell->getIndex());
     }
     this->playerRedTurn = !this->playerRedTurn; // toggle player turns
@@ -168,7 +169,9 @@ void GameManager::handleJumpPiece(const chk::PlayerPtr &hunter, const chk::Playe
 {
     // If There's a PIECE on target cell, Cannot Jump to it.
     if (this->gameOver || this->getPieceFromCell(targetCell->getIndex()) != -1)
+    {
         return;
+    }
 
     for (const auto &[hunterPieceId, target] : this->forcedMoves)
     {
@@ -196,8 +199,8 @@ void GameManager::handleJumpPiece(const chk::PlayerPtr &hunter, const chk::Playe
             }
             else
             {
-                std::cout << prey->getName() << " IS IN DANGER " << std::endl;
-                this->updateMessage(prey->getName() + " IS IN DANGER ");
+                spdlog::info(prey->getName() + " IS IN DANGER");
+                this->updateMessage(prey->getName() + " IS IN DANGER");
             }
             break;
         }
@@ -267,7 +270,7 @@ void GameManager::matchCellsToPieces(const std::vector<chk::PiecePtr> &pieceList
         }
     }
     this->alreadyCached = true;
-    std::cout << "hashmap size " << gameMap.size() << std::endl;
+    spdlog::info("hashmap size " + std::to_string(gameMap.size()));
 }
 
 /**
@@ -445,7 +448,7 @@ void GameManager::collectFrontRHS(const chk::PlayerPtr &hunter, const Block &cel
     short deltaBehindEnemy = cell_ptr->getIsEvenRow() ? 4 : 3;
     int mSign = 1;
 
-    // if player piece is Black (PLAYER 2)
+    // if piece is Black (PLAYER 2)
     if (hunter->getPlayerType() == PlayerType::PLAYER_2)
     {
         mSign = -1;
@@ -501,7 +504,7 @@ void GameManager::collectBehindRHS(const PlayerPtr &hunter, const Block &cell_pt
     short deltaBehindEnemy = cell_ptr->getIsEvenRow() ? 4 : 5;
     int mSign = +1;
 
-    // if player is Black (PLAYER 2)
+    // if piece is Black (PLAYER 2)
     if (hunter->getPlayerType() == PlayerType::PLAYER_2)
     {
         mSign = -1;
@@ -557,7 +560,7 @@ void GameManager::collectBehindLHS(const PlayerPtr &hunter, const Block &cell_pt
     short deltaBehindEnemy = cell_ptr->getIsEvenRow() ? 3 : 4;
     int mSign = 1;
 
-    // if is player Black (PLAYER 2)
+    // if piece is Black (PLAYER 2)
     if (hunter->getPlayerType() == PlayerType::PLAYER_2)
     {
         mSign = -1;

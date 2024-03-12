@@ -6,6 +6,7 @@
 #include "CaptureTarget.hpp"
 #include "Cell.hpp"
 #include "Player.hpp"
+#include "spdlog/spdlog.h"
 #include <SFML/Graphics/Text.hpp>
 #include <functional>
 #include <memory>
@@ -21,8 +22,8 @@ using Block = std::unique_ptr<chk::Cell>;
 using PlayerPtr = std::unique_ptr<chk::Player>;
 using onMoveSuccessCallback = std::function<void(short, int)>; // callback after moving
 using onJumpSuccess = std::function<void(short, int)>;         // callback after capturing
-constexpr size_t NUM_ROWS = 8;
-constexpr size_t NUM_COLS = 8;
+constexpr uint16_t NUM_ROWS = 8;
+constexpr uint16_t NUM_COLS = 8;
 
 /**
  * Overall game manager
@@ -33,7 +34,7 @@ class GameManager
   public:
     GameManager();
     void drawCheckerboard(const sf::Font &font);
-    static void drawAllPieces(std::vector<chk::PiecePtr> &pieceList);
+    static void createAllPieces(std::vector<chk::PiecePtr> &pieceList);
     void updateMessage(std::string_view msg);
     void matchCellsToPieces(const std::vector<chk::PiecePtr> &pieceList);
     [[nodiscard]] const std::unordered_map<short, chk::CaptureTarget> &getForcedMoves() const;

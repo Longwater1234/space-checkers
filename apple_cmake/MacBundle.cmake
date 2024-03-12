@@ -14,7 +14,7 @@ foreach(FILE ${my_images})
 endforeach()
 
 add_executable(${CMAKE_PROJECT_NAME} MACOSX_BUNDLE
-               ${GAME_SRC} "${CMAKE_SOURCE_DIR}/ResourcePath.mm" ${application_icon} "${my_images}")
+               ${GAME_SRC} ${application_icon} "${my_images}")
 
 set_target_properties(
   ${CMAKE_PROJECT_NAME}

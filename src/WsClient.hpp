@@ -5,6 +5,9 @@
 #include <ixwebsocket/IXNetSystem.h>
 #include <ixwebsocket/IXWebSocket.h>
 #include <mutex>
+#include <nlohmann/json.hpp>
+#include <spdlog/spdlog.h>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -19,11 +22,11 @@ class WsClient
   public:
     explicit WsClient(chk::GameManager *mgr) : manager_(mgr){};
     WsClient() = delete;
-    bool showConnectionWindow();
+    bool doneConnectionWindow();
     void tryConnect();
 
   private:
-    std::string final_address;  // IP or URL of server
+    std::string final_address;       // IP or URL of server
     chk::GameManager *manager_;      // game manager
     std::atomic_bool isReady{false}; // wait for connection to open;
     std::atomic_bool isDead{false};  // when connection closed
@@ -39,7 +42,7 @@ class WsClient
  * Show the imgui connection window, for server address
  * @return TRUE if CONNECT button is clicked, else FALSE
  */
-inline bool WsClient::showConnectionWindow()
+inline bool WsClient::doneConnectionWindow()
 {
     static bool is_secure = false;
     static bool btn_disabled = false;
@@ -111,7 +114,7 @@ inline void WsClient::tryConnect()
         {
             std::lock_guard lg{this->mut};
             errorMsg = "Connection error: " + msg->errorInfo.reason;
-            std::cerr << errorMsg << std::endl;
+            spdlog::error(errorMsg);
             this->isDead = true;
         }
     });
@@ -134,10 +137,12 @@ inline void WsClient::tryConnect()
         return;
     }
 
-    //LISTEN for UI game updates from manager
-    this->manager_->setOnMoveSuccessCallback([this](const short &pieceId, const int &targetCell) {
-        std::cout << " I moved " << pieceId << " to cell index " << targetCell << std::endl;
-        webSocket.send("i played " + std::to_string(pieceId) + " to cell " + std::to_string(targetCell));
+    // LISTEN for UI game updates from manager
+    this->manager_->setOnMoveSuccessCallback([](const short &pieceId, const int &targetCell) {
+        std::stringstream ss;
+        ss << "I moved " << pieceId << " to cell index " << targetCell;
+        spdlog::info(ss.str());
+        webSocket.send(ss.str());
     });
 
     this->showChatWindow(&webSocket);
@@ -180,7 +185,7 @@ inline void WsClient::showChatWindow(ix::WebSocket *webSocket)
             if (!std::string_view(msgpack).empty())
             {
                 std::lock_guard lg{this->mut};
-                this->messages.emplace_back("You " + std::string(msgpack));
+                this->messages.emplace_back("You: " + std::string(msgpack));
                 webSocket->send(msgpack);
                 memset(msgpack, 0, sizeof(msgpack));
             }

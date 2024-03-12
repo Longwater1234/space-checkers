@@ -1,18 +1,19 @@
 cmake_minimum_required(VERSION 3.18 FATAL_ERROR)
 
-project("SpaceCheckers" VERSION 1.0 HOMEPAGE_URL "https://github.com/Longwater1234/space-checkers")
+project("SpaceCheckers" VERSION 1.0 
+ HOMEPAGE_URL "https://github.com/Longwater1234/space-checkers")
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(IMGUI_SFML_FIND_SFML OFF)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
-if(WIN32)
+if(NOT APPLE)
   set(SFML_STATIC_LIBRARIES TRUE)
 endif()
 
 # Absolute path where you installed SFML
-set(SFML_HOME "D:/work_mine/CPP/SFML-2.6.1")
+set(SFML_HOME "D:/work_mine/CPP/SFML-2.6.1") 
 
 file(GLOB_RECURSE GAME_SRC "src/*.cpp" "src/*.hpp")
 set(SFML_DIR ${SFML_HOME}/lib/cmake/SFML)
@@ -36,7 +37,7 @@ endif()
 
 # link all required libraries
 target_link_libraries(SpaceCheckers PRIVATE sfml-graphics sfml-window sfml-system ImGui-SFML
-                        ixwebsocket spdlog::spdlog)
+                        ixwebsocket nlohmann_json spdlog::spdlog)
 
 # include SFML headers
 include_directories(${SFML_HOME}/include)
