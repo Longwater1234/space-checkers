@@ -18,7 +18,7 @@ template <typename T> class CircularBuffer
     // Constructor, sets maxCapacity limit
     explicit CircularBuffer(uint32_t maxCapacity) : maxCapacity(maxCapacity)
     {
-        m_deque_.resize(maxCapacity);
+        m_deque.resize(maxCapacity);
     }
     CircularBuffer() = delete;
     void addItem(T item);
@@ -29,7 +29,7 @@ template <typename T> class CircularBuffer
 
   private:
     uint32_t maxCapacity = 0; // max Capacity
-    std::deque<T> m_deque_;   // actual container of elements
+    std::deque<T> m_deque;   // actual container of elements
 };
 
 /**
@@ -38,7 +38,7 @@ template <typename T> class CircularBuffer
  */
 template <typename T> void CircularBuffer<T>::clean()
 {
-    m_deque_.clear();
+    m_deque.clear();
 }
 
 /**
@@ -48,17 +48,17 @@ template <typename T> void CircularBuffer<T>::clean()
  */
 template <typename T> bool CircularBuffer<T>::isEmpty() const
 {
-    return m_deque_.empty();
+    return m_deque.empty();
 }
 
 /**
- * Pop out the first in queue (front)
+ * Get the first in queue (front), WITHOUT removing it
  * @tparam T any type
  * @return The first element in queue
  */
 template <typename T> T &CircularBuffer<T>::getTop()
 {
-    return m_deque_.front();
+    return m_deque.front();
 }
 
 /**
@@ -68,7 +68,7 @@ template <typename T> T &CircularBuffer<T>::getTop()
 template <typename T> void CircularBuffer<T>::printAll()
 {
     std::cout << "[";
-    for (const auto &item : m_deque_)
+    for (const auto &item : m_deque)
     {
         std::cout << item << ", ";
     }
@@ -83,10 +83,10 @@ template <typename T> void CircularBuffer<T>::printAll()
 template <typename T> void CircularBuffer<T>::addItem(T item)
 {
     // if full, remove 1st item first
-    if (m_deque_.size() >= maxCapacity)
+    if (m_deque.size() >= maxCapacity)
     {
-        m_deque_.pop_front();
+        m_deque.pop_front();
     }
-    m_deque_.push_back(item);
+    m_deque.push_back(item);
 }
 } // namespace chk

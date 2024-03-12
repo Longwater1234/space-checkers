@@ -25,6 +25,7 @@ class Piece final : public sf::Drawable, public sf::Transformable
 
   public:
     Piece(const sf::CircleShape &circle, const PieceType &pType, short id);
+    Piece() = delete;
     [[nodiscard]] const PieceType &getPieceType() const;
     void activateKing();
     bool getIsKing() const;

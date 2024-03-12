@@ -5,6 +5,7 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Window/Mouse.hpp>
 #include <set>
+#include <cassert>
 #include <vector>
 
 #include "imgui-SFML.h"
@@ -86,7 +87,7 @@ static void handleCellTap(const std::unique_ptr<chk::GameManager> &manager, cons
 int main()
 {
     auto window = sf::RenderWindow{sf::VideoMode{600, 700}, "SpaceCheckers", sf::Style::Titlebar | sf::Style::Close};
-    window.setFramerateLimit(60u);
+    window.setFramerateLimit(60);
     ImGui::SFML::Init(window, false);
 
     // LOAD FONT FOR IMGUI
@@ -95,6 +96,7 @@ int main()
     ImFont *imfont = io.Fonts->AddFontFromFileTTF(chk::getResourcePath(FONT_PATH).c_str(), 16);
     IM_ASSERT(imfont != nullptr);
     ImGui::SFML::UpdateFontTexture();
+   // ImGui::StyleColorsLight();
 
     sf::Image appIcon;
     if (appIcon.loadFromFile(chk::getResourcePath(ICON_PATH)))
@@ -117,14 +119,15 @@ int main()
     // CREATE TWO unique PLAYERS
     auto p1 = std::make_unique<chk::Player>(chk::PlayerType::PLAYER_1);
     auto p2 = std::make_unique<chk::Player>(chk::PlayerType::PLAYER_2);
+    assert(!(*p1 == *p2));
 
-    // NOW DRAW all PIECES ON BOARD
-    std::vector<chk::PiecePtr> keteList;
-    keteList.reserve(NUM_PIECES);
-    manager->drawAllPieces(keteList);
-    manager->matchCellsToPieces(keteList);
+    // NOW create all PIECES ON BOARD
+    std::vector<chk::PiecePtr> pieceVector;
+    pieceVector.reserve(NUM_PIECES);
+    manager->createAllPieces(pieceVector);
+    manager->matchCellsToPieces(pieceVector);
 
-    for (auto &kete : keteList)
+    for (auto &kete : pieceVector)
     {
         if (kete->getPieceType() == chk::PieceType::Red)
         {
@@ -137,9 +140,9 @@ int main()
     }
 
     // we don't need this anymore
-    keteList.clear();
+    pieceVector.clear();
 
-    // Our temp store with maxCap of 1
+    // Our "rotating" store with maxCap of 1
     chk::CircularBuffer<short> circularBuffer{1};
 
     // THE STATUS TEXT
@@ -194,7 +197,7 @@ int main()
         auto mousePos = sf::Mouse::getPosition(window);
         window.clear();
         // START IMGUI
-        if (wsClient->showConnectionWindow())
+        if (wsClient->doneConnectionWindow())
         {
             wsClient->tryConnect();
         }

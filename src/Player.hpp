@@ -11,9 +11,9 @@ namespace chk
 enum class PlayerType
 {
     // RED
-    PLAYER_1 = 4883834,
+    PLAYER_1 = 48834,
     // BLACK
-    PLAYER_2 = 8594839
+    PLAYER_2 = 48835
 };
 
 // alias for unique pointer of player's Piece
@@ -23,6 +23,7 @@ class Player
 {
   public:
     explicit Player(PlayerType player_type);
+    Player() = delete;
     void receivePiece(PiecePtr &piecePtr);
     void losePiece(const short &targetId);
     [[nodiscard]] const std::unordered_map<short, chk::PiecePtr> &getOwnPieces() const;
