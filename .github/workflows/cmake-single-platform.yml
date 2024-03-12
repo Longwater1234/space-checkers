@@ -24,16 +24,16 @@ jobs:
     - uses: actions/checkout@v3
 
     - name: Create SFML 2.6 folders
-    - shell: cmd
-    - run: mkdir "C:/SFML/"
+      shell: cmd
+      run: mkdir "C:/SFML/"
     
     - name: Download SFML 2.6 latest
       shell: cmd
       run: curl -X GET -fSL "https://www.sfml-dev.org/files/SFML-2.6.1-windows-vc15-64-bit.zip" -o "C:/SFML/SFML-2.6.1-windows-vc15-64-bit.zip"
     
     - name: Unzip SFML
-      shell: pwsh
-      run: Expand-Archive -LiteralPath "C:/SFML/SFML-2.6.1-windows-vc15-64-bit.zip" -DestinationPath ${{env.SFML_HOME}} -Force
+      shell: cmd
+      run: tar -xvf "C:/SFML/SFML-2.6.1-windows-vc15-64-bit.zip" -C ${{env.SFML_HOME}}
       
     - name: Configure CMake
       # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
