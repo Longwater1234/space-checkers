@@ -164,7 +164,8 @@ inline void WsClient::showChatWindow(ix::WebSocket *webSocket)
         if (!this->isReady)
         {
             /* code */
-            ImGui::Text("Connecting to %s", this->final_address.data());
+            ImGui::Text("Connecting to %s", this->final_address.c_str());
+            ImGui::End();
             return;
         }
 
