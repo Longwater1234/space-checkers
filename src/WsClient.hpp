@@ -1,4 +1,5 @@
 #pragma once
+#include "CircularBuffer.hpp"
 #include "GameManager.hpp"
 #include <atomic>
 #include <iostream>
@@ -32,6 +33,7 @@ class WsClient
     std::atomic_bool isDead{false};  // when connection closed
     std::string errorMsg{};
     std::vector<std::string> messages{};
+    chk::CircularBuffer<std::string> msgBuffer{20};
     std::mutex mut;
     bool w_open = true;
     void showErrorPopup() const;
@@ -102,12 +104,12 @@ inline void WsClient::tryConnect()
         if (msg->type == ix::WebSocketMessageType::Message)
         {
             std::lock_guard<std::mutex> lg{this->mut};
-            this->messages.emplace_back("Server: " + msg->str);
+            this->msgBuffer.addItem("Server: " + msg->str);
         }
         else if (msg->type == ix::WebSocketMessageType::Open)
         {
             std::lock_guard lg{this->mut};
-            this->messages.emplace_back("Connection established");
+            this->msgBuffer.addItem("Connection established");
             this->isReady = true;
         }
         else if (msg->type == ix::WebSocketMessageType::Error)
@@ -155,7 +157,7 @@ inline void WsClient::tryConnect()
 inline void WsClient::showChatWindow(ix::WebSocket *webSocket)
 {
     static bool chatWindow = true;
-    ImGui::SetNextWindowSize(ImVec2(400, 400));
+    ImGui::SetNextWindowSize(ImVec2(sf::Vector2f{400, 400}));
     if (chatWindow)
     {
         ImGui::Begin("Echo Chat", &chatWindow, ImGuiWindowFlags_NoResize);
@@ -163,19 +165,20 @@ inline void WsClient::showChatWindow(ix::WebSocket *webSocket)
         {
             /* code */
             ImGui::Text("Connecting to %s", this->final_address.data());
+            return;
         }
 
-        ImGui::BeginChild("chatmessages", ImVec2(300, 200), false);
-        for (const auto &msg : this->messages)
+        ImGui::BeginChild("Chatmessages", ImVec2(300.0, 290.0), ImGuiChildFlags_None);
+        for (const auto &msg : this->msgBuffer.getAll())
         {
             if (!msg.empty())
             {
-                ImGui::Text(u8"%s", msg.c_str());
+                ImGui::TextWrapped(u8"%s", msg.c_str());
             }
         }
         ImGui::EndChild();
 
-        ImGui::SetCursorPos(ImVec2(0, 300));
+        ImGui::SetCursorPos(ImVec2(sf::Vector2f{0, 350.0}));
         ImGui::PushItemWidth(300);
         static char msgpack[256] = "";
         if (ImGui::InputTextWithHint(".", "Write message, press Enter", msgpack, IM_ARRAYSIZE(msgpack),
@@ -185,7 +188,7 @@ inline void WsClient::showChatWindow(ix::WebSocket *webSocket)
             if (!std::string_view(msgpack).empty())
             {
                 std::lock_guard lg{this->mut};
-                this->messages.emplace_back("You: " + std::string(msgpack));
+                this->msgBuffer.addItem("You: " + std::string(msgpack));
                 webSocket->send(msgpack);
                 memset(msgpack, 0, sizeof(msgpack));
             }
@@ -213,7 +216,7 @@ inline void WsClient::showErrorPopup() const
     // Always center this window when appearing
     ImVec2 center = ImGui::GetMainViewport()->GetCenter();
     static bool popen = true;
-    ImGui::SetNextWindowPos(center, ImGuiCond_Appearing, ImVec2(0.5f, 0.5f));
+    ImGui::SetNextWindowPos(center, ImGuiCond_FirstUseEver, ImVec2(0.5f, 0.5f));
     if (popen)
     {
         if (ImGui::BeginPopupModal("Error", &popen, ImGuiWindowFlags_AlwaysAutoResize))
