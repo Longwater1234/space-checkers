@@ -4,8 +4,8 @@
 #include "WsClient.hpp"
 #include <SFML/Graphics.hpp>
 #include <SFML/Window/Mouse.hpp>
-#include <set>
 #include <cassert>
+#include <set>
 #include <vector>
 
 #include "imgui-SFML.h"
@@ -96,7 +96,7 @@ int main()
     ImFont *imfont = io.Fonts->AddFontFromFileTTF(chk::getResourcePath(FONT_PATH).c_str(), 16);
     IM_ASSERT(imfont != nullptr);
     ImGui::SFML::UpdateFontTexture();
-   // ImGui::StyleColorsLight();
+    // ImGui::StyleColorsLight();
 
     sf::Image appIcon;
     if (appIcon.loadFromFile(chk::getResourcePath(ICON_PATH)))
@@ -167,27 +167,29 @@ int main()
             {
                 const auto clickedPos = sf::Mouse::getPosition(window);
                 /* Check window bounds */
-                if (clickedPos.y <= chk::SIZE_CELL * 8)
+                if (clickedPos.y > chk::SIZE_CELL * 8)
                 {
-                    for (auto &cell : manager->getBlockList())
+                    continue;
+                }
+                for (auto &cell : manager->getBlockList())
+                {
+                    // inner loop
+                    if (cell->containsPoint(clickedPos) && cell->getIndex() != -1)
                     {
-                        if (cell->containsPoint(clickedPos) && cell->getIndex() != -1)
-                        {
-                            const auto &hunter = manager->isPlayerRedTurn() ? p1 : p2;
-                            const auto &prey = manager->isPlayerRedTurn() ? p2 : p1;
+                        const auto &hunter = manager->isPlayerRedTurn() ? p1 : p2;
+                        const auto &prey = manager->isPlayerRedTurn() ? p2 : p1;
 
-                            if (manager->hasPendingCaptures())
-                            {
-                                manager->handleJumpPiece(hunter, prey, cell);
-                                manager->updateMatchStatus(hunter, prey);
-                                circularBuffer.clean();
-                            }
-                            else
-                            {
-                                handleCellTap(manager, hunter, prey, circularBuffer, cell);
-                            }
-                            break;
+                        if (manager->hasPendingCaptures())
+                        {
+                            manager->handleJumpPiece(hunter, prey, cell);
+                            manager->updateMatchStatus(hunter, prey);
+                            circularBuffer.clean();
                         }
+                        else
+                        {
+                            handleCellTap(manager, hunter, prey, circularBuffer, cell);
+                        }
+                        break; // inner loop
                     }
                 }
             }
@@ -197,7 +199,7 @@ int main()
         auto mousePos = sf::Mouse::getPosition(window);
         window.clear();
         // START IMGUI
-        if (wsClient->doneConnectionWindow())
+        if (wsClient->doneConnectWindow())
         {
             wsClient->tryConnect();
         }
