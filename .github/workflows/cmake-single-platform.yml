@@ -4,14 +4,15 @@ name: CMake on a single platform
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
   SFML_DIR: "C:/SFML/SFML-2.6.1"
+  SFML_HOME: "C:/SFML/SFML-2.6.1"
 
 jobs:
   build:
@@ -21,32 +22,31 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-    - name: Create SFML 2.6 folders
-      shell: cmd
-      run: mkdir "C:/SFML/"
-    
-    - name: Download SFML 2.6 latest
-      shell: cmd
-      run: curl -fSL "https://www.sfml-dev.org/files/SFML-2.6.1-windows-vc17-64-bit.zip" -o "C:/SFML/SFML-2.6.1-windows-vc17-64-bit.zip"
-    
-    - name: Unzip SFML
-      shell: cmd
-      run: tar -xvf "C:/SFML/SFML-2.6.1-windows-vc17-64-bit.zip" -C "C:/SFML/"
-      
-    - name: Configure CMake
-      # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
-      # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DSFML_DIR=${{env.SFML_DIR}} -DCMAKE_CXX_COMPILER=cl -DCMAKE_C_COMPILER=cl
-        
-    - name: Build
-      # Build your program with the given configuration
-      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+      - name: Create SFML 2.6 folders
+        shell: cmd
+        run: mkdir "C:/SFML/"
 
-    - name: Test
-      working-directory: ${{github.workspace}}/build
-      # Execute tests defined by the CMake configuration.
-      # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
-      run: ctest -C ${{env.BUILD_TYPE}}
+      - name: Download SFML 2.6 latest
+        shell: cmd
+        run: curl -fSL "https://www.sfml-dev.org/files/SFML-2.6.1-windows-vc17-64-bit.zip" -o "C:/SFML/SFML-2.6.1-windows-vc17-64-bit.zip"
 
+      - name: Unzip SFML
+        shell: cmd
+        run: tar -xvf "C:/SFML/SFML-2.6.1-windows-vc17-64-bit.zip" -C "C:/SFML/"
+
+      - name: Configure CMake
+        # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
+        # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
+        run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DSFML_HOME=${{env.SFML_HOME}} -DCMAKE_CXX_COMPILER=cl -DCMAKE_C_COMPILER=cl
+
+      - name: Build
+        # Build your program with the given configuration
+        run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+
+      - name: Test
+        working-directory: ${{github.workspace}}/build
+        # Execute tests defined by the CMake configuration.
+        # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
+        run: ctest -C ${{env.BUILD_TYPE}}
