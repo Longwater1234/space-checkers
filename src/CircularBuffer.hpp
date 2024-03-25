@@ -4,7 +4,6 @@
 
 #pragma once
 #include <deque>
-#include <iostream>
 namespace chk
 {
 /**
@@ -21,15 +20,16 @@ template <typename T> class CircularBuffer
         m_deque.resize(maxCapacity);
     }
     CircularBuffer() = delete;
-    void addItem(T item);
+    void addItem(const T &item);
     T &getTop();
+    // void getAll();
     [[nodiscard]] bool isEmpty() const;
-    void printAll();
+    const std::deque<T> &getAll() const;
     void clean();
 
   private:
     uint32_t maxCapacity = 0; // max Capacity
-    std::deque<T> m_deque;   // actual container of elements
+    std::deque<T> m_deque;    // actual container of elements
 };
 
 /**
@@ -52,6 +52,14 @@ template <typename T> bool CircularBuffer<T>::isEmpty() const
 }
 
 /**
+ * returns all elements from the buffer
+ */
+template <typename T> inline const std::deque<T> &CircularBuffer<T>::getAll() const
+{
+    return this->m_deque;
+}
+
+/**
  * Get the first in queue (front), WITHOUT removing it
  * @tparam T any type
  * @return The first element in queue
@@ -62,31 +70,17 @@ template <typename T> T &CircularBuffer<T>::getTop()
 }
 
 /**
- * printAll all elements in the buffer
- * @tparam T any type
- */
-template <typename T> void CircularBuffer<T>::printAll()
-{
-    std::cout << "[";
-    for (const auto &item : m_deque)
-    {
-        std::cout << item << ", ";
-    }
-    std::cout << "]" << std::endl;
-}
-
-/**
  * Add new element to buffer
  * @tparam T any type
  * @param item the element to be inserted
  */
-template <typename T> void CircularBuffer<T>::addItem(T item)
+template <typename T> void CircularBuffer<T>::addItem(const T &item)
 {
     // if full, remove 1st item first
     if (m_deque.size() >= maxCapacity)
     {
         m_deque.pop_front();
     }
-    m_deque.push_back(item);
+    m_deque.emplace_back(item);
 }
 } // namespace chk

@@ -1,12 +1,11 @@
 # space-checkers
 
-Multiplayer Checkers game in C++ built with SFML and Websockets. This is the Windows Version.
+Multiplayer Checkers game in C++ built with SFML and Websockets.
 
 ## Requirements
 
 ### For Windows
 - Latest Visual Studio 2022 or later (NOT VS Code), with complete "Desktop C++ Development" workload
-- Latest CMake 3.x (Optional, bundled with Visual Studio)
 - [SFML 2.6.x](https://www.sfml-dev.org/download/sfml/2.6.1/) - Please choose "Visual C++" edition of SFML, avoid others.
 - Windows 10 or 11.
 
