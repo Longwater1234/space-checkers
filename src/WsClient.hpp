@@ -10,7 +10,6 @@
 #include <spdlog/spdlog.h>
 #include <sstream>
 #include <string>
-#include <vector>
 
 #include "imgui-SFML.h"
 #include "imgui.h"
@@ -23,17 +22,16 @@ class WsClient
   public:
     explicit WsClient(chk::GameManager *mgr) : manager_(mgr){};
     WsClient() = delete;
-    bool doneConnectionWindow();
+    bool doneConnectWindow();
     void tryConnect();
 
   private:
-    std::string final_address;       // IP or URL of server
-    chk::GameManager *manager_;      // game manager
-    std::atomic_bool isReady{false}; // wait for connection to open;
-    std::atomic_bool isDead{false};  // when connection closed
-    std::string errorMsg{};
-    std::vector<std::string> messages{};
-    chk::CircularBuffer<std::string> msgBuffer{20};
+    std::string final_address;                      // IP or URL of server
+    chk::GameManager *manager_;                     // game manager
+    std::atomic_bool isReady{false};                // wait for connection to open;
+    std::atomic_bool isDead{false};                 // when connection closed
+    chk::CircularBuffer<std::string> msgBuffer{20}; // keep only recent 20 messages
+    std::string errorMsg{};                         // for any connection fail
     std::mutex mut;
     bool w_open = true;
     void showErrorPopup() const;
@@ -44,16 +42,16 @@ class WsClient
  * Show the imgui connection window, for server address
  * @return TRUE if CONNECT button is clicked, else FALSE
  */
-inline bool WsClient::doneConnectionWindow()
+inline bool WsClient::doneConnectWindow()
 {
     static bool is_secure = false;
     static bool btn_disabled = false;
-    static bool w_closed = false;
+    static bool btn_clicked = false;
     if (w_open)
     {
         /* code */
         ImGui::SetNextWindowSize(ImVec2(sf::Vector2f(300.0, 300.0)));
-        static char inputUrl[256];
+        static char inputUrl[256] = "";
         ImGui::Begin("Connect Window", nullptr, ImGuiWindowFlags_NoResize);
         ImGui::InputText("Server IP", inputUrl, IM_ARRAYSIZE(inputUrl), ImGuiInputTextFlags_CharsNoBlank);
         ImGui::Checkbox("Secure", &is_secure);
@@ -64,14 +62,13 @@ inline bool WsClient::doneConnectionWindow()
             const char *suffix = is_secure ? "wss://" : "ws://";
             this->final_address = suffix + std::string(inputUrl);
             w_open = false;
-            w_closed = true;
+            btn_clicked = true;
             memset(inputUrl, 0, sizeof(inputUrl));
         }
         ImGui::EndDisabled();
         ImGui::End();
     }
-    // negate the FALSE value
-    return w_closed;
+    return btn_clicked;
 }
 
 /**
