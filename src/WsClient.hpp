@@ -36,7 +36,24 @@ class WsClient
     bool w_open = true;
     void showErrorPopup() const;
     void showChatWindow(ix::WebSocket *webSocket);
+    void HelpMarker(const char *tip) const;
 };
+
+/**
+ * Show help tooltip with given message
+ * @param tip the help message
+ */
+inline void WsClient::HelpMarker(const char *tip) const
+{
+    ImGui::TextDisabled("(?)");
+    if (ImGui::BeginItemTooltip())
+    {
+        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+        ImGui::TextUnformatted(tip);
+        ImGui::PopTextWrapPos();
+        ImGui::EndTooltip();
+    }
+}
 
 /**
  * Show the imgui connection window, for server address
@@ -49,11 +66,12 @@ inline bool WsClient::doneConnectWindow()
     static bool btn_clicked = false;
     if (w_open)
     {
-        /* code */
         ImGui::SetNextWindowSize(ImVec2(sf::Vector2f(300.0, 300.0)));
         static char inputUrl[256] = "";
         ImGui::Begin("Connect Window", nullptr, ImGuiWindowFlags_NoResize);
-        ImGui::InputText("Host IP", inputUrl, IM_ARRAYSIZE(inputUrl), ImGuiInputTextFlags_CharsNoBlank);
+        ImGui::InputText("Server IP", inputUrl, IM_ARRAYSIZE(inputUrl), ImGuiInputTextFlags_CharsNoBlank);
+        ImGui::SameLine();
+        this->HelpMarker("eg: 127.0.0.1:8080 OR myserver.example.org");
         ImGui::Checkbox("Secure", &is_secure);
         ImGui::BeginDisabled(btn_disabled);
         if (!std::string_view(inputUrl).empty() && ImGui::Button("Connect", ImVec2(100.0f, 0)))
@@ -131,14 +149,14 @@ inline void WsClient::tryConnect()
     if (webSocket.getReadyState() != ix::ReadyState::Open && this->isDead)
     {
         ImGui::OpenPopup("Error", ImGuiPopupFlags_NoOpenOverExistingPopup);
-        //TODO this should be guarded by "if" statement and global bool variable
+        // TODO this should be guarded by "if" statement and global bool variable
         this->showErrorPopup();
         webSocket.stop();
         return;
     }
 
-    // LISTEN for UI game updates from manager
-    this->manager_->setOnMoveSuccessCallback([](const uint16_t &pieceId, const int &targetCell) {
+    // LISTEN for UI game updates from manager, send to server
+    this->manager_->setOnMoveSuccessCallback([this](const uint16_t &pieceId, const int &targetCell) {
         std::stringstream ss;
         ss << "I moved " << pieceId << " to cell index " << targetCell;
         spdlog::info(ss.str());
@@ -181,8 +199,7 @@ inline void WsClient::showChatWindow(ix::WebSocket *webSocket)
         ImGui::PushItemWidth(300);
         static char msgpack[256] = "";
         if (ImGui::InputTextWithHint(".", "Write message, press Enter", msgpack, IM_ARRAYSIZE(msgpack),
-                                     ImGuiInputTextFlags_EnterReturnsTrue) &&
-            this->isReady)
+                                     ImGuiInputTextFlags_EnterReturnsTrue))
         {
             if (!std::string_view(msgpack).empty())
             {

@@ -8,6 +8,7 @@
 #include "Player.hpp"
 #include <SFML/Graphics/Text.hpp>
 #include <functional>
+#include <future>
 #include <memory>
 #include <mutex>
 #include <random>
@@ -60,7 +61,7 @@ class GameManager
     // mutex for atomic updates
     std::mutex my_mutex;
     // callback after successfully moved piece
-    onMoveSuccessCallback onMoveSuccess_;
+    onMoveSuccessCallback _onMoveSuccess;
 
   private:
     [[nodiscard]] bool boardContainsCell(const int &cell_idx) const;

@@ -189,8 +189,7 @@ int main()
                         {
                             handleCellTap(manager, hunter, prey, circularBuffer, cell);
                         }
-                        break;
-                        // END inner loop
+                        break; // END inner loop
                     }
                 }
             }

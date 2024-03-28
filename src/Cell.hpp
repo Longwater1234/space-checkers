@@ -14,7 +14,7 @@ namespace chk
 class Cell final : public sf::Drawable
 {
   public:
-    Cell(int idx, const sf::RectangleShape &rec, const sf::Vector2f &pos, const sf::Font &font);
+    explicit Cell(int idx, const sf::RectangleShape &rec, const sf::Vector2f &pos, const sf::Font &font);
     Cell() = delete;
     bool containsPoint(const sf::Vector2i &pos) const;
     bool containsOrigin(const sf::Vector2f &pos) const;
@@ -25,7 +25,7 @@ class Cell final : public sf::Drawable
 
   private:
     sf::RectangleShape rec;
-    int index; // Darker cells have index in range [1-32]. Lighter cells are all -1
+    int index; // Darker cells have index in range [1...32]. Lighter cells are all -1
     bool isEvenRow = false;
     sf::Vector2f cell_pos;
     sf::Text sfText;
@@ -50,7 +50,7 @@ inline void Cell::draw(sf::RenderTarget &target, sf::RenderStates states) const
 {
 
     target.draw(rec, states);
-    if (index != -1)
+    if (this->index != -1)
     {
         // only draw text on Darker cells
         target.draw(sfText, states);

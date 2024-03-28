@@ -149,10 +149,10 @@ void GameManager::handleMovePiece(const chk::PlayerPtr &player, const chk::Playe
     {
         spdlog::info(player->getName() + " IS IN DANGER ");
     }
-    if (this->onMoveSuccess_ != nullptr)
+    if (this->_onMoveSuccess != nullptr)
     {
         // notify server
-        onMoveSuccess_(currentPieceId, destCell->getIndex());
+        _onMoveSuccess(currentPieceId, destCell->getIndex());
     }
     this->playerRedTurn = !this->playerRedTurn; // toggle player turns
     this->updateMessage(player->getName() + " has moved to " + std::to_string(destCell->getIndex()) + ". It's " +
@@ -302,7 +302,7 @@ void GameManager::updateMatchStatus(const chk::PlayerPtr &p1, const chk::PlayerP
  */
 void chk::GameManager::setOnMoveSuccessCallback(const onMoveSuccessCallback &callback)
 {
-    this->onMoveSuccess_ = callback;
+    this->_onMoveSuccess = callback;
 }
 
 /**
@@ -329,7 +329,7 @@ bool GameManager::boardContainsCell(const int &cell_idx) const
 }
 
 /**
- * \brief Whether the cell index specified is NOT on any edge of board
+ * \brief Whether the given cell index is NOT on any edge of board
  * \param cell_idx cell index
  * \return TRUE if NOT on edges, else FALSE
  */
@@ -343,7 +343,7 @@ bool GameManager::awayFromEdge(const int &cell_idx) const
 }
 
 /**
- * Collect all possible next "forced captures" for this hunter. Loop entire board.
+ * Collect all possible next "forced captures" for this hunter. Loop entire board once.
  * @param hunter Current player
  */
 void GameManager::identifyTargets(const PlayerPtr &hunter)
@@ -357,6 +357,7 @@ void GameManager::identifyTargets(const PlayerPtr &hunter)
             // this CELL is not usable, OR piece not OWNED by hunter
             continue;
         }
+        // TODO use constant threadpool of 4 to speed up this. (std::Async)
         this->collectFrontLHS(hunter, cell_ptr);
         this->collectFrontRHS(hunter, cell_ptr);
         const auto &piecePtr = hunter->getOwnPieces().at(pieceId);
@@ -377,7 +378,7 @@ void GameManager::collectFrontLHS(const chk::PlayerPtr &hunter, const Block &cel
 {
     if (hunter->getPlayerType() == PlayerType::PLAYER_1 && cell_ptr->getPos().x == 0)
     {
-        // stop here. IMPOSSIBLE to have enemies on my left.
+        // IMPOSSIBLE to have enemies on my Left.
         return;
     }
     if (hunter->getPlayerType() == PlayerType::PLAYER_2 && cell_ptr->getPos().x >= 7 * chk::SIZE_CELL)
@@ -436,7 +437,7 @@ void GameManager::collectFrontRHS(const chk::PlayerPtr &hunter, const Block &cel
 {
     if (hunter->getPlayerType() == PlayerType::PLAYER_1 && cell_ptr->getPos().x >= 7 * chk::SIZE_CELL)
     {
-        // stop here, IMPOSSIBLE to have enemies on my Right.
+        // IMPOSSIBLE to have enemies on my Right.
         return;
     }
     if (hunter->getPlayerType() == PlayerType::PLAYER_2 && cell_ptr->getPos().x == 0)
