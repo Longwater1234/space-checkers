@@ -11,7 +11,7 @@
 #include "imgui-SFML.h"
 #include "imgui.h"
 
-constexpr uint16_t NUM_PIECES = 24u;
+constexpr uint16_t NUM_PIECES{24};
 constexpr auto ICON_PATH = "win-icon-16.png";
 constexpr auto FONT_PATH = "open-sans.regular.ttf";
 
@@ -96,7 +96,7 @@ int main()
     ImFont *imfont = io.Fonts->AddFontFromFileTTF(chk::getResourcePath(FONT_PATH).c_str(), 16);
     IM_ASSERT(imfont != nullptr);
     ImGui::SFML::UpdateFontTexture();
-    // ImGui::StyleColorsLight(); //LIGHT MODE
+    // ImGui::StyleColorsLight(); //LIGHT THEME
 
     sf::Image appIcon;
     if (appIcon.loadFromFile(chk::getResourcePath(ICON_PATH)))
@@ -142,7 +142,7 @@ int main()
     // we don't need this anymore
     pieceVector.clear();
 
-    // for storing clicked Piece (using curly braces for safety)
+    // for storing currently clicked Piece (use braces initialize)
     chk::CircularBuffer<short> circularBuffer{1};
 
     // THE STATUS TEXT

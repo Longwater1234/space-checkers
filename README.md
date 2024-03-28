@@ -2,7 +2,7 @@
 
 Online Multiplayer Checkers game in C++ built with SFML 2.6 and ixWebsockets. With very minimal dependencies (no BOOST lib), and
 a simple build process. All dependencies are auto-downloaded and built for you using CPM. The only dependency you need
-pre-installed is SFML.
+pre-installed is SFML 2.6.
 
 ## Requirements for Building
 
