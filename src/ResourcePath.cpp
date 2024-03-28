@@ -1,5 +1,5 @@
 // this is for Windows and Linux only
-#ifndef __APPLE__
+#if defined(_WIN32) || defined(__linux__)
 #include "ResourcePath.hpp"
 
 std::string chk::getResourcePath(const std::string &relativePath)

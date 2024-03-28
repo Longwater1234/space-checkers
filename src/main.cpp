@@ -11,9 +11,9 @@
 #include "imgui-SFML.h"
 #include "imgui.h"
 
-constexpr uint16_t NUM_PIECES = 24u;
+constexpr uint16_t NUM_PIECES{24};
 constexpr auto ICON_PATH = "win-icon-16.png";
-constexpr auto FONT_PATH = "open-sans.regular.ttf";
+constexpr auto FONT_PATH = "notosans-regular.ttf";
 
 /**
  * When player is forced to capture opponent's piece, highlight their pieces.
@@ -96,7 +96,7 @@ int main()
     ImFont *imfont = io.Fonts->AddFontFromFileTTF(chk::getResourcePath(FONT_PATH).c_str(), 16);
     IM_ASSERT(imfont != nullptr);
     ImGui::SFML::UpdateFontTexture();
-    // ImGui::StyleColorsLight();
+    // ImGui::StyleColorsLight(); //LIGHT THEME
 
     sf::Image appIcon;
     if (appIcon.loadFromFile(chk::getResourcePath(ICON_PATH)))
@@ -142,7 +142,7 @@ int main()
     // we don't need this anymore
     pieceVector.clear();
 
-    // Our "rotating" store with maxCap of 1
+    // for storing currently clicked Piece (use braces initialize)
     chk::CircularBuffer<short> circularBuffer{1};
 
     // THE STATUS TEXT
@@ -189,7 +189,7 @@ int main()
                         {
                             handleCellTap(manager, hunter, prey, circularBuffer, cell);
                         }
-                        break; // inner loop
+                        break; // END inner loop
                     }
                 }
             }

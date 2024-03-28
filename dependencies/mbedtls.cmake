@@ -10,6 +10,6 @@ CPMAddPackage(
  
 if(mbedtls_ADDED)
     file(GLOB mbedtls_SOURCES ${mbedtls_SOURCE_DIR}/library/*.c)
-    add_library(mbedtls STATIC ${mbedtls_SOURCES})
+    add_library(mbedtls STATIC ${mbedtls_SOURCES}) 
     target_include_directories(mbedtls PUBLIC ${mbedtls_SOURCE_DIR}/include)
 endif()

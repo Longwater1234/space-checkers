@@ -1,4 +1,5 @@
-# include relative dependencies
+# AUTO-download extra dependencies.
+# DO NOT change the order below:
 include(CPM.cmake)
 include(zlib.cmake)
 include(mbedtls.cmake)
@@ -34,7 +35,5 @@ CPMAddPackage(
   URL "https://github.com/SFML/imgui-sfml/archive/refs/tags/v2.6.tar.gz"
   VERSION 2.6
   DOWNLOAD_EXTRACT_TIMESTAMP TRUE
-  OPTIONS        "IMGUI_SFML_FIND_SFML OFF"
+  OPTIONS        "IMGUI_SFML_FIND_SFML OFF" "IMGUI_DIR ${imgui_SOURCE_DIR}"
 )
-
-# /Users/davis/Documents/work_mine/space-checkers-mac/src/nlohmann

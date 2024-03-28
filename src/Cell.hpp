@@ -14,7 +14,8 @@ namespace chk
 class Cell final : public sf::Drawable
 {
   public:
-    Cell(int idx, const sf::RectangleShape &rec, const sf::Vector2f &pos, const sf::Font &font);
+    explicit Cell(int idx, const sf::RectangleShape &rec, const sf::Vector2f &pos, const sf::Font &font);
+    Cell() = delete;
     bool containsPoint(const sf::Vector2i &pos) const;
     bool containsOrigin(const sf::Vector2f &pos) const;
     const sf::Vector2f &getPos() const;
@@ -23,24 +24,24 @@ class Cell final : public sf::Drawable
     bool getIsEvenRow() const;
 
   private:
-    sf::RectangleShape rec_;
-    int index_; // Darker cells have index in range [1-32]. Lighter cells are all -1
+    sf::RectangleShape rec;
+    int index; // Darker cells have index in range [1...32]. Lighter cells are all -1
     bool isEvenRow = false;
     sf::Vector2f cell_pos;
     sf::Text sfText;
     void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
 };
 
-inline Cell::Cell(const int idx, const sf::RectangleShape &rec, const sf::Vector2f &pos, const sf::Font &font)
+inline Cell::Cell(const int idx, const sf::RectangleShape &rect, const sf::Vector2f &pos, const sf::Font &font)
 {
-    this->rec_ = rec;
-    this->index_ = idx;
+    this->rec = rect;
+    this->index = idx;
     this->cell_pos = pos;
 
     sf::Text text;
     text.setFont(font);
     text.setFillColor(sf::Color{255u, 255u, 255u, 100u});
-    text.setString(std::to_string(this->index_));
+    text.setString(std::to_string(this->index));
     text.setPosition(pos);
     this->sfText = text;
 }
@@ -48,8 +49,8 @@ inline Cell::Cell(const int idx, const sf::RectangleShape &rec, const sf::Vector
 inline void Cell::draw(sf::RenderTarget &target, sf::RenderStates states) const
 {
 
-    target.draw(rec_, states);
-    if (index_ != -1)
+    target.draw(rec, states);
+    if (this->index != -1)
     {
         // only draw text on Darker cells
         target.draw(sfText, states);
@@ -59,7 +60,7 @@ inline void Cell::draw(sf::RenderTarget &target, sf::RenderStates states) const
 /**
  * Whether this cell is in even numbered row
  * @return TRUE or FALSE
-*/
+ */
 inline bool Cell::getIsEvenRow() const
 {
     return this->isEvenRow;
@@ -72,7 +73,7 @@ inline bool Cell::getIsEvenRow() const
  */
 inline bool Cell::containsPoint(const sf::Vector2i &pos) const
 {
-    return this->rec_.getGlobalBounds().contains(static_cast<float>(pos.x), static_cast<float>(pos.y));
+    return this->rec.getGlobalBounds().contains(static_cast<float>(pos.x), static_cast<float>(pos.y));
 }
 
 /**
@@ -91,7 +92,7 @@ inline bool Cell::containsOrigin(const sf::Vector2f &pos) const
  */
 inline int Cell::getIndex() const
 {
-    return this->index_;
+    return this->index;
 }
 
 /**

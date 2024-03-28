@@ -4,6 +4,7 @@
 
 #pragma once
 #include <deque>
+
 namespace chk
 {
 /**
@@ -15,21 +16,20 @@ template <typename T> class CircularBuffer
 
   public:
     // Constructor, sets maxCapacity limit
-    explicit CircularBuffer(uint32_t maxCapacity) : maxCapacity(maxCapacity)
+    explicit CircularBuffer(const uint32_t &maxCapacity) : max_capacity(maxCapacity)
     {
-        m_deque.resize(maxCapacity);
+        m_deque.resize(max_capacity);
     }
     CircularBuffer() = delete;
     void addItem(const T &item);
     T &getTop();
-    // void getAll();
     [[nodiscard]] bool isEmpty() const;
     const std::deque<T> &getAll() const;
     void clean();
 
   private:
-    uint32_t maxCapacity = 0; // max Capacity
-    std::deque<T> m_deque;    // actual container of elements
+    uint32_t max_capacity{}; // max Capacity
+    std::deque<T> m_deque{}; // actual container of elements
 };
 
 /**
@@ -77,7 +77,7 @@ template <typename T> T &CircularBuffer<T>::getTop()
 template <typename T> void CircularBuffer<T>::addItem(const T &item)
 {
     // if full, remove 1st item first
-    if (m_deque.size() >= maxCapacity)
+    if (m_deque.size() >= max_capacity)
     {
         m_deque.pop_front();
     }
