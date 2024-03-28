@@ -135,7 +135,7 @@ void GameManager::handleMovePiece(const chk::PlayerPtr &player, const chk::Playe
 {
     if (this->gameOver)
         return;
-    // VERIFY if move is completed
+    // VERIFY if move is successful
     const bool success = player->movePiece(currentPieceId, destCell->getPos());
     if (!success)
     {
