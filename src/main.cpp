@@ -13,7 +13,7 @@
 
 constexpr uint16_t NUM_PIECES{24};
 constexpr auto ICON_PATH = "win-icon-16.png";
-constexpr auto FONT_PATH = "open-sans.regular.ttf";
+constexpr auto FONT_PATH = "notosans-regular.ttf";
 
 /**
  * When player is forced to capture opponent's piece, highlight their pieces.
