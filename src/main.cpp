@@ -96,7 +96,7 @@ int main()
     ImFont *imfont = io.Fonts->AddFontFromFileTTF(chk::getResourcePath(FONT_PATH).c_str(), 16);
     IM_ASSERT(imfont != nullptr);
     ImGui::SFML::UpdateFontTexture();
-    // ImGui::StyleColorsLight();
+    // ImGui::StyleColorsLight(); //LIGHT MODE
 
     sf::Image appIcon;
     if (appIcon.loadFromFile(chk::getResourcePath(ICON_PATH)))
@@ -142,7 +142,7 @@ int main()
     // we don't need this anymore
     pieceVector.clear();
 
-    // Our "rotating" store with maxCap of 1
+    // for storing clicked Piece (using curly braces for safety)
     chk::CircularBuffer<short> circularBuffer{1};
 
     // THE STATUS TEXT
@@ -189,7 +189,8 @@ int main()
                         {
                             handleCellTap(manager, hunter, prey, circularBuffer, cell);
                         }
-                        break; // inner loop
+                        break;
+                        // END inner loop
                     }
                 }
             }

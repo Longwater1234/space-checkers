@@ -6,12 +6,12 @@
 #include "CaptureTarget.hpp"
 #include "Cell.hpp"
 #include "Player.hpp"
-#include "spdlog/spdlog.h"
 #include <SFML/Graphics/Text.hpp>
 #include <functional>
 #include <memory>
 #include <mutex>
 #include <random>
+#include <spdlog/spdlog.h>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -22,8 +22,8 @@ using Block = std::unique_ptr<chk::Cell>;
 using PlayerPtr = std::unique_ptr<chk::Player>;
 using onMoveSuccessCallback = std::function<void(short, int)>; // callback after moving
 using onJumpSuccess = std::function<void(short, int)>;         // callback after capturing
-constexpr uint16_t NUM_ROWS = 8;
-constexpr uint16_t NUM_COLS = 8;
+constexpr uint16_t NUM_ROWS{8};
+constexpr uint16_t NUM_COLS{8};
 
 /**
  * Overall game manager

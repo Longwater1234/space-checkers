@@ -28,10 +28,10 @@ class WsClient
   private:
     std::string final_address;                      // IP or URL of server
     chk::GameManager *manager_;                     // game manager
-    std::atomic_bool isReady{false};                // wait for connection to open;
-    std::atomic_bool isDead{false};                 // when connection closed
+    std::atomic_bool isReady{false};                // if connection ready open
+    std::atomic_bool isDead{false};                 // if connection closed
     chk::CircularBuffer<std::string> msgBuffer{20}; // keep only recent 20 messages
-    std::string errorMsg{};                         // for any connection fail
+    std::string errorMsg{};                         // for any websocket errors
     std::mutex mut;
     bool w_open = true;
     void showErrorPopup() const;
@@ -53,7 +53,7 @@ inline bool WsClient::doneConnectWindow()
         ImGui::SetNextWindowSize(ImVec2(sf::Vector2f(300.0, 300.0)));
         static char inputUrl[256] = "";
         ImGui::Begin("Connect Window", nullptr, ImGuiWindowFlags_NoResize);
-        ImGui::InputText("Server IP", inputUrl, IM_ARRAYSIZE(inputUrl), ImGuiInputTextFlags_CharsNoBlank);
+        ImGui::InputText("Host IP", inputUrl, IM_ARRAYSIZE(inputUrl), ImGuiInputTextFlags_CharsNoBlank);
         ImGui::Checkbox("Secure", &is_secure);
         ImGui::BeginDisabled(btn_disabled);
         if (!std::string_view(inputUrl).empty() && ImGui::Button("Connect", ImVec2(100.0f, 0)))
@@ -61,7 +61,7 @@ inline bool WsClient::doneConnectWindow()
             btn_disabled = true;
             const char *suffix = is_secure ? "wss://" : "ws://";
             this->final_address = suffix + std::string(inputUrl);
-            w_open = false;
+            this->w_open = false;
             btn_clicked = true;
             memset(inputUrl, 0, sizeof(inputUrl));
         }
@@ -112,8 +112,8 @@ inline void WsClient::tryConnect()
         else if (msg->type == ix::WebSocketMessageType::Error)
         {
             std::lock_guard lg{this->mut};
-            errorMsg = "Connection error: " + msg->errorInfo.reason;
-            spdlog::error(errorMsg);
+            this->errorMsg = "Connection error: " + msg->errorInfo.reason;
+            spdlog::error(this->errorMsg);
             this->isDead = true;
         }
     });
@@ -131,13 +131,14 @@ inline void WsClient::tryConnect()
     if (webSocket.getReadyState() != ix::ReadyState::Open && this->isDead)
     {
         ImGui::OpenPopup("Error", ImGuiPopupFlags_NoOpenOverExistingPopup);
+        //TODO this should be guarded by "if" statement and global bool variable
         this->showErrorPopup();
         webSocket.stop();
         return;
     }
 
     // LISTEN for UI game updates from manager
-    this->manager_->setOnMoveSuccessCallback([](const short &pieceId, const int &targetCell) {
+    this->manager_->setOnMoveSuccessCallback([](const uint16_t &pieceId, const int &targetCell) {
         std::stringstream ss;
         ss << "I moved " << pieceId << " to cell index " << targetCell;
         spdlog::info(ss.str());
@@ -166,7 +167,7 @@ inline void WsClient::showChatWindow(ix::WebSocket *webSocket)
             return;
         }
 
-        ImGui::BeginChild("Chatmessages", ImVec2(300.0, 290.0), ImGuiChildFlags_None);
+        ImGui::BeginChild("ChatMessages", ImVec2(300.0, 290.0), ImGuiChildFlags_None);
         for (const auto &msg : this->msgBuffer.getAll())
         {
             if (!msg.empty())

@@ -2,8 +2,8 @@
 
 CPMAddPackage(
     NAME ixwebsocket
-    URL    "https://github.com/machinezone/IXWebSocket/archive/refs/tags/v11.4.2.tar.gz"
-    VERSION 11.4.2
+    URL    "https://github.com/machinezone/IXWebSocket/archive/refs/tags/v11.4.5.tar.gz"
+    VERSION 11.4.5
     DOWNLOAD_EXTRACT_TIMESTAMP TRUE
     DOWNLOAD_ONLY ON
 )
