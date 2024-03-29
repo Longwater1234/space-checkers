@@ -32,7 +32,7 @@ elseif(APPLE)
   find_library(FOUNDATION_FRAMEWORK Foundation)
   target_link_libraries(SpaceCheckers PRIVATE ${FOUNDATION_FRAMEWORK})
 else()
-  add_executable(SpaceCheckers ${GAME_SRC})
+  add_executable(SpaceCheckers ${GAME_SRC}) 
 endif()
 
 # link all required libraries
