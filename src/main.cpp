@@ -44,7 +44,7 @@ static void showForcedMoves(const std::unique_ptr<chk::GameManager> &manager, co
 }
 
 /**
- * When current player taps a cell.
+ * When current player taps any playable cell.
  * @param manager game manager
  * @param player currentPlayer
  * @param buffer Temporary store for clicked Pieces
@@ -56,7 +56,7 @@ static void handleCellTap(const std::unique_ptr<chk::GameManager> &manager, cons
     if (manager->isGameOver())
         return;
 
-    // CHECK IF cell has a Piece
+    // CHECK IF this cell has a Piece
     const short pieceId = manager->getPieceFromCell(cell->getIndex());
     if (pieceId != -1)
     {
@@ -66,7 +66,7 @@ static void handleCellTap(const std::unique_ptr<chk::GameManager> &manager, cons
             showForcedMoves(manager, player, cell);
             return;
         }
-        // OTHERWISE, store it in buffer!
+        // OTHERWISE, store it in buffer (for a simple move next)!
         buffer.addItem(pieceId);
         manager->setSourceCell(cell->getIndex());
     }
@@ -77,7 +77,9 @@ static void handleCellTap(const std::unique_ptr<chk::GameManager> &manager, cons
         {
             const short movablePieceId = buffer.getTop();
             if (!player->hasThisPiece(movablePieceId))
+            {
                 return;
+            }
             manager->handleMovePiece(player, opponent, cell, movablePieceId);
             buffer.clean();
         }

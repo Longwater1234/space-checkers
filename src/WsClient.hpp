@@ -8,7 +8,6 @@
 #include <mutex>
 #include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
-#include <sstream>
 #include <string>
 
 #include "imgui-SFML.h"
@@ -20,14 +19,14 @@ namespace chk
 class WsClient
 {
   public:
-    explicit WsClient(chk::GameManager *mgr) : manager_(mgr){};
+    explicit WsClient(chk::GameManager *mgr) : manager(mgr){};
     WsClient() = delete;
     bool doneConnectWindow();
     void tryConnect();
 
   private:
     std::string final_address;                      // IP or URL of server
-    chk::GameManager *manager_;                     // game manager
+    chk::GameManager *manager;                      // game manager (pointer)
     std::atomic_bool isReady{false};                // if connection ready open
     std::atomic_bool isDead{false};                 // if connection closed
     chk::CircularBuffer<std::string> msgBuffer{20}; // keep only recent 20 messages
@@ -118,18 +117,18 @@ inline void WsClient::tryConnect()
     webSocket.setOnMessageCallback([this](const ix::WebSocketMessagePtr &msg) {
         if (msg->type == ix::WebSocketMessageType::Message)
         {
-            std::lock_guard<std::mutex> lg{this->mut};
+            std::scoped_lock<std::mutex> lg{this->mut};
             this->msgBuffer.addItem("Server: " + msg->str);
         }
         else if (msg->type == ix::WebSocketMessageType::Open)
         {
-            std::lock_guard lg{this->mut};
+            std::scoped_lock lg{this->mut};
             this->msgBuffer.addItem("Connection established");
             this->isReady = true;
         }
         else if (msg->type == ix::WebSocketMessageType::Error)
         {
-            std::lock_guard lg{this->mut};
+            std::scoped_lock lg{this->mut};
             this->errorMsg = "Connection error: " + msg->errorInfo.reason;
             spdlog::error(this->errorMsg);
             this->isDead = true;
@@ -156,11 +155,10 @@ inline void WsClient::tryConnect()
     }
 
     // LISTEN for UI game updates from manager, send to server
-    this->manager_->setOnMoveSuccessCallback([this](const uint16_t &pieceId, const int &targetCell) {
-        std::stringstream ss;
-        ss << "I moved " << pieceId << " to cell index " << targetCell;
-        spdlog::info(ss.str());
-        webSocket.send(ss.str());
+    this->manager->setOnMoveSuccessCallback([this](const short &pieceId, const int &targetCell) {
+        std::string pkg = "I moved " + std::to_string(pieceId).append(" to cell index ") + std::to_string(targetCell);
+        spdlog::info(pkg);
+        webSocket.send(pkg);
     });
 
     this->showChatWindow(&webSocket);
@@ -203,7 +201,7 @@ inline void WsClient::showChatWindow(ix::WebSocket *webSocket)
         {
             if (!std::string_view(msgpack).empty())
             {
-                std::lock_guard lg{this->mut};
+                std::scoped_lock lg{this->mut};
                 this->msgBuffer.addItem("You: " + std::string(msgpack));
                 webSocket->send(msgpack);
                 memset(msgpack, 0, sizeof(msgpack));
@@ -214,7 +212,7 @@ inline void WsClient::showChatWindow(ix::WebSocket *webSocket)
     }
     else
     {
-        // IF THIS WINDOW IS CLOSED, SHUTDOWN socket
+        // IF THIS chat WINDOW IS CLOSED, SHUTDOWN socket
         webSocket->stop();
         this->isDead = true;
     }

@@ -16,7 +16,7 @@ GameManager::GameManager()
 
 /**
  * Get hashmap of hunter pieceID's to the assigned CaptureTarget
- * @return pair (PieceId--> captureTarget)
+ * @return )pair of forced captures
  */
 [[nodiscard]] const std::unordered_map<short, chk::CaptureTarget> &GameManager::getForcedMoves() const
 {
@@ -24,12 +24,12 @@ GameManager::GameManager()
 }
 
 /**
- * Atomically update main GUI message
+ * Atomically update main UI message
  * @param msg the message content
  */
 void GameManager::updateMessage(std::string_view msg)
 {
-    std::lock_guard<std::mutex> lg(my_mutex);
+    std::scoped_lock<std::mutex> lg(my_mutex);
     this->currentMsg = msg;
 }
 
@@ -160,17 +160,19 @@ void GameManager::handleMovePiece(const chk::PlayerPtr &player, const chk::Playe
 }
 
 /**
- * Handle capturing of "Prey's" pieces by "Hunter", then update gameMap
- * @param hunter the offensive player
+ * Perform capturing of "prey's" pieces by "hunter", then update gameMap
+ * @param hunter the attacking player
  * @param prey the defensive player
  * @param targetCell the destination of hunter
  */
 void GameManager::handleJumpPiece(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,
                                   const chk::Block &targetCell)
 {
-    // If There's a PIECE on target cell, Cannot Jump to it.
+
+    assert(!(hunter == prey) && "cannot be same player");
     if (this->gameOver || this->getPieceFromCell(targetCell->getIndex()) != -1)
     {
+        // STOP if there's already a Piece on target cell
         return;
     }
 
@@ -228,7 +230,7 @@ void GameManager::setSourceCell(const int &src_cell)
 
 /**
  * Whether the current player is holding own hunting Piece, AND
- * the next forced moves not empty.
+ * is about to complete capturing opponent
  *
  *@return TRUE or FALSE
  */
@@ -357,7 +359,7 @@ void GameManager::identifyTargets(const PlayerPtr &hunter)
             // this CELL is not usable, OR piece not OWNED by hunter
             continue;
         }
-        // TODO use constant threadpool of 4 to speed up this. (std::Async)
+        // TODO use constant threadpool of 4 to speed up this up. (std::Async)
         this->collectFrontLHS(hunter, cell_ptr);
         this->collectFrontRHS(hunter, cell_ptr);
         const auto &piecePtr = hunter->getOwnPieces().at(pieceId);
@@ -366,11 +368,12 @@ void GameManager::identifyTargets(const PlayerPtr &hunter)
             this->collectBehindLHS(hunter, cell_ptr);
             this->collectBehindRHS(hunter, cell_ptr);
         }
+        // TODO yield the results (await all 4 threads) here, then return to pool
     }
 }
 
 /**
- * Collect nearby enemies for next "forced" captures (NORTH WEST)
+ * Collect nearby enemies of Hunter for next "forced" captures (NORTH WEST)
  * @param hunter  player whose turn is next
  * @param cell_ptr current cell of hunter
  */
@@ -429,7 +432,7 @@ void GameManager::collectFrontLHS(const chk::PlayerPtr &hunter, const Block &cel
 }
 
 /**
- * Collect nearby enemies for next "forced" captures (NORTH EAST)
+ * Collect nearby enemies of Hunter for next "forced" captures (NORTH EAST)
  * @param hunter player whose turn is next
  * @param cell_ptr current cell of hunter
  */
@@ -486,8 +489,8 @@ void GameManager::collectFrontRHS(const chk::PlayerPtr &hunter, const Block &cel
 }
 
 /**
- * Collect nearby enemies for next "forced" captures (SOUTH EAST). Only for KING pieces
- * @param hunter  player whose turn is next
+ * Collect nearby enemies of Hunter for next "forced" captures (SOUTH EAST). Only for KING pieces
+ * @param hunter  player whose turn is next (MUST be King)
  * @param cell_ptr current cell of hunter
  */
 void GameManager::collectBehindRHS(const PlayerPtr &hunter, const Block &cell_ptr)
