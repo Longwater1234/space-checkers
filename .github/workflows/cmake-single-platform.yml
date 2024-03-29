@@ -52,7 +52,8 @@ jobs:
         run: ctest -C ${{env.BUILD_TYPE}}
 
       - name: Create build_version TXT file
-        run: echo "Build date %DATE% %TIME%" > ${{github.workspace}}/build/bin/Release/build_date.txt
+        shell: pwsh
+        run: Get-Date > ${{github.workspace}}/build/bin/Release/build_date.txt
 
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v4
