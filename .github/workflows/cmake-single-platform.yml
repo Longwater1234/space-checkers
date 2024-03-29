@@ -11,7 +11,6 @@ on:
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
-  SFML_DIR: "C:/SFML/SFML-2.6.1"
   SFML_HOME: "C:/SFML/SFML-2.6.1"
 
 jobs:
@@ -30,7 +29,7 @@ jobs:
 
       - name: Download SFML 2.6 latest
         shell: cmd
-        run: curl -fSL "https://www.sfml-dev.org/files/SFML-2.6.1-windows-vc17-64-bit.zip" -o "C:/SFML/SFML-2.6.1-windows-vc17-64-bit.zip"
+        run: cmd.exe /C "cd C:/SFML/ && curl -fSL https://www.sfml-dev.org/files/SFML-2.6.1-windows-vc17-64-bit.zip -O"
 
       - name: Unzip SFML
         shell: cmd
