@@ -1,6 +1,7 @@
 #pragma once
 #include "CircularBuffer.hpp"
 #include "GameManager.hpp"
+#include "Player.hpp"
 #include <atomic>
 #include <iostream>
 #include <ixwebsocket/IXNetSystem.h>
@@ -19,7 +20,8 @@ namespace chk
 class WsClient
 {
   public:
-    explicit WsClient(chk::GameManager *mgr) : manager(mgr){};
+    explicit WsClient(chk::GameManager *mgr, chk::Player *p1, chk::Player *p2)
+        : manager(mgr), player1(p1), player2(p2){};
     WsClient() = delete;
     bool doneConnectWindow();
     void tryConnect();
@@ -33,16 +35,18 @@ class WsClient
     std::string errorMsg{};                         // for any websocket errors
     std::mutex mut;
     bool w_open = true;
+    chk::Player *player1;
+    chk::Player *player2;
     void showErrorPopup() const;
     void showChatWindow(ix::WebSocket *webSocket);
-    void HelpMarker(const char *tip) const;
+    void showHint(const char *tip) const;
 };
 
 /**
  * Show help tooltip with given message
  * @param tip the help message
  */
-inline void WsClient::HelpMarker(const char *tip) const
+inline void WsClient::showHint(const char *tip) const
 {
     ImGui::TextDisabled("(?)");
     if (ImGui::BeginItemTooltip())
@@ -70,7 +74,7 @@ inline bool WsClient::doneConnectWindow()
         ImGui::Begin("Connect Window", nullptr, ImGuiWindowFlags_NoResize);
         ImGui::InputText("Server IP", inputUrl, IM_ARRAYSIZE(inputUrl), ImGuiInputTextFlags_CharsNoBlank);
         ImGui::SameLine();
-        this->HelpMarker("eg: 127.0.0.1:8080 OR myserver.example.org");
+        this->showHint("eg: 127.0.0.1:8080 OR myserver.example.org");
         ImGui::Checkbox("Secure", &is_secure);
         ImGui::BeginDisabled(btn_disabled);
         if (!std::string_view(inputUrl).empty() && ImGui::Button("Connect", ImVec2(100.0f, 0)))
@@ -201,7 +205,7 @@ inline void WsClient::showChatWindow(ix::WebSocket *webSocket)
         {
             if (!std::string_view(msgpack).empty())
             {
-                std::scoped_lock lg{this->mut};
+                std::scoped_lock<std::mutex> lg{this->mut};
                 this->msgBuffer.addItem("You: " + std::string(msgpack));
                 webSocket->send(msgpack);
                 memset(msgpack, 0, sizeof(msgpack));

@@ -141,7 +141,7 @@ int main()
         }
     }
 
-    // we don't need this anymore
+    //     /* we don't need this anymore  */
     pieceVector.clear();
 
     // for storing currently clicked Piece (use braces initialize)
@@ -153,7 +153,7 @@ int main()
     txtPanel.setPosition(sf::Vector2f{0, 8.5 * chk::SIZE_CELL});
     manager->updateMessage("Now playing! RED starts");
 
-    auto wsClient = std::make_unique<chk::WsClient>(manager.get());
+    auto wsClient = std::make_unique<chk::WsClient>(manager.get(), p1.get(), p2.get());
 
     sf::Clock deltaClock;
     while (window.isOpen())

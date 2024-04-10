@@ -167,7 +167,7 @@ inline void Piece::removeOutline()
 }
 
 /**
- * Get piece's id
+ * Get unique ID of this piece
  */
 const inline short &Piece::getId() const
 {

@@ -8,7 +8,6 @@
 #include "Player.hpp"
 #include <SFML/Graphics/Text.hpp>
 #include <functional>
-#include <future>
 #include <memory>
 #include <mutex>
 #include <random>

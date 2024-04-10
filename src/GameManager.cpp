@@ -359,16 +359,14 @@ void GameManager::identifyTargets(const PlayerPtr &hunter)
             // this CELL is not usable, OR piece not OWNED by hunter
             continue;
         }
-        // TODO use constant threadpool of 4 to speed up this up. (std::Async)
         this->collectFrontLHS(hunter, cell_ptr);
         this->collectFrontRHS(hunter, cell_ptr);
         const auto &piecePtr = hunter->getOwnPieces().at(pieceId);
-        if (piecePtr->getIsKing())
+        if (piecePtr->getIsKing()) 
         {
             this->collectBehindLHS(hunter, cell_ptr);
             this->collectBehindRHS(hunter, cell_ptr);
         }
-        // TODO yield the results (await all 4 threads) here, then return to pool
     }
 }
 
