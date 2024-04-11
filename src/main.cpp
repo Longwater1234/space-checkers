@@ -1,7 +1,7 @@
 #include "CircularBuffer.hpp"
-#include "manager/LocalGameManager.hpp"
 #include "ResourcePath.hpp"
 #include "WsClient.hpp"
+#include "manager/LocalGameManager.hpp"
 #include <SFML/Graphics.hpp>
 #include <SFML/Window/Mouse.hpp>
 #include <cassert>
@@ -58,7 +58,7 @@ static void handleCellTap(const std::unique_ptr<chk::GameManager> &manager, cons
 
     // CHECK IF this cell has a Piece
     const short pieceId = manager->getPieceFromCell(cell->getIndex());
-    if (pieceId !=-1)
+    if (pieceId != -1)
     {
         // YES, it has one! CHECK IF THERE IS ANY PENDING "forced jumps"
         if (!manager->getForcedMoves().empty())
@@ -92,7 +92,7 @@ int main()
     window.setFramerateLimit(60);
     ImGui::SFML::Init(window, false);
 
-    // LOAD FONT FOR IMGUI
+    // LOAD FONT for IMGUI
     ImGuiIO &io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     ImFont *imfont = io.Fonts->AddFontFromFileTTF(chk::getResourcePath(FONT_PATH).c_str(), 16);
@@ -107,7 +107,7 @@ int main()
         window.setIcon(dims.x, dims.y, appIcon.getPixelsPtr());
     }
 
-    // LOAD FONT
+    // LOAD FONT for SFML
     sf::Font font;
     if (!font.loadFromFile(chk::getResourcePath(FONT_PATH)))
     {
@@ -142,7 +142,7 @@ int main()
         }
     }
 
-    //     /* we don't need this anymore  */
+    /* we don't need this anymore  */
     pieceVector.clear();
 
     // for storing currently clicked Piece (use braces initialize)

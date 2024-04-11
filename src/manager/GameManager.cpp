@@ -106,9 +106,9 @@ void GameManager::handleMovePiece(const chk::PlayerPtr &player, const chk::Playe
     {
         return;
     }
-    gameMap.erase(this->sourceCell);                       // set old location empty!
+    gameMap.erase(this->sourceCell.value());               // set old location empty!
     gameMap.emplace(destCell->getIndex(), currentPieceId); // fill in the new location
-    this->sourceCell = -1;                                 // reset source cell
+    this->sourceCell = std::nullopt;                       // reset source cell
     this->identifyTargets(opponent);
     if (!this->forcedMoves.empty())
     {
@@ -150,11 +150,11 @@ void GameManager::handleJumpPiece(const chk::PlayerPtr &hunter, const chk::Playe
                 return;
             }
             this->updateMessage(hunter->getName() + " has captured " + prey->getName() + "'s piece!");
-            gameMap.erase(this->sourceCell);                        // set hunter's old location empty!
+            gameMap.erase(this->sourceCell.value());                // set hunter's old location empty!
             gameMap.erase(target.preyCellIdx);                      // set Prey's old location empty!
             gameMap.emplace(targetCell->getIndex(), hunterPieceId); // fill in hunter new location
             prey->losePiece(target.preyPieceId);                    // the defending player loses 1 piece
-            this->sourceCell = -1;                                  // reset source cell
+            this->sourceCell = std::nullopt;                        // reset source cell
             this->forcedMoves.clear();                              // reset forced jumps
 
             // FIXME do not RUN this next line if just became KING!
@@ -201,7 +201,7 @@ void GameManager::setSourceCell(const int &src_cell)
  */
 bool GameManager::hasPendingCaptures() const
 {
-    return this->sourceCell != -1 && !forcedMoves.empty();
+    return this->sourceCell.has_value() && !forcedMoves.empty();
 }
 
 /**

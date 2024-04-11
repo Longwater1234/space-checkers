@@ -13,6 +13,7 @@
 #include <random>
 #include <spdlog/spdlog.h>
 #include <string>
+#include <optional>
 #include <unordered_map>
 #include <vector>
 
@@ -43,7 +44,7 @@ class GameManager
 
   private:
     // source cell Index of selected piece
-    int sourceCell;
+    std::optional<int> sourceCell;
     // all checkerboard cells
     std::vector<chk::Block> blockList;
     // map of cell_index --> piece_id
