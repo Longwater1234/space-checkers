@@ -1,5 +1,5 @@
 #include "CircularBuffer.hpp"
-#include "GameManager.hpp"
+#include "LocalGameManager.hpp"
 #include "ResourcePath.hpp"
 #include "WsClient.hpp"
 #include <SFML/Graphics.hpp>
@@ -115,7 +115,7 @@ int main()
         exit(EXIT_FAILURE);
     }
 
-    const auto manager = std::make_unique<chk::GameManager>();
+    const std::unique_ptr<chk::GameManager>  manager = std::make_unique<chk::OfflineGameMgr>();
     manager->drawCheckerboard(font);
 
     // CREATE TWO unique PLAYERS

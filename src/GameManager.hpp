@@ -34,7 +34,7 @@ class GameManager
   public:
     GameManager();
     void drawCheckerboard(const sf::Font &font);
-    static void createAllPieces(std::vector<chk::PiecePtr> &pieceList);
+    virtual void createAllPieces(std::vector<chk::PiecePtr> &pieceList) = 0;
     void updateMessage(std::string_view msg);
     void matchCellsToPieces(const std::vector<chk::PiecePtr> &pieceList);
     [[nodiscard]] const std::unordered_map<short, chk::CaptureTarget> &getForcedMoves() const;
@@ -61,8 +61,7 @@ class GameManager
     std::mutex my_mutex;
     // callback after successfully moved piece
     onMoveSuccessCallback _onMoveSuccess;
-
-  private:
+    // BEGIN LIST OF private METHODS
     [[nodiscard]] bool boardContainsCell(const int &cell_idx) const;
     [[nodiscard]] bool awayFromEdge(const int &cell_idx) const;
     void identifyTargets(const chk::PlayerPtr &hunter);
