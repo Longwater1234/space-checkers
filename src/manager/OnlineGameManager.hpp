@@ -1,5 +1,5 @@
 #pragma once
-#include "GameManager.hpp"
+#include "../GameManager.hpp"
 
 namespace chk
 {
@@ -19,8 +19,9 @@ class OnlineGameManager : public chk::GameManager
 };
 
 
-void chk::OnlineGameManager::createAllPieces(std::vector<chk::PiecePtr>& pieceList)
+inline void chk::OnlineGameManager::createAllPieces(std::vector<chk::PiecePtr>& pieceList)
 {
+    //TODO: complete me
 }
 
 inline void OnlineGameManager::setMyPlayerType(const chk::PlayerType &ptype)

@@ -1,7 +1,7 @@
 //
 // Created by Davis on 2023/12/21.
 //
-#include "GameManager.hpp"
+#include "../GameManager.hpp"
 using namespace chk;
 
 /**
@@ -87,7 +87,6 @@ void GameManager::drawCheckerboard(const sf::Font &font)
         }
     }
 }
-
 
 /**
  * Move the selected piece to clicked cell, and update the gameMap
@@ -319,7 +318,8 @@ void GameManager::identifyTargets(const PlayerPtr &hunter)
     this->forcedMoves.clear();
     for (const auto &cell_ptr : this->blockList)
     {
-        short pieceId = this->getPieceFromCell(cell_ptr->getIndex());
+        const short pieceId = this->getPieceFromCell(cell_ptr->getIndex());
+
         if (gameMap.find(cell_ptr->getIndex()) == gameMap.end() || !hunter->hasThisPiece(pieceId))
         {
             // this CELL is not usable, OR piece not OWNED by hunter
@@ -328,7 +328,7 @@ void GameManager::identifyTargets(const PlayerPtr &hunter)
         this->collectFrontLHS(hunter, cell_ptr);
         this->collectFrontRHS(hunter, cell_ptr);
         const auto &piecePtr = hunter->getOwnPieces().at(pieceId);
-        if (piecePtr->getIsKing()) 
+        if (piecePtr->getIsKing())
         {
             this->collectBehindLHS(hunter, cell_ptr);
             this->collectBehindRHS(hunter, cell_ptr);

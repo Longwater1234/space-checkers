@@ -1,5 +1,5 @@
 #include "CircularBuffer.hpp"
-#include "LocalGameManager.hpp"
+#include "manager/LocalGameManager.hpp"
 #include "ResourcePath.hpp"
 #include "WsClient.hpp"
 #include <SFML/Graphics.hpp>
@@ -58,7 +58,7 @@ static void handleCellTap(const std::unique_ptr<chk::GameManager> &manager, cons
 
     // CHECK IF this cell has a Piece
     const short pieceId = manager->getPieceFromCell(cell->getIndex());
-    if (pieceId != -1)
+    if (pieceId !=-1)
     {
         // YES, it has one! CHECK IF THERE IS ANY PENDING "forced jumps"
         if (!manager->getForcedMoves().empty())
@@ -115,7 +115,8 @@ int main()
         exit(EXIT_FAILURE);
     }
 
-    const std::unique_ptr<chk::GameManager>  manager = std::make_unique<chk::OfflineGameMgr>();
+    // TODO depending on user choice, initialize GameManager
+    const std::unique_ptr<chk::GameManager> manager = std::make_unique<chk::LocalGameManager>();
     manager->drawCheckerboard(font);
 
     // CREATE TWO unique PLAYERS

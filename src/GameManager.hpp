@@ -26,13 +26,14 @@ constexpr uint16_t NUM_ROWS{8};
 constexpr uint16_t NUM_COLS{8};
 
 /**
- * Overall game manager
+ * Abstract game manager (Base Class)
  */
 class GameManager
 {
 
   public:
     GameManager();
+    virtual ~GameManager() = default;
     void drawCheckerboard(const sf::Font &font);
     virtual void createAllPieces(std::vector<chk::PiecePtr> &pieceList) = 0;
     void updateMessage(std::string_view msg);
@@ -62,6 +63,7 @@ class GameManager
     // callback after successfully moved piece
     onMoveSuccessCallback _onMoveSuccess;
     // BEGIN LIST OF private METHODS
+
     [[nodiscard]] bool boardContainsCell(const int &cell_idx) const;
     [[nodiscard]] bool awayFromEdge(const int &cell_idx) const;
     void identifyTargets(const chk::PlayerPtr &hunter);

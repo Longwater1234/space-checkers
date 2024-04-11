@@ -1,5 +1,5 @@
 #pragma once
-#include "GameManager.hpp"
+#include "../GameManager.hpp"
 
 namespace chk
 {
@@ -11,6 +11,7 @@ class LocalGameManager : public chk::GameManager
 {
   public:
     void createAllPieces(std::vector<chk::PiecePtr> &pieceList) override;
+    LocalGameManager() = default;
 };
 
 inline void LocalGameManager::createAllPieces(std::vector<chk::PiecePtr> &pieceList)
