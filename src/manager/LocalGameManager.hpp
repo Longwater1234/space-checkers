@@ -12,6 +12,10 @@ class LocalGameManager : public chk::GameManager
   public:
     void createAllPieces(std::vector<chk::PiecePtr> &pieceList) override;
     LocalGameManager() = default;
+
+    // Inherited via GameManager
+    void handleEvents() override;
+    void drawScreen() override;
 };
 
 inline void LocalGameManager::createAllPieces(std::vector<chk::PiecePtr> &pieceList)
@@ -43,5 +47,13 @@ inline void LocalGameManager::createAllPieces(std::vector<chk::PiecePtr> &pieceL
             }
         }
     }
+}
+
+void LocalGameManager::handleEvents()
+{
+}
+
+void LocalGameManager::drawScreen()
+{
 }
 } // namespace chk

@@ -14,19 +14,30 @@ class OnlineGameManager : public chk::GameManager
     void createAllPieces(std::vector<chk::PiecePtr> &pieceList) override;
     void setMyPlayerType(const chk::PlayerType &ptype);
 
-  private: 
-      chk::PlayerType myType;
+    // Inherited via GameManager
+    void handleEvents() override;
+    void drawScreen() override;
+
+  private:
+    chk::PlayerType myType;
 };
 
-
-inline void chk::OnlineGameManager::createAllPieces(std::vector<chk::PiecePtr>& pieceList)
+inline void chk::OnlineGameManager::createAllPieces(std::vector<chk::PiecePtr> &pieceList)
 {
-    //TODO: complete me
+    // TODO: complete me
 }
 
 inline void OnlineGameManager::setMyPlayerType(const chk::PlayerType &ptype)
 {
     this->myType = ptype;
+}
+
+void OnlineGameManager::handleEvents()
+{
+}
+
+void OnlineGameManager::drawScreen()
+{
 }
 
 } // namespace chk

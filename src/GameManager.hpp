@@ -10,10 +10,10 @@
 #include <functional>
 #include <memory>
 #include <mutex>
+#include <optional>
 #include <random>
 #include <spdlog/spdlog.h>
 #include <string>
-#include <optional>
 #include <unordered_map>
 #include <vector>
 
@@ -41,6 +41,8 @@ class GameManager
     void matchCellsToPieces(const std::vector<chk::PiecePtr> &pieceList);
     [[nodiscard]] const std::unordered_map<short, chk::CaptureTarget> &getForcedMoves() const;
     [[nodiscard]] const std::string &getCurrentMsg() const;
+    virtual void handleEvents() = 0;
+    virtual void drawScreen() = 0;
 
   private:
     // source cell Index of selected piece
@@ -63,7 +65,6 @@ class GameManager
     std::mutex my_mutex;
     // callback after successfully moved piece
     onMoveSuccessCallback _onMoveSuccess;
-    // BEGIN LIST OF private METHODS
 
     [[nodiscard]] bool boardContainsCell(const int &cell_idx) const;
     [[nodiscard]] bool awayFromEdge(const int &cell_idx) const;
