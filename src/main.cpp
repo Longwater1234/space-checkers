@@ -90,7 +90,7 @@ int main()
 {
 
     chk::MainMenu homeMenu;
-    homeMenu.mainLoop();
+    homeMenu.runLoop();
 
     auto window = sf::RenderWindow{sf::VideoMode{600, 700}, "SpaceCheckers", sf::Style::Titlebar | sf::Style::Close};
     window.setFramerateLimit(60);

@@ -15,11 +15,10 @@ class MainMenu final
   public:
     MainMenu();
     void handleEvents();
-    int mainLoop();
+    int runLoop();
 
   private:
     std::unique_ptr<sf::RenderWindow> window;
-    std::string bkgImagePath = "main_menu.png";
     sf::Texture mainImage;
     sf::RectangleShape rectangle;
     bool imageOk = false;
@@ -31,7 +30,7 @@ inline MainMenu::MainMenu()
                                                       sf::Style::Titlebar | sf::Style::Close);
     this->window->setFramerateLimit(60);
     this->rectangle = sf::RectangleShape(sf::Vector2f(600, 700));
-    if (this->mainImage.loadFromFile(chk::getResourcePath(bkgImagePath)))
+    if (this->mainImage.loadFromFile(chk::getResourcePath("main_menu.png")))
     {
         this->imageOk = true;
     }
@@ -47,7 +46,7 @@ inline void MainMenu::handleEvents()
 {
 }
 
-inline int MainMenu::mainLoop()
+inline int MainMenu::runLoop()
 {
     if (imageOk)
     {
