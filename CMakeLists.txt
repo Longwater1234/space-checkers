@@ -32,7 +32,7 @@ elseif(APPLE)
   find_library(FOUNDATION_FRAMEWORK Foundation)
   target_link_libraries(SpaceCheckers PRIVATE ${FOUNDATION_FRAMEWORK})
 else()
-  add_executable(SpaceCheckers ${GAME_SRC}) 
+  add_executable(SpaceCheckers ${GAME_SRC})   
 endif()
 
 # link all required libraries
@@ -40,7 +40,7 @@ target_link_libraries(SpaceCheckers PRIVATE sfml-graphics sfml-window sfml-syste
                         ixwebsocket nlohmann_json spdlog::spdlog)
 
 # include SFML headers
-include_directories(${SFML_HOME}/include)
+include_directories(${SFML_HOME}/include) 
 
 # show warnings (depending on C++ compiler)
 if(MSVC)

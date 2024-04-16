@@ -1,4 +1,5 @@
 #include "CircularBuffer.hpp"
+#include "MainMenu.hpp"
 #include "ResourcePath.hpp"
 #include "WsClient.hpp"
 #include "manager/LocalGameManager.hpp"
@@ -12,7 +13,6 @@
 #include "imgui.h"
 
 constexpr uint16_t NUM_PIECES{24};
-constexpr auto ICON_PATH = "win-icon-16.png";
 constexpr auto FONT_PATH = "notosans-regular.ttf";
 
 /**
@@ -88,6 +88,10 @@ static void handleCellTap(const std::unique_ptr<chk::GameManager> &manager, cons
 
 int main()
 {
+
+    chk::MainMenu homeMenu;
+    homeMenu.mainLoop();
+
     auto window = sf::RenderWindow{sf::VideoMode{600, 700}, "SpaceCheckers", sf::Style::Titlebar | sf::Style::Close};
     window.setFramerateLimit(60);
     ImGui::SFML::Init(window, false);
@@ -101,7 +105,7 @@ int main()
     // ImGui::StyleColorsLight(); //LIGHT THEME
 
     sf::Image appIcon;
-    if (appIcon.loadFromFile(chk::getResourcePath(ICON_PATH)))
+    if (appIcon.loadFromFile(chk::getResourcePath(chk::ICON_PATH)))
     {
         auto dims = appIcon.getSize();
         window.setIcon(dims.x, dims.y, appIcon.getPixelsPtr());
@@ -127,9 +131,10 @@ int main()
     // NOW create all PIECES ON BOARD
     std::vector<chk::PiecePtr> pieceVector;
     pieceVector.reserve(NUM_PIECES);
-    manager->createAllPieces(pieceVector);
-    manager->matchCellsToPieces(pieceVector);
+    // manager->createAllPieces(pieceVector);
+    // manager->matchCellsToPieces(pieceVector);
 
+    // GIVE EACH PLAYER their own piece
     for (auto &kete : pieceVector)
     {
         if (kete->getPieceType() == chk::PieceType::Red)
