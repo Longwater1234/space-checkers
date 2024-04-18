@@ -11,6 +11,7 @@
 
 #include "imgui-SFML.h"
 #include "imgui.h"
+#include "manager/OnlineGameManager.hpp"
 
 constexpr uint16_t NUM_PIECES{24};
 constexpr auto FONT_PATH = "notosans-regular.ttf";
@@ -88,9 +89,18 @@ static void handleCellTap(const std::unique_ptr<chk::GameManager> &manager, cons
 
 int main()
 {
-
-    chk::MainMenu homeMenu;
-    homeMenu.runLoop();
+    std::unique_ptr<chk::GameManager> manager = nullptr;
+    chk::MainMenu homeMenu{};
+    homeMenu.init();
+    const chk::UserChoice userChoice = homeMenu.runLoop();
+    if (userChoice == chk::UserChoice::ONLINE_PLAY)
+    {
+        manager = std::make_unique<chk::OnlineGameManager>();
+    }
+    else
+    {
+        manager = std::make_unique<chk::LocalGameManager>();
+    }
 
     auto window = sf::RenderWindow{sf::VideoMode{600, 700}, "SpaceCheckers", sf::Style::Titlebar | sf::Style::Close};
     window.setFramerateLimit(60);
@@ -119,8 +129,6 @@ int main()
         exit(EXIT_FAILURE);
     }
 
-    // TODO depending on user choice, initialize GameManager
-    const std::unique_ptr<chk::GameManager> manager = std::make_unique<chk::LocalGameManager>();
     manager->drawCheckerboard(font);
 
     // CREATE TWO unique PLAYERS

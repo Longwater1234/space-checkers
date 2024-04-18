@@ -37,12 +37,12 @@ class GameManager
     virtual ~GameManager() = default;
     void drawCheckerboard(const sf::Font &font);
     virtual void createAllPieces(std::vector<chk::PiecePtr> &pieceList) = 0;
+    virtual void handleEvents() = 0;
+    virtual void drawScreen() = 0;
     void updateMessage(std::string_view msg);
     void matchCellsToPieces(const std::vector<chk::PiecePtr> &pieceList);
     [[nodiscard]] const std::unordered_map<short, chk::CaptureTarget> &getForcedMoves() const;
     [[nodiscard]] const std::string &getCurrentMsg() const;
-    virtual void handleEvents() = 0;
-    virtual void drawScreen() = 0;
 
   private:
     // source cell Index of selected piece
