@@ -15,7 +15,7 @@ constexpr auto ICON_PATH = "win-icon-16.png";
 enum class UserChoice
 {
     LOCAL_PLAY = 984883, // playing offline
-    ONLINE_PLAY = 873832 // playing online
+    ONLINE_PLAY = 873832,// playing online
 };
 
 class MainMenu final
@@ -110,15 +110,13 @@ inline chk::UserChoice MainMenu::runLoop()
     chk::UserChoice result{};
     while (this->window->isOpen())
     {
-        // HANDLINE EVENTS
+        // HANDLE EVENTS
         handleEvents(result);
         if (result == chk::UserChoice::LOCAL_PLAY || result == chk::UserChoice::ONLINE_PLAY)
         {
             break;
         }
-        // actual rendering
         window->clear();
-
         auto mousePos = sf::Mouse::getPosition(*window);
         if (this->localBtn.getGlobalBounds().contains(sf::Vector2f(mousePos)))
         {
