@@ -65,10 +65,13 @@ inline void MainMenu::init()
     this->onlineBtn = sf::RectangleShape{sizeRec};
     this->localBtn.setFillColor(sf::Color::Transparent);
     this->onlineBtn.setFillColor(sf::Color::Transparent);
-    this->localBtn.setPosition(sf::Vector2f{154.0, 476.0});
-    this->onlineBtn.setPosition(sf::Vector2f{154.0, 558.0});
+    this->onlineBtn.setPosition(sf::Vector2f{154.0, 476.0});
+    this->localBtn.setPosition(sf::Vector2f{154.0, 558.0});
 }
 
+/**
+ * Listen for GUI events
+ */
 inline void MainMenu::handleEvents(chk::UserChoice &result)
 {
     for (auto event = sf::Event{}; window->pollEvent(event);)
@@ -76,6 +79,7 @@ inline void MainMenu::handleEvents(chk::UserChoice &result)
         if (event.type == sf::Event::Closed)
         {
             window->close();
+            exit(EXIT_SUCCESS);
         }
         if (event.type == sf::Event::MouseButtonPressed && sf::Mouse::isButtonPressed(sf::Mouse::Left))
         {
@@ -88,19 +92,18 @@ inline void MainMenu::handleEvents(chk::UserChoice &result)
             if (this->localBtn.getGlobalBounds().contains(sf::Vector2f(clickedPos)))
             {
                 result = chk::UserChoice::LOCAL_PLAY;
-                // goto EXIT_LOOP;
             }
             else if (this->onlineBtn.getGlobalBounds().contains(sf::Vector2f(clickedPos)))
             {
                 result = chk::UserChoice::ONLINE_PLAY;
-                // goto EXIT_LOOP;
             }
         }
     }
 }
 
 /**
- * The main loop
+ * The main loop, renders the main menu screen, returning user choice for game Mode
+ * @return The selected result
  */
 inline chk::UserChoice MainMenu::runLoop()
 {
@@ -113,7 +116,6 @@ inline chk::UserChoice MainMenu::runLoop()
         {
             break;
         }
-
         // actual rendering
         window->clear();
 

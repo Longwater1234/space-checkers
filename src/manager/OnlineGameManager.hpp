@@ -19,7 +19,7 @@ class OnlineGameManager : public chk::GameManager
     void drawScreen() override;
 
   private:
-    chk::PlayerType myType;
+    chk::PlayerType myType{};
 };
 
 inline void chk::OnlineGameManager::createAllPieces(std::vector<chk::PiecePtr> &pieceList)
