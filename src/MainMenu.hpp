@@ -112,7 +112,7 @@ inline chk::UserChoice MainMenu::runLoop()
     {
         // HANDLINE EVENTS
         handleEvents(result);
-        if (result == chk::UserChoice::LOCAL_PLAY || result == chk::UserChoice::LOCAL_PLAY)
+        if (result == chk::UserChoice::LOCAL_PLAY || result == chk::UserChoice::ONLINE_PLAY)
         {
             break;
         }
