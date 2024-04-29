@@ -89,8 +89,13 @@ static void handleCellTap(const std::unique_ptr<chk::GameManager> &manager, cons
 
 int main()
 {
+
+    auto window = sf::RenderWindow{sf::VideoMode{600, 700}, "SpaceCheckers", sf::Style::Titlebar | sf::Style::Close};
+    window.setFramerateLimit(60);
+    ImGui::SFML::Init(window, false);
+
     std::unique_ptr<chk::GameManager> manager = nullptr;
-    chk::MainMenu homeMenu{};
+    chk::MainMenu homeMenu(&window);
     homeMenu.init();
     const auto userChoice = homeMenu.runLoop();
     if (userChoice == chk::UserChoice::ONLINE_PLAY)
@@ -101,10 +106,6 @@ int main()
     {
         manager = std::make_unique<chk::LocalGameManager>();
     }
-
-    auto window = sf::RenderWindow{sf::VideoMode{600, 700}, "SpaceCheckers", sf::Style::Titlebar | sf::Style::Close};
-    window.setFramerateLimit(60);
-    ImGui::SFML::Init(window, false);
 
     // LOAD FONT for IMGUI
     ImGuiIO &io = ImGui::GetIO();
@@ -125,7 +126,7 @@ int main()
     sf::Font font;
     if (!font.loadFromFile(chk::getResourcePath(FONT_PATH)))
     {
-        perror("cannot find file");
+        perror("cannot find font file");
         exit(EXIT_FAILURE);
     }
 
@@ -139,8 +140,8 @@ int main()
     // NOW create all PIECES ON BOARD
     std::vector<chk::PiecePtr> pieceVector;
     pieceVector.reserve(NUM_PIECES);
-    // manager->createAllPieces(pieceVector);
-    // manager->matchCellsToPieces(pieceVector);
+    manager->createAllPieces(pieceVector);
+    manager->matchCellsToPieces(pieceVector);
 
     // GIVE EACH PLAYER their own piece
     for (auto &kete : pieceVector)
@@ -155,7 +156,7 @@ int main()
         }
     }
 
-    /* we don't need this anymore  */
+    /* we don't need this anymore */
     pieceVector.clear();
 
     // for storing currently clicked Piece (use braces initialize)

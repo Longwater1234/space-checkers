@@ -7,26 +7,25 @@
 #include <SFML/Graphics.hpp>
 #include <memory>
 #include <string>
-#include <utility>
 namespace chk
 {
 constexpr auto ICON_PATH = "win-icon-16.png";
 
 enum class UserChoice
 {
-    LOCAL_PLAY = 984883, // playing offline
-    ONLINE_PLAY = 873832,// playing online
+    LOCAL_PLAY = 984883,  // playing offline
+    ONLINE_PLAY = 873832, // playing online
 };
 
 class MainMenu final
 {
   public:
-    MainMenu();
+    explicit MainMenu(sf::RenderWindow *windowPtr);
     void init();
     chk::UserChoice runLoop();
 
   private:
-    std::unique_ptr<sf::RenderWindow> window;
+    sf::RenderWindow *window;
     sf::Texture mainImage;
     sf::RectangleShape mainFrame;
     sf::RectangleShape localBtn;
@@ -35,11 +34,9 @@ class MainMenu final
     void handleEvents(chk::UserChoice &result);
 };
 
-inline MainMenu::MainMenu()
+inline MainMenu::MainMenu(sf::RenderWindow *windowPtr)
 {
-    this->window = std::make_unique<sf::RenderWindow>(sf::VideoMode{600, 700}, "SpaceCheckers",
-                                                      sf::Style::Titlebar | sf::Style::Close);
-    this->window->setFramerateLimit(60);
+    this->window = windowPtr;
     this->mainFrame = sf::RectangleShape(sf::Vector2f(600, 700));
     if (this->mainImage.loadFromFile(chk::getResourcePath("main_menu_clean.png")))
     {

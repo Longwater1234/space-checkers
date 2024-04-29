@@ -1,13 +1,13 @@
 #pragma once
-#include <string> 
+#include <string>
 #include <vector>
 namespace chk
 {
-  struct Welcome
-  {
+struct Welcome
+{
     /* data */
     std::string name;
     std::vector<int16_t> pieces{};
-  };
-     
+};
+
 } // namespace chk
