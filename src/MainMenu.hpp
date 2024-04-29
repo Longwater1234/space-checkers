@@ -62,6 +62,7 @@ inline void MainMenu::init()
     this->onlineBtn = sf::RectangleShape{sizeRec};
     this->localBtn.setFillColor(sf::Color::Transparent);
     this->onlineBtn.setFillColor(sf::Color::Transparent);
+
     this->onlineBtn.setPosition(sf::Vector2f{154.0, 476.0});
     this->localBtn.setPosition(sf::Vector2f{154.0, 558.0});
 }

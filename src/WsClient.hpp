@@ -116,8 +116,7 @@ inline void WsClient::tryConnect()
     // set inital connection timeout
     webSocket.setHandshakeTimeout(10);
 
-    // Setup a callback to be fired (in a background thread, watch out for race conditions !)
-    // when a message or an event (open, close, error) is received
+    // Setup a callback to be fired when an event (open, close, msg, error) is received
     webSocket.setOnMessageCallback([this](const ix::WebSocketMessagePtr &msg) {
         if (msg->type == ix::WebSocketMessageType::Message)
         {

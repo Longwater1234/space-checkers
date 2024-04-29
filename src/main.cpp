@@ -140,26 +140,34 @@ int main()
     // NOW create all PIECES ON BOARD
     std::vector<chk::PiecePtr> pieceVector;
     pieceVector.reserve(NUM_PIECES);
-    manager->createAllPieces(pieceVector);
-    manager->matchCellsToPieces(pieceVector);
 
-    // GIVE EACH PLAYER their own piece
-    for (auto &kete : pieceVector)
-    {
-        if (kete->getPieceType() == chk::PieceType::Red)
+    // TODO should be in a virtual callback
+    manager->setOnReadyCreatePiecesCallback([&manager, &p1, &p2, &pieceVector](const bool &isReady) {
+        if (!isReady)
         {
-            p1->receivePiece(kete);
+            return;
         }
-        else
+        manager->matchCellsToPieces(pieceVector);
+        // GIVE EACH PLAYER their own piece
+        for (auto &kete : pieceVector)
         {
-            p2->receivePiece(kete);
+            if (kete->getPieceType() == chk::PieceType::Red)
+            {
+                p1->receivePiece(kete);
+            }
+            else
+            {
+                p2->receivePiece(kete);
+            }
         }
-    }
+    });
+
+    manager->createAllPieces(pieceVector);
 
     /* we don't need this anymore */
     pieceVector.clear();
 
-    // for storing currently clicked Piece (use braces initialize)
+    // for storing currently clicked Piece
     chk::CircularBuffer<short> circularBuffer{1};
 
     // THE STATUS TEXT

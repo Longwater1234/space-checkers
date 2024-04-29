@@ -16,6 +16,7 @@ class LocalGameManager : public chk::GameManager
     // Inherited via GameManager
     void handleEvents() override;
     void drawScreen() override;
+    void setOnReadyCreatePiecesCallback(const onReadyCreatePieces &callback) override;
 };
 
 inline void LocalGameManager::createAllPieces(std::vector<chk::PiecePtr> &pieceList)
@@ -47,6 +48,7 @@ inline void LocalGameManager::createAllPieces(std::vector<chk::PiecePtr> &pieceL
             }
         }
     }
+    this->_onReadyCreatePieces(true);
 }
 
 void LocalGameManager::handleEvents()
@@ -55,5 +57,10 @@ void LocalGameManager::handleEvents()
 
 void LocalGameManager::drawScreen()
 {
+}
+
+void LocalGameManager::setOnReadyCreatePiecesCallback(const onReadyCreatePieces &callback)
+{
+    this->_onReadyCreatePieces = callback;
 }
 } // namespace chk

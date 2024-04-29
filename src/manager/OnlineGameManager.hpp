@@ -20,11 +20,16 @@ class OnlineGameManager : public chk::GameManager
 
   private:
     chk::PlayerType myType{};
+
+    // Inherited via GameManager
+    void setOnReadyCreatePiecesCallback(const onReadyCreatePieces &callback) override;
 };
 
 inline void chk::OnlineGameManager::createAllPieces(std::vector<chk::PiecePtr> &pieceList)
 {
     // TODO: complete me
+    // make request to backend, wait for response
+    this->_onReadyCreatePieces(false);
 }
 
 inline void OnlineGameManager::setMyPlayerType(const chk::PlayerType &ptype)
@@ -38,6 +43,11 @@ void OnlineGameManager::handleEvents()
 
 void OnlineGameManager::drawScreen()
 {
+}
+
+void OnlineGameManager::setOnReadyCreatePiecesCallback(const onReadyCreatePieces &callback)
+{
+    this->_onReadyCreatePieces = callback;
 }
 
 } // namespace chk

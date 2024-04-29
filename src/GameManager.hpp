@@ -23,6 +23,7 @@ using Block = std::unique_ptr<chk::Cell>;
 using PlayerPtr = std::unique_ptr<chk::Player>;
 using onMoveSuccessCallback = std::function<void(short, int)>; // callback after moving
 using onJumpSuccess = std::function<void(short, int)>;         // callback after capturing
+using onReadyCreatePieces = std::function<void(bool)>;         // callback after creating pieces
 constexpr uint16_t NUM_ROWS{8};
 constexpr uint16_t NUM_COLS{8};
 
@@ -39,6 +40,7 @@ class GameManager
     virtual void createAllPieces(std::vector<chk::PiecePtr> &pieceList) = 0;
     virtual void handleEvents() = 0;
     virtual void drawScreen() = 0;
+    virtual void setOnReadyCreatePiecesCallback(const onReadyCreatePieces &callback) = 0;
     void updateMessage(std::string_view msg);
     void matchCellsToPieces(const std::vector<chk::PiecePtr> &pieceList);
     [[nodiscard]] const std::unordered_map<short, chk::CaptureTarget> &getForcedMoves() const;
@@ -86,6 +88,10 @@ class GameManager
     void handleJumpPiece(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey, const chk::Block &targetCell);
     void updateMatchStatus(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2);
     void setOnMoveSuccessCallback(const onMoveSuccessCallback &callback);
+
+  protected:
+    // callback after creating pieces for both players
+    onReadyCreatePieces _onReadyCreatePieces;
 };
 
 } // namespace chk
