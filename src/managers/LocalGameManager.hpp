@@ -10,8 +10,9 @@ namespace chk
 class LocalGameManager : public chk::GameManager
 {
   public:
+    explicit LocalGameManager(sf::RenderWindow *windowPtr);
+    LocalGameManager() = delete;
     void createAllPieces(std::vector<chk::PiecePtr> &pieceList) override;
-    LocalGameManager() = default;
 
     // Inherited via GameManager
     void handleEvents() override;
@@ -49,6 +50,12 @@ inline void LocalGameManager::createAllPieces(std::vector<chk::PiecePtr> &pieceL
         }
     }
     this->_onReadyCreatePieces(true);
+}
+
+inline LocalGameManager::LocalGameManager(sf::RenderWindow *windowPtr)
+{
+    this->window = windowPtr;
+  
 }
 
 void LocalGameManager::handleEvents()

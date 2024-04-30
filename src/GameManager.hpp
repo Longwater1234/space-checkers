@@ -6,6 +6,7 @@
 #include "CaptureTarget.hpp"
 #include "Cell.hpp"
 #include "Player.hpp"
+#include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/Text.hpp>
 #include <functional>
 #include <memory>
@@ -34,7 +35,8 @@ class GameManager
 {
 
   public:
-    GameManager();
+    explicit GameManager(sf::RenderWindow *windowPtr);
+    GameManager() = default;
     virtual ~GameManager() = default;
     void drawCheckerboard(const sf::Font &font);
     virtual void createAllPieces(std::vector<chk::PiecePtr> &pieceList) = 0;
@@ -62,7 +64,7 @@ class GameManager
     // whether match is over
     bool gameOver = false;
     // collection of my next targets (Map<HunterPieceID, CaptureTarget>)
-    std::unordered_map<short, chk::CaptureTarget> forcedMoves;
+    std::unordered_map<short, chk::CaptureTarget> forcedMoves{};
     // mutex for atomic updates
     std::mutex my_mutex;
     // callback after successfully moved piece
@@ -92,6 +94,7 @@ class GameManager
   protected:
     // callback after creating pieces for both players
     onReadyCreatePieces _onReadyCreatePieces;
+    sf::RenderWindow *window = nullptr;
 };
 
 } // namespace chk

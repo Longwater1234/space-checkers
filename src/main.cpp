@@ -2,7 +2,9 @@
 #include "MainMenu.hpp"
 #include "ResourcePath.hpp"
 #include "WsClient.hpp"
-#include "manager/LocalGameManager.hpp"
+#include "managers/LocalGameManager.hpp"
+#include "managers/OnlineGameManager.hpp"
+
 #include <SFML/Graphics.hpp>
 #include <SFML/Window/Mouse.hpp>
 #include <cassert>
@@ -11,7 +13,6 @@
 
 #include "imgui-SFML.h"
 #include "imgui.h"
-#include "manager/OnlineGameManager.hpp"
 
 constexpr uint16_t NUM_PIECES{24};
 constexpr auto FONT_PATH = "notosans-regular.ttf";
@@ -100,11 +101,11 @@ int main()
     const auto userChoice = homeMenu.runLoop();
     if (userChoice == chk::UserChoice::ONLINE_PLAY)
     {
-        manager = std::make_unique<chk::OnlineGameManager>();
+        manager = std::make_unique<chk::OnlineGameManager>(&window);
     }
     else
     {
-        manager = std::make_unique<chk::LocalGameManager>();
+        manager = std::make_unique<chk::LocalGameManager>(&window);
     }
 
     // LOAD FONT for IMGUI
@@ -141,7 +142,7 @@ int main()
     std::vector<chk::PiecePtr> pieceVector;
     pieceVector.reserve(NUM_PIECES);
 
-    // TODO should be in a virtual callback
+    // wait for manager to create pieces
     manager->setOnReadyCreatePiecesCallback([&manager, &p1, &p2, &pieceVector](const bool &isReady) {
         if (!isReady)
         {

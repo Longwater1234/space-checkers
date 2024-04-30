@@ -5,10 +5,11 @@
 using namespace chk;
 
 /**
- * Default constructor
+ * Custom constructor
  */
-GameManager::GameManager()
+GameManager::GameManager(sf::RenderWindow *window)
 {
+    this->window = window;
     this->sourceCell = -1;
     this->forcedMoves.clear();
     this->blockList.reserve(chk::NUM_COLS * chk::NUM_COLS);
