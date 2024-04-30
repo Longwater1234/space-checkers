@@ -55,7 +55,9 @@ inline void LocalGameManager::createAllPieces(std::vector<chk::PiecePtr> &pieceL
 inline LocalGameManager::LocalGameManager(sf::RenderWindow *windowPtr)
 {
     this->window = windowPtr;
-  
+    this->sourceCell = -1;
+    this->forcedMoves.clear();
+    this->blockList.reserve(chk::NUM_COLS * chk::NUM_COLS);
 }
 
 void LocalGameManager::handleEvents()

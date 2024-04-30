@@ -18,17 +18,18 @@ class OnlineGameManager : public chk::GameManager
     // Inherited via GameManager
     void handleEvents() override;
     void drawScreen() override;
+    void setOnReadyCreatePiecesCallback(const onReadyCreatePieces &callback) override;
 
   private:
     chk::PlayerType myType{};
-
-    // Inherited via GameManager
-    void setOnReadyCreatePiecesCallback(const onReadyCreatePieces &callback) override;
 };
 
 inline OnlineGameManager::OnlineGameManager(sf::RenderWindow *windowPtr)
 {
     this->window = windowPtr;
+    this->sourceCell = -1;
+    this->forcedMoves.clear();
+    this->blockList.reserve(chk::NUM_COLS * chk::NUM_COLS);
 }
 
 inline void chk::OnlineGameManager::createAllPieces(std::vector<chk::PiecePtr> &pieceList)

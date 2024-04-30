@@ -15,7 +15,6 @@
 #include "imgui.h"
 
 constexpr uint16_t NUM_PIECES{24};
-constexpr auto FONT_PATH = "notosans-regular.ttf";
 
 /**
  * When player is forced to capture opponent's piece, highlight their pieces.
@@ -111,7 +110,7 @@ int main()
     // LOAD FONT for IMGUI
     ImGuiIO &io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-    ImFont *imfont = io.Fonts->AddFontFromFileTTF(chk::getResourcePath(FONT_PATH).c_str(), 16);
+    ImFont *imfont = io.Fonts->AddFontFromFileTTF(chk::getResourcePath(chk::FONT_PATH).c_str(), 16);
     IM_ASSERT(imfont != nullptr);
     ImGui::SFML::UpdateFontTexture();
     // ImGui::StyleColorsLight(); //LIGHT THEME
@@ -125,7 +124,7 @@ int main()
 
     // LOAD FONT for SFML
     sf::Font font;
-    if (!font.loadFromFile(chk::getResourcePath(FONT_PATH)))
+    if (!font.loadFromFile(chk::getResourcePath(chk::FONT_PATH)))
     {
         perror("cannot find font file");
         exit(EXIT_FAILURE);

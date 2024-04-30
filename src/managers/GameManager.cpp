@@ -5,17 +5,6 @@
 using namespace chk;
 
 /**
- * Custom constructor
- */
-GameManager::GameManager(sf::RenderWindow *window)
-{
-    this->window = window;
-    this->sourceCell = -1;
-    this->forcedMoves.clear();
-    this->blockList.reserve(chk::NUM_COLS * chk::NUM_COLS);
-}
-
-/**
  * Get hashmap of hunter pieceID's to the assigned CaptureTarget
  * @return )pair of forced captures
  */

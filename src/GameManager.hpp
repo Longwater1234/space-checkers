@@ -35,7 +35,6 @@ class GameManager
 {
 
   public:
-    explicit GameManager(sf::RenderWindow *windowPtr);
     GameManager() = default;
     virtual ~GameManager() = default;
     void drawCheckerboard(const sf::Font &font);
@@ -49,11 +48,7 @@ class GameManager
     [[nodiscard]] const std::string &getCurrentMsg() const;
 
   private:
-    // source cell Index of selected piece
-    std::optional<int> sourceCell;
-    // all checkerboard cells
-    std::vector<chk::Block> blockList;
-    // map of cell_index --> piece_id
+    // map of cell_index -> piece_id
     std::map<int, short> gameMap;
     // flag to check if cache is already filled
     bool alreadyCached = false;
@@ -63,8 +58,6 @@ class GameManager
     std::string currentMsg;
     // whether match is over
     bool gameOver = false;
-    // collection of my next targets (Map<HunterPieceID, CaptureTarget>)
-    std::unordered_map<short, chk::CaptureTarget> forcedMoves{};
     // mutex for atomic updates
     std::mutex my_mutex;
     // callback after successfully moved piece
@@ -94,7 +87,14 @@ class GameManager
   protected:
     // callback after creating pieces for both players
     onReadyCreatePieces _onReadyCreatePieces;
+    // main window
     sf::RenderWindow *window = nullptr;
+    // source cell Index of selected piece
+    std::optional<int> sourceCell;
+    // collection of my next targets (Map<HunterPieceID, CaptureTarget>)
+    std::unordered_map<short, chk::CaptureTarget> forcedMoves{};
+    // all checkerboard cells
+    std::vector<chk::Block> blockList{};
 };
 
 } // namespace chk
