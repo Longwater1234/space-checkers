@@ -12,8 +12,8 @@ pre-installed is SFML 2.6.
 
 ### For Windows
 
-- MS Visual Studio 2022 or newer (NOT vscode), with default "**Desktop C++ Development**" workload.
-- Please choose "Visual C++ 2022" edition of SFML; ignore others.
+- MS Visual Studio 2019 or newer (NOT vscode), with default "**Desktop C++ Development**" workload.
+- Please choose "Visual C++ 64bit" edition of SFML; ignore others.
 - Move your unzipped `SFML-2.6.x` folder to its own home, example: `C:/SFML/SFML-2.6.1`
 
 ### For MacOS

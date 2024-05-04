@@ -5,12 +5,15 @@
 
 #include "CaptureTarget.hpp"
 #include "Cell.hpp"
+#include "CircularBuffer.hpp"
 #include "Player.hpp"
+#include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/Text.hpp>
+#include <SFML/Window/Mouse.hpp>
 #include <functional>
-#include <future>
 #include <memory>
 #include <mutex>
+#include <optional>
 #include <random>
 #include <spdlog/spdlog.h>
 #include <string>
@@ -23,30 +26,33 @@ using Block = std::unique_ptr<chk::Cell>;
 using PlayerPtr = std::unique_ptr<chk::Player>;
 using onMoveSuccessCallback = std::function<void(short, int)>; // callback after moving
 using onJumpSuccess = std::function<void(short, int)>;         // callback after capturing
+using onReadyCreatePieces = std::function<void(bool)>;         // callback after creating pieces
 constexpr uint16_t NUM_ROWS{8};
 constexpr uint16_t NUM_COLS{8};
 
 /**
- * Overall game manager
+ * Abstract game manager (Base Class)
  */
 class GameManager
 {
 
   public:
-    GameManager();
+    GameManager() = default;
+    virtual ~GameManager() = default;
+    virtual void createAllPieces(std::vector<chk::PiecePtr> &pieceList) = 0;
+    virtual void handleEvents(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2,
+                              chk::CircularBuffer<short> &buffer) = 0;
+    virtual void drawScreen(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2) = 0;
+    virtual void setOnReadyPiecesCallback(const onReadyCreatePieces &callback) = 0;
     void drawCheckerboard(const sf::Font &font);
-    static void createAllPieces(std::vector<chk::PiecePtr> &pieceList);
     void updateMessage(std::string_view msg);
     void matchCellsToPieces(const std::vector<chk::PiecePtr> &pieceList);
+    void setOnMoveSuccessCallback(const onMoveSuccessCallback &callback);
     [[nodiscard]] const std::unordered_map<short, chk::CaptureTarget> &getForcedMoves() const;
     [[nodiscard]] const std::string &getCurrentMsg() const;
 
   private:
-    // source cell Index of selected piece
-    int sourceCell;
-    // all checkerboard cells
-    std::vector<chk::Block> blockList;
-    // map of cell_index --> piece_id
+    // map of cell_index -> piece_id
     std::map<int, short> gameMap;
     // flag to check if cache is already filled
     bool alreadyCached = false;
@@ -56,14 +62,11 @@ class GameManager
     std::string currentMsg;
     // whether match is over
     bool gameOver = false;
-    // collection of my next targets (Map<HunterPieceID, CaptureTarget>)
-    std::unordered_map<short, chk::CaptureTarget> forcedMoves;
     // mutex for atomic updates
     std::mutex my_mutex;
     // callback after successfully moved piece
     onMoveSuccessCallback _onMoveSuccess;
 
-  private:
     [[nodiscard]] bool boardContainsCell(const int &cell_idx) const;
     [[nodiscard]] bool awayFromEdge(const int &cell_idx) const;
     void identifyTargets(const chk::PlayerPtr &hunter);
@@ -72,7 +75,18 @@ class GameManager
     void collectBehindRHS(const chk::PlayerPtr &hunter, const Block &cell_ptr);
     void collectBehindLHS(const chk::PlayerPtr &hunter, const Block &cell_ptr);
 
-  public:
+  protected:
+    // callback after creating pieces for both players
+    onReadyCreatePieces _onReadyCreatePieces;
+    // main window
+    sf::RenderWindow *window = nullptr;
+    // source cell Index of selected piece
+    std::optional<int> sourceCell;
+    // collection of my next targets (Map<HunterPieceID, CaptureTarget>)
+    std::unordered_map<short, chk::CaptureTarget> forcedMoves{};
+    // all checkerboard cells
+    std::vector<chk::Block> blockList{};
+
     [[nodiscard]] const bool &isPlayerRedTurn() const;
     [[nodiscard]] short getPieceFromCell(const int &cell_idx);
     [[nodiscard]] const std::vector<chk::Block> &getBlockList() const;
@@ -83,7 +97,9 @@ class GameManager
                          const short &currentPieceId);
     void handleJumpPiece(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey, const chk::Block &targetCell);
     void updateMatchStatus(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2);
-    void setOnMoveSuccessCallback(const onMoveSuccessCallback &callback);
+    void showForcedMoves(const chk::PlayerPtr &player, const chk::Block &cell);
+    void handleCellTap(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey, chk::CircularBuffer<short> &buffer,
+                       const chk::Block &cell);
 };
 
 } // namespace chk

@@ -1,22 +1,12 @@
 //
 // Created by Davis on 2023/12/21.
 //
-#include "GameManager.hpp"
+#include "../GameManager.hpp"
 using namespace chk;
 
 /**
- * Default constructor
- */
-GameManager::GameManager()
-{
-    this->sourceCell = -1;
-    this->forcedMoves.clear();
-    this->blockList.reserve(chk::NUM_COLS * chk::NUM_COLS);
-}
-
-/**
  * Get hashmap of hunter pieceID's to the assigned CaptureTarget
- * @return pair (PieceId--> captureTarget)
+ * @return )pair of forced captures
  */
 [[nodiscard]] const std::unordered_map<short, chk::CaptureTarget> &GameManager::getForcedMoves() const
 {
@@ -24,12 +14,12 @@ GameManager::GameManager()
 }
 
 /**
- * Atomically update main GUI message
+ * Atomically update main UI message
  * @param msg the message content
  */
 void GameManager::updateMessage(std::string_view msg)
 {
-    std::lock_guard<std::mutex> lg(my_mutex);
+    std::scoped_lock<std::mutex> lg(my_mutex);
     this->currentMsg = msg;
 }
 
@@ -89,44 +79,9 @@ void GameManager::drawCheckerboard(const sf::Font &font)
 }
 
 /**
- * Create new checker pieces, each with own position, and add them to given vector
- * @param pieceList destination
- */
-void GameManager::createAllPieces(std::vector<chk::PiecePtr> &pieceList)
-{
-    std::random_device randomDevice;
-    std::mt19937 randEngine(randomDevice());
-    std::uniform_int_distribution<short> dist(1, std::numeric_limits<short>::max());
-    for (uint16_t row = 0; row < NUM_ROWS; row++)
-    {
-        for (uint16_t col = 0; col < NUM_COLS; col++)
-        {
-            if ((row + col) % 2 != 0)
-            {
-                sf::CircleShape circle(0.5 * chk::SIZE_CELL);
-                const float x = static_cast<float>(col % NUM_COLS) * chk::SIZE_CELL;
-                circle.setPosition(sf::Vector2f(x, row * chk::SIZE_CELL));
-                if (row < 3)
-                {
-                    // Half Top cells, put BLACK piece
-                    auto kete = std::make_unique<chk::Piece>(circle, chk::PieceType::Black, dist(randEngine));
-                    pieceList.emplace_back(std::move_if_noexcept(kete));
-                }
-                else if (row > 4)
-                {
-                    // Half Bottom cells, put RED piece
-                    auto kete = std::make_unique<chk::Piece>(circle, chk::PieceType::Red, dist(randEngine));
-                    pieceList.emplace_back(std::move_if_noexcept(kete));
-                }
-            }
-        }
-    }
-}
-
-/**
  * Move the selected piece to clicked cell, and update the gameMap
  * @param player current player
- * @param opponent oppponent
+ * @param opponent opposing player
  * @param destCell target cell
  * @param currentPieceId the selected PieceId
  */
@@ -141,9 +96,9 @@ void GameManager::handleMovePiece(const chk::PlayerPtr &player, const chk::Playe
     {
         return;
     }
-    gameMap.erase(this->sourceCell);                       // set old location empty!
+    gameMap.erase(this->sourceCell.value());               // set old location empty!
     gameMap.emplace(destCell->getIndex(), currentPieceId); // fill in the new location
-    this->sourceCell = -1;                                 // reset source cell
+    this->sourceCell = std::nullopt;                       // reset source cell
     this->identifyTargets(opponent);
     if (!this->forcedMoves.empty())
     {
@@ -160,17 +115,19 @@ void GameManager::handleMovePiece(const chk::PlayerPtr &player, const chk::Playe
 }
 
 /**
- * Handle capturing of "Prey's" pieces by "Hunter", then update gameMap
- * @param hunter the offensive player
+ * Perform capturing of "prey's" pieces by "hunter", then update gameMap
+ * @param hunter the attacking player
  * @param prey the defensive player
  * @param targetCell the destination of hunter
  */
 void GameManager::handleJumpPiece(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,
                                   const chk::Block &targetCell)
 {
-    // If There's a PIECE on target cell, Cannot Jump to it.
+
+    assert(!(hunter == prey) && "cannot be same player");
     if (this->gameOver || this->getPieceFromCell(targetCell->getIndex()) != -1)
     {
+        // STOP if there's already a Piece on target cell
         return;
     }
 
@@ -183,11 +140,11 @@ void GameManager::handleJumpPiece(const chk::PlayerPtr &hunter, const chk::Playe
                 return;
             }
             this->updateMessage(hunter->getName() + " has captured " + prey->getName() + "'s piece!");
-            gameMap.erase(this->sourceCell);                        // set hunter's old location empty!
+            gameMap.erase(this->sourceCell.value());                // set hunter's old location empty!
             gameMap.erase(target.preyCellIdx);                      // set Prey's old location empty!
             gameMap.emplace(targetCell->getIndex(), hunterPieceId); // fill in hunter new location
             prey->losePiece(target.preyPieceId);                    // the defending player loses 1 piece
-            this->sourceCell = -1;                                  // reset source cell
+            this->sourceCell = std::nullopt;                        // reset source cell
             this->forcedMoves.clear();                              // reset forced jumps
 
             // FIXME do not RUN this next line if just became KING!
@@ -228,13 +185,13 @@ void GameManager::setSourceCell(const int &src_cell)
 
 /**
  * Whether the current player is holding own hunting Piece, AND
- * the next forced moves not empty.
+ * is about to complete capturing opponent
  *
  *@return TRUE or FALSE
  */
 bool GameManager::hasPendingCaptures() const
 {
-    return this->sourceCell != -1 && !forcedMoves.empty();
+    return this->sourceCell.has_value() && !forcedMoves.empty();
 }
 
 /**
@@ -306,6 +263,77 @@ void chk::GameManager::setOnMoveSuccessCallback(const onMoveSuccessCallback &cal
 }
 
 /**
+ * When current player taps any playable cell.
+ * @param hunter currentPlayer
+ * @param prey the opposing player
+ * @param buffer Temporary store for clicked Pieces
+ * @param cell Tapped cell
+ */
+void chk::GameManager::handleCellTap(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,
+                                     chk::CircularBuffer<short> &buffer, const chk::Block &cell)
+{
+    if (this->isGameOver())
+    {
+        return;
+    }
+
+    // CHECK IF this cell has a Piece
+    const short pieceId = this->getPieceFromCell(cell->getIndex());
+    if (pieceId != -1)
+    {
+        // YES, it has one! CHECK IF THERE IS ANY PENDING "forced jumps"
+        if (!this->getForcedMoves().empty())
+        {
+            this->showForcedMoves(hunter, cell);
+            return;
+        }
+        // OTHERWISE, store it in buffer (for a simple move next)!
+        buffer.addItem(pieceId);
+        this->setSourceCell(cell->getIndex());
+    }
+    else
+    {
+        // Cell is Empty! Let's move a piece (from buffer) here!
+        if (!buffer.isEmpty())
+        {
+            const short movablePieceId = buffer.getTop();
+            if (!hunter->hasThisPiece(movablePieceId))
+            {
+                return;
+            }
+            this->handleMovePiece(hunter, prey, cell, movablePieceId);
+            buffer.clean();
+        }
+    }
+}
+
+/**
+ * When player is forced to capture opponent's piece, highlight their pieces.
+ * @param player current player
+ * @param cell selected cell
+ */
+void chk::GameManager::showForcedMoves(const chk::PlayerPtr &player, const chk::Block &cell)
+{
+    const auto &forcedMoves = this->getForcedMoves();
+    const short pieceId = this->getPieceFromCell(cell->getIndex());
+    if (forcedMoves.find(pieceId) == forcedMoves.end())
+    {
+        // FORCE PLAYER TO DO JUMP, don't proceed until done!
+        std::set<short> pieceSet;
+        for (const auto &[hunter_piece, captureTarget] : forcedMoves)
+        {
+            pieceSet.insert(hunter_piece);
+        }
+        player->showForcedPieces(pieceSet);
+        this->updateMessage(player->getName() + " must capture piece!");
+    }
+    else
+    {
+        this->setSourceCell(cell->getIndex());
+    }
+}
+
+/**
  * Whether game is over
  * @return TRUE or FALSE
  */
@@ -351,13 +379,13 @@ void GameManager::identifyTargets(const PlayerPtr &hunter)
     this->forcedMoves.clear();
     for (const auto &cell_ptr : this->blockList)
     {
-        short pieceId = this->getPieceFromCell(cell_ptr->getIndex());
+        const short pieceId = this->getPieceFromCell(cell_ptr->getIndex());
+
         if (gameMap.find(cell_ptr->getIndex()) == gameMap.end() || !hunter->hasThisPiece(pieceId))
         {
             // this CELL is not usable, OR piece not OWNED by hunter
             continue;
         }
-        // TODO use constant threadpool of 4 to speed up this. (std::Async)
         this->collectFrontLHS(hunter, cell_ptr);
         this->collectFrontRHS(hunter, cell_ptr);
         const auto &piecePtr = hunter->getOwnPieces().at(pieceId);
@@ -370,7 +398,7 @@ void GameManager::identifyTargets(const PlayerPtr &hunter)
 }
 
 /**
- * Collect nearby enemies for next "forced" captures (NORTH WEST)
+ * Collect nearby enemies of Hunter for next "forced" captures (NORTH WEST)
  * @param hunter  player whose turn is next
  * @param cell_ptr current cell of hunter
  */
@@ -429,7 +457,7 @@ void GameManager::collectFrontLHS(const chk::PlayerPtr &hunter, const Block &cel
 }
 
 /**
- * Collect nearby enemies for next "forced" captures (NORTH EAST)
+ * Collect nearby enemies of Hunter for next "forced" captures (NORTH EAST)
  * @param hunter player whose turn is next
  * @param cell_ptr current cell of hunter
  */
@@ -486,8 +514,8 @@ void GameManager::collectFrontRHS(const chk::PlayerPtr &hunter, const Block &cel
 }
 
 /**
- * Collect nearby enemies for next "forced" captures (SOUTH EAST). Only for KING pieces
- * @param hunter  player whose turn is next
+ * Collect nearby enemies of Hunter for next "forced" captures (SOUTH EAST). Only for KING pieces
+ * @param hunter  player whose turn is next (MUST be King)
  * @param cell_ptr current cell of hunter
  */
 void GameManager::collectBehindRHS(const PlayerPtr &hunter, const Block &cell_ptr)
