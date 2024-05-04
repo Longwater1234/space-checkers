@@ -81,7 +81,7 @@ void GameManager::drawCheckerboard(const sf::Font &font)
 /**
  * Move the selected piece to clicked cell, and update the gameMap
  * @param player current player
- * @param opponent oppponent
+ * @param opponent opposing player
  * @param destCell target cell
  * @param currentPieceId the selected PieceId
  */
@@ -260,6 +260,77 @@ void GameManager::updateMatchStatus(const chk::PlayerPtr &p1, const chk::PlayerP
 void chk::GameManager::setOnMoveSuccessCallback(const onMoveSuccessCallback &callback)
 {
     this->_onMoveSuccess = callback;
+}
+
+/**
+ * When current player taps any playable cell.
+ * @param hunter currentPlayer
+ * @param prey the opposing player
+ * @param buffer Temporary store for clicked Pieces
+ * @param cell Tapped cell
+ */
+void chk::GameManager::handleCellTap(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,
+                                     chk::CircularBuffer<short> &buffer, const chk::Block &cell)
+{
+    if (this->isGameOver())
+    {
+        return;
+    }
+
+    // CHECK IF this cell has a Piece
+    const short pieceId = this->getPieceFromCell(cell->getIndex());
+    if (pieceId != -1)
+    {
+        // YES, it has one! CHECK IF THERE IS ANY PENDING "forced jumps"
+        if (!this->getForcedMoves().empty())
+        {
+            this->showForcedMoves(hunter, cell);
+            return;
+        }
+        // OTHERWISE, store it in buffer (for a simple move next)!
+        buffer.addItem(pieceId);
+        this->setSourceCell(cell->getIndex());
+    }
+    else
+    {
+        // Cell is Empty! Let's move a piece (from buffer) here!
+        if (!buffer.isEmpty())
+        {
+            const short movablePieceId = buffer.getTop();
+            if (!hunter->hasThisPiece(movablePieceId))
+            {
+                return;
+            }
+            this->handleMovePiece(hunter, prey, cell, movablePieceId);
+            buffer.clean();
+        }
+    }
+}
+
+/**
+ * When player is forced to capture opponent's piece, highlight their pieces.
+ * @param player current player
+ * @param cell selected cell
+ */
+void chk::GameManager::showForcedMoves(const chk::PlayerPtr &player, const chk::Block &cell)
+{
+    const auto &forcedMoves = this->getForcedMoves();
+    const short pieceId = this->getPieceFromCell(cell->getIndex());
+    if (forcedMoves.find(pieceId) == forcedMoves.end())
+    {
+        // FORCE PLAYER TO DO JUMP, don't proceed until done!
+        std::set<short> pieceSet;
+        for (const auto &[hunter_piece, captureTarget] : forcedMoves)
+        {
+            pieceSet.insert(hunter_piece);
+        }
+        player->showForcedPieces(pieceSet);
+        this->updateMessage(player->getName() + " must capture piece!");
+    }
+    else
+    {
+        this->setSourceCell(cell->getIndex());
+    }
 }
 
 /**

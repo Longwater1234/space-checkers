@@ -16,8 +16,8 @@ class OnlineGameManager : public chk::GameManager
     void setMyPlayerType(const chk::PlayerType &ptype);
 
     // Inherited via GameManager
-    void handleEvents() override;
-    void drawScreen(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2, const sf::Font &font) override;
+    void handleEvents(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2, chk::CircularBuffer<short> &buffer) override;
+    void drawScreen(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2) override;
     void setOnReadyPiecesCallback(const onReadyCreatePieces &callback) override;
 
   private:
@@ -45,11 +45,12 @@ inline void OnlineGameManager::setMyPlayerType(const chk::PlayerType &ptype)
     this->myType = ptype;
 }
 
-void OnlineGameManager::handleEvents()
+void OnlineGameManager::handleEvents(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2,
+                                     chk::CircularBuffer<short> &buffer)
 {
 }
 
-void OnlineGameManager::drawScreen(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2, const sf::Font &font)
+void OnlineGameManager::drawScreen(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2)
 {
 }
 

@@ -15,9 +15,10 @@ class LocalGameManager : public chk::GameManager
     void createAllPieces(std::vector<chk::PiecePtr> &pieceList) override;
 
     // Inherited via GameManager
-    void handleEvents() override;
-    void drawScreen(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2, const sf::Font &font) override;
-    void handleMyEvents(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2, chk::CircularBuffer<short> &circularBuffer);
+    // void handleEvents() override;
+    void drawScreen(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2) override;
+    void handleEvents(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2, chk::CircularBuffer<short> &buffer) override;
+    // void drawMyScreenTwo(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2, chk::CircularBuffer<short> &buffer);
     void setOnReadyPiecesCallback(const onReadyCreatePieces &callback) override;
 };
 
@@ -61,69 +62,44 @@ inline LocalGameManager::LocalGameManager(sf::RenderWindow *windowPtr)
     this->blockList.reserve(chk::NUM_COLS * chk::NUM_COLS);
 }
 
-void LocalGameManager::handleEvents()
+void LocalGameManager::drawScreen(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2)
 {
-}
-
-void LocalGameManager::drawScreen(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2, const sf::Font &font)
-{
-
-    // for storing currently clicked Piece
-    chk::CircularBuffer<short> circularBuffer{1};
-
-    // THE STATUS TEXT
-    sf::Text txtPanel{"Welcome to Checkers", font, 16};
-    txtPanel.setFillColor(sf::Color::White);
-    txtPanel.setPosition(sf::Vector2f{0, 8.5 * chk::SIZE_CELL});
-    this->updateMessage("Now playing! RED starts");
-
-    while (window->isOpen())
+    auto mousePos = sf::Mouse::getPosition(*window);
+    // RENDER CHECKERBOARD
+    for (const auto &cell : this->getBlockList())
     {
-        this->handleMyEvents(p1, p2, circularBuffer);
-        //  ImGui::SFML::Update(window, deltaClock.restart());
-        auto mousePos = sf::Mouse::getPosition(*window);
-        window->clear();
-
-        // RENDER CHECKERBOARD
-        for (const auto &cell : this->getBlockList())
+        window->draw(*cell);
+    }
+    // DRAW RED PIECES
+    for (const auto &[id, red_piece] : p1->getOwnPieces())
+    {
+        if (this->isPlayerRedTurn() && red_piece->containsPoint(mousePos))
         {
-            window->draw(*cell);
+            red_piece->addOutline();
         }
-        // DRAW RED PIECES
-        for (const auto &[id, red_piece] : p1->getOwnPieces())
+        else
         {
-            if (this->isPlayerRedTurn() && red_piece->containsPoint(mousePos))
-            {
-                red_piece->addOutline();
-            }
-            else
-            {
-                red_piece->removeOutline();
-            }
-            window->draw(*red_piece);
+            red_piece->removeOutline();
         }
-        // DRAW BLACK PIECES
-        for (const auto &[id, black_piece] : p2->getOwnPieces())
+        window->draw(*red_piece);
+    }
+    // DRAW BLACK PIECES
+    for (const auto &[id, black_piece] : p2->getOwnPieces())
+    {
+        if (!this->isPlayerRedTurn() && black_piece->containsPoint(mousePos))
         {
-            if (!this->isPlayerRedTurn() && black_piece->containsPoint(mousePos))
-            {
-                black_piece->addOutline();
-            }
-            else
-            {
-                black_piece->removeOutline();
-            }
-            window->draw(*black_piece);
+            black_piece->addOutline();
         }
-
-        txtPanel.setString(this->getCurrentMsg());
-        window->draw(txtPanel);
-        window->display();
+        else
+        {
+            black_piece->removeOutline();
+        }
+        window->draw(*black_piece);
     }
 }
 
-void LocalGameManager::handleMyEvents(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2,
-                                      chk::CircularBuffer<short> &circularBuffer)
+void LocalGameManager::handleEvents(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2,
+                                    chk::CircularBuffer<short> &circularBuffer)
 {
     for (auto event = sf::Event{}; window->pollEvent(event);)
     {
@@ -156,9 +132,10 @@ void LocalGameManager::handleMyEvents(const chk::PlayerPtr &p1, const chk::Playe
                     }
                     else
                     {
-                        // handleCellTap(manager, hunter, prey, circularBuffer, cell);
+                        this->handleCellTap(hunter, prey, circularBuffer, cell);
                     }
-                    break; // END inner loop
+                    break;
+                    // END inner loop
                 }
             }
         }

@@ -5,6 +5,7 @@
 
 #include "CaptureTarget.hpp"
 #include "Cell.hpp"
+#include "CircularBuffer.hpp"
 #include "Player.hpp"
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/Text.hpp>
@@ -38,11 +39,12 @@ class GameManager
   public:
     GameManager() = default;
     virtual ~GameManager() = default;
-    void drawCheckerboard(const sf::Font &font);
     virtual void createAllPieces(std::vector<chk::PiecePtr> &pieceList) = 0;
-    virtual void handleEvents() = 0;
-    virtual void drawScreen(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2, const sf::Font &font) = 0;
+    virtual void handleEvents(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2,
+                              chk::CircularBuffer<short> &buffer) = 0;
+    virtual void drawScreen(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2) = 0;
     virtual void setOnReadyPiecesCallback(const onReadyCreatePieces &callback) = 0;
+    void drawCheckerboard(const sf::Font &font);
     void updateMessage(std::string_view msg);
     void matchCellsToPieces(const std::vector<chk::PiecePtr> &pieceList);
     [[nodiscard]] const std::unordered_map<short, chk::CaptureTarget> &getForcedMoves() const;
@@ -96,6 +98,11 @@ class GameManager
     std::unordered_map<short, chk::CaptureTarget> forcedMoves{};
     // all checkerboard cells
     std::vector<chk::Block> blockList{};
+    // show forced moves for this current player
+    void showForcedMoves(const chk::PlayerPtr &player, const chk::Block &cell);
+    // when player taps any playable cell
+    void handleCellTap(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey, chk::CircularBuffer<short> &buffer,
+                       const chk::Block &cell);
 };
 
 } // namespace chk

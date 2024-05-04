@@ -4,7 +4,12 @@
 #pragma once
 #include "Piece.hpp"
 #include "ResourcePath.hpp"
-#include <SFML/Graphics.hpp>
+#include <SFML/Graphics/Color.hpp>
+#include <SFML/Graphics/RectangleShape.hpp>
+#include <SFML/Graphics/RenderWindow.hpp>
+#include <SFML/Graphics/Texture.hpp>
+#include <SFML/Window/Event.hpp>
+#include <SFML/Window/Mouse.hpp>
 #include <memory>
 #include <string>
 namespace chk
@@ -39,11 +44,13 @@ inline MainMenu::MainMenu(sf::RenderWindow *windowPtr)
 {
     this->window = windowPtr;
     this->mainFrame = sf::RectangleShape(sf::Vector2f(600, 700));
-    if (this->mainImage.loadFromFile(chk::getResourcePath("main_menu_clean.png")))
+    if (!this->mainImage.loadFromFile(chk::getResourcePath("main_menu_clean.png")))
     {
-        mainFrame.setTexture(&this->mainImage);
-        mainFrame.setPosition(0, 0);
+        perror("cannot find home image");
+        exit(EXIT_FAILURE);
     }
+    mainFrame.setTexture(&this->mainImage);
+    mainFrame.setPosition(0, 0);
     sf::Image appIcon;
     if (appIcon.loadFromFile(chk::getResourcePath(ICON_PATH)))
     {
@@ -53,12 +60,12 @@ inline MainMenu::MainMenu(sf::RenderWindow *windowPtr)
 }
 
 /**
- * Initialize the button outlines
+ * Initialize the menu buttons
  */
 inline void MainMenu::init()
 {
-    // draw t rectangles
-    static sf::Vector2f sizeRec(277.0, 55.0);
+    // draw two rectangles
+    static sf::Vector2f sizeRec{277.0, 55.0};
     this->localBtn = sf::RectangleShape{sizeRec};
     this->onlineBtn = sf::RectangleShape{sizeRec};
     this->localBtn.setFillColor(sf::Color::Transparent);
@@ -69,7 +76,7 @@ inline void MainMenu::init()
 }
 
 /**
- * Listen for GUI events
+ * Listen for GUI events, and store the selected choice to `result`
  */
 inline void MainMenu::handleEvents(chk::UserChoice &result)
 {
@@ -110,7 +117,7 @@ inline chk::UserChoice MainMenu::runLoop()
     while (this->window->isOpen())
     {
         // HANDLE EVENTS
-        handleEvents(result);
+        this->handleEvents(result);
         if (result == chk::UserChoice::LOCAL_PLAY || result == chk::UserChoice::ONLINE_PLAY)
         {
             break;

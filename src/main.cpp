@@ -92,9 +92,9 @@ int main()
     auto window = sf::RenderWindow{sf::VideoMode{600, 700}, "SpaceCheckers", sf::Style::Titlebar | sf::Style::Close};
     window.setFramerateLimit(60);
     ImGui::SFML::Init(window, false);
+    std::unique_ptr<chk::GameManager> manager = nullptr;
 
     // SHOW MAIN MENU
-    std::unique_ptr<chk::GameManager> manager = nullptr;
     chk::MainMenu homeMenu(&window);
     homeMenu.init();
     const auto userChoice = homeMenu.runLoop();
@@ -168,9 +168,30 @@ int main()
     pieceVector.clear();
 
     // for storing currently clicked Piece
-    // chk::CircularBuffer<short> circularBuffer{1};
+    chk::CircularBuffer<short> circularBuffer{1};
 
-    manager->drawScreen(p1, p2, font);
+    // THE STATUS TEXT
+    sf::Text txtPanel{"Welcome to Checkers", font, 16};
+    txtPanel.setFillColor(sf::Color::White);
+    txtPanel.setPosition(sf::Vector2f{0, 8.5 * chk::SIZE_CELL});
+    manager->updateMessage("Now playing! RED starts");
+
+    sf::Clock deltaClock;
+
+    // THE MAIN GAME LOOP
+    while (window.isOpen())
+    {
+        manager->handleEvents(p1, p2, circularBuffer);
+        ImGui::SFML::Update(window, deltaClock.restart());
+
+        window.clear();
+        manager->drawScreen(p1, p2);
+
+        txtPanel.setString(manager->getCurrentMsg());
+        window.draw(txtPanel);
+        ImGui::SFML::Render(window);
+        window.display();
+    }
 
     // THE STATUS TEXT
     // sf::Text txtPanel{"Welcome to Checkers", font, 16};
