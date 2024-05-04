@@ -28,8 +28,6 @@ int main()
     if (userChoice == chk::UserChoice::ONLINE_PLAY)
     {
         manager = std::make_unique<chk::OnlineGameManager>(&window);
-
-        // manager->setWsClient(wsClient.get());
     }
     else
     {
@@ -42,7 +40,6 @@ int main()
     ImFont *imfont = io.Fonts->AddFontFromFileTTF(chk::getResourcePath(chk::FONT_PATH).c_str(), 16);
     IM_ASSERT(imfont != nullptr);
     ImGui::SFML::UpdateFontTexture();
-    // ImGui::StyleColorsLight(); //LIGHT THEME
 
     sf::Image appIcon;
     if (appIcon.loadFromFile(chk::getResourcePath(chk::ICON_PATH)))

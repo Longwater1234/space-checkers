@@ -20,6 +20,15 @@ class LocalGameManager : public chk::GameManager
     void setOnReadyPiecesCallback(const onReadyCreatePieces &callback) override;
 };
 
+
+inline LocalGameManager::LocalGameManager(sf::RenderWindow *windowPtr)
+{
+    this->window = windowPtr;
+    this->sourceCell = -1;
+    this->forcedMoves.clear();
+    this->blockList.reserve(chk::NUM_COLS * chk::NUM_COLS);
+}
+
 inline void LocalGameManager::createAllPieces(std::vector<chk::PiecePtr> &pieceList)
 {
     std::random_device randomDevice;
@@ -50,14 +59,6 @@ inline void LocalGameManager::createAllPieces(std::vector<chk::PiecePtr> &pieceL
         }
     }
     this->_onReadyCreatePieces(true);
-}
-
-inline LocalGameManager::LocalGameManager(sf::RenderWindow *windowPtr)
-{
-    this->window = windowPtr;
-    this->sourceCell = -1;
-    this->forcedMoves.clear();
-    this->blockList.reserve(chk::NUM_COLS * chk::NUM_COLS);
 }
 
 void LocalGameManager::drawScreen(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2)

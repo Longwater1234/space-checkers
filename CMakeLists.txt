@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.18 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
 
 project("SpaceCheckers" VERSION 1.0 
  HOMEPAGE_URL "https://github.com/Longwater1234/space-checkers")
@@ -13,7 +13,7 @@ if(NOT APPLE)
 endif()
 
 # Absolute path where you installed SFML
-set(SFML_HOME "D:/work_mine/CPP/SFML-2.6.1")   
+set(SFML_HOME "C:/SFML/SFML-2.6.1")    
 
 file(GLOB_RECURSE GAME_SRC "src/*.cpp" "src/*.hpp")
 set(SFML_DIR ${SFML_HOME}/lib/cmake/SFML)
