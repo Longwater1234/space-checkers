@@ -8,6 +8,7 @@
 #include "Player.hpp"
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/Text.hpp>
+#include <SFML/Window/Mouse.hpp>
 #include <functional>
 #include <memory>
 #include <mutex>
@@ -40,8 +41,8 @@ class GameManager
     void drawCheckerboard(const sf::Font &font);
     virtual void createAllPieces(std::vector<chk::PiecePtr> &pieceList) = 0;
     virtual void handleEvents() = 0;
-    virtual void drawScreen() = 0;
-    virtual void setOnReadyCreatePiecesCallback(const onReadyCreatePieces &callback) = 0;
+    virtual void drawScreen(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2, const sf::Font &font) = 0;
+    virtual void setOnReadyPiecesCallback(const onReadyCreatePieces &callback) = 0;
     void updateMessage(std::string_view msg);
     void matchCellsToPieces(const std::vector<chk::PiecePtr> &pieceList);
     [[nodiscard]] const std::unordered_map<short, chk::CaptureTarget> &getForcedMoves() const;

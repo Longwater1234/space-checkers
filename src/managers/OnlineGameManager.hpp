@@ -17,8 +17,8 @@ class OnlineGameManager : public chk::GameManager
 
     // Inherited via GameManager
     void handleEvents() override;
-    void drawScreen() override;
-    void setOnReadyCreatePiecesCallback(const onReadyCreatePieces &callback) override;
+    void drawScreen(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2, const sf::Font &font) override;
+    void setOnReadyPiecesCallback(const onReadyCreatePieces &callback) override;
 
   private:
     chk::PlayerType myType{};
@@ -49,11 +49,11 @@ void OnlineGameManager::handleEvents()
 {
 }
 
-void OnlineGameManager::drawScreen()
+void OnlineGameManager::drawScreen(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2, const sf::Font &font)
 {
 }
 
-void OnlineGameManager::setOnReadyCreatePiecesCallback(const onReadyCreatePieces &callback)
+void OnlineGameManager::setOnReadyPiecesCallback(const onReadyCreatePieces &callback)
 {
     this->_onReadyCreatePieces = callback;
 }

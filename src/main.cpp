@@ -89,11 +89,11 @@ static void handleCellTap(const std::unique_ptr<chk::GameManager> &manager, cons
 
 int main()
 {
-
     auto window = sf::RenderWindow{sf::VideoMode{600, 700}, "SpaceCheckers", sf::Style::Titlebar | sf::Style::Close};
     window.setFramerateLimit(60);
     ImGui::SFML::Init(window, false);
 
+    // SHOW MAIN MENU
     std::unique_ptr<chk::GameManager> manager = nullptr;
     chk::MainMenu homeMenu(&window);
     homeMenu.init();
@@ -142,7 +142,7 @@ int main()
     pieceVector.reserve(NUM_PIECES);
 
     // wait for manager to create pieces
-    manager->setOnReadyCreatePiecesCallback([&manager, &p1, &p2, &pieceVector](const bool &isReady) {
+    manager->setOnReadyPiecesCallback([&manager, &p1, &p2, &pieceVector](const bool &isReady) {
         if (!isReady)
         {
             return;
@@ -168,104 +168,106 @@ int main()
     pieceVector.clear();
 
     // for storing currently clicked Piece
-    chk::CircularBuffer<short> circularBuffer{1};
+    // chk::CircularBuffer<short> circularBuffer{1};
+
+    manager->drawScreen(p1, p2, font);
 
     // THE STATUS TEXT
-    sf::Text txtPanel{"Welcome to Checkers", font, 16};
-    txtPanel.setFillColor(sf::Color::White);
-    txtPanel.setPosition(sf::Vector2f{0, 8.5 * chk::SIZE_CELL});
-    manager->updateMessage("Now playing! RED starts");
+    // sf::Text txtPanel{"Welcome to Checkers", font, 16};
+    // txtPanel.setFillColor(sf::Color::White);
+    // txtPanel.setPosition(sf::Vector2f{0, 8.5 * chk::SIZE_CELL});
+    // manager->updateMessage("Now playing! RED starts");
 
-    auto wsClient = std::make_unique<chk::WsClient>(manager.get(), p1.get(), p2.get());
+    // auto wsClient = std::make_unique<chk::WsClient>(manager.get(), p1.get(), p2.get());
 
-    sf::Clock deltaClock;
-    while (window.isOpen())
-    {
-        for (auto event = sf::Event{}; window.pollEvent(event);)
-        {
-            ImGui::SFML::ProcessEvent(window, event);
-            if (event.type == sf::Event::Closed)
-            {
-                window.close();
-            }
-            if (event.type == sf::Event::MouseButtonPressed && sf::Mouse::isButtonPressed(sf::Mouse::Left))
-            {
-                const auto clickedPos = sf::Mouse::getPosition(window);
-                /* Check window bounds */
-                if (clickedPos.y > chk::SIZE_CELL * 8)
-                {
-                    continue;
-                }
-                for (auto &cell : manager->getBlockList())
-                {
-                    // inner loop
-                    if (cell->containsPoint(clickedPos) && cell->getIndex() != -1)
-                    {
-                        const auto &hunter = manager->isPlayerRedTurn() ? p1 : p2;
-                        const auto &prey = manager->isPlayerRedTurn() ? p2 : p1;
+    // sf::Clock deltaClock;
+    // while (window.isOpen())
+    // {
+    //     for (auto event = sf::Event{}; window.pollEvent(event);)
+    //     {
+    //         ImGui::SFML::ProcessEvent(window, event);
+    //         if (event.type == sf::Event::Closed)
+    //         {
+    //             window.close();
+    //         }
+    //         if (event.type == sf::Event::MouseButtonPressed && sf::Mouse::isButtonPressed(sf::Mouse::Left))
+    //         {
+    //             const auto clickedPos = sf::Mouse::getPosition(window);
+    //             /* Check window bounds */
+    //             if (clickedPos.y > chk::SIZE_CELL * 8)
+    //             {
+    //                 continue;
+    //             }
+    //             for (auto &cell : manager->getBlockList())
+    //             {
+    //                 // inner loop
+    //                 if (cell->containsPoint(clickedPos) && cell->getIndex() != -1)
+    //                 {
+    //                     const auto &hunter = manager->isPlayerRedTurn() ? p1 : p2;
+    //                     const auto &prey = manager->isPlayerRedTurn() ? p2 : p1;
 
-                        if (manager->hasPendingCaptures())
-                        {
-                            manager->handleJumpPiece(hunter, prey, cell);
-                            manager->updateMatchStatus(hunter, prey);
-                            circularBuffer.clean();
-                        }
-                        else
-                        {
-                            handleCellTap(manager, hunter, prey, circularBuffer, cell);
-                        }
-                        break; // END inner loop
-                    }
-                }
-            }
-        }
+    //                     if (manager->hasPendingCaptures())
+    //                     {
+    //                         manager->handleJumpPiece(hunter, prey, cell);
+    //                         manager->updateMatchStatus(hunter, prey);
+    //                         circularBuffer.clean();
+    //                     }
+    //                     else
+    //                     {
+    //                         handleCellTap(manager, hunter, prey, circularBuffer, cell);
+    //                     }
+    //                     break; // END inner loop
+    //                 }
+    //             }
+    //         }
+    //     }
 
-        ImGui::SFML::Update(window, deltaClock.restart());
-        auto mousePos = sf::Mouse::getPosition(window);
-        window.clear();
-        // START IMGUI
-        if (wsClient->doneConnectWindow())
-        {
-            wsClient->tryConnect();
-        }
+    //     ImGui::SFML::Update(window, deltaClock.restart());
+    //     auto mousePos = sf::Mouse::getPosition(window);
+    //     window.clear();
+    //     // START IMGUI
+    //     if (wsClient->doneConnectWindow())
+    //     {
+    //         wsClient->tryConnect();
+    //     }
 
-        // RENDER CHECKERBOARD
-        for (const auto &cell : manager->getBlockList())
-        {
-            window.draw(*cell);
-        }
-        // DRAW RED PIECES
-        for (const auto &[id, red_piece] : p1->getOwnPieces())
-        {
-            if (manager->isPlayerRedTurn() && red_piece->containsPoint(mousePos))
-            {
-                red_piece->addOutline();
-            }
-            else
-            {
-                red_piece->removeOutline();
-            }
-            window.draw(*red_piece);
-        }
-        // DRAW BLACK PIECES
-        for (const auto &[id, black_piece] : p2->getOwnPieces())
-        {
-            if (!manager->isPlayerRedTurn() && black_piece->containsPoint(mousePos))
-            {
-                black_piece->addOutline();
-            }
-            else
-            {
-                black_piece->removeOutline();
-            }
-            window.draw(*black_piece);
-        }
+    //     // RENDER CHECKERBOARD
+    //     for (const auto &cell : manager->getBlockList())
+    //     {
+    //         window.draw(*cell);
+    //     }
+    //     // DRAW RED PIECES
+    //     for (const auto &[id, red_piece] : p1->getOwnPieces())
+    //     {
+    //         if (manager->isPlayerRedTurn() && red_piece->containsPoint(mousePos))
+    //         {
+    //             red_piece->addOutline();
+    //         }
+    //         else
+    //         {
+    //             red_piece->removeOutline();
+    //         }
+    //         window.draw(*red_piece);
+    //     }
+    //     // DRAW BLACK PIECES
+    //     for (const auto &[id, black_piece] : p2->getOwnPieces())
+    //     {
+    //         if (!manager->isPlayerRedTurn() && black_piece->containsPoint(mousePos))
+    //         {
+    //             black_piece->addOutline();
+    //         }
+    //         else
+    //         {
+    //             black_piece->removeOutline();
+    //         }
+    //         window.draw(*black_piece);
+    //     }
 
-        txtPanel.setString(manager->getCurrentMsg());
-        window.draw(txtPanel);
-        ImGui::SFML::Render(window);
-        window.display();
-    }
+    //     txtPanel.setString(manager->getCurrentMsg());
+    //     window.draw(txtPanel);
+    //     ImGui::SFML::Render(window);
+    //     window.display();
+    // }
     ImGui::SFML::Shutdown();
     return EXIT_SUCCESS;
 }

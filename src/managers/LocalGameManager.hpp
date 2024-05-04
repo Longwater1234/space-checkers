@@ -16,8 +16,9 @@ class LocalGameManager : public chk::GameManager
 
     // Inherited via GameManager
     void handleEvents() override;
-    void drawScreen() override;
-    void setOnReadyCreatePiecesCallback(const onReadyCreatePieces &callback) override;
+    void drawScreen(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2, const sf::Font &font) override;
+    void handleMyEvents(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2, chk::CircularBuffer<short> &circularBuffer);
+    void setOnReadyPiecesCallback(const onReadyCreatePieces &callback) override;
 };
 
 inline void LocalGameManager::createAllPieces(std::vector<chk::PiecePtr> &pieceList)
@@ -64,11 +65,107 @@ void LocalGameManager::handleEvents()
 {
 }
 
-void LocalGameManager::drawScreen()
+void LocalGameManager::drawScreen(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2, const sf::Font &font)
 {
+
+    // for storing currently clicked Piece
+    chk::CircularBuffer<short> circularBuffer{1};
+
+    // THE STATUS TEXT
+    sf::Text txtPanel{"Welcome to Checkers", font, 16};
+    txtPanel.setFillColor(sf::Color::White);
+    txtPanel.setPosition(sf::Vector2f{0, 8.5 * chk::SIZE_CELL});
+    this->updateMessage("Now playing! RED starts");
+
+    while (window->isOpen())
+    {
+        this->handleMyEvents(p1, p2, circularBuffer);
+        //  ImGui::SFML::Update(window, deltaClock.restart());
+        auto mousePos = sf::Mouse::getPosition(*window);
+        window->clear();
+
+        // RENDER CHECKERBOARD
+        for (const auto &cell : this->getBlockList())
+        {
+            window->draw(*cell);
+        }
+        // DRAW RED PIECES
+        for (const auto &[id, red_piece] : p1->getOwnPieces())
+        {
+            if (this->isPlayerRedTurn() && red_piece->containsPoint(mousePos))
+            {
+                red_piece->addOutline();
+            }
+            else
+            {
+                red_piece->removeOutline();
+            }
+            window->draw(*red_piece);
+        }
+        // DRAW BLACK PIECES
+        for (const auto &[id, black_piece] : p2->getOwnPieces())
+        {
+            if (!this->isPlayerRedTurn() && black_piece->containsPoint(mousePos))
+            {
+                black_piece->addOutline();
+            }
+            else
+            {
+                black_piece->removeOutline();
+            }
+            window->draw(*black_piece);
+        }
+
+        txtPanel.setString(this->getCurrentMsg());
+        window->draw(txtPanel);
+        window->display();
+    }
 }
 
-void LocalGameManager::setOnReadyCreatePiecesCallback(const onReadyCreatePieces &callback)
+void LocalGameManager::handleMyEvents(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2,
+                                      chk::CircularBuffer<short> &circularBuffer)
+{
+    for (auto event = sf::Event{}; window->pollEvent(event);)
+    {
+        // ImGui::SFML::ProcessEvent(window, event);
+        if (event.type == sf::Event::Closed)
+        {
+            window->close();
+        }
+        if (event.type == sf::Event::MouseButtonPressed && sf::Mouse::isButtonPressed(sf::Mouse::Left))
+        {
+            const auto clickedPos = sf::Mouse::getPosition(*window);
+            /* Check window bounds */
+            if (clickedPos.y > chk::SIZE_CELL * 8)
+            {
+                continue;
+            }
+            for (auto &cell : this->getBlockList())
+            {
+                // inner loop
+                if (cell->containsPoint(clickedPos) && cell->getIndex() != -1)
+                {
+                    const auto &hunter = this->isPlayerRedTurn() ? p1 : p2;
+                    const auto &prey = this->isPlayerRedTurn() ? p2 : p1;
+
+                    if (this->hasPendingCaptures())
+                    {
+                        this->handleJumpPiece(hunter, prey, cell);
+                        this->updateMatchStatus(hunter, prey);
+                        circularBuffer.clean();
+                    }
+                    else
+                    {
+                        // handleCellTap(manager, hunter, prey, circularBuffer, cell);
+                    }
+                    break; // END inner loop
+                }
+            }
+        }
+    }
+}
+
+void LocalGameManager::setOnReadyPiecesCallback(const onReadyCreatePieces &callback)
 {
     this->_onReadyCreatePieces = callback;
 }
