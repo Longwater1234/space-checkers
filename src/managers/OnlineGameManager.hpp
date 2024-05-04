@@ -1,5 +1,7 @@
 #pragma once
 #include "../GameManager.hpp"
+#include "imgui-SFML.h"
+#include "imgui.h"
 
 namespace chk
 {
@@ -45,16 +47,88 @@ inline void OnlineGameManager::setMyPlayerType(const chk::PlayerType &ptype)
     this->myType = ptype;
 }
 
-void OnlineGameManager::handleEvents(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2,
-                                     chk::CircularBuffer<short> &buffer)
+inline void OnlineGameManager::handleEvents(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2,
+                                            chk::CircularBuffer<short> &circularBuffer)
 {
+    for (auto event = sf::Event{}; window->pollEvent(event);)
+    {
+        ImGui::SFML::ProcessEvent(*this->window, event);
+        if (event.type == sf::Event::Closed)
+        {
+            window->close();
+        }
+        if (event.type == sf::Event::MouseButtonPressed && sf::Mouse::isButtonPressed(sf::Mouse::Left))
+        {
+            const auto clickedPos = sf::Mouse::getPosition(*window);
+            /* Check window bounds */
+            if (clickedPos.y > chk::SIZE_CELL * 8)
+            {
+                continue;
+            }
+            for (auto &cell : this->getBlockList())
+            {
+                // inner loop
+                if (cell->containsPoint(clickedPos) && cell->getIndex() != -1)
+                {
+                    const auto &hunter = this->isPlayerRedTurn() ? p1 : p2;
+                    const auto &prey = this->isPlayerRedTurn() ? p2 : p1;
+
+                    if (this->hasPendingCaptures())
+                    {
+                        this->handleJumpPiece(hunter, prey, cell);
+                        this->updateMatchStatus(hunter, prey);
+                        circularBuffer.clean();
+                    }
+                    else
+                    {
+                        this->handleCellTap(hunter, prey, circularBuffer, cell);
+                    }
+                    break;
+                    // END inner loop
+                }
+            }
+        }
+    }
 }
 
-void OnlineGameManager::drawScreen(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2)
+inline void OnlineGameManager::drawScreen(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2)
 {
+    auto mousePos = sf::Mouse::getPosition(*window);
+
+    // RENDER CHECKERBOARD
+    for (const auto &cell : this->getBlockList())
+    {
+        window->draw(*cell);
+    }
+    // DRAW RED PIECES
+    for (const auto &[id, red_piece] : p1->getOwnPieces())
+    {
+        if (this->isPlayerRedTurn() && red_piece->containsPoint(mousePos))
+        {
+            red_piece->addOutline();
+        }
+        else
+        {
+            red_piece->removeOutline();
+        }
+        window->draw(*red_piece);
+    }
+    // DRAW BLACK PIECES
+    for (const auto &[id, black_piece] : p2->getOwnPieces())
+    {
+        if (!this->isPlayerRedTurn() && black_piece->containsPoint(mousePos))
+        {
+            black_piece->addOutline();
+        }
+        else
+        {
+            black_piece->removeOutline();
+        }
+        window->draw(*black_piece);
+    }
 }
 
-void OnlineGameManager::setOnReadyPiecesCallback(const onReadyCreatePieces &callback)
+inline void OnlineGameManager::setOnReadyPiecesCallback(const onReadyCreatePieces &callback)
 {
     this->_onReadyCreatePieces = callback;
 }

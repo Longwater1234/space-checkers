@@ -47,6 +47,7 @@ class GameManager
     void drawCheckerboard(const sf::Font &font);
     void updateMessage(std::string_view msg);
     void matchCellsToPieces(const std::vector<chk::PiecePtr> &pieceList);
+    void setOnMoveSuccessCallback(const onMoveSuccessCallback &callback);
     [[nodiscard]] const std::unordered_map<short, chk::CaptureTarget> &getForcedMoves() const;
     [[nodiscard]] const std::string &getCurrentMsg() const;
 
@@ -74,19 +75,6 @@ class GameManager
     void collectBehindRHS(const chk::PlayerPtr &hunter, const Block &cell_ptr);
     void collectBehindLHS(const chk::PlayerPtr &hunter, const Block &cell_ptr);
 
-  public:
-    [[nodiscard]] const bool &isPlayerRedTurn() const;
-    [[nodiscard]] short getPieceFromCell(const int &cell_idx);
-    [[nodiscard]] const std::vector<chk::Block> &getBlockList() const;
-    [[nodiscard]] bool hasPendingCaptures() const;
-    [[nodiscard]] const bool &isGameOver() const;
-    void setSourceCell(const int &src_cell);
-    void handleMovePiece(const chk::PlayerPtr &player, const chk::PlayerPtr &opponent, const Block &destCell,
-                         const short &currentPieceId);
-    void handleJumpPiece(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey, const chk::Block &targetCell);
-    void updateMatchStatus(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2);
-    void setOnMoveSuccessCallback(const onMoveSuccessCallback &callback);
-
   protected:
     // callback after creating pieces for both players
     onReadyCreatePieces _onReadyCreatePieces;
@@ -98,9 +86,18 @@ class GameManager
     std::unordered_map<short, chk::CaptureTarget> forcedMoves{};
     // all checkerboard cells
     std::vector<chk::Block> blockList{};
-    // show forced moves for this current player
+
+    [[nodiscard]] const bool &isPlayerRedTurn() const;
+    [[nodiscard]] short getPieceFromCell(const int &cell_idx);
+    [[nodiscard]] const std::vector<chk::Block> &getBlockList() const;
+    [[nodiscard]] bool hasPendingCaptures() const;
+    [[nodiscard]] const bool &isGameOver() const;
+    void setSourceCell(const int &src_cell);
+    void handleMovePiece(const chk::PlayerPtr &player, const chk::PlayerPtr &opponent, const Block &destCell,
+                         const short &currentPieceId);
+    void handleJumpPiece(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey, const chk::Block &targetCell);
+    void updateMatchStatus(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2);
     void showForcedMoves(const chk::PlayerPtr &player, const chk::Block &cell);
-    // when player taps any playable cell
     void handleCellTap(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey, chk::CircularBuffer<short> &buffer,
                        const chk::Block &cell);
 };

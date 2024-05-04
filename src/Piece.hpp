@@ -19,6 +19,7 @@ constexpr auto BLACK_KING = "black_king.png";
 constexpr auto RED_NORMAL = "red_normal.png";
 constexpr auto RED_KING = "red_king.png";
 constexpr auto SIZE_CELL = 75.0f; // length of square cell
+constexpr auto NUM_PIECES = 24;
 
 class Piece final : public sf::Drawable, public sf::Transformable
 {
