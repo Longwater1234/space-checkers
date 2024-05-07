@@ -2,6 +2,7 @@
 // Created by Davis on 2023/12/21.
 //
 #include "../GameManager.hpp"
+
 using namespace chk;
 
 /**
@@ -48,6 +49,7 @@ const std::vector<chk::Block> &GameManager::getBlockList() const
 void GameManager::drawCheckerboard(const sf::Font &font)
 {
     int counter = 32;
+    std::cout << flatbuffers::flatbuffers_version_string() << std::endl;
     for (uint16_t row = 0; row < NUM_ROWS; row++)
     {
         for (uint16_t col = 0; col < NUM_COLS; col++)
@@ -314,13 +316,13 @@ void chk::GameManager::handleCellTap(const chk::PlayerPtr &hunter, const chk::Pl
  */
 void chk::GameManager::showForcedMoves(const chk::PlayerPtr &player, const chk::Block &cell)
 {
-    const auto &forcedMoves = this->getForcedMoves();
+    const auto &moves = this->getForcedMoves();
     const short pieceId = this->getPieceFromCell(cell->getIndex());
-    if (forcedMoves.find(pieceId) == forcedMoves.end())
+    if (moves.find(pieceId) == moves.end())
     {
         // FORCE PLAYER TO DO JUMP, don't proceed until done!
         std::set<short> pieceSet;
-        for (const auto &[hunter_piece, captureTarget] : forcedMoves)
+        for (const auto &[hunter_piece, captureTarget] : moves)
         {
             pieceSet.insert(hunter_piece);
         }

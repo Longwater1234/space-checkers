@@ -7,7 +7,6 @@
 #include <ixwebsocket/IXNetSystem.h>
 #include <ixwebsocket/IXWebSocket.h>
 #include <mutex>
-#include <nlohmann/json.hpp>
 #include <spdlog/spdlog.h>
 #include <string>
 

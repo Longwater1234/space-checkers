@@ -10,11 +10,13 @@
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/Text.hpp>
 #include <SFML/Window/Mouse.hpp>
+#include <flatbuffers/flatbuffers.h>
 #include <functional>
 #include <memory>
 #include <mutex>
 #include <optional>
 #include <random>
+#include <set>
 #include <spdlog/spdlog.h>
 #include <string>
 #include <unordered_map>
@@ -64,6 +66,8 @@ class GameManager
     bool gameOver = false;
     // mutex for atomic updates
     std::mutex my_mutex;
+    // collection of my next targets (Map<HunterPieceID, CaptureTarget>)
+    std::unordered_map<short, chk::CaptureTarget> forcedMoves{};
     // callback after successfully moved piece
     onMoveSuccessCallback _onMoveSuccess;
 
@@ -82,8 +86,6 @@ class GameManager
     sf::RenderWindow *window = nullptr;
     // source cell Index of selected piece
     std::optional<int> sourceCell;
-    // collection of my next targets (Map<HunterPieceID, CaptureTarget>)
-    std::unordered_map<short, chk::CaptureTarget> forcedMoves{};
     // all checkerboard cells
     std::vector<chk::Block> blockList{};
 

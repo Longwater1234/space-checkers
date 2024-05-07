@@ -24,8 +24,8 @@ class LocalGameManager : public chk::GameManager
 inline LocalGameManager::LocalGameManager(sf::RenderWindow *windowPtr)
 {
     this->window = windowPtr;
-    this->sourceCell = -1;
-    this->forcedMoves.clear();
+    this->sourceCell = std::nullopt;
+   // this->forcedMoves.clear();
     this->blockList.reserve(chk::NUM_COLS * chk::NUM_COLS);
 }
 

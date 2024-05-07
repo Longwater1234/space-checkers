@@ -4,13 +4,12 @@ project("SpaceCheckers" VERSION 1.0
  HOMEPAGE_URL "https://github.com/Longwater1234/space-checkers")
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-set(IMGUI_SFML_FIND_SFML OFF)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 if(NOT APPLE) 
   set(SFML_STATIC_LIBRARIES TRUE) 
-endif()
+endif() 
 
 # Absolute path where you installed SFML
 set(SFML_HOME "C:/SFML/SFML-2.6.1")    
@@ -37,15 +36,15 @@ endif()
 
 # link all required libraries
 target_link_libraries(SpaceCheckers PRIVATE sfml-graphics sfml-window sfml-system ImGui-SFML
-                        ixwebsocket nlohmann_json spdlog::spdlog)
+                        ixwebsocket spdlog::spdlog FlatBuffers::FlatBuffers)
 
 # include SFML headers
-include_directories(${SFML_HOME}/include) 
+include_directories(${SFML_HOME}/include)   
 
 # show warnings (depending on C++ compiler)
 if(MSVC)
   target_compile_options(SpaceCheckers PRIVATE /W4)
-else()
+else() 
   target_compile_options(SpaceCheckers PRIVATE -Wall)
 endif()
 

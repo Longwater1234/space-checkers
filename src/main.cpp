@@ -8,7 +8,6 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Window/Mouse.hpp>
 #include <cassert>
-#include <set>
 #include <vector>
 
 #include "imgui-SFML.h"
@@ -102,7 +101,7 @@ int main()
     txtPanel.setPosition(sf::Vector2f{0, 8.5 * chk::SIZE_CELL});
     manager->updateMessage("Now playing! RED starts");
 
-    // initialize Websocket client (if ONLINE MODE)
+    // initialize Websocket client (only ONLINE PLAY)
     std::unique_ptr<chk::WsClient> wsClient = nullptr;
     if (userChoice == chk::UserChoice::ONLINE_PLAY)
     {
@@ -119,7 +118,7 @@ int main()
         window.clear();
         manager->drawScreen(p1, p2);
 
-        // draw IMGUI elements
+        // draw IMGUI elements (online only)
         if (wsClient != nullptr && wsClient->doneConnectWindow())
         {
             wsClient->tryConnect();
