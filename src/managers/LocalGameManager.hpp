@@ -20,15 +20,21 @@ class LocalGameManager : public chk::GameManager
     void setOnReadyPiecesCallback(const onReadyCreatePieces &callback) override;
 };
 
-
+/**
+ * Custom constructor
+ * @param windowPtr original window from main.cpp
+ */
 inline LocalGameManager::LocalGameManager(sf::RenderWindow *windowPtr)
 {
     this->window = windowPtr;
     this->sourceCell = std::nullopt;
-   // this->forcedMoves.clear();
     this->blockList.reserve(chk::NUM_COLS * chk::NUM_COLS);
 }
 
+/**
+ * Create all pieces for both players and add them to pieceList, using stdlib random generator
+ * @param pieceList destination of created pieces
+ */
 inline void LocalGameManager::createAllPieces(std::vector<chk::PiecePtr> &pieceList)
 {
     std::random_device randomDevice;
@@ -61,10 +67,15 @@ inline void LocalGameManager::createAllPieces(std::vector<chk::PiecePtr> &pieceL
     this->_onReadyCreatePieces(true);
 }
 
+/**
+ * This will be called in the main game loop, every 60 FPS, drawing elements on screen
+ * @param p1 Red Player
+ * @param p2 Black Player
+ */
 void LocalGameManager::drawScreen(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2)
 {
     auto mousePos = sf::Mouse::getPosition(*window);
-    // RENDER CHECKERBOARD
+    // DRAW CHECKERBOARD
     for (const auto &cell : this->getBlockList())
     {
         window->draw(*cell);
@@ -97,12 +108,17 @@ void LocalGameManager::drawScreen(const chk::PlayerPtr &p1, const chk::PlayerPtr
     }
 }
 
+/**
+ * This will be called in the main game loop, every 60 FPS, drawing elements on screen
+ * @param p1 Red Player
+ * @param p2 Black Player
+ * @param circularBuffer stores the currently selected piece
+ */
 void LocalGameManager::handleEvents(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2,
                                     chk::CircularBuffer<short> &circularBuffer)
 {
     for (auto event = sf::Event{}; window->pollEvent(event);)
     {
-        // ImGui::SFML::ProcessEvent(window, event);
         if (event.type == sf::Event::Closed)
         {
             window->close();
@@ -141,6 +157,9 @@ void LocalGameManager::handleEvents(const chk::PlayerPtr &p1, const chk::PlayerP
     }
 }
 
+/**
+ * Set the callback for handling event after creating all pieces
+*/
 void LocalGameManager::setOnReadyPiecesCallback(const onReadyCreatePieces &callback)
 {
     this->_onReadyCreatePieces = callback;

@@ -129,7 +129,7 @@ void GameManager::handleJumpPiece(const chk::PlayerPtr &hunter, const chk::Playe
     assert(!(hunter == prey) && "cannot be same player");
     if (this->gameOver || this->getPieceFromCell(targetCell->getIndex()) != -1)
     {
-        // STOP if there's already a Piece on target cell
+        // STOP if game over OR there's already a Piece on target cell
         return;
     }
 
@@ -149,7 +149,7 @@ void GameManager::handleJumpPiece(const chk::PlayerPtr &hunter, const chk::Playe
             this->sourceCell = std::nullopt;                        // reset source cell
             this->forcedMoves.clear();                              // reset forced jumps
 
-            // FIXME do not RUN this next line if just became KING!
+            // FIXME do not RUN this next line if "hunter" just became KING!
             this->identifyTargets(hunter); // Check for extra opportunities NOW!
             if (this->forcedMoves.empty())
             {
@@ -187,7 +187,7 @@ void GameManager::setSourceCell(const int &src_cell)
 
 /**
  * Whether the current player is holding own hunting Piece, AND
- * is about to complete capturing opponent
+ * forcedMoves is not empty
  *
  *@return TRUE or FALSE
  */

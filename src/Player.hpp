@@ -80,7 +80,9 @@ inline void Player::losePiece(const short &targetId)
 inline void Player::showForcedPieces(const std::set<short> &hunterPieces) const
 {
     if (hunterPieces.empty())
+    {
         return;
+    }
     for (const auto &id : hunterPieces)
     {
         this->basket.at(id)->markImportant();

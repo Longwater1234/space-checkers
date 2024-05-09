@@ -30,7 +30,6 @@ inline OnlineGameManager::OnlineGameManager(sf::RenderWindow *windowPtr)
 {
     this->window = windowPtr;
     this->sourceCell = std::nullopt;
-   // this->forcedMoves.clear();
     this->blockList.reserve(chk::NUM_COLS * chk::NUM_COLS);
 }
 
@@ -83,8 +82,8 @@ inline void OnlineGameManager::handleEvents(const chk::PlayerPtr &p1, const chk:
                     {
                         this->handleCellTap(hunter, prey, circularBuffer, cell);
                     }
+                     // END inner loop
                     break;
-                    // END inner loop
                 }
             }
         }
