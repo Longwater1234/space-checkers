@@ -91,7 +91,9 @@ void GameManager::handleMovePiece(const chk::PlayerPtr &player, const chk::Playe
                                   const short &currentPieceId)
 {
     if (this->gameOver)
+    {
         return;
+    }
     // VERIFY if move is successful
     const bool success = player->movePiece(currentPieceId, destCell->getPos());
     if (!success)
@@ -108,7 +110,7 @@ void GameManager::handleMovePiece(const chk::PlayerPtr &player, const chk::Playe
     }
     if (this->_onMoveSuccess != nullptr)
     {
-        // notify server
+        // notify move listener
         _onMoveSuccess(currentPieceId, destCell->getIndex());
     }
     this->playerRedTurn = !this->playerRedTurn; // toggle player turns
