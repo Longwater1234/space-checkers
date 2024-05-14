@@ -2,11 +2,13 @@
 #include "CircularBuffer.hpp"
 #include "GameManager.hpp"
 #include "Player.hpp"
+#include "payloads/ServerTypes.hpp"
 #include <atomic>
 #include <iostream>
 #include <ixwebsocket/IXNetSystem.h>
 #include <ixwebsocket/IXWebSocket.h>
 #include <mutex>
+#include <simdjson.h>
 #include <spdlog/spdlog.h>
 #include <string>
 
@@ -16,6 +18,7 @@
 
 namespace chk
 {
+using namespace simdjson;
 class WsClient
 {
   public:
@@ -38,6 +41,7 @@ class WsClient
     chk::Player *player2;
     void showErrorPopup() const;
     void showChatWindow(ix::WebSocket *webSocket);
+    void listenServerLoop(ix::WebSocket *webSocket);
     void showHint(const char *tip) const;
 };
 
@@ -120,7 +124,7 @@ inline void WsClient::tryConnect()
         if (msg->type == ix::WebSocketMessageType::Message)
         {
             std::scoped_lock<std::mutex> lg{this->mut};
-            this->msgBuffer.addItem("Server: " + msg->str);
+            this->msgBuffer.addItem(msg->str);
         }
         else if (msg->type == ix::WebSocketMessageType::Open)
         {
@@ -163,7 +167,7 @@ inline void WsClient::tryConnect()
         webSocket.send(pkg);
     });
 
-    this->showChatWindow(&webSocket);
+    // this->showChatWindow(&webSocket);
 }
 
 /**
@@ -217,6 +221,34 @@ inline void WsClient::showChatWindow(ix::WebSocket *webSocket)
         // IF THIS chat WINDOW IS CLOSED, SHUTDOWN socket
         webSocket->stop();
         this->isDead = true;
+    }
+}
+
+/**
+ * Exchange messages with the server and update the game accordingly. if any error happen, close connection
+ * @param webSocket Connected websocket connection
+ */
+inline void WsClient::listenServerLoop(ix::WebSocket *webSocket)
+{
+    static simdjson::dom::parser parser;
+    while (!this->isDead)
+    {
+        try
+        {
+            const auto welcome = std::make_unique<chk::payload::Welcome>();
+            simdjson::dom::element doc = parser.parse(this->msgBuffer.getTop());
+            welcome->messageType = doc.at("messageType").get_int64();
+            welcome->myTeam = doc.at("myTeam").get_int64();
+            welcome->piecesRed = doc.at("piecesRed");
+            welcome->messageType = doc.at("messageType");
+        }
+        catch (const simdjson::simdjson_error &ex)
+        {
+            this->errorMsg = "json error: " + std::string(ex.what());
+            this->isDead = true;
+            break;
+        }
+        // listen for updates
     }
 }
 

@@ -20,7 +20,7 @@ set(SFML_DIR ${SFML_HOME}/lib/cmake/SFML)
 find_package(SFML 2.6 REQUIRED COMPONENTS "graphics" "window" "system")
 find_package(OpenGL REQUIRED)
 
-# download extra libs
+# download extra libs 
 add_subdirectory(dependencies)
 
 if(WIN32)
@@ -36,7 +36,7 @@ endif()
 
 # link all required libraries
 target_link_libraries(SpaceCheckers PRIVATE sfml-graphics sfml-window sfml-system ImGui-SFML
-                        ixwebsocket spdlog::spdlog FlatBuffers::FlatBuffers)
+                        ixwebsocket spdlog::spdlog simdjson::simdjson)
 
 # include SFML headers
 include_directories(${SFML_HOME}/include)   
@@ -51,7 +51,7 @@ endif()
 # COPY resources folder to destination
 if(NOT APPLE)
   add_custom_command(
-    TARGET SpaceCheckers
+    TARGET SpaceCheckers 
     POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/resources
             $<TARGET_FILE_DIR:SpaceCheckers>/resources)

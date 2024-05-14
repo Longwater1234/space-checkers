@@ -5,8 +5,7 @@ include(zlib.cmake)
 include(mbedtls.cmake)
 include(ixwebsocket.cmake)
 include(spdlog.cmake)
-# include(nlohmann.cmake)
-include(flatbuffers.cmake) 
+include(simdjson.cmake)
 
 # GET ImGui 1.90.4
 CPMAddPackage(

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Piece.hpp"
+#include "PlayerType.hpp"
 #include <iostream>
 #include <set>
 #include <string>
@@ -8,13 +9,6 @@
 
 namespace chk
 {
-enum class PlayerType
-{
-    // RED
-    PLAYER_1 = 48834,
-    // BLACK
-    PLAYER_2 = 48835
-};
 
 // alias for unique pointer of player's Piece
 using PiecePtr = std::unique_ptr<chk::Piece>;

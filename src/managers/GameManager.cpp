@@ -49,7 +49,6 @@ const std::vector<chk::Block> &GameManager::getBlockList() const
 void GameManager::drawCheckerboard(const sf::Font &font)
 {
     int counter = 32;
-    std::cout << flatbuffers::flatbuffers_version_string() << std::endl;
     for (uint16_t row = 0; row < NUM_ROWS; row++)
     {
         for (uint16_t col = 0; col < NUM_COLS; col++)
@@ -384,7 +383,6 @@ void GameManager::identifyTargets(const PlayerPtr &hunter)
     for (const auto &cell_ptr : this->blockList)
     {
         const short pieceId = this->getPieceFromCell(cell_ptr->getIndex());
-
         if (gameMap.find(cell_ptr->getIndex()) == gameMap.end() || !hunter->hasThisPiece(pieceId))
         {
             // this CELL is not usable, OR piece not OWNED by hunter
