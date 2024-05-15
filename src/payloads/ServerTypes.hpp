@@ -10,8 +10,8 @@ namespace chk::payload
 struct Welcome
 {
     /* data */
-    int64_t messageType;
-    int64_t myTeam;
+    MessageType messageType;
+    chk::PlayerType myTeam;
     std::vector<int16_t> piecesRed;
     std::vector<int16_t> piecesBlack;
 };

@@ -18,7 +18,7 @@
 
 namespace chk
 {
-using namespace simdjson;
+
 class WsClient
 {
   public:
@@ -35,13 +35,13 @@ class WsClient
     std::atomic_bool isDead{false};                 // if connection closed
     chk::CircularBuffer<std::string> msgBuffer{20}; // keep only recent 20 messages
     std::string errorMsg{};                         // for any websocket errors
+    bool w_open = true;                             // main connection window
     std::mutex mut;
-    bool w_open = true;
     chk::Player *player1;
     chk::Player *player2;
     void showErrorPopup() const;
     void showChatWindow(ix::WebSocket *webSocket);
-    void listenServerLoop(ix::WebSocket *webSocket);
+    void runServerLoop(ix::WebSocket *webSocket);
     void showHint(const char *tip) const;
 };
 
@@ -114,7 +114,7 @@ inline void WsClient::tryConnect()
 #endif // _WIN32
     webSocket.setTLSOptions(tlsOptions);
 
-    webSocket.setUrl(final_address);
+    webSocket.setUrl(this->final_address);
 
     // set inital connection timeout
     webSocket.setHandshakeTimeout(10);
@@ -129,7 +129,7 @@ inline void WsClient::tryConnect()
         else if (msg->type == ix::WebSocketMessageType::Open)
         {
             std::scoped_lock lg{this->mut};
-            this->msgBuffer.addItem("Connection established");
+            spdlog::info("Connection established");
             this->isReady = true;
         }
         else if (msg->type == ix::WebSocketMessageType::Error)
@@ -150,7 +150,7 @@ inline void WsClient::tryConnect()
     // ping server every 50 seconds
     webSocket.setPingInterval(50);
 
-    // Handle connection error/timeout
+    // Handle any connection error/timeout
     if (webSocket.getReadyState() != ix::ReadyState::Open && this->isDead)
     {
         ImGui::OpenPopup("Error", ImGuiPopupFlags_NoOpenOverExistingPopup);
@@ -160,13 +160,17 @@ inline void WsClient::tryConnect()
         return;
     }
 
-    // LISTEN for UI game updates from manager, send to server
+    // LISTEN for UI updates from GameManager, forward to server
     this->manager->setOnMoveSuccessCallback([this](const short &pieceId, const int &targetCell) {
-        std::string pkg = "I moved " + std::to_string(pieceId).append(" to cell index ") + std::to_string(targetCell);
+        //TODO: SERIALIZE TO JSON, and send it here
+        std::string pkg = fmt::format("I moved {} to cell index {}", pieceId, targetCell);
+        // std::string pkg = std::sprintf("I moved " + std::to_string(pieceId).append(" to cell index ") +
+        // std::to_string(targetCell);
         spdlog::info(pkg);
         webSocket.send(pkg);
     });
 
+    this->runServerLoop(&webSocket);
     // this->showChatWindow(&webSocket);
 }
 
@@ -177,7 +181,7 @@ inline void WsClient::tryConnect()
 inline void WsClient::showChatWindow(ix::WebSocket *webSocket)
 {
     static bool chatWindow = true;
-    ImGui::SetNextWindowSize(ImVec2(sf::Vector2f{400, 400}));
+    ImGui::SetNextWindowSize(ImVec2(sf::Vector2f{400.0, 400.0}));
     if (chatWindow)
     {
         ImGui::Begin("Echo Chat", &chatWindow, ImGuiWindowFlags_NoResize);
@@ -226,29 +230,66 @@ inline void WsClient::showChatWindow(ix::WebSocket *webSocket)
 
 /**
  * Exchange messages with the server and update the game accordingly. if any error happen, close connection
- * @param webSocket Connected websocket connection
+ * @param webSocket the WS connection
  */
-inline void WsClient::listenServerLoop(ix::WebSocket *webSocket)
+inline void WsClient::runServerLoop(ix::WebSocket *webSocket)
 {
-    static simdjson::dom::parser parser;
-    while (!this->isDead)
+    if (this->isDead)
     {
-        try
+        return;
+    }
+    ImGui::StyleColorsLight();
+    ImGui::SetNextWindowSize(ImVec2(sf::Vector2f{500.0, 200.0}), ImGuiCond_FirstUseEver);
+    ImGui::SetNextWindowPos(ImVec2(sf::Vector2f{10.0, 150.0}));
+    if (!this->isReady)
+    {
+        if (ImGui::Begin("Server Dial", nullptr, ImGuiWindowFlags_NoResize))
         {
-            const auto welcome = std::make_unique<chk::payload::Welcome>();
-            simdjson::dom::element doc = parser.parse(this->msgBuffer.getTop());
-            welcome->messageType = doc.at("messageType").get_int64();
-            welcome->myTeam = doc.at("myTeam").get_int64();
-            welcome->piecesRed = doc.at("piecesRed");
-            welcome->messageType = doc.at("messageType");
+            /* code */
+            ImGui::TextWrapped("Connecting to %s", this->final_address.c_str());
+            ImGui::End();
+            return;
         }
-        catch (const simdjson::simdjson_error &ex)
-        {
-            this->errorMsg = "json error: " + std::string(ex.what());
-            this->isDead = true;
-            break;
-        }
-        // listen for updates
+    }
+    ImGui::StyleColorsDark();
+
+    static simdjson::ondemand::parser jparser;
+    try
+    {
+        // const static auto welcome = std::make_unique<chk::payload::Welcome>();
+
+        // for (const auto &msg : this->msgBuffer.getAll())
+        //{
+        // const std::string &msg = this->msgBuffer.getTop();
+        const std::string fucker = "(x{f:\"xx\",jalfajsflkasjlkfasjlfajslkf}";
+        // if (!msg.empty())
+        //{
+        static auto doc = jparser.iterate(fucker);
+        std::cout << doc.raw_json_token() << std::endl;
+        // std::cout << doc << std::endl;
+        // spdlog::info("RAW response: {} ", fucker);
+        // this->msgBuffer.clean();
+        // }
+        //}
+        // auto messagett = doc["messageType"].get_int64();
+        // std::cout << "messageType " << messagett << std::endl;
+        // spdlog::info("hello " + std::to_string(messagett.value()));
+
+        // welcome->myTeam = chk::PlayerType{doc["myTeam"]};
+        // for (auto val : doc["piecesRed"])
+        // {
+        //     welcome->piecesRed.emplace_back(static_cast<int16_t>(val));
+        //}
+
+        // static auto arrayRed = doc.at("piecesRed").get_array();
+        // welcome->piecesRed = std::vector(arrayRed.begin(), arrayRed.end());
+        // welcome->messageType = doc.at("messageType");
+    }
+    catch (const simdjson::simdjson_error &ex)
+    {
+        this->errorMsg = fmt::format("JSON ERROR: {}", ex.what());
+        this->isDead = true;
+        webSocket->stop();
     }
 }
 
@@ -261,7 +302,7 @@ inline void WsClient::showErrorPopup() const
     {
         return;
     }
-    // Always center this window when appearing
+    // Always center this next dialog
     ImVec2 center = ImGui::GetMainViewport()->GetCenter();
     static bool popen = true;
     ImGui::SetNextWindowPos(center, ImGuiCond_FirstUseEver, ImVec2(0.5f, 0.5f));
