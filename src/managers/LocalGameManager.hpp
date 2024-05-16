@@ -18,9 +18,6 @@ class LocalGameManager : public chk::GameManager
     void drawScreen(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2) override;
     void handleEvents(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2, chk::CircularBuffer<short> &buffer) override;
     void setOnReadyPiecesCallback(const onReadyCreatePieces &callback) override;
-
-    // Inherited via GameManager
-    void setMyPlayerType(const chk::PlayerType &ptype) override;
 };
 
 /**
@@ -168,12 +165,4 @@ void LocalGameManager::setOnReadyPiecesCallback(const onReadyCreatePieces &callb
     this->_onReadyCreatePieces = callback;
 }
 
-/**
- * Set my team (or piece color)
- * @param pieceType my piece type
- */
-void LocalGameManager::setMyPlayerType(const chk::PlayerType &ptype)
-{
-    // do nothing for local_play
-}
 } // namespace chk

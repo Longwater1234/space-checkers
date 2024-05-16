@@ -258,11 +258,12 @@ inline void WsClient::runServerLoop(ix::WebSocket *webSocket)
         {
             if (!msg.empty())
             {
-                static auto doc = jparser.parse(simdjson::padded_string(msg));
-                static auto rawMsgType = static_cast<uint16_t>(doc.at_key("messageType").get_uint64());
+                static simdjson::dom::object doc = jparser.parse(msg);
+                static uint16_t rawMsgType = static_cast<uint16_t>( doc.at_key("messageType").get_int64());
                 static chk::payload::MessageType msgType{rawMsgType};
                 if (msgType == chk::payload::MessageType::WELCOME)
                 {
+                    // CREATE A 'welcome' object
                     const static auto welcome = std::make_unique<chk::payload::Welcome>();
                     static auto rawTeam = static_cast<uint16_t>(doc.at_key("myTeam").get_uint64());
                     welcome->myTeam = chk::PlayerType{rawTeam};
