@@ -8,7 +8,7 @@ enum class PlayerType
     // RED
     PLAYER_1 = 48834,
     // BLACK
-    PLAYER_2 = 48835
+    PLAYER_2
 };
 
 }

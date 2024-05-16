@@ -15,7 +15,7 @@ class OnlineGameManager : public chk::GameManager
     explicit OnlineGameManager(sf::RenderWindow *windowPtr);
     OnlineGameManager() = delete;
     void createAllPieces(std::vector<chk::PiecePtr> &pieceList) override;
-    void setMyPlayerType(const chk::PlayerType &ptype);
+    void setMyPlayerType(const chk::PlayerType &ptype) override;
 
     // Inherited via GameManager
     void handleEvents(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2, chk::CircularBuffer<short> &buffer) override;

@@ -45,6 +45,7 @@ class GameManager
                               chk::CircularBuffer<short> &buffer) = 0;
     virtual void drawScreen(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2) = 0;
     virtual void setOnReadyPiecesCallback(const onReadyCreatePieces &callback) = 0;
+    virtual void setMyPlayerType(const chk::PlayerType &ptype) = 0;
     void drawCheckerboard(const sf::Font &font);
     void updateMessage(std::string_view msg);
     void matchCellsToPieces(const std::vector<chk::PiecePtr> &pieceList);

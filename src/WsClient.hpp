@@ -2,7 +2,7 @@
 #include "CircularBuffer.hpp"
 #include "GameManager.hpp"
 #include "Player.hpp"
-#include "payloads/ServerTypes.hpp"
+#include "payloads/ServerStructs.hpp"
 #include <atomic>
 #include <iostream>
 #include <ixwebsocket/IXNetSystem.h>
@@ -162,10 +162,8 @@ inline void WsClient::tryConnect()
 
     // LISTEN for UI updates from GameManager, forward to server
     this->manager->setOnMoveSuccessCallback([this](const short &pieceId, const int &targetCell) {
-        //TODO: SERIALIZE TO JSON, and send it here
+        // TODO: SERIALIZE TO JSON, and send it here
         std::string pkg = fmt::format("I moved {} to cell index {}", pieceId, targetCell);
-        // std::string pkg = std::sprintf("I moved " + std::to_string(pieceId).append(" to cell index ") +
-        // std::to_string(targetCell);
         spdlog::info(pkg);
         webSocket.send(pkg);
     });
@@ -253,24 +251,36 @@ inline void WsClient::runServerLoop(ix::WebSocket *webSocket)
     }
     ImGui::StyleColorsDark();
 
-    static simdjson::ondemand::parser jparser;
+    static simdjson::dom::parser jparser;
     try
     {
-        // const static auto welcome = std::make_unique<chk::payload::Welcome>();
+        for (const auto &msg : this->msgBuffer.getAll())
+        {
+            if (!msg.empty())
+            {
+                static auto doc = jparser.parse(simdjson::padded_string(msg));
+                static auto rawMsgType = static_cast<uint16_t>(doc.at_key("messageType").get_uint64());
+                static chk::payload::MessageType msgType{rawMsgType};
+                if (msgType == chk::payload::MessageType::WELCOME)
+                {
+                    const static auto welcome = std::make_unique<chk::payload::Welcome>();
+                    static auto rawTeam = static_cast<uint16_t>(doc.at_key("myTeam").get_uint64());
+                    welcome->myTeam = chk::PlayerType{rawTeam};
+                    for (const auto &val : doc.at_key("piecesRed").get_array())
+                    {
+                        welcome->piecesRed.emplace_back(static_cast<int16_t>(val.get_int64()));
+                    }
 
-        // for (const auto &msg : this->msgBuffer.getAll())
-        //{
-        // const std::string &msg = this->msgBuffer.getTop();
-        const std::string fucker = "(x{f:\"xx\",jalfajsflkasjlkfasjlfajslkf}";
-        // if (!msg.empty())
-        //{
-        static auto doc = jparser.iterate(fucker);
-        std::cout << doc.raw_json_token() << std::endl;
-        // std::cout << doc << std::endl;
-        // spdlog::info("RAW response: {} ", fucker);
-        // this->msgBuffer.clean();
-        // }
-        //}
+                    for (const auto &val : doc.at_key("piecesBlack").get_array())
+                    {
+                        welcome->piecesBlack.emplace_back(static_cast<int16_t>(val.get_int64()));
+                    }
+
+                    spdlog::info("size of red {}", welcome->piecesRed.size());
+                }
+                msgBuffer.clean();
+            }
+        }
         // auto messagett = doc["messageType"].get_int64();
         // std::cout << "messageType " << messagett << std::endl;
         // spdlog::info("hello " + std::to_string(messagett.value()));
@@ -287,6 +297,7 @@ inline void WsClient::runServerLoop(ix::WebSocket *webSocket)
     }
     catch (const simdjson::simdjson_error &ex)
     {
+        std::scoped_lock lg(this->mut);
         this->errorMsg = fmt::format("JSON ERROR: {}", ex.what());
         this->isDead = true;
         webSocket->stop();
