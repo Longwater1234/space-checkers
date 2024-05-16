@@ -61,32 +61,7 @@ int main()
     std::vector<chk::PiecePtr> pieceVector;
     pieceVector.reserve(chk::NUM_PIECES);
 
-    // CREATE TWO unique PLAYERS
-    auto p1 = std::make_unique<chk::Player>(chk::PlayerType::PLAYER_1);
-    auto p2 = std::make_unique<chk::Player>(chk::PlayerType::PLAYER_2);
-    assert(!(*p1 == *p2));
-
-    // wait for manager to create pieces
-    manager->setOnReadyPiecesCallback([&manager, &p1, &p2, &pieceVector](const bool &isReady) {
-        if (!isReady)
-        {
-            return;
-        }
-        manager->matchCellsToPieces(pieceVector);
-        // GIVE EACH PLAYER their own piece
-        for (auto &kete : pieceVector)
-        {
-            if (kete->getPieceType() == chk::PieceType::Red)
-            {
-                p1->receivePiece(kete);
-            }
-            else
-            {
-                p2->receivePiece(kete);
-            }
-        }
-    });
-
+    //create pieces with random ID and give each player their own
     manager->createAllPieces(pieceVector);
 
     /* we don't need this anymore */
@@ -105,18 +80,18 @@ int main()
     std::unique_ptr<chk::WsClient> wsClient = nullptr;
     if (userChoice == chk::UserChoice::ONLINE_PLAY)
     {
-        wsClient = std::make_unique<chk::WsClient>(manager.get(), p1.get(), p2.get());
+        wsClient = std::make_unique<chk::WsClient>(manager.get());
     }
 
     // THE MAIN GAME LOOP
     sf::Clock deltaClock;
     while (window.isOpen())
     {
-        manager->handleEvents(p1, p2, circularBuffer);
+        manager->handleEvents(circularBuffer);
         ImGui::SFML::Update(window, deltaClock.restart());
 
         window.clear();
-        manager->drawScreen(p1, p2);
+        manager->drawScreen();
 
         // draw IMGUI elements (online only)
         if (wsClient != nullptr && wsClient->doneConnectWindow())

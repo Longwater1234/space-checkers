@@ -41,11 +41,9 @@ class GameManager
     GameManager() = default;
     virtual ~GameManager() = default;
     virtual void createAllPieces(std::vector<chk::PiecePtr> &pieceList) = 0;
-    virtual void handleEvents(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2,
-                              chk::CircularBuffer<short> &buffer) = 0;
-    virtual void drawScreen(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2) = 0;
+    virtual void handleEvents(chk::CircularBuffer<short> &buffer) = 0;
+    virtual void drawScreen() = 0;
     virtual void setOnReadyPiecesCallback(const onReadyCreatePieces &callback) = 0;
-    virtual void setMyPlayerType(const chk::PlayerType &ptype) = 0;
     void drawCheckerboard(const sf::Font &font);
     void updateMessage(std::string_view msg);
     void matchCellsToPieces(const std::vector<chk::PiecePtr> &pieceList);
@@ -88,6 +86,10 @@ class GameManager
     std::optional<int> sourceCell;
     // all checkerboard cells
     std::vector<chk::Block> blockList{};
+    // first player (RED)
+    chk::PlayerPtr player1 = nullptr;
+    // second player (BLACK)
+    chk::PlayerPtr player2 = nullptr;
 
     [[nodiscard]] const bool &isPlayerRedTurn() const;
     [[nodiscard]] short getPieceFromCell(const int &cell_idx);

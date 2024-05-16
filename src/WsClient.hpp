@@ -14,7 +14,6 @@
 
 #include "imgui-SFML.h"
 #include "imgui.h"
-#include "misc/cpp/imgui_stdlib.h"
 
 namespace chk
 {
@@ -22,8 +21,7 @@ namespace chk
 class WsClient
 {
   public:
-    explicit WsClient(chk::GameManager *mgr, chk::Player *p1, chk::Player *p2)
-        : manager(mgr), player1(p1), player2(p2){};
+    explicit WsClient(chk::GameManager *mgr) : manager(mgr){};
     WsClient() = delete;
     bool doneConnectWindow();
     void tryConnect();
@@ -37,8 +35,6 @@ class WsClient
     std::string errorMsg{};                         // for any websocket errors
     bool w_open = true;                             // main connection window
     std::mutex mut;
-    chk::Player *player1;
-    chk::Player *player2;
     void showErrorPopup() const;
     void showChatWindow(ix::WebSocket *webSocket);
     void runServerLoop(ix::WebSocket *webSocket);
@@ -259,7 +255,7 @@ inline void WsClient::runServerLoop(ix::WebSocket *webSocket)
             if (!msg.empty())
             {
                 static simdjson::dom::object doc = jparser.parse(msg);
-                static uint16_t rawMsgType = static_cast<uint16_t>( doc.at_key("messageType").get_int64());
+                static uint16_t rawMsgType = static_cast<uint16_t>(doc.at_key("messageType").get_int64());
                 static chk::payload::MessageType msgType{rawMsgType};
                 if (msgType == chk::payload::MessageType::WELCOME)
                 {
