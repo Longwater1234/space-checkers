@@ -15,7 +15,7 @@ class LocalGameManager final : public chk::GameManager
     void createAllPieces(std::vector<chk::PiecePtr> &pieceList) override;
 
     // Inherited via GameManager
-    void drawScreen() override;
+    void drawBoard() override;
     void handleEvents(chk::CircularBuffer<short> &buffer) override;
 };
 
@@ -86,7 +86,7 @@ inline void LocalGameManager::createAllPieces(std::vector<chk::PiecePtr> &pieceL
 /**
  * This will be called in the main game loop, every 60 FPS, drawing elements on screen
  */
-void LocalGameManager::drawScreen()
+void LocalGameManager::drawBoard()
 {
     auto mousePos = sf::Mouse::getPosition(*window);
     // DRAW CHECKERBOARD

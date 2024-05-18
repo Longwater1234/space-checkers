@@ -36,7 +36,8 @@ class WsClient final
     chk::CircularBuffer<std::string> msgBuffer{20}; // keep only recent 20 messages
     std::string errorMsg{};                         // for any websocket errors
     bool w_open = true;                             // main connection window
-    onReadyCreatePieces _onReadyCreatePieces;       // callback after creating pieces for both players
+
+    onReadyCreatePieces _onReadyCreatePieces; // callback after creating pieces for both players
     std::mutex mut;
     void showErrorPopup() const;
     void showChatWindow(ix::WebSocket *webSocket);
@@ -67,8 +68,8 @@ inline void WsClient::showHint(const char *tip) const
 inline bool WsClient::doneConnectWindow()
 {
     static bool is_secure = false;
+    static bool btn_clicked = false; //'connect' button clicked
     static bool btn_disabled = false;
-    static bool btn_clicked = false;
     if (w_open)
     {
         ImGui::SetNextWindowSize(ImVec2(sf::Vector2f(300.0, 300.0)));
@@ -81,7 +82,7 @@ inline bool WsClient::doneConnectWindow()
         ImGui::BeginDisabled(btn_disabled);
         if (!std::string_view(inputUrl).empty() && ImGui::Button("Connect", ImVec2(100.0f, 0)))
         {
-            btn_disabled = true;
+            // btn_disabled = true;
             const char *suffix = is_secure ? "wss://" : "ws://";
             this->final_address = suffix + std::string(inputUrl);
             this->w_open = false;
@@ -153,7 +154,6 @@ inline void WsClient::tryConnect()
     if (webSocket.getReadyState() != ix::ReadyState::Open && this->isDead)
     {
         ImGui::OpenPopup("Error", ImGuiPopupFlags_NoOpenOverExistingPopup);
-        // TODO this should be guarded by "if" statement and global bool variable
         this->showErrorPopup();
         webSocket.stop();
         return;
@@ -246,9 +246,6 @@ inline void WsClient::runServerLoop(ix::WebSocket *webSocket)
     }
     if (!this->isReady)
     {
-        ImGui::StyleColorsLight();
-        ImGui::SetNextWindowSize(ImVec2(sf::Vector2f{500.0, 200.0}), ImGuiCond_FirstUseEver);
-        ImGui::SetNextWindowPos(ImVec2(sf::Vector2f{10.0, 150.0}));
         if (ImGui::Begin("Server Dial", nullptr, ImGuiWindowFlags_NoResize))
         {
             /* code */
@@ -256,7 +253,6 @@ inline void WsClient::runServerLoop(ix::WebSocket *webSocket)
             ImGui::End();
             return;
         }
-        ImGui::StyleColorsDark();
     }
 
     static simdjson::dom::parser jparser;
@@ -267,8 +263,8 @@ inline void WsClient::runServerLoop(ix::WebSocket *webSocket)
             if (!msg.empty())
             {
                 static simdjson::dom::object doc = jparser.parse(msg);
-                static uint16_t rawMsgType = static_cast<uint16_t>(doc.at_key("messageType").get_int64());
-                static chk::payload::MessageType msgType{rawMsgType};
+                uint16_t rawMsgType = static_cast<uint16_t>(doc.at_key("messageType").get_int64());
+                chk::payload::MessageType msgType{rawMsgType};
                 if (msgType == chk::payload::MessageType::WELCOME)
                 {
                     // CREATE A 'welcome' object
@@ -279,7 +275,6 @@ inline void WsClient::runServerLoop(ix::WebSocket *webSocket)
                     {
                         welcome.piecesRed.emplace_back(static_cast<int16_t>(val.get_int64()));
                     }
-
                     for (const auto &val : doc.at_key("piecesBlack").get_array())
                     {
                         welcome.piecesBlack.emplace_back(static_cast<int16_t>(val.get_int64()));
@@ -290,7 +285,6 @@ inline void WsClient::runServerLoop(ix::WebSocket *webSocket)
                         this->_onReadyCreatePieces(welcome);
                     }
                 }
-
                 msgBuffer.clean();
             }
         }

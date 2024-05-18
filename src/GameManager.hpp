@@ -42,7 +42,7 @@ class GameManager
     virtual ~GameManager() = default;
     virtual void createAllPieces(std::vector<chk::PiecePtr> &pieceList) = 0;
     virtual void handleEvents(chk::CircularBuffer<short> &buffer) = 0;
-    virtual void drawScreen() = 0;
+    virtual void drawBoard() = 0;
     void drawCheckerboard(const sf::Font &font);
     void updateMessage(std::string_view msg);
     void matchCellsToPieces(const std::vector<chk::PiecePtr> &pieceList);

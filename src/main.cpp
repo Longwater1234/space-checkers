@@ -83,7 +83,7 @@ int main()
         ImGui::SFML::Update(window, deltaClock.restart());
 
         window.clear();
-        manager->drawScreen();
+        manager->drawBoard();
 
         txtPanel.setString(manager->getCurrentMsg());
         window.draw(txtPanel);

@@ -20,7 +20,7 @@ class OnlineGameManager final : public chk::GameManager
 
     // Inherited via GameManager
     void handleEvents(chk::CircularBuffer<short> &buffer) override;
-    void drawScreen() override;
+    void drawBoard() override;
 
   private:
     chk::PlayerType _myTeam{};
@@ -40,7 +40,7 @@ inline OnlineGameManager::OnlineGameManager(sf::RenderWindow *windowPtr)
 }
 
 /**
- * Wait Server to generate random IDs and deliver the response, then give each player their own set of pieces
+ * Wait for server to generate random IDs and deliver the response, then give each player their own set of pieces
  * @param pieceList destination of created pieces
  */
 inline void chk::OnlineGameManager::createAllPieces(std::vector<chk::PiecePtr> &pieceList)
@@ -96,7 +96,7 @@ inline void chk::OnlineGameManager::createAllPieces(std::vector<chk::PiecePtr> &
 /**
  * This will be called in the main game loop, every 60 FPS, drawing elements on screen
  */
-inline void OnlineGameManager::drawScreen()
+inline void OnlineGameManager::drawBoard()
 {
     auto mousePos = sf::Mouse::getPosition(*window);
 
