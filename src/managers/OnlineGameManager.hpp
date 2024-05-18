@@ -1,5 +1,7 @@
 #pragma once
 #include "../GameManager.hpp"
+#include "../WsClient.hpp"
+#include "../payloads/ServerStructs.hpp"
 #include "imgui-SFML.h"
 #include "imgui.h"
 
@@ -9,7 +11,7 @@ namespace chk
  * This class is responsible for online gameplay
  * @since 2024-11-04
  */
-class OnlineGameManager : public chk::GameManager
+class OnlineGameManager final : public chk::GameManager
 {
   public:
     explicit OnlineGameManager(sf::RenderWindow *windowPtr);
@@ -19,10 +21,10 @@ class OnlineGameManager : public chk::GameManager
     // Inherited via GameManager
     void handleEvents(chk::CircularBuffer<short> &buffer) override;
     void drawScreen() override;
-    void setOnReadyPiecesCallback(const onReadyCreatePieces &callback) override;
 
   private:
-    chk::PlayerType myType{};
+    chk::PlayerType _myTeam{};
+    std::unique_ptr<chk::WsClient> wsClient = nullptr;
 };
 
 inline OnlineGameManager::OnlineGameManager(sf::RenderWindow *windowPtr)
@@ -30,6 +32,7 @@ inline OnlineGameManager::OnlineGameManager(sf::RenderWindow *windowPtr)
     this->window = windowPtr;
     this->sourceCell = std::nullopt;
     this->blockList.reserve(chk::NUM_COLS * chk::NUM_COLS);
+    this->wsClient = std::make_unique<chk::WsClient>();
     // CREATE TWO unique PLAYERS
     this->player1 = std::make_unique<chk::Player>(chk::PlayerType::PLAYER_1);
     this->player2 = std::make_unique<chk::Player>(chk::PlayerType::PLAYER_2);
@@ -37,20 +40,45 @@ inline OnlineGameManager::OnlineGameManager(sf::RenderWindow *windowPtr)
 }
 
 /**
- * Create all pieces for both players and add them to pieceList, using game Server number generator
+ * Wait Server to generate random IDs and deliver the response, then give each player their own set of pieces
  * @param pieceList destination of created pieces
  */
 inline void chk::OnlineGameManager::createAllPieces(std::vector<chk::PiecePtr> &pieceList)
 {
-    // TODO: complete me
-    // make request to backend, wait for response
-    spdlog::info(pieceList.size());
+    this->wsClient->setOnReadyPiecesCallback([this, &pieceList](chk::payload::Welcome &welcome) {
+        this->_myTeam = welcome.myTeam;
+        auto redItr = welcome.piecesRed.begin();
+        auto blackItr = welcome.piecesBlack.begin();
+        // create pieces objects, using id's from Server
+        for (uint16_t row = 0; row < chk::NUM_ROWS; row++)
+        {
+            for (uint16_t col = 0; col < chk::NUM_COLS; col++)
+            {
+                if ((row + col) % 2 != 0)
+                {
+                    sf::CircleShape circle(0.5 * chk::SIZE_CELL);
+                    const float x = static_cast<float>(col % NUM_COLS) * chk::SIZE_CELL;
+                    circle.setPosition(sf::Vector2f(x, row * chk::SIZE_CELL));
+                    if (row < 3 && blackItr != welcome.piecesBlack.end())
+                    {
+                        // Half Top cells, put BLACK piece
+                        auto kete = std::make_unique<chk::Piece>(circle, chk::PieceType::Black, *blackItr);
+                        pieceList.emplace_back(std::move_if_noexcept(kete));
+                        ++blackItr;
+                    }
+                    else if (row > 4 && redItr != welcome.piecesRed.end())
+                    {
+                        // Half Bottom cells, put RED piece
+                        auto kete = std::make_unique<chk::Piece>(circle, chk::PieceType::Red, *redItr);
+                        pieceList.emplace_back(std::move_if_noexcept(kete));
+                        ++redItr;
+                    }
+                }
+            }
+        }
 
-    if (false)
-    {
-        // TODO WAIT FOR BACKEND , use callback here for WsClient
-        this->matchCellsToPieces(pieceList);
         // GIVE EACH PLAYER their own piece
+        this->matchCellsToPieces(pieceList);
         for (auto &kete : pieceList)
         {
             if (kete->getPieceType() == chk::PieceType::Red)
@@ -62,7 +90,7 @@ inline void chk::OnlineGameManager::createAllPieces(std::vector<chk::PiecePtr> &
                 this->player2->receivePiece(kete);
             }
         }
-    }
+    });
 }
 
 /**
@@ -76,6 +104,10 @@ inline void OnlineGameManager::drawScreen()
     for (const auto &cell : this->getBlockList())
     {
         window->draw(*cell);
+    }
+    if (this->wsClient != nullptr && wsClient->doneConnectWindow())
+    {
+        this->wsClient->tryConnect();
     }
     // DRAW RED PIECES
     for (const auto &[id, red_piece] : this->player1->getOwnPieces())
@@ -150,11 +182,6 @@ inline void OnlineGameManager::handleEvents(chk::CircularBuffer<short> &circular
             }
         }
     }
-}
-
-inline void OnlineGameManager::setOnReadyPiecesCallback(const onReadyCreatePieces &callback)
-{
-    this->_onReadyCreatePieces = callback;
 }
 
 } // namespace chk

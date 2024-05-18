@@ -1,7 +1,6 @@
 #include "CircularBuffer.hpp"
 #include "MainMenu.hpp"
 #include "ResourcePath.hpp"
-#include "WsClient.hpp"
 #include "managers/LocalGameManager.hpp"
 #include "managers/OnlineGameManager.hpp"
 
@@ -61,7 +60,7 @@ int main()
     std::vector<chk::PiecePtr> pieceVector;
     pieceVector.reserve(chk::NUM_PIECES);
 
-    //create pieces with random ID and give each player their own
+    // create pieces with random ID and give each player their own
     manager->createAllPieces(pieceVector);
 
     /* we don't need this anymore */
@@ -76,13 +75,6 @@ int main()
     txtPanel.setPosition(sf::Vector2f{0, 8.5 * chk::SIZE_CELL});
     manager->updateMessage("Now playing! RED starts");
 
-    // initialize Websocket client (only ONLINE PLAY)
-    std::unique_ptr<chk::WsClient> wsClient = nullptr;
-    if (userChoice == chk::UserChoice::ONLINE_PLAY)
-    {
-        wsClient = std::make_unique<chk::WsClient>(manager.get());
-    }
-
     // THE MAIN GAME LOOP
     sf::Clock deltaClock;
     while (window.isOpen())
@@ -93,11 +85,6 @@ int main()
         window.clear();
         manager->drawScreen();
 
-        // draw IMGUI elements (online only)
-        if (wsClient != nullptr && wsClient->doneConnectWindow())
-        {
-            wsClient->tryConnect();
-        }
         txtPanel.setString(manager->getCurrentMsg());
         window.draw(txtPanel);
         ImGui::SFML::Render(window);

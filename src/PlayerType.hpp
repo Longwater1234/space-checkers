@@ -1,7 +1,8 @@
 // created 2024-05-14
 
 #pragma once
-namespace chk {
+namespace chk
+{
 
 enum class PlayerType
 {
@@ -11,4 +12,4 @@ enum class PlayerType
     PLAYER_2
 };
 
-}
+} // namespace chk

@@ -7,7 +7,7 @@ namespace chk
  * This class is responsible for offline play
  * @since 2024-11-04
  */
-class LocalGameManager : public chk::GameManager
+class LocalGameManager final : public chk::GameManager
 {
   public:
     explicit LocalGameManager(sf::RenderWindow *windowPtr);
@@ -17,7 +17,6 @@ class LocalGameManager : public chk::GameManager
     // Inherited via GameManager
     void drawScreen() override;
     void handleEvents(chk::CircularBuffer<short> &buffer) override;
-    void setOnReadyPiecesCallback(const onReadyCreatePieces &callback) override;
 };
 
 /**
@@ -167,14 +166,6 @@ void LocalGameManager::handleEvents(chk::CircularBuffer<short> &circularBuffer)
             }
         }
     }
-}
-
-/**
- * Set the callback for handling event after creating all pieces
- */
-void LocalGameManager::setOnReadyPiecesCallback(const onReadyCreatePieces &callback)
-{
-    this->_onReadyCreatePieces = callback;
 }
 
 } // namespace chk

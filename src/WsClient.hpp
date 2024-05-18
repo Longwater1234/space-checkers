@@ -1,7 +1,5 @@
 #pragma once
 #include "CircularBuffer.hpp"
-#include "GameManager.hpp"
-#include "Player.hpp"
 #include "payloads/ServerStructs.hpp"
 #include <atomic>
 #include <iostream>
@@ -18,22 +16,27 @@
 namespace chk
 {
 
-class WsClient
+using onReadyCreatePieces = std::function<void(chk::payload::Welcome &)>; // callback after creating pieces
+
+/**
+ * This will handle all websocket exchanges with Server
+ */
+class WsClient final
 {
   public:
-    explicit WsClient(chk::GameManager *mgr) : manager(mgr){};
-    WsClient() = delete;
+    WsClient() = default;
     bool doneConnectWindow();
     void tryConnect();
+    void setOnReadyPiecesCallback(const onReadyCreatePieces &callback);
 
   private:
     std::string final_address;                      // IP or URL of server
-    chk::GameManager *manager;                      // game manager (pointer)
     std::atomic_bool isReady{false};                // if connection ready open
     std::atomic_bool isDead{false};                 // if connection closed
     chk::CircularBuffer<std::string> msgBuffer{20}; // keep only recent 20 messages
     std::string errorMsg{};                         // for any websocket errors
     bool w_open = true;                             // main connection window
+    onReadyCreatePieces _onReadyCreatePieces;       // callback after creating pieces for both players
     std::mutex mut;
     void showErrorPopup() const;
     void showChatWindow(ix::WebSocket *webSocket);
@@ -156,16 +159,25 @@ inline void WsClient::tryConnect()
         return;
     }
 
-    // LISTEN for UI updates from GameManager, forward to server
-    this->manager->setOnMoveSuccessCallback([this](const short &pieceId, const int &targetCell) {
-        // TODO: SERIALIZE TO JSON, and send it here
-        std::string pkg = fmt::format("I moved {} to cell index {}", pieceId, targetCell);
-        spdlog::info(pkg);
-        webSocket.send(pkg);
-    });
+    // ----------->>>>> LISTEN for UI updates from GameManager, forward to server
+    // this->manager->setOnMoveSuccessCallback([this](const short &pieceId, const int &targetCell) {
+    //    // TODO: SERIALIZE TO JSON, and send it here
+    //    std::string pkg = fmt::format("I moved {} to cell index {}", pieceId, targetCell);
+    //    spdlog::info(pkg);
+    //    webSocket.send(pkg);
+    //});
 
     this->runServerLoop(&webSocket);
     // this->showChatWindow(&webSocket);
+}
+
+/**
+ * Set the callback to handle created pieces (from server)
+ * @param callback - the callback function
+ */
+inline void WsClient::setOnReadyPiecesCallback(const onReadyCreatePieces &callback)
+{
+    this->_onReadyCreatePieces = callback;
 }
 
 /**
@@ -232,11 +244,11 @@ inline void WsClient::runServerLoop(ix::WebSocket *webSocket)
     {
         return;
     }
-    ImGui::StyleColorsLight();
-    ImGui::SetNextWindowSize(ImVec2(sf::Vector2f{500.0, 200.0}), ImGuiCond_FirstUseEver);
-    ImGui::SetNextWindowPos(ImVec2(sf::Vector2f{10.0, 150.0}));
     if (!this->isReady)
     {
+        ImGui::StyleColorsLight();
+        ImGui::SetNextWindowSize(ImVec2(sf::Vector2f{500.0, 200.0}), ImGuiCond_FirstUseEver);
+        ImGui::SetNextWindowPos(ImVec2(sf::Vector2f{10.0, 150.0}));
         if (ImGui::Begin("Server Dial", nullptr, ImGuiWindowFlags_NoResize))
         {
             /* code */
@@ -244,8 +256,8 @@ inline void WsClient::runServerLoop(ix::WebSocket *webSocket)
             ImGui::End();
             return;
         }
+        ImGui::StyleColorsDark();
     }
-    ImGui::StyleColorsDark();
 
     static simdjson::dom::parser jparser;
     try
@@ -260,37 +272,28 @@ inline void WsClient::runServerLoop(ix::WebSocket *webSocket)
                 if (msgType == chk::payload::MessageType::WELCOME)
                 {
                     // CREATE A 'welcome' object
-                    const static auto welcome = std::make_unique<chk::payload::Welcome>();
-                    static auto rawTeam = static_cast<uint16_t>(doc.at_key("myTeam").get_uint64());
-                    welcome->myTeam = chk::PlayerType{rawTeam};
+                    chk::payload::Welcome welcome{};
+                    auto rawTeam = static_cast<uint16_t>(doc.at_key("myTeam").get_uint64());
+                    welcome.myTeam = chk::PlayerType{rawTeam};
                     for (const auto &val : doc.at_key("piecesRed").get_array())
                     {
-                        welcome->piecesRed.emplace_back(static_cast<int16_t>(val.get_int64()));
+                        welcome.piecesRed.emplace_back(static_cast<int16_t>(val.get_int64()));
                     }
 
                     for (const auto &val : doc.at_key("piecesBlack").get_array())
                     {
-                        welcome->piecesBlack.emplace_back(static_cast<int16_t>(val.get_int64()));
+                        welcome.piecesBlack.emplace_back(static_cast<int16_t>(val.get_int64()));
                     }
-
-                    spdlog::info("size of red {}", welcome->piecesRed.size());
+                    // invoke the callback
+                    if (this->_onReadyCreatePieces != nullptr)
+                    {
+                        this->_onReadyCreatePieces(welcome);
+                    }
                 }
+
                 msgBuffer.clean();
             }
         }
-        // auto messagett = doc["messageType"].get_int64();
-        // std::cout << "messageType " << messagett << std::endl;
-        // spdlog::info("hello " + std::to_string(messagett.value()));
-
-        // welcome->myTeam = chk::PlayerType{doc["myTeam"]};
-        // for (auto val : doc["piecesRed"])
-        // {
-        //     welcome->piecesRed.emplace_back(static_cast<int16_t>(val));
-        //}
-
-        // static auto arrayRed = doc.at("piecesRed").get_array();
-        // welcome->piecesRed = std::vector(arrayRed.begin(), arrayRed.end());
-        // welcome->messageType = doc.at("messageType");
     }
     catch (const simdjson::simdjson_error &ex)
     {

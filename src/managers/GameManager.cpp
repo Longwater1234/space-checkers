@@ -1,4 +1,5 @@
 //
+// Base implementation of Abstract Game Manager
 // Created by Davis on 2023/12/21.
 //
 #include "../GameManager.hpp"
