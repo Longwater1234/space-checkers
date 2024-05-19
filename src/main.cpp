@@ -21,7 +21,6 @@ int main()
 
     // SHOW MAIN MENU
     chk::MainMenu homeMenu(&window);
-    homeMenu.init();
     const auto userChoice = homeMenu.runLoop();
     if (userChoice == chk::UserChoice::ONLINE_PLAY)
     {

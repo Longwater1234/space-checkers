@@ -27,10 +27,11 @@ class MainMenu final
 {
   public:
     explicit MainMenu(sf::RenderWindow *windowPtr);
-    void init();
+   
     chk::UserChoice runLoop();
 
   private:
+       void init();
     sf::RenderWindow *window;
     sf::Texture mainImage;
     sf::RectangleShape mainFrame;
@@ -57,6 +58,7 @@ inline MainMenu::MainMenu(sf::RenderWindow *windowPtr)
         auto dims = appIcon.getSize();
         window->setIcon(dims.x, dims.y, appIcon.getPixelsPtr());
     }
+    this->init();
 }
 
 /**

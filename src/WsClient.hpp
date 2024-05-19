@@ -33,10 +33,10 @@ class WsClient final
     std::string final_address;                      // IP or URL of server
     std::atomic_bool isReady{false};                // if connection ready open
     std::atomic_bool isDead{false};                 // if connection closed
-    chk::CircularBuffer<std::string> msgBuffer{20}; // keep only recent 20 messages
+    chk::CircularBuffer<std::string> msgBuffer{1}; // keep only 1 recent message
     std::string errorMsg{};                         // for any websocket errors
     bool w_open = true;                             // main connection window
-
+  
     onReadyCreatePieces _onReadyCreatePieces; // callback after creating pieces for both players
     std::mutex mut;
     void showErrorPopup() const;
@@ -285,6 +285,7 @@ inline void WsClient::runServerLoop(ix::WebSocket *webSocket)
                         this->_onReadyCreatePieces(welcome);
                     }
                 }
+                //std::scoped_lock lg{this->mut};
                 msgBuffer.clean();
             }
         }

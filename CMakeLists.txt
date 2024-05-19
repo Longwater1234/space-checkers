@@ -12,7 +12,7 @@ if(NOT APPLE)
 endif() 
 
 # Absolute path where you installed SFML
-set(SFML_HOME "C:/SFML/SFML-2.6.1")    
+set(SFML_HOME "C:/SFML/SFML-2.6.1")
 
 file(GLOB_RECURSE GAME_SRC "src/*.cpp" "src/*.hpp")
 set(SFML_DIR ${SFML_HOME}/lib/cmake/SFML)
