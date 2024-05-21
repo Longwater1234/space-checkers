@@ -19,8 +19,8 @@ constexpr auto FONT_PATH = "notosans-regular.ttf";
 
 enum class UserChoice
 {
-    LOCAL_PLAY = 984883,  // playing offline
-    ONLINE_PLAY = 873832, // playing online
+    LOCAL_PLAY = 98483,  // playing offline
+    ONLINE_PLAY, // playing online
 };
 
 class MainMenu final

@@ -30,13 +30,13 @@ class WsClient final
     void setOnReadyPiecesCallback(const onReadyCreatePieces &callback);
 
   private:
-    std::string final_address;                      // IP or URL of server
-    std::atomic_bool isReady{false};                // if connection ready open
-    std::atomic_bool isDead{false};                 // if connection closed
+    std::string final_address;                     // IP or URL of server
+    std::atomic_bool isReady{false};               // if connection ready open
+    std::atomic_bool isDead{false};                // if connection closed
     chk::CircularBuffer<std::string> msgBuffer{1}; // keep only 1 recent message
-    std::string errorMsg{};                         // for any websocket errors
-    bool w_open = true;                             // main connection window
-  
+    std::string errorMsg{};                        // for any websocket errors
+    bool conn_window = true;                       // main connection window
+
     onReadyCreatePieces _onReadyCreatePieces; // callback after creating pieces for both players
     std::mutex mut;
     void showErrorPopup() const;
@@ -70,7 +70,7 @@ inline bool WsClient::doneConnectWindow()
     static bool is_secure = false;
     static bool btn_clicked = false; //'connect' button clicked
     static bool btn_disabled = false;
-    if (w_open)
+    if (conn_window)
     {
         ImGui::SetNextWindowSize(ImVec2(sf::Vector2f(300.0, 300.0)));
         static char inputUrl[256] = "";
@@ -85,7 +85,7 @@ inline bool WsClient::doneConnectWindow()
             // btn_disabled = true;
             const char *suffix = is_secure ? "wss://" : "ws://";
             this->final_address = suffix + std::string(inputUrl);
-            this->w_open = false;
+            this->conn_window = false;
             btn_clicked = true;
             memset(inputUrl, 0, sizeof(inputUrl));
         }
@@ -268,7 +268,7 @@ inline void WsClient::runServerLoop(ix::WebSocket *webSocket)
                 if (msgType == chk::payload::MessageType::WELCOME)
                 {
                     // CREATE A 'welcome' object
-                    chk::payload::Welcome welcome{};
+                    chk::payload::Welcome welcome;
                     auto rawTeam = static_cast<uint16_t>(doc.at_key("myTeam").get_uint64());
                     welcome.myTeam = chk::PlayerType{rawTeam};
                     for (const auto &val : doc.at_key("piecesRed").get_array())
@@ -285,7 +285,7 @@ inline void WsClient::runServerLoop(ix::WebSocket *webSocket)
                         this->_onReadyCreatePieces(welcome);
                     }
                 }
-                //std::scoped_lock lg{this->mut};
+                // std::scoped_lock lg{this->mut};
                 msgBuffer.clean();
             }
         }
