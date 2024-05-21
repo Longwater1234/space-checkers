@@ -24,26 +24,44 @@ using onReadyCreatePieces = std::function<void(chk::payload::Welcome &)>; // cal
 class WsClient final
 {
   public:
-    WsClient() = default;
-    bool doneConnectWindow();
-    void tryConnect();
+    WsClient();
+    void runMainLoop();
     void setOnReadyPiecesCallback(const onReadyCreatePieces &callback);
 
   private:
-    std::string final_address;                     // IP or URL of server
-    std::atomic_bool isReady{false};               // if connection ready open
-    std::atomic_bool isDead{false};                // if connection closed
-    chk::CircularBuffer<std::string> msgBuffer{1}; // keep only 1 recent message
-    std::string errorMsg{};                        // for any websocket errors
-    bool conn_window = true;                       // main connection window
+    std::string final_address;                      // IP or URL of server
+    std::atomic_bool isReady{false};                // if connection ready open
+    std::atomic_bool isDead{false};                 // if connection closed
+    std::atomic_bool isConnected{false};            // if connection open
+    chk::CircularBuffer<std::string> msgBuffer{20}; // keep only recent 20 messages
+    std::string errorMsg{};                         // for any websocket errors
+    bool conn_window = true;                        // main connection window
 
     onReadyCreatePieces _onReadyCreatePieces; // callback after creating pieces for both players
     std::mutex mut;
+    std::unique_ptr<ix::WebSocket> webSocketPtr = nullptr;
     void showErrorPopup() const;
-    void showChatWindow(ix::WebSocket *webSocket);
-    void runServerLoop(ix::WebSocket *webSocket);
+    void showChatWindow();
+    void runServerLoop();
     void showHint(const char *tip) const;
+    void tryConnect(std::string_view address);
+    bool showConnectWindow();
 };
+
+inline chk::WsClient::WsClient()
+{ // Initialize WS
+    ix::initNetSystem();
+    // Our websocket object
+    this->webSocketPtr = std::make_unique<ix::WebSocket>();
+    // set inital connection timeout
+    this->webSocketPtr->setHandshakeTimeout(10);
+    ix::SocketTLSOptions tlsOptions;
+#ifndef _WIN32
+    // Currently system CAs are not supported on non-Windows platforms with mbedtls
+    tlsOptions.caFile = "NONE";
+#endif // _WIN32
+    this->webSocketPtr->setTLSOptions(tlsOptions);
+}
 
 /**
  * Show help tooltip with given message
@@ -65,62 +83,71 @@ inline void WsClient::showHint(const char *tip) const
  * Show the imgui connection window, for server address
  * @return TRUE if CONNECT button is clicked, else FALSE
  */
-inline bool WsClient::doneConnectWindow()
+inline bool WsClient::showConnectWindow()
 {
     static bool is_secure = false;
     static bool btn_clicked = false; //'connect' button clicked
     static bool btn_disabled = false;
-    if (conn_window)
+    // if (this->conn_window)
+    // {
+    ImGui::SetNextWindowSize(ImVec2(sf::Vector2f(300.0, 300.0)));
+    static char inputUrl[256] = "";
+    ImGui::Begin("Connect Window", nullptr, ImGuiWindowFlags_NoResize);
+    ImGui::InputText("Server IP", inputUrl, IM_ARRAYSIZE(inputUrl), ImGuiInputTextFlags_CharsNoBlank);
+    ImGui::SameLine();
+    this->showHint("eg: 127.0.0.1:8080 OR myserver.example.org");
+    ImGui::Checkbox("Secure", &is_secure);
+    ImGui::BeginDisabled(btn_disabled);
+    if (!std::string_view(inputUrl).empty() && ImGui::Button("Connect", ImVec2(100.0f, 0)))
     {
-        ImGui::SetNextWindowSize(ImVec2(sf::Vector2f(300.0, 300.0)));
-        static char inputUrl[256] = "";
-        ImGui::Begin("Connect Window", nullptr, ImGuiWindowFlags_NoResize);
-        ImGui::InputText("Server IP", inputUrl, IM_ARRAYSIZE(inputUrl), ImGuiInputTextFlags_CharsNoBlank);
-        ImGui::SameLine();
-        this->showHint("eg: 127.0.0.1:8080 OR myserver.example.org");
-        ImGui::Checkbox("Secure", &is_secure);
-        ImGui::BeginDisabled(btn_disabled);
-        if (!std::string_view(inputUrl).empty() && ImGui::Button("Connect", ImVec2(100.0f, 0)))
-        {
-            // btn_disabled = true;
-            const char *suffix = is_secure ? "wss://" : "ws://";
-            this->final_address = suffix + std::string(inputUrl);
-            this->conn_window = false;
-            btn_clicked = true;
-            memset(inputUrl, 0, sizeof(inputUrl));
-        }
-        ImGui::EndDisabled();
-        ImGui::End();
+        // btn_disabled = true;
+        const char *suffix = is_secure ? "wss://" : "ws://";
+        this->final_address = suffix + std::string(inputUrl);
+        this->conn_window = false;
+        btn_clicked = true;
+        memset(inputUrl, 0, sizeof(inputUrl));
     }
+    ImGui::EndDisabled();
+    ImGui::End();
+    //  }
     return btn_clicked;
 }
 
 /**
- * Try to connect to Server
+ * Run main loop of showing connection window, tryConnect, and handle exchanges
  */
-inline void WsClient::tryConnect()
+inline void WsClient::runMainLoop()
 {
-    // Initialize WS
-    ix::initNetSystem();
 
-    // Our websocket object
-    static ix::WebSocket webSocket;
+    static bool okClicked = false;
+    if (this->showConnectWindow())
+    {
+        if (!this->isConnected)
+        {
+            this->tryConnect(this->final_address);
+        }
+        return;
+    }
 
-    // TLS options
-    static ix::SocketTLSOptions tlsOptions;
-#ifndef _WIN32
-    // Currently system CAs are not supported on non-Windows platforms with mbedtls
-    tlsOptions.caFile = "NONE";
-#endif // _WIN32
-    webSocket.setTLSOptions(tlsOptions);
+    if (this->isConnected)
+    {
+        this->showChatWindow();
+    }
 
-    webSocket.setUrl(this->final_address);
+    // return;
+    // }
+}
 
-    // set inital connection timeout
-    webSocket.setHandshakeTimeout(10);
+/**
+ * Try to connect to Server
+ * @param address server IP or URI
+ */
+inline void WsClient::tryConnect(const std::string_view address)
+{
+    this->webSocketPtr->setUrl(address.data());
 
-    // Setup a callback to be fired when an event (open, close, msg, error) is received
-    webSocket.setOnMessageCallback([this](const ix::WebSocketMessagePtr &msg) {
+    // Setup a callback to be fired when an Async event is received
+    this->webSocketPtr->setOnMessageCallback([this](const ix::WebSocketMessagePtr &msg) {
         if (msg->type == ix::WebSocketMessageType::Message)
         {
             std::scoped_lock<std::mutex> lg{this->mut};
@@ -130,7 +157,8 @@ inline void WsClient::tryConnect()
         {
             std::scoped_lock lg{this->mut};
             spdlog::info("Connection established");
-            this->isReady = true;
+            this->isConnected = true;
+            // this->is = true;
         }
         else if (msg->type == ix::WebSocketMessageType::Error)
         {
@@ -138,24 +166,25 @@ inline void WsClient::tryConnect()
             this->errorMsg = "Connection error: " + msg->errorInfo.reason;
             spdlog::error(this->errorMsg);
             this->isDead = true;
+            // this->isReady = false;
         }
     });
 
     // Start our b/ground thread and receive messages (if websocket not dead)
     if (!this->isDead)
     {
-        webSocket.start();
+        this->webSocketPtr->start();
     }
 
     // ping server every 50 seconds
-    webSocket.setPingInterval(50);
+    this->webSocketPtr->setPingInterval(50);
 
     // Handle any connection error/timeout
-    if (webSocket.getReadyState() != ix::ReadyState::Open && this->isDead)
+    if (this->webSocketPtr->getReadyState() != ix::ReadyState::Open && this->isDead)
     {
         ImGui::OpenPopup("Error", ImGuiPopupFlags_NoOpenOverExistingPopup);
         this->showErrorPopup();
-        webSocket.stop();
+        this->webSocketPtr->stop();
         return;
     }
 
@@ -167,7 +196,6 @@ inline void WsClient::tryConnect()
     //    webSocket.send(pkg);
     //});
 
-    this->runServerLoop(&webSocket);
     // this->showChatWindow(&webSocket);
 }
 
@@ -182,9 +210,8 @@ inline void WsClient::setOnReadyPiecesCallback(const onReadyCreatePieces &callba
 
 /**
  * Show the chat window and handle sending messsages
- * @param webSocket The websocket pointer
  */
-inline void WsClient::showChatWindow(ix::WebSocket *webSocket)
+inline void WsClient::showChatWindow()
 {
     static bool chatWindow = true;
     ImGui::SetNextWindowSize(ImVec2(sf::Vector2f{400.0, 400.0}));
@@ -219,7 +246,7 @@ inline void WsClient::showChatWindow(ix::WebSocket *webSocket)
             {
                 std::scoped_lock<std::mutex> lg{this->mut};
                 this->msgBuffer.addItem("You: " + std::string(msgpack));
-                webSocket->send(msgpack);
+                this->webSocketPtr->send(msgpack);
                 memset(msgpack, 0, sizeof(msgpack));
             }
         }
@@ -229,22 +256,21 @@ inline void WsClient::showChatWindow(ix::WebSocket *webSocket)
     else
     {
         // IF THIS chat WINDOW IS CLOSED, SHUTDOWN socket
-        webSocket->stop();
+        this->webSocketPtr->stop();
         this->isDead = true;
     }
 }
 
 /**
  * Exchange messages with the server and update the game accordingly. if any error happen, close connection
- * @param webSocket the WS connection
  */
-inline void WsClient::runServerLoop(ix::WebSocket *webSocket)
+inline void WsClient::runServerLoop()
 {
     if (this->isDead)
     {
         return;
     }
-    if (!this->isReady)
+    if (!this->isConnected)
     {
         if (ImGui::Begin("Server Dial", nullptr, ImGuiWindowFlags_NoResize))
         {
@@ -262,13 +288,13 @@ inline void WsClient::runServerLoop(ix::WebSocket *webSocket)
         {
             if (!msg.empty())
             {
-                static simdjson::dom::object doc = jparser.parse(msg);
+                static simdjson::dom::object doc = jparser.parse(simdjson::padded_string(msg));
                 uint16_t rawMsgType = static_cast<uint16_t>(doc.at_key("messageType").get_int64());
                 chk::payload::MessageType msgType{rawMsgType};
                 if (msgType == chk::payload::MessageType::WELCOME)
                 {
                     // CREATE A 'welcome' object
-                    chk::payload::Welcome welcome;
+                    chk::payload::Welcome welcome{};
                     auto rawTeam = static_cast<uint16_t>(doc.at_key("myTeam").get_uint64());
                     welcome.myTeam = chk::PlayerType{rawTeam};
                     for (const auto &val : doc.at_key("piecesRed").get_array())
@@ -285,7 +311,6 @@ inline void WsClient::runServerLoop(ix::WebSocket *webSocket)
                         this->_onReadyCreatePieces(welcome);
                     }
                 }
-                // std::scoped_lock lg{this->mut};
                 msgBuffer.clean();
             }
         }
@@ -295,7 +320,7 @@ inline void WsClient::runServerLoop(ix::WebSocket *webSocket)
         std::scoped_lock lg(this->mut);
         this->errorMsg = fmt::format("JSON ERROR: {}", ex.what());
         this->isDead = true;
-        webSocket->stop();
+        // webSocket->stop();
     }
 }
 

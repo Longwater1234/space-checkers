@@ -19,7 +19,7 @@ class OnlineGameManager final : public chk::GameManager
     void createAllPieces(std::vector<chk::PiecePtr> &pieceList) override;
 
     // Inherited via GameManager
-    void handleEvents(chk::CircularBuffer<short> &buffer) override;
+    void handleEvents(chk::CircularBuffer<short> &circularBuffer) override;
     void drawBoard() override;
 
   private:
@@ -105,9 +105,9 @@ inline void OnlineGameManager::drawBoard()
     {
         window->draw(*cell);
     }
-    if (this->wsClient != nullptr && wsClient->doneConnectWindow())
+    if (this->wsClient != nullptr)
     {
-        this->wsClient->tryConnect();
+        wsClient->runMainLoop();
     }
     // DRAW RED PIECES
     for (const auto &[id, red_piece] : this->player1->getOwnPieces())

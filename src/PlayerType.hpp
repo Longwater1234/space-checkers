@@ -1,10 +1,10 @@
 // created 2024-05-14
-
 #pragma once
+#include <cstdint>
 namespace chk
 {
 
-enum class PlayerType
+enum class PlayerType : uint16_t
 {
     // RED
     PLAYER_1 = 48834,

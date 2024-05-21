@@ -16,7 +16,7 @@ class LocalGameManager final : public chk::GameManager
 
     // Inherited via GameManager
     void drawBoard() override;
-    void handleEvents(chk::CircularBuffer<short> &buffer) override;
+    void handleEvents(chk::CircularBuffer<short> &circularBuffer) override;
 };
 
 /**
@@ -86,7 +86,7 @@ inline void LocalGameManager::createAllPieces(std::vector<chk::PiecePtr> &pieceL
 /**
  * This will be called in the main game loop, every 60 FPS, drawing elements on screen
  */
-void LocalGameManager::drawBoard()
+inline void LocalGameManager::drawBoard()
 {
     auto mousePos = sf::Mouse::getPosition(*window);
     // DRAW CHECKERBOARD
@@ -126,7 +126,7 @@ void LocalGameManager::drawBoard()
  * This will be handling all events
  * @param circularBuffer stores the currently selected piece
  */
-void LocalGameManager::handleEvents(chk::CircularBuffer<short> &circularBuffer)
+inline void LocalGameManager::handleEvents(chk::CircularBuffer<short> &circularBuffer)
 {
     for (auto event = sf::Event{}; window->pollEvent(event);)
     {
