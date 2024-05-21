@@ -19,19 +19,19 @@ constexpr auto FONT_PATH = "notosans-regular.ttf";
 
 enum class UserChoice
 {
-    LOCAL_PLAY = 98483,  // playing offline
-    ONLINE_PLAY, // playing online
+    LOCAL_PLAY = 98483, // playing offline
+    ONLINE_PLAY,        // playing online
 };
 
 class MainMenu final
 {
   public:
     explicit MainMenu(sf::RenderWindow *windowPtr);
-   
+
     chk::UserChoice runLoop();
 
   private:
-       void init();
+    void init();
     sf::RenderWindow *window;
     sf::Texture mainImage;
     sf::RectangleShape mainFrame;
