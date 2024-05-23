@@ -35,6 +35,7 @@ class WsClient final
     chk::CircularBuffer<std::string> msgBuffer{20}; // keep only recent 20 messages
     std::string errorMsg{};                         // for any websocket errors
     std::atomic_bool btn_clicked = false;           // if 'connect' button clicked
+    std::deque<std::string> serverMessages;         // messages from backend server
 
     onReadyCreatePieces _onReadyCreatePieces; // callback after creating pieces for both players
     std::mutex mut;
@@ -42,7 +43,7 @@ class WsClient final
     void showErrorPopup();
     void showChatWindow();
     void runServerLoop();
-    void showHint(const char *tip) const;
+    static void showHint(const char *tip);
     void tryConnect(std::string_view address);
     void showConnectWindow();
     void resetAllStates();
@@ -67,7 +68,7 @@ inline chk::WsClient::WsClient()
  * Show help tooltip with given message
  * @param tip the help message
  */
-inline void WsClient::showHint(const char *tip) const
+inline void WsClient::showHint(const char *tip)
 {
     ImGui::TextDisabled("(?)");
     if (ImGui::BeginItemTooltip())
@@ -88,11 +89,11 @@ inline void WsClient::showConnectWindow()
     static bool is_secure = false;
     ImGui::SetNextWindowSize(ImVec2(sf::Vector2f(300.0, 300.0)));
     static char inputUrl[256] = "";
-    if (ImGui::Begin("Connect Window", nullptr, ImGuiWindowFlags_NoResize))
+    if (ImGui::Begin("Connect Window", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse))
     {
         ImGui::InputText("Server IP", inputUrl, IM_ARRAYSIZE(inputUrl), ImGuiInputTextFlags_CharsNoBlank);
         ImGui::SameLine();
-        this->showHint("eg: 127.0.0.1:8080 OR myserver.example.org");
+        WsClient::showHint("eg: 127.0.0.1:8080 OR myserver.example.org");
         ImGui::Checkbox("Secure", &is_secure);
         if (!std::string_view(inputUrl).empty() && ImGui::Button("Connect", ImVec2(100.0f, 0)))
         {
@@ -269,7 +270,6 @@ inline void WsClient::showChatWindow()
 
 /**
  * Exchange messages with the server and update the game accordingly. if any error happen, close connection
- * @param webSocket the WS connection
  */
 inline void WsClient::runServerLoop()
 {
@@ -314,6 +314,7 @@ inline void WsClient::runServerLoop()
                         this->_onReadyCreatePieces(welcome);
                     }
                 }
+                std::scoped_lock lg(this->mut);
                 msgBuffer.clean();
             }
         }

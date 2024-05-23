@@ -105,6 +105,7 @@ inline void OnlineGameManager::drawBoard()
     {
         window->draw(*cell);
     }
+    // RENDER WsClient elements
     if (this->wsClient != nullptr)
     {
         wsClient->runMainLoop();
@@ -158,9 +159,9 @@ inline void OnlineGameManager::handleEvents(chk::CircularBuffer<short> &circular
             {
                 continue;
             }
+            // START inner loop:
             for (auto &cell : this->getBlockList())
             {
-                // inner loop
                 if (cell->containsPoint(clickedPos) && cell->getIndex() != -1)
                 {
                     const auto &hunter = this->isPlayerRedTurn() ? this->player1 : this->player2;

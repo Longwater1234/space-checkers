@@ -16,7 +16,7 @@ class LocalGameManager final : public chk::GameManager
 
     // Inherited via GameManager
     void drawBoard() override;
-    void handleEvents(chk::CircularBuffer<short> &circularBuffer) override;
+    void handleEvents(chk::CircularBuffer<short> &buffer) override;
 };
 
 /**
@@ -124,9 +124,9 @@ inline void LocalGameManager::drawBoard()
 
 /**
  * This will be handling all events
- * @param circularBuffer stores the currently selected piece
+ * @param buffer stores the currently selected piece
  */
-inline void LocalGameManager::handleEvents(chk::CircularBuffer<short> &circularBuffer)
+inline void LocalGameManager::handleEvents(chk::CircularBuffer<short> &buffer)
 {
     for (auto event = sf::Event{}; window->pollEvent(event);)
     {
@@ -154,11 +154,11 @@ inline void LocalGameManager::handleEvents(chk::CircularBuffer<short> &circularB
                     {
                         this->handleJumpPiece(hunter, prey, cell);
                         this->updateMatchStatus(hunter, prey);
-                        circularBuffer.clean();
+                        buffer.clean();
                     }
                     else
                     {
-                        this->handleCellTap(hunter, prey, circularBuffer, cell);
+                        this->handleCellTap(hunter, prey, buffer, cell);
                     }
                     break;
                     // END inner loop
