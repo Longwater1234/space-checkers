@@ -30,22 +30,22 @@ class WsClient final
 
   private:
     std::string final_address;                      // IP or URL of server
-    std::atomic_bool isReady{false};                // if connection ready open
     std::atomic_bool isDead{false};                 // if connection closed
-    std::atomic_bool isConnected{false};            // if connection open
+    std::atomic_bool isConnected{false};            // if done connected to server (else, show loading)
     chk::CircularBuffer<std::string> msgBuffer{20}; // keep only recent 20 messages
     std::string errorMsg{};                         // for any websocket errors
-    bool conn_window = true;                        // main connection window
+    std::atomic_bool btn_clicked = false;           // if 'connect' button clicked
 
     onReadyCreatePieces _onReadyCreatePieces; // callback after creating pieces for both players
     std::mutex mut;
     std::unique_ptr<ix::WebSocket> webSocketPtr = nullptr;
-    void showErrorPopup() const;
+    void showErrorPopup();
     void showChatWindow();
     void runServerLoop();
     void showHint(const char *tip) const;
     void tryConnect(std::string_view address);
-    bool showConnectWindow();
+    void showConnectWindow();
+    void resetAllStates();
 };
 
 inline chk::WsClient::WsClient()
@@ -83,68 +83,78 @@ inline void WsClient::showHint(const char *tip) const
  * Show the imgui connection window, for server address
  * @return TRUE if CONNECT button is clicked, else FALSE
  */
-inline bool WsClient::showConnectWindow()
+inline void WsClient::showConnectWindow()
 {
     static bool is_secure = false;
-    static bool btn_clicked = false; //'connect' button clicked
-    static bool btn_disabled = false;
-    // if (this->conn_window)
-    // {
     ImGui::SetNextWindowSize(ImVec2(sf::Vector2f(300.0, 300.0)));
     static char inputUrl[256] = "";
-    ImGui::Begin("Connect Window", nullptr, ImGuiWindowFlags_NoResize);
-    ImGui::InputText("Server IP", inputUrl, IM_ARRAYSIZE(inputUrl), ImGuiInputTextFlags_CharsNoBlank);
-    ImGui::SameLine();
-    this->showHint("eg: 127.0.0.1:8080 OR myserver.example.org");
-    ImGui::Checkbox("Secure", &is_secure);
-    ImGui::BeginDisabled(btn_disabled);
-    if (!std::string_view(inputUrl).empty() && ImGui::Button("Connect", ImVec2(100.0f, 0)))
+    if (ImGui::Begin("Connect Window", nullptr, ImGuiWindowFlags_NoResize))
     {
-        // btn_disabled = true;
-        const char *suffix = is_secure ? "wss://" : "ws://";
-        this->final_address = suffix + std::string(inputUrl);
-        this->conn_window = false;
-        btn_clicked = true;
-        memset(inputUrl, 0, sizeof(inputUrl));
+        ImGui::InputText("Server IP", inputUrl, IM_ARRAYSIZE(inputUrl), ImGuiInputTextFlags_CharsNoBlank);
+        ImGui::SameLine();
+        this->showHint("eg: 127.0.0.1:8080 OR myserver.example.org");
+        ImGui::Checkbox("Secure", &is_secure);
+        if (!std::string_view(inputUrl).empty() && ImGui::Button("Connect", ImVec2(100.0f, 0)))
+        {
+            const char *suffix = is_secure ? "wss://" : "ws://";
+            this->final_address = suffix + std::string(inputUrl);
+            this->btn_clicked = true;
+            memset(inputUrl, 0, sizeof(inputUrl));
+        }
+        ImGui::End();
     }
-    ImGui::EndDisabled();
-    ImGui::End();
-    //  }
-    return btn_clicked;
+}
+
+/**
+ * Reset all local states to FALSE or empty string
+ */
+inline void WsClient::resetAllStates()
+{
+    this->isConnected = false;
+    this->btn_clicked = false;
+    this->isDead = false;
+    this->errorMsg.clear();
 }
 
 /**
  * Run main loop of showing connection window, tryConnect, and handle exchanges
+ * TODO improve me !!!!
  */
 inline void WsClient::runMainLoop()
 {
-
-    static bool okClicked = false;
-    if (this->showConnectWindow())
-    {
-        if (!this->isConnected)
-        {
-            this->tryConnect(this->final_address);
+    // clang-format off
+    if (!isConnected) {
+        if (!btn_clicked) {
+           this->showConnectWindow();
+        } else {
+            this->tryConnect(final_address);
         }
-        return;
     }
-
-    if (this->isConnected)
-    {
+    // already connected
+    else {
         this->showChatWindow();
     }
-
-    // return;
-    // }
+    // connection failure 🙁
+    if (this->isDead) {
+       this->showErrorPopup();
+    }
+    // clang-format on
 }
 
 /**
  * Try to connect to Server
  * @param address server IP or URI
  */
-inline void WsClient::tryConnect(const std::string_view address)
+inline void WsClient::tryConnect(std::string_view address)
 {
     this->webSocketPtr->setUrl(address.data());
+    if (!this->isConnected)
+    {
+        ImGui::SetNextWindowSize(ImVec2(sf::Vector2f{400.0, 100.0}));
+        ImGui::Begin("Loading", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+        ImGui::Text("Connecting to %s", this->final_address.c_str());
+        ImGui::End();
+    }
 
     // Setup a callback to be fired when an Async event is received
     this->webSocketPtr->setOnMessageCallback([this](const ix::WebSocketMessagePtr &msg) {
@@ -155,10 +165,8 @@ inline void WsClient::tryConnect(const std::string_view address)
         }
         else if (msg->type == ix::WebSocketMessageType::Open)
         {
-            std::scoped_lock lg{this->mut};
             spdlog::info("Connection established");
             this->isConnected = true;
-            // this->is = true;
         }
         else if (msg->type == ix::WebSocketMessageType::Error)
         {
@@ -166,7 +174,6 @@ inline void WsClient::tryConnect(const std::string_view address)
             this->errorMsg = "Connection error: " + msg->errorInfo.reason;
             spdlog::error(this->errorMsg);
             this->isDead = true;
-            // this->isReady = false;
         }
     });
 
@@ -182,8 +189,6 @@ inline void WsClient::tryConnect(const std::string_view address)
     // Handle any connection error/timeout
     if (this->webSocketPtr->getReadyState() != ix::ReadyState::Open && this->isDead)
     {
-        ImGui::OpenPopup("Error", ImGuiPopupFlags_NoOpenOverExistingPopup);
-        this->showErrorPopup();
         this->webSocketPtr->stop();
         return;
     }
@@ -196,7 +201,7 @@ inline void WsClient::tryConnect(const std::string_view address)
     //    webSocket.send(pkg);
     //});
 
-    // this->showChatWindow(&webSocket);
+    //  this->showChatWindow();
 }
 
 /**
@@ -210,6 +215,7 @@ inline void WsClient::setOnReadyPiecesCallback(const onReadyCreatePieces &callba
 
 /**
  * Show the chat window and handle sending messsages
+ * @param webSocket The websocket pointer
  */
 inline void WsClient::showChatWindow()
 {
@@ -218,7 +224,7 @@ inline void WsClient::showChatWindow()
     if (chatWindow)
     {
         ImGui::Begin("Echo Chat", &chatWindow, ImGuiWindowFlags_NoResize);
-        if (!this->isReady)
+        if (!this->isConnected)
         {
             /* code */
             ImGui::Text("Connecting to %s", this->final_address.c_str());
@@ -263,16 +269,13 @@ inline void WsClient::showChatWindow()
 
 /**
  * Exchange messages with the server and update the game accordingly. if any error happen, close connection
+ * @param webSocket the WS connection
  */
 inline void WsClient::runServerLoop()
 {
-    if (this->isDead)
-    {
-        return;
-    }
     if (!this->isConnected)
     {
-        if (ImGui::Begin("Server Dial", nullptr, ImGuiWindowFlags_NoResize))
+        if (ImGui::Begin("Loading", nullptr, ImGuiWindowFlags_NoResize))
         {
             /* code */
             ImGui::TextWrapped("Connecting to %s", this->final_address.c_str());
@@ -288,7 +291,7 @@ inline void WsClient::runServerLoop()
         {
             if (!msg.empty())
             {
-                static simdjson::dom::object doc = jparser.parse(simdjson::padded_string(msg));
+                static simdjson::dom::object doc = jparser.parse(msg);
                 uint16_t rawMsgType = static_cast<uint16_t>(doc.at_key("messageType").get_int64());
                 chk::payload::MessageType msgType{rawMsgType};
                 if (msgType == chk::payload::MessageType::WELCOME)
@@ -320,14 +323,13 @@ inline void WsClient::runServerLoop()
         std::scoped_lock lg(this->mut);
         this->errorMsg = fmt::format("JSON ERROR: {}", ex.what());
         this->isDead = true;
-        // webSocket->stop();
     }
 }
 
 /**
  * Show error message from websockets as a popup window
  */
-inline void WsClient::showErrorPopup() const
+inline void WsClient::showErrorPopup()
 {
     if (this->errorMsg.empty())
     {
@@ -335,22 +337,19 @@ inline void WsClient::showErrorPopup() const
     }
     // Always center this next dialog
     ImVec2 center = ImGui::GetMainViewport()->GetCenter();
-    static bool popen = true;
-    ImGui::SetNextWindowPos(center, ImGuiCond_FirstUseEver, ImVec2(0.5f, 0.5f));
-    if (popen)
+    ImGui::SetNextWindowPos(center, ImGuiCond_FirstUseEver, ImVec2(0.5, 0.5));
+    ImGui::OpenPopup("Error", ImGuiPopupFlags_NoOpenOverExistingPopup);
+    if (ImGui::BeginPopupModal("Error", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {
-        if (ImGui::BeginPopupModal("Error", &popen, ImGuiWindowFlags_AlwaysAutoResize))
+        ImGui::Text(u8"%s", this->errorMsg.c_str());
+        ImGui::Separator();
+        if (ImGui::Button("OK", ImVec2(120, 0)))
         {
-            ImGui::Text(u8"%s", this->errorMsg.c_str());
-            ImGui::Separator();
-            if (ImGui::Button("OK", ImVec2(120, 0)))
-            {
-                popen = false;
-                ImGui::CloseCurrentPopup();
-            }
-            ImGui::EndPopup();
-        };
-    }
+            ImGui::CloseCurrentPopup();
+            this->resetAllStates();
+        }
+        ImGui::EndPopup();
+    };
 }
 
 } // namespace chk
