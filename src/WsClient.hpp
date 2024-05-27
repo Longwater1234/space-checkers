@@ -222,7 +222,7 @@ inline bool WsClient::replyToServer(const simdjson::dom::object &payload)
 {
     if (this->isDead)
     {
-        return;
+        return false;
     }
     const auto &result = this->webSocketPtr->send(simdjson::to_string(payload));
     return result.success;
