@@ -1,14 +1,12 @@
 #include "CircularBuffer.hpp"
 #include "MainMenu.hpp"
 #include "ResourcePath.hpp"
-#include "WsClient.hpp"
 #include "managers/LocalGameManager.hpp"
 #include "managers/OnlineGameManager.hpp"
 
 #include <SFML/Graphics.hpp>
 #include <SFML/Window/Mouse.hpp>
 #include <cassert>
-#include <set>
 #include <vector>
 
 #include "imgui-SFML.h"
@@ -23,13 +21,10 @@ int main()
 
     // SHOW MAIN MENU
     chk::MainMenu homeMenu(&window);
-    homeMenu.init();
-    const auto userChoice = homeMenu.runLoop();
+    const auto userChoice = homeMenu.runMainLoop();
     if (userChoice == chk::UserChoice::ONLINE_PLAY)
     {
         manager = std::make_unique<chk::OnlineGameManager>(&window);
-
-        // manager->setWsClient(wsClient.get());
     }
     else
     {
@@ -42,7 +37,6 @@ int main()
     ImFont *imfont = io.Fonts->AddFontFromFileTTF(chk::getResourcePath(chk::FONT_PATH).c_str(), 16);
     IM_ASSERT(imfont != nullptr);
     ImGui::SFML::UpdateFontTexture();
-    // ImGui::StyleColorsLight(); //LIGHT THEME
 
     sf::Image appIcon;
     if (appIcon.loadFromFile(chk::getResourcePath(chk::ICON_PATH)))
@@ -65,32 +59,7 @@ int main()
     std::vector<chk::PiecePtr> pieceVector;
     pieceVector.reserve(chk::NUM_PIECES);
 
-    // CREATE TWO unique PLAYERS
-    auto p1 = std::make_unique<chk::Player>(chk::PlayerType::PLAYER_1);
-    auto p2 = std::make_unique<chk::Player>(chk::PlayerType::PLAYER_2);
-    assert(!(*p1 == *p2));
-
-    // wait for manager to create pieces
-    manager->setOnReadyPiecesCallback([&manager, &p1, &p2, &pieceVector](const bool &isReady) {
-        if (!isReady)
-        {
-            return;
-        }
-        manager->matchCellsToPieces(pieceVector);
-        // GIVE EACH PLAYER their own piece
-        for (auto &kete : pieceVector)
-        {
-            if (kete->getPieceType() == chk::PieceType::Red)
-            {
-                p1->receivePiece(kete);
-            }
-            else
-            {
-                p2->receivePiece(kete);
-            }
-        }
-    });
-
+    // create pieces with random ID and give each player their own
     manager->createAllPieces(pieceVector);
 
     /* we don't need this anymore */
@@ -105,28 +74,16 @@ int main()
     txtPanel.setPosition(sf::Vector2f{0, 8.5 * chk::SIZE_CELL});
     manager->updateMessage("Now playing! RED starts");
 
-    // initialize Websocket client (if ONLINE MODE)
-    std::unique_ptr<chk::WsClient> wsClient = nullptr;
-    if (userChoice == chk::UserChoice::ONLINE_PLAY)
-    {
-        wsClient = std::make_unique<chk::WsClient>(manager.get(), p1.get(), p2.get());
-    }
-
     // THE MAIN GAME LOOP
     sf::Clock deltaClock;
     while (window.isOpen())
     {
-        manager->handleEvents(p1, p2, circularBuffer);
+        manager->handleEvents(circularBuffer);
         ImGui::SFML::Update(window, deltaClock.restart());
 
         window.clear();
-        manager->drawScreen(p1, p2);
+        manager->drawBoard();
 
-        // draw IMGUI elements
-        if (wsClient != nullptr && wsClient->doneConnectWindow())
-        {
-            wsClient->tryConnect();
-        }
         txtPanel.setString(manager->getCurrentMsg());
         window.draw(txtPanel);
         ImGui::SFML::Render(window);

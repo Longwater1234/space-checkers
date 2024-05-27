@@ -7,7 +7,7 @@ namespace chk
  * This class is responsible for offline play
  * @since 2024-11-04
  */
-class LocalGameManager : public chk::GameManager
+class LocalGameManager final : public chk::GameManager
 {
   public:
     explicit LocalGameManager(sf::RenderWindow *windowPtr);
@@ -15,11 +15,30 @@ class LocalGameManager : public chk::GameManager
     void createAllPieces(std::vector<chk::PiecePtr> &pieceList) override;
 
     // Inherited via GameManager
-    void drawScreen(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2) override;
-    void handleEvents(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2, chk::CircularBuffer<short> &buffer) override;
-    void setOnReadyPiecesCallback(const onReadyCreatePieces &callback) override;
+    void drawBoard() override;
+    void handleEvents(chk::CircularBuffer<short> &buffer) override;
 };
 
+/**
+ * Custom constructor
+ * @param windowPtr original window from main.cpp
+ */
+inline LocalGameManager::LocalGameManager(sf::RenderWindow *windowPtr)
+{
+    this->window = windowPtr;
+    this->sourceCell = std::nullopt;
+    this->blockList.reserve(chk::NUM_COLS * chk::NUM_COLS);
+
+    // CREATE TWO unique PLAYERS
+    this->player1 = std::make_unique<chk::Player>(chk::PlayerType::PLAYER_1);
+    this->player2 = std::make_unique<chk::Player>(chk::PlayerType::PLAYER_2);
+    assert(!(*player1 == *player2));
+}
+
+/**
+ * Create all pieces for both players and add them to pieceList, using stdlib random generator
+ * @param pieceList destination of created pieces
+ */
 inline void LocalGameManager::createAllPieces(std::vector<chk::PiecePtr> &pieceList)
 {
     std::random_device randomDevice;
@@ -49,27 +68,34 @@ inline void LocalGameManager::createAllPieces(std::vector<chk::PiecePtr> &pieceL
             }
         }
     }
-    this->_onReadyCreatePieces(true);
+    this->matchCellsToPieces(pieceList);
+    // GIVE EACH PLAYER their own piece
+    for (auto &kete : pieceList)
+    {
+        if (kete->getPieceType() == chk::PieceType::Red)
+        {
+            this->player1->receivePiece(kete);
+        }
+        else
+        {
+            this->player2->receivePiece(kete);
+        }
+    }
 }
 
-inline LocalGameManager::LocalGameManager(sf::RenderWindow *windowPtr)
-{
-    this->window = windowPtr;
-    this->sourceCell = -1;
-    this->forcedMoves.clear();
-    this->blockList.reserve(chk::NUM_COLS * chk::NUM_COLS);
-}
-
-void LocalGameManager::drawScreen(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2)
+/**
+ * This will be called in the main game loop, every 60 FPS, drawing elements on screen
+ */
+inline void LocalGameManager::drawBoard()
 {
     auto mousePos = sf::Mouse::getPosition(*window);
-    // RENDER CHECKERBOARD
+    // DRAW CHECKERBOARD
     for (const auto &cell : this->getBlockList())
     {
         window->draw(*cell);
     }
     // DRAW RED PIECES
-    for (const auto &[id, red_piece] : p1->getOwnPieces())
+    for (const auto &[id, red_piece] : this->player1->getOwnPieces())
     {
         if (this->isPlayerRedTurn() && red_piece->containsPoint(mousePos))
         {
@@ -82,7 +108,7 @@ void LocalGameManager::drawScreen(const chk::PlayerPtr &p1, const chk::PlayerPtr
         window->draw(*red_piece);
     }
     // DRAW BLACK PIECES
-    for (const auto &[id, black_piece] : p2->getOwnPieces())
+    for (const auto &[id, black_piece] : this->player2->getOwnPieces())
     {
         if (!this->isPlayerRedTurn() && black_piece->containsPoint(mousePos))
         {
@@ -96,12 +122,14 @@ void LocalGameManager::drawScreen(const chk::PlayerPtr &p1, const chk::PlayerPtr
     }
 }
 
-void LocalGameManager::handleEvents(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2,
-                                    chk::CircularBuffer<short> &circularBuffer)
+/**
+ * This will be handling all events
+ * @param buffer stores the currently selected piece
+ */
+inline void LocalGameManager::handleEvents(chk::CircularBuffer<short> &buffer)
 {
     for (auto event = sf::Event{}; window->pollEvent(event);)
     {
-        // ImGui::SFML::ProcessEvent(window, event);
         if (event.type == sf::Event::Closed)
         {
             window->close();
@@ -119,18 +147,18 @@ void LocalGameManager::handleEvents(const chk::PlayerPtr &p1, const chk::PlayerP
                 // inner loop
                 if (cell->containsPoint(clickedPos) && cell->getIndex() != -1)
                 {
-                    const auto &hunter = this->isPlayerRedTurn() ? p1 : p2;
-                    const auto &prey = this->isPlayerRedTurn() ? p2 : p1;
+                    const auto &hunter = this->isPlayerRedTurn() ? this->player1 : this->player2;
+                    const auto &prey = this->isPlayerRedTurn() ? this->player2 : this->player1;
 
                     if (this->hasPendingCaptures())
                     {
                         this->handleJumpPiece(hunter, prey, cell);
                         this->updateMatchStatus(hunter, prey);
-                        circularBuffer.clean();
+                        buffer.clean();
                     }
                     else
                     {
-                        this->handleCellTap(hunter, prey, circularBuffer, cell);
+                        this->handleCellTap(hunter, prey, buffer, cell);
                     }
                     break;
                     // END inner loop
@@ -140,8 +168,4 @@ void LocalGameManager::handleEvents(const chk::PlayerPtr &p1, const chk::PlayerP
     }
 }
 
-void LocalGameManager::setOnReadyPiecesCallback(const onReadyCreatePieces &callback)
-{
-    this->_onReadyCreatePieces = callback;
-}
 } // namespace chk

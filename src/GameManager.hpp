@@ -15,6 +15,7 @@
 #include <mutex>
 #include <optional>
 #include <random>
+#include <set>
 #include <spdlog/spdlog.h>
 #include <string>
 #include <unordered_map>
@@ -26,7 +27,7 @@ using Block = std::unique_ptr<chk::Cell>;
 using PlayerPtr = std::unique_ptr<chk::Player>;
 using onMoveSuccessCallback = std::function<void(short, int)>; // callback after moving
 using onJumpSuccess = std::function<void(short, int)>;         // callback after capturing
-using onReadyCreatePieces = std::function<void(bool)>;         // callback after creating pieces
+
 constexpr uint16_t NUM_ROWS{8};
 constexpr uint16_t NUM_COLS{8};
 
@@ -40,10 +41,8 @@ class GameManager
     GameManager() = default;
     virtual ~GameManager() = default;
     virtual void createAllPieces(std::vector<chk::PiecePtr> &pieceList) = 0;
-    virtual void handleEvents(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2,
-                              chk::CircularBuffer<short> &buffer) = 0;
-    virtual void drawScreen(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2) = 0;
-    virtual void setOnReadyPiecesCallback(const onReadyCreatePieces &callback) = 0;
+    virtual void handleEvents(chk::CircularBuffer<short> &buffer) = 0;
+    virtual void drawBoard() = 0;
     void drawCheckerboard(const sf::Font &font);
     void updateMessage(std::string_view msg);
     void matchCellsToPieces(const std::vector<chk::PiecePtr> &pieceList);
@@ -64,6 +63,8 @@ class GameManager
     bool gameOver = false;
     // mutex for atomic updates
     std::mutex my_mutex;
+    // collection of my next targets (Map<HunterPieceID, CaptureTarget>)
+    std::unordered_map<short, chk::CaptureTarget> forcedMoves{};
     // callback after successfully moved piece
     onMoveSuccessCallback _onMoveSuccess;
 
@@ -76,16 +77,16 @@ class GameManager
     void collectBehindLHS(const chk::PlayerPtr &hunter, const Block &cell_ptr);
 
   protected:
-    // callback after creating pieces for both players
-    onReadyCreatePieces _onReadyCreatePieces;
     // main window
     sf::RenderWindow *window = nullptr;
     // source cell Index of selected piece
     std::optional<int> sourceCell;
-    // collection of my next targets (Map<HunterPieceID, CaptureTarget>)
-    std::unordered_map<short, chk::CaptureTarget> forcedMoves{};
     // all checkerboard cells
     std::vector<chk::Block> blockList{};
+    // first player (RED)
+    chk::PlayerPtr player1 = nullptr;
+    // second player (BLACK)
+    chk::PlayerPtr player2 = nullptr;
 
     [[nodiscard]] const bool &isPlayerRedTurn() const;
     [[nodiscard]] short getPieceFromCell(const int &cell_idx);
