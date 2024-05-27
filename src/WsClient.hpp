@@ -33,8 +33,8 @@ class WsClient final
     std::atomic_bool isDead{false};                 // if connection closed
     std::atomic_bool isConnected{false};            // if done connected to server (else, show loading)
     chk::CircularBuffer<std::string> msgBuffer{20}; // keep only recent 20 messages
-    std::string errorMsg{};                         // for any websocket errors
-    std::atomic_bool btn_clicked = false;           // if 'connect' button clicked
+    mutable std::string errorMsg{};                 // for any websocket errors
+    std::atomic_bool conn_clicked = false;          // if 'connect' button clicked
     std::deque<std::string> serverMessages;         // messages from backend server
 
     onReadyCreatePieces _onReadyCreatePieces; // callback after creating pieces for both players
@@ -50,7 +50,8 @@ class WsClient final
 };
 
 inline chk::WsClient::WsClient()
-{ // Initialize WS
+{
+    // Initialize WS
     ix::initNetSystem();
     // Our websocket object
     this->webSocketPtr = std::make_unique<ix::WebSocket>();
@@ -99,7 +100,7 @@ inline void WsClient::showConnectWindow()
         {
             const char *suffix = is_secure ? "wss://" : "ws://";
             this->final_address = suffix + std::string(inputUrl);
-            this->btn_clicked = true;
+            this->conn_clicked = true;
             memset(inputUrl, 0, sizeof(inputUrl));
         }
         ImGui::End();
@@ -112,20 +113,19 @@ inline void WsClient::showConnectWindow()
 inline void WsClient::resetAllStates()
 {
     this->isConnected = false;
-    this->btn_clicked = false;
+    this->conn_clicked = false;
     this->isDead = false;
     this->errorMsg.clear();
 }
 
 /**
  * Run main loop of showing connection window, tryConnect, and handle exchanges
- * TODO improve me !!!!
  */
 inline void WsClient::runMainLoop()
 {
     // clang-format off
     if (!isConnected) {
-        if (!btn_clicked) {
+        if (!conn_clicked) {
            this->showConnectWindow();
         } else {
             this->tryConnect(final_address);
@@ -156,7 +156,6 @@ inline void WsClient::tryConnect(std::string_view address)
         ImGui::Text("Connecting to %s", this->final_address.c_str());
         ImGui::End();
     }
-
     // Setup a callback to be fired when an Async event is received
     this->webSocketPtr->setOnMessageCallback([this](const ix::WebSocketMessagePtr &msg) {
         if (msg->type == ix::WebSocketMessageType::Message)
