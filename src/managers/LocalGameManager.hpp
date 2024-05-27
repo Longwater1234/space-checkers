@@ -15,7 +15,7 @@ class LocalGameManager final : public chk::GameManager
     void createAllPieces(std::vector<chk::PiecePtr> &pieceList) override;
 
     // Inherited via GameManager
-    void drawScreen() override;
+    void drawBoard() override;
     void handleEvents(chk::CircularBuffer<short> &buffer) override;
 };
 
@@ -86,7 +86,7 @@ inline void LocalGameManager::createAllPieces(std::vector<chk::PiecePtr> &pieceL
 /**
  * This will be called in the main game loop, every 60 FPS, drawing elements on screen
  */
-void LocalGameManager::drawScreen()
+inline void LocalGameManager::drawBoard()
 {
     auto mousePos = sf::Mouse::getPosition(*window);
     // DRAW CHECKERBOARD
@@ -124,9 +124,9 @@ void LocalGameManager::drawScreen()
 
 /**
  * This will be handling all events
- * @param circularBuffer stores the currently selected piece
+ * @param buffer stores the currently selected piece
  */
-void LocalGameManager::handleEvents(chk::CircularBuffer<short> &circularBuffer)
+inline void LocalGameManager::handleEvents(chk::CircularBuffer<short> &buffer)
 {
     for (auto event = sf::Event{}; window->pollEvent(event);)
     {
@@ -154,11 +154,11 @@ void LocalGameManager::handleEvents(chk::CircularBuffer<short> &circularBuffer)
                     {
                         this->handleJumpPiece(hunter, prey, cell);
                         this->updateMatchStatus(hunter, prey);
-                        circularBuffer.clean();
+                        buffer.clean();
                     }
                     else
                     {
-                        this->handleCellTap(hunter, prey, circularBuffer, cell);
+                        this->handleCellTap(hunter, prey, buffer, cell);
                     }
                     break;
                     // END inner loop

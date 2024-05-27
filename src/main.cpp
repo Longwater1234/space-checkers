@@ -21,8 +21,7 @@ int main()
 
     // SHOW MAIN MENU
     chk::MainMenu homeMenu(&window);
-    homeMenu.init();
-    const auto userChoice = homeMenu.runLoop();
+    const auto userChoice = homeMenu.runMainLoop();
     if (userChoice == chk::UserChoice::ONLINE_PLAY)
     {
         manager = std::make_unique<chk::OnlineGameManager>(&window);
@@ -83,7 +82,7 @@ int main()
         ImGui::SFML::Update(window, deltaClock.restart());
 
         window.clear();
-        manager->drawScreen();
+        manager->drawBoard();
 
         txtPanel.setString(manager->getCurrentMsg());
         window.draw(txtPanel);

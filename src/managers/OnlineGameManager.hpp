@@ -19,8 +19,8 @@ class OnlineGameManager final : public chk::GameManager
     void createAllPieces(std::vector<chk::PiecePtr> &pieceList) override;
 
     // Inherited via GameManager
-    void handleEvents(chk::CircularBuffer<short> &buffer) override;
-    void drawScreen() override;
+    void handleEvents(chk::CircularBuffer<short> &circularBuffer) override;
+    void drawBoard() override;
 
   private:
     chk::PlayerType _myTeam{};
@@ -40,7 +40,7 @@ inline OnlineGameManager::OnlineGameManager(sf::RenderWindow *windowPtr)
 }
 
 /**
- * Wait Server to generate random IDs and deliver the response, then give each player their own set of pieces
+ * Wait for server to generate random IDs and deliver the response, then give each player their own set of pieces
  * @param pieceList destination of created pieces
  */
 inline void chk::OnlineGameManager::createAllPieces(std::vector<chk::PiecePtr> &pieceList)
@@ -96,7 +96,7 @@ inline void chk::OnlineGameManager::createAllPieces(std::vector<chk::PiecePtr> &
 /**
  * This will be called in the main game loop, every 60 FPS, drawing elements on screen
  */
-inline void OnlineGameManager::drawScreen()
+inline void OnlineGameManager::drawBoard()
 {
     auto mousePos = sf::Mouse::getPosition(*window);
 
@@ -105,9 +105,10 @@ inline void OnlineGameManager::drawScreen()
     {
         window->draw(*cell);
     }
-    if (this->wsClient != nullptr && wsClient->doneConnectWindow())
+    // RENDER WsClient elements
+    if (this->wsClient != nullptr)
     {
-        this->wsClient->tryConnect();
+        wsClient->runMainLoop();
     }
     // DRAW RED PIECES
     for (const auto &[id, red_piece] : this->player1->getOwnPieces())
@@ -158,9 +159,9 @@ inline void OnlineGameManager::handleEvents(chk::CircularBuffer<short> &circular
             {
                 continue;
             }
+            // START inner loop:
             for (auto &cell : this->getBlockList())
             {
-                // inner loop
                 if (cell->containsPoint(clickedPos) && cell->getIndex() != -1)
                 {
                     const auto &hunter = this->isPlayerRedTurn() ? this->player1 : this->player2;

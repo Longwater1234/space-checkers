@@ -19,7 +19,7 @@ using namespace chk;
  * Atomically update main UI message
  * @param msg the message content
  */
-void GameManager::updateMessage(std::string_view msg)
+void GameManager::updateMessage(const std::string_view msg)
 {
     std::scoped_lock<std::mutex> lg(my_mutex);
     this->currentMsg = msg;
@@ -436,16 +436,16 @@ void GameManager::collectFrontLHS(const chk::PlayerPtr &hunter, const Block &cel
         return;
     }
 
-    short pieceId_NW = this->getPieceFromCell(cellAheadIdx); // North West
+    const short pieceId_NW = this->getPieceFromCell(cellAheadIdx); // North West
     hasEnemyAhead = pieceId_NW != -1 && !hunter->hasThisPiece(pieceId_NW);
 
-    int cellBehindEnemy = cell_ptr->getIndex() + (deltaBehindEnemy * mSign) + (deltaForward * mSign);
+    const int cellBehindEnemy = cell_ptr->getIndex() + (deltaBehindEnemy * mSign) + (deltaForward * mSign);
     if (!this->boardContainsCell(cellBehindEnemy))
     {
         return;
     }
 
-    short pieceId_SE = this->getPieceFromCell(cellBehindEnemy); // South East
+    const short pieceId_SE = this->getPieceFromCell(cellBehindEnemy); // South East
     enemyOpenBehind = pieceId_SE == -1;
 
     if (hasEnemyAhead && enemyOpenBehind)
@@ -489,20 +489,20 @@ void GameManager::collectFrontRHS(const chk::PlayerPtr &hunter, const Block &cel
         std::swap(deltaForward, deltaBehindEnemy);
     }
 
-    int cellAheadIdx = cell_ptr->getIndex() + (deltaForward * mSign);
+    const int cellAheadIdx = cell_ptr->getIndex() + (deltaForward * mSign);
     if (!this->awayFromEdge(cellAheadIdx))
     {
         return;
     }
-    short pieceId_NE = this->getPieceFromCell(cellAheadIdx); // North East
+    const short pieceId_NE = this->getPieceFromCell(cellAheadIdx); // North East
     hasEnemyAhead = pieceId_NE != -1 && !hunter->hasThisPiece(pieceId_NE);
 
-    int cellBehindEnemy = cell_ptr->getIndex() + (deltaBehindEnemy * mSign) + (deltaForward * mSign);
+    const int cellBehindEnemy = cell_ptr->getIndex() + (deltaBehindEnemy * mSign) + (deltaForward * mSign);
     if (!this->boardContainsCell(cellBehindEnemy))
     {
         return;
     }
-    short pieceId_SW = this->getPieceFromCell(cellBehindEnemy); // south West
+    const short pieceId_SW = this->getPieceFromCell(cellBehindEnemy); // south West
     enemyOpenBehind = pieceId_SW == -1;
 
     if (hasEnemyAhead && enemyOpenBehind)
@@ -545,13 +545,13 @@ void GameManager::collectBehindRHS(const PlayerPtr &hunter, const Block &cell_pt
         std::swap(deltaForward, deltaBehindEnemy);
     }
 
-    int cellAheadIdx = cell_ptr->getIndex() - (deltaForward * mSign);
+    const int cellAheadIdx = cell_ptr->getIndex() - (deltaForward * mSign);
     if (!this->awayFromEdge(cellAheadIdx))
     {
         return;
     }
 
-    short pieceId_NW = this->getPieceFromCell(cellAheadIdx);
+    const short pieceId_NW = this->getPieceFromCell(cellAheadIdx);
     hasEnemyAhead = pieceId_NW != -1 && !hunter->hasThisPiece(pieceId_NW);
 
     int cellBehindEnemy = cell_ptr->getIndex() - (deltaBehindEnemy * mSign) - (deltaForward * mSign);
@@ -559,7 +559,7 @@ void GameManager::collectBehindRHS(const PlayerPtr &hunter, const Block &cell_pt
     {
         return;
     }
-    short pieceId_SE = this->getPieceFromCell(cellBehindEnemy);
+    const short pieceId_SE = this->getPieceFromCell(cellBehindEnemy);
     enemyOpenBehind = pieceId_SE == -1;
 
     if (hasEnemyAhead && enemyOpenBehind)
@@ -601,12 +601,12 @@ void GameManager::collectBehindLHS(const PlayerPtr &hunter, const Block &cell_pt
         std::swap(deltaForward, deltaBehindEnemy);
     }
 
-    int cellAheadIdx = cell_ptr->getIndex() - (deltaForward * mSign);
+    const int cellAheadIdx = cell_ptr->getIndex() - (deltaForward * mSign);
     if (!this->awayFromEdge(cellAheadIdx))
     {
         return;
     }
-    short pieceId_NE = this->getPieceFromCell(cellAheadIdx);
+    const short pieceId_NE = this->getPieceFromCell(cellAheadIdx);
     hasEnemyAhead = pieceId_NE != -1 && !hunter->hasThisPiece(pieceId_NE);
 
     int cellBehindEnemy = cell_ptr->getIndex() - (deltaBehindEnemy * mSign) - (deltaForward * mSign);
@@ -614,7 +614,7 @@ void GameManager::collectBehindLHS(const PlayerPtr &hunter, const Block &cell_pt
     {
         return;
     }
-    short pieceId_SW = this->getPieceFromCell(cellBehindEnemy);
+    const short pieceId_SW = this->getPieceFromCell(cellBehindEnemy);
     enemyOpenBehind = pieceId_SW == -1;
 
     if (hasEnemyAhead && enemyOpenBehind)

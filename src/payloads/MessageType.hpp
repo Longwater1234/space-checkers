@@ -1,8 +1,8 @@
 #pragma once
-
+#include <cstdint>
 namespace chk::payload
 {
-enum class MessageType
+enum class MessageType : uint16_t
 {
     WELCOME = 49,
     START,

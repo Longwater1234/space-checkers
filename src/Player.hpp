@@ -13,7 +13,7 @@ namespace chk
 // alias for unique pointer of player's Piece
 using PiecePtr = std::unique_ptr<chk::Piece>;
 
-class Player
+class Player final
 {
   public:
     explicit Player(PlayerType player_type);
@@ -135,10 +135,10 @@ inline size_t Player::getPieceCount() const
 }
 
 /**
- * Get vector index of selected piece by this player
+ * Move the specified piece to the given destination position on the board
  * @param pieceId the selected PieceId
- * @param destPos destination cell
- * @return TRUE if successful or FALSE
+ * @param destPos destination cell position
+ * @return TRUE if successful, else FALSE
  */
 inline bool Player::movePiece(const short &pieceId, const sf::Vector2f &destPos) const
 {
@@ -149,7 +149,7 @@ inline bool Player::movePiece(const short &pieceId, const sf::Vector2f &destPos)
  * \brief Move the given piece to destPos to complete capture opponent
  * \param pieceId my pieceId
  * \param destPos destination cell
- * \return TRUE if successful or FALSE
+ * \return TRUE if successful, else FALSE
  */
 inline bool Player::captureEnemyWith(const short &pieceId, const sf::Vector2f &destPos) const
 {

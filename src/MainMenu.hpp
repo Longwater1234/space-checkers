@@ -19,18 +19,19 @@ constexpr auto FONT_PATH = "notosans-regular.ttf";
 
 enum class UserChoice
 {
-    LOCAL_PLAY = 984883,  // playing offline
-    ONLINE_PLAY = 873832, // playing online
+    LOCAL_PLAY = 98483, // playing offline
+    ONLINE_PLAY,        // playing online
 };
 
 class MainMenu final
 {
   public:
     explicit MainMenu(sf::RenderWindow *windowPtr);
-    void init();
-    chk::UserChoice runLoop();
+
+    chk::UserChoice runMainLoop();
 
   private:
+    void init();
     sf::RenderWindow *window;
     sf::Texture mainImage;
     sf::RectangleShape mainFrame;
@@ -57,6 +58,7 @@ inline MainMenu::MainMenu(sf::RenderWindow *windowPtr)
         auto dims = appIcon.getSize();
         window->setIcon(dims.x, dims.y, appIcon.getPixelsPtr());
     }
+    this->init();
 }
 
 /**
@@ -111,7 +113,7 @@ inline void MainMenu::handleEvents(chk::UserChoice &result)
  * The main loop, renders the main menu screen, returning user choice for game Mode
  * @return The selected result
  */
-inline chk::UserChoice MainMenu::runLoop()
+inline chk::UserChoice MainMenu::runMainLoop()
 {
     chk::UserChoice result{};
     while (this->window->isOpen())
