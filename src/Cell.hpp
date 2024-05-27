@@ -40,7 +40,7 @@ inline Cell::Cell(const int idx, const sf::RectangleShape &rect, const sf::Vecto
 
     sf::Text text;
     text.setFont(font);
-    text.setFillColor(sf::Color{255u, 255u, 255u, 100u});
+    text.setFillColor(sf::Color::White);
     text.setString(std::to_string(this->index));
     text.setPosition(pos);
     this->sfText = text;
