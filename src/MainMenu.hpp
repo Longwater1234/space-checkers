@@ -28,7 +28,7 @@ class MainMenu final
   public:
     explicit MainMenu(sf::RenderWindow *windowPtr);
 
-    chk::UserChoice runLoop();
+    chk::UserChoice runMainLoop();
 
   private:
     void init();
@@ -113,7 +113,7 @@ inline void MainMenu::handleEvents(chk::UserChoice &result)
  * The main loop, renders the main menu screen, returning user choice for game Mode
  * @return The selected result
  */
-inline chk::UserChoice MainMenu::runLoop()
+inline chk::UserChoice MainMenu::runMainLoop()
 {
     chk::UserChoice result{};
     while (this->window->isOpen())
