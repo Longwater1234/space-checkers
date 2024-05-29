@@ -6,10 +6,10 @@ namespace chk
 
 enum class PlayerType : uint16_t
 {
-    // RED
-    PLAYER_1 = 48834,
-    // BLACK
-    PLAYER_2
+    // player 1
+    PLAYER_RED = 48834,
+    // player 2
+    PLAYER_BLACK
 };
 
 } // namespace chk

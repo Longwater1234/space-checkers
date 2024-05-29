@@ -10,7 +10,7 @@
 namespace chk
 {
 
-// alias for unique pointer of player's Piece
+// alias for unique pointer of `Piece`
 using PiecePtr = std::unique_ptr<chk::Piece>;
 
 class Player final
@@ -39,7 +39,7 @@ class Player final
 
 inline Player::Player(PlayerType player_type)
 {
-    if (player_type == PlayerType::PLAYER_1)
+    if (player_type == PlayerType::PLAYER_RED)
     {
         this->name = "RED";
     }
@@ -92,9 +92,9 @@ inline PlayerType Player::getPlayerType() const
 {
     if (this->name == "RED")
     {
-        return chk::PlayerType::PLAYER_1;
+        return chk::PlayerType::PLAYER_RED;
     }
-    return chk::PlayerType::PLAYER_2;
+    return chk::PlayerType::PLAYER_BLACK;
 }
 
 /**

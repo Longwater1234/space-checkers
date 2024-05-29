@@ -27,7 +27,7 @@ class WsClient final
     WsClient();
     void runMainLoop();
     void setOnReadyPiecesCallback(const onReadyCreatePieces &callback);
-    bool replyToServer(const simdjson::dom::object &payload);
+    bool replyServer(const simdjson::dom::object &payload);
 
   private:
     std::string final_address;                      // IP or URL of server
@@ -218,9 +218,9 @@ inline void WsClient::setOnReadyPiecesCallback(const onReadyCreatePieces &callba
  * Send JSON response back to server
  * @param payload the request body
  */
-inline bool WsClient::replyToServer(const simdjson::dom::object &payload)
+inline bool WsClient::replyServer(const simdjson::dom::object &payload)
 {
-    if (this->isDead)
+    if (this->isDead || !this->isConnected)
     {
         return false;
     }

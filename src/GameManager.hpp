@@ -94,13 +94,14 @@ class GameManager
     [[nodiscard]] bool hasPendingCaptures() const;
     [[nodiscard]] const bool &isGameOver() const;
     void setSourceCell(const int &src_cell);
-    void handleMovePiece(const chk::PlayerPtr &player, const chk::PlayerPtr &opponent, const Block &destCell,
-                         const short &currentPieceId);
-    void handleJumpPiece(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey, const chk::Block &targetCell);
+    virtual void handleMovePiece(const chk::PlayerPtr &player, const chk::PlayerPtr &opponent, const Block &destCell,
+                                 const short &currentPieceId);
+    virtual void handleJumpPiece(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,
+                                 const chk::Block &targetCell);
+    virtual void handleCellTap(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,
+                               chk::CircularBuffer<short> &buffer, const chk::Block &cell);
     void updateMatchStatus(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2);
     void showForcedMoves(const chk::PlayerPtr &player, const chk::Block &cell);
-    void handleCellTap(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey, chk::CircularBuffer<short> &buffer,
-                       const chk::Block &cell);
 };
 
 } // namespace chk

@@ -407,12 +407,12 @@ void GameManager::identifyTargets(const PlayerPtr &hunter)
  */
 void GameManager::collectFrontLHS(const chk::PlayerPtr &hunter, const Block &cell_ptr)
 {
-    if (hunter->getPlayerType() == PlayerType::PLAYER_1 && cell_ptr->getPos().x == 0)
+    if (hunter->getPlayerType() == PlayerType::PLAYER_RED && cell_ptr->getPos().x == 0)
     {
         // IMPOSSIBLE to have enemies on my Left.
         return;
     }
-    if (hunter->getPlayerType() == PlayerType::PLAYER_2 && cell_ptr->getPos().x >= 7 * chk::SIZE_CELL)
+    if (hunter->getPlayerType() == PlayerType::PLAYER_BLACK && cell_ptr->getPos().x >= 7 * chk::SIZE_CELL)
     {
         // same as above, based on my current "X" position.
         return;
@@ -424,7 +424,7 @@ void GameManager::collectFrontLHS(const chk::PlayerPtr &hunter, const Block &cel
     int mSign = 1;
 
     // if player piece is Black (PLAYER 2)
-    if (hunter->getPlayerType() == PlayerType::PLAYER_2)
+    if (hunter->getPlayerType() == PlayerType::PLAYER_BLACK)
     {
         mSign = -1;
         std::swap(deltaForward, deltaBehindEnemy);
@@ -466,12 +466,12 @@ void GameManager::collectFrontLHS(const chk::PlayerPtr &hunter, const Block &cel
  */
 void GameManager::collectFrontRHS(const chk::PlayerPtr &hunter, const Block &cell_ptr)
 {
-    if (hunter->getPlayerType() == PlayerType::PLAYER_1 && cell_ptr->getPos().x >= 7 * chk::SIZE_CELL)
+    if (hunter->getPlayerType() == PlayerType::PLAYER_RED && cell_ptr->getPos().x >= 7 * chk::SIZE_CELL)
     {
         // IMPOSSIBLE to have enemies on my Right.
         return;
     }
-    if (hunter->getPlayerType() == PlayerType::PLAYER_2 && cell_ptr->getPos().x == 0)
+    if (hunter->getPlayerType() == PlayerType::PLAYER_BLACK && cell_ptr->getPos().x == 0)
     {
         // same as above, based on my current "X" position.
         return;
@@ -483,7 +483,7 @@ void GameManager::collectFrontRHS(const chk::PlayerPtr &hunter, const Block &cel
     int mSign = 1;
 
     // if piece is Black (PLAYER 2)
-    if (hunter->getPlayerType() == PlayerType::PLAYER_2)
+    if (hunter->getPlayerType() == PlayerType::PLAYER_BLACK)
     {
         mSign = -1;
         std::swap(deltaForward, deltaBehindEnemy);
@@ -523,11 +523,11 @@ void GameManager::collectFrontRHS(const chk::PlayerPtr &hunter, const Block &cel
  */
 void GameManager::collectBehindRHS(const PlayerPtr &hunter, const Block &cell_ptr)
 {
-    if (hunter->getPlayerType() == PlayerType::PLAYER_1 && cell_ptr->getPos().x >= 7 * chk::SIZE_CELL)
+    if (hunter->getPlayerType() == PlayerType::PLAYER_RED && cell_ptr->getPos().x >= 7 * chk::SIZE_CELL)
     {
         return;
     }
-    if (hunter->getPlayerType() == PlayerType::PLAYER_2 && cell_ptr->getPos().x == 0)
+    if (hunter->getPlayerType() == PlayerType::PLAYER_BLACK && cell_ptr->getPos().x == 0)
     {
         return;
     }
@@ -539,7 +539,7 @@ void GameManager::collectBehindRHS(const PlayerPtr &hunter, const Block &cell_pt
     int mSign = +1;
 
     // if piece is Black (PLAYER 2)
-    if (hunter->getPlayerType() == PlayerType::PLAYER_2)
+    if (hunter->getPlayerType() == PlayerType::PLAYER_BLACK)
     {
         mSign = -1;
         std::swap(deltaForward, deltaBehindEnemy);
@@ -580,11 +580,11 @@ void GameManager::collectBehindRHS(const PlayerPtr &hunter, const Block &cell_pt
  */
 void GameManager::collectBehindLHS(const PlayerPtr &hunter, const Block &cell_ptr)
 {
-    if (hunter->getPlayerType() == PlayerType::PLAYER_1 && cell_ptr->getPos().x == 0)
+    if (hunter->getPlayerType() == PlayerType::PLAYER_RED && cell_ptr->getPos().x == 0)
     {
         return;
     }
-    if (hunter->getPlayerType() == PlayerType::PLAYER_2 && cell_ptr->getPos().x >= 7 * chk::SIZE_CELL)
+    if (hunter->getPlayerType() == PlayerType::PLAYER_BLACK && cell_ptr->getPos().x >= 7 * chk::SIZE_CELL)
     {
         return;
     }
@@ -595,7 +595,7 @@ void GameManager::collectBehindLHS(const PlayerPtr &hunter, const Block &cell_pt
     int mSign = 1;
 
     // if piece is Black (PLAYER 2)
-    if (hunter->getPlayerType() == PlayerType::PLAYER_2)
+    if (hunter->getPlayerType() == PlayerType::PLAYER_BLACK)
     {
         mSign = -1;
         std::swap(deltaForward, deltaBehindEnemy);

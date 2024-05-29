@@ -3,7 +3,6 @@
 #include "../WsClient.hpp"
 #include "../payloads/ServerStructs.hpp"
 #include "imgui-SFML.h"
-#include "imgui.h"
 
 namespace chk
 {
@@ -34,8 +33,8 @@ inline OnlineGameManager::OnlineGameManager(sf::RenderWindow *windowPtr)
     this->blockList.reserve(chk::NUM_COLS * chk::NUM_COLS);
     this->wsClient = std::make_unique<chk::WsClient>();
     // CREATE TWO unique PLAYERS
-    this->player1 = std::make_unique<chk::Player>(chk::PlayerType::PLAYER_1);
-    this->player2 = std::make_unique<chk::Player>(chk::PlayerType::PLAYER_2);
+    this->player1 = std::make_unique<chk::Player>(chk::PlayerType::PLAYER_RED);
+    this->player2 = std::make_unique<chk::Player>(chk::PlayerType::PLAYER_BLACK);
     assert(!(*player1 == *player2));
 }
 
