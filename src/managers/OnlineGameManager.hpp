@@ -24,6 +24,7 @@ class OnlineGameManager final : public chk::GameManager
   private:
     chk::PlayerType _myTeam{};
     std::unique_ptr<chk::WsClient> wsClient = nullptr;
+    bool isMyTurn = false;
 };
 
 inline OnlineGameManager::OnlineGameManager(sf::RenderWindow *windowPtr)
@@ -46,6 +47,10 @@ inline void chk::OnlineGameManager::createAllPieces(std::vector<chk::PiecePtr> &
 {
     this->wsClient->setOnReadyPiecesCallback([this, &pieceList](chk::payload::Welcome &welcome) {
         this->_myTeam = welcome.myTeam;
+        if (this->_myTeam == PlayerType::PLAYER_RED)
+        {
+            this->isMyTurn = true; // Red always starts
+        }
         auto redItr = welcome.piecesRed.begin();
         auto blackItr = welcome.piecesBlack.begin();
         // create pieces objects, using id's from Server
