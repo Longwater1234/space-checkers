@@ -27,7 +27,7 @@ class WsClient final
     WsClient();
     void runMainLoop();
     void setOnReadyPiecesCallback(const onReadyCreatePieces &callback);
-    bool replyServer(const simdjson::dom::object &payload);
+    bool replyServer(const simdjson::dom::object &payload) const;
 
   private:
     std::string final_address;                      // IP or URL of server
@@ -218,7 +218,7 @@ inline void WsClient::setOnReadyPiecesCallback(const onReadyCreatePieces &callba
  * Send JSON response back to server
  * @param payload the request body
  */
-inline bool WsClient::replyServer(const simdjson::dom::object &payload)
+inline bool WsClient::replyServer(const simdjson::dom::object &payload) const
 {
     if (this->isDead || !this->isConnected)
     {
@@ -230,7 +230,6 @@ inline bool WsClient::replyServer(const simdjson::dom::object &payload)
 
 /**
  * Show the chat window and handle sending messsages
- * @param webSocket The websocket pointer
  */
 inline void WsClient::showChatWindow()
 {
@@ -306,7 +305,7 @@ inline void WsClient::runServerLoop()
             if (!msg.empty())
             {
                 static simdjson::dom::object doc = jparser.parse(msg);
-                uint16_t rawMsgType = static_cast<uint16_t>(doc.at_key("messageType").get_int64());
+                const auto rawMsgType = static_cast<uint16_t>(doc.at_key("messageType").get_int64());
                 chk::payload::MessageType msgType{rawMsgType};
                 if (msgType == chk::payload::MessageType::WELCOME)
                 {
@@ -364,7 +363,7 @@ inline void WsClient::showErrorPopup()
             this->resetAllStates();
         }
         ImGui::EndPopup();
-    };
+    }
 }
 
 } // namespace chk
