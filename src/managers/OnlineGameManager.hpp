@@ -21,6 +21,14 @@ class OnlineGameManager final : public chk::GameManager
     void handleEvents(chk::CircularBuffer<short> &circularBuffer) override;
     void drawBoard() override;
 
+  protected:
+    void handleMovePiece(const chk::PlayerPtr &player, const chk::PlayerPtr &opponent, const Block &destCell,
+                         const short &currentPieceId) override;
+    void handleJumpPiece(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,
+                         const chk::Block &targetCell) override;
+    void handleCellTap(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey, chk::CircularBuffer<short> &buffer,
+                       const chk::Block &cell) override;
+
   private:
     chk::PlayerType _myTeam{};
     std::unique_ptr<chk::WsClient> wsClient = nullptr;
@@ -140,6 +148,25 @@ inline void OnlineGameManager::drawBoard()
         }
         window->draw(*black_piece);
     }
+}
+
+
+inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, const chk::PlayerPtr &opponent,
+                                               const Block &destCell, const short &currentPieceId)
+{
+    // TODO complete me
+}
+
+inline void OnlineGameManager::handleJumpPiece(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,
+                                               const chk::Block &targetCell)
+{
+    // TODO complete me
+}
+
+inline void OnlineGameManager::handleCellTap(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,
+                                             chk::CircularBuffer<short> &buffer, const chk::Block &cell)
+{
+    // TODO complete me
 }
 
 /**

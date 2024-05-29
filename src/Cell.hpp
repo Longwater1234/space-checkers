@@ -97,6 +97,7 @@ inline int Cell::getIndex() const
 
 /**
  * Set whether this cell's row is even
+ * @param is_even TRUE or FALSE
  */
 inline void Cell::setEvenRow(const bool &is_even)
 {
