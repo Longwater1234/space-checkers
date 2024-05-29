@@ -36,7 +36,7 @@ class Piece final : public sf::Drawable, public sf::Transformable
     void addOutline();
     void markImportant();
     void removeOutline();
-    const short &getId() const;
+    short getId() const;
     bool operator==(const Piece &other) const;
 
   private:
@@ -170,7 +170,7 @@ inline void Piece::removeOutline()
 /**
  * Get unique ID of this piece
  */
-const inline short &Piece::getId() const
+inline short Piece::getId() const
 {
     return this->id_;
 }

@@ -102,7 +102,7 @@ inline void chk::OnlineGameManager::createAllPieces(std::vector<chk::PiecePtr> &
  */
 inline void OnlineGameManager::drawBoard()
 {
-    auto mousePos = sf::Mouse::getPosition(*window);
+    const auto mousePos = sf::Mouse::getPosition(*window);
 
     // RENDER CHECKERBOARD
     for (const auto &cell : this->getBlockList())
