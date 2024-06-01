@@ -55,7 +55,7 @@ int main()
 
     manager->drawCheckerboard(font);
 
-    // NOW create all PIECES ON BOARD
+    // Reserve container for pieces on board
     std::vector<chk::PiecePtr> pieceVector;
     pieceVector.reserve(chk::NUM_PIECES);
 

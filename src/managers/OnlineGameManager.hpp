@@ -3,6 +3,7 @@
 #include "../WsClient.hpp"
 #include "../payloads/ServerStructs.hpp"
 #include "imgui-SFML.h"
+#include <atomic>
 
 namespace chk
 {
@@ -22,6 +23,7 @@ class OnlineGameManager final : public chk::GameManager
     void drawBoard() override;
 
   protected:
+    // Inherited via GameManager
     void handleMovePiece(const chk::PlayerPtr &player, const chk::PlayerPtr &opponent, const Block &destCell,
                          const short &currentPieceId) override;
     void handleJumpPiece(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,
@@ -32,7 +34,8 @@ class OnlineGameManager final : public chk::GameManager
   private:
     chk::PlayerType _myTeam{};
     std::unique_ptr<chk::WsClient> wsClient = nullptr;
-    bool isMyTurn = false;
+    std::atomic_bool isMyTurn = false;
+    std::atomic_bool gameReady = false;
 };
 
 inline OnlineGameManager::OnlineGameManager(sf::RenderWindow *windowPtr)
@@ -53,11 +56,12 @@ inline OnlineGameManager::OnlineGameManager(sf::RenderWindow *windowPtr)
  */
 inline void chk::OnlineGameManager::createAllPieces(std::vector<chk::PiecePtr> &pieceList)
 {
+    // wait for server response
     this->wsClient->setOnReadyPiecesCallback([this, &pieceList](chk::payload::Welcome &welcome) {
         this->_myTeam = welcome.myTeam;
         if (this->_myTeam == PlayerType::PLAYER_RED)
         {
-            this->isMyTurn = true; // Red always starts
+            this->isMyTurn = true; // Red always starts game
         }
         auto redItr = welcome.piecesRed.begin();
         auto blackItr = welcome.piecesBlack.begin();
@@ -103,6 +107,12 @@ inline void chk::OnlineGameManager::createAllPieces(std::vector<chk::PiecePtr> &
             }
         }
     });
+
+    // wait for start game response
+    this->wsClient->setOnReadyStartGameCallback([this](chk::payload::StartGame &payload) {
+        this->gameReady = true;
+        this->updateMessage(payload.notice);
+    });
 }
 
 /**
@@ -111,13 +121,12 @@ inline void chk::OnlineGameManager::createAllPieces(std::vector<chk::PiecePtr> &
 inline void OnlineGameManager::drawBoard()
 {
     const auto mousePos = sf::Mouse::getPosition(*window);
-
     // RENDER CHECKERBOARD
     for (const auto &cell : this->getBlockList())
     {
         window->draw(*cell);
     }
-    // RENDER WsClient elements
+    // run the Websocket client
     if (this->wsClient != nullptr)
     {
         wsClient->runMainLoop();
@@ -125,7 +134,7 @@ inline void OnlineGameManager::drawBoard()
     // DRAW RED PIECES
     for (const auto &[id, red_piece] : this->player1->getOwnPieces())
     {
-        if (this->isPlayerRedTurn() && red_piece->containsPoint(mousePos))
+        if (this->_myTeam == PlayerType::PLAYER_RED && this->isMyTurn && red_piece->containsPoint(mousePos))
         {
             red_piece->addOutline();
         }
@@ -138,7 +147,7 @@ inline void OnlineGameManager::drawBoard()
     // DRAW BLACK PIECES
     for (const auto &[id, black_piece] : this->player2->getOwnPieces())
     {
-        if (!this->isPlayerRedTurn() && black_piece->containsPoint(mousePos))
+        if (this->_myTeam == PlayerType::PLAYER_BLACK && this->isMyTurn && black_piece->containsPoint(mousePos))
         {
             black_piece->addOutline();
         }
@@ -149,7 +158,6 @@ inline void OnlineGameManager::drawBoard()
         window->draw(*black_piece);
     }
 }
-
 
 inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, const chk::PlayerPtr &opponent,
                                                const Block &destCell, const short &currentPieceId)
@@ -167,6 +175,10 @@ inline void OnlineGameManager::handleCellTap(const chk::PlayerPtr &hunter, const
                                              chk::CircularBuffer<short> &buffer, const chk::Block &cell)
 {
     // TODO complete me
+    if (!this->gameReady || this->isGameOver())
+    {
+        return;
+    }
 }
 
 /**

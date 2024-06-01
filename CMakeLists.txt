@@ -43,7 +43,7 @@ include_directories(${SFML_HOME}/include)
 
 # show warnings (depending on C++ compiler)
 if(MSVC)
-  target_compile_options(SpaceCheckers PRIVATE /W4)
+  target_compile_options(SpaceCheckers PRIVATE /W4 /sdl)
 else() 
   target_compile_options(SpaceCheckers PRIVATE -Wall)
 endif()

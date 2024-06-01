@@ -16,7 +16,8 @@
 namespace chk
 {
 
-using onReadyCreatePieces = std::function<void(chk::payload::Welcome &)>; // callback after creating pieces
+using onReadyCreatePieces = std::function<void(chk::payload::Welcome &)>; // callback after receiving pieces from server
+using onReadyStartGame = std::function<void(chk::payload::StartGame &)>;      // callback after both players done joined
 
 /**
  * This will handle all websocket exchanges with Server
@@ -27,6 +28,7 @@ class WsClient final
     WsClient();
     void runMainLoop();
     void setOnReadyPiecesCallback(const onReadyCreatePieces &callback);
+    void setOnReadyStartGameCallback(const onReadyStartGame &callback);
     bool replyServer(const simdjson::dom::object &payload) const;
 
   private:
@@ -39,11 +41,12 @@ class WsClient final
     std::deque<std::string> serverMessages;         // messages from backend server
 
     onReadyCreatePieces _onReadyCreatePieces; // callback after creating pieces for both players
+    onReadyStartGame _onReadyStartGame;
     std::mutex mut;
     std::unique_ptr<ix::WebSocket> webSocketPtr = nullptr;
     void showErrorPopup();
     void showChatWindow();
-    void runServerLoop();
+    void initGameLoop();
     static void showHint(const char *tip);
     void tryConnect(std::string_view address);
     void showConnectWindow();
@@ -134,7 +137,7 @@ inline void WsClient::runMainLoop()
     }
     // already connected
     else {
-        this->showChatWindow();
+        this->initGameLoop();
     }
     // connection failure 🙁
     if (this->isDead) {
@@ -215,6 +218,15 @@ inline void WsClient::setOnReadyPiecesCallback(const onReadyCreatePieces &callba
 }
 
 /**
+* Set the callback to handle starting game after signal from server
+* @param callback the callback function
+*/
+inline void WsClient::setOnReadyStartGameCallback(const onReadyStartGame &callback)
+{
+    this->_onReadyStartGame = callback;
+}
+
+/**
  * Send JSON response back to server
  * @param payload the request body
  */
@@ -284,7 +296,7 @@ inline void WsClient::showChatWindow()
 /**
  * Exchange messages with the server and update the game accordingly. if any error happen, close connection
  */
-inline void WsClient::runServerLoop()
+inline void WsClient::initGameLoop()
 {
     if (!this->isConnected)
     {
@@ -325,6 +337,15 @@ inline void WsClient::runServerLoop()
                     if (this->_onReadyCreatePieces != nullptr)
                     {
                         this->_onReadyCreatePieces(welcome);
+                    }
+                }
+                else if (msgType == chk::payload::MessageType::START)
+                {
+                    chk::payload::StartGame startPayload;
+                    startPayload.notice = doc.at_key("notice").get_string();
+                    if (this->_onReadyStartGame != nullptr)
+                    {
+                        this->_onReadyStartGame(startPayload);
                     }
                 }
                 std::scoped_lock lg(this->mut);

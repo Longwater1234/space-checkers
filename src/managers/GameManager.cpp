@@ -244,17 +244,14 @@ void GameManager::matchCellsToPieces(const std::vector<chk::PiecePtr> &pieceList
  */
 void GameManager::updateMatchStatus(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2)
 {
-    if (*p1 == *p2)
-    {
-        throw std::invalid_argument("cannot pass same Player");
-    }
+    assert(!(*p1 == *p2) && "cannot pass same Player");
     const auto p1Count = p1->getPieceCount();
     const auto p2Count = p2->getPieceCount();
     if (p1Count == 0 || p2Count == 0)
     {
         this->gameOver = true;
         const std::string &winnerName = p1Count > p2Count ? p1->getName() : p2->getName();
-        this->updateMessage("GAME OVER! " + winnerName + " won");
+        this->updateMessage("GAME OVER!" + winnerName + " won!");
     }
 }
 
