@@ -26,9 +26,9 @@ class Player final
     [[nodiscard]] size_t getPieceCount() const;
     [[nodiscard]] const std::string &getName() const;
     [[nodiscard]] PlayerType getPlayerType() const;
-    [[nodiscard]] bool hasThisPiece(const short &pieceId) const;
-    [[nodiscard]] bool movePiece(const short &pieceId, const sf::Vector2f &destPos) const;
-    [[nodiscard]] bool captureEnemyWith(const short &pieceId, const sf::Vector2f &destPos) const;
+    [[nodiscard]] bool hasThisPiece(const short pieceId) const;
+    [[nodiscard]] bool movePiece(const short pieceId, const sf::Vector2f &destPos) const;
+    [[nodiscard]] bool captureEnemyWith(const short pieceId, const sf::Vector2f &destPos) const;
     bool operator==(const Player &other) const;
 
   private:
@@ -129,7 +129,7 @@ inline const std::unordered_map<short, chk::PiecePtr> &Player::getOwnPieces() co
  * @param pieceId the pieceId
  * @return TRUE or FALSE
  */
-inline bool Player::hasThisPiece(const short &pieceId) const
+inline bool Player::hasThisPiece(const short pieceId) const
 {
     return this->basket.find(pieceId) != this->basket.end();
 }
@@ -149,7 +149,7 @@ inline size_t Player::getPieceCount() const
  * @param destPos destination cell position
  * @return TRUE if successful, else FALSE
  */
-inline bool Player::movePiece(const short &pieceId, const sf::Vector2f &destPos) const
+inline bool Player::movePiece(const short pieceId, const sf::Vector2f &destPos) const
 {
     return this->basket.at(pieceId)->moveSimple(destPos);
 }
@@ -160,7 +160,7 @@ inline bool Player::movePiece(const short &pieceId, const sf::Vector2f &destPos)
  * \param destPos destination cell
  * \return TRUE if successful, else FALSE
  */
-inline bool Player::captureEnemyWith(const short &pieceId, const sf::Vector2f &destPos) const
+inline bool Player::captureEnemyWith(const short pieceId, const sf::Vector2f &destPos) const
 {
     return this->basket.at(pieceId)->moveCapture(destPos);
 }
