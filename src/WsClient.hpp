@@ -325,6 +325,7 @@ inline void WsClient::initGameLoop()
                     chk::payload::Welcome welcome{};
                     auto rawTeam = static_cast<uint16_t>(doc.at_key("myTeam").get_uint64());
                     welcome.myTeam = chk::PlayerType{rawTeam};
+                    welcome.notice = doc.at_key("notice").get_string();
                     for (const auto &val : doc.at_key("piecesRed").get_array())
                     {
                         welcome.piecesRed.emplace_back(static_cast<int16_t>(val.get_int64()));

@@ -55,17 +55,10 @@ int main()
 
     manager->drawCheckerboard(font);
 
-    // Reserve container for pieces on board
-    std::vector<chk::PiecePtr> pieceVector;
-    pieceVector.reserve(chk::NUM_PIECES);
-
     // create pieces with random ID and give each player their own
-    manager->createAllPieces(pieceVector);
+    manager->createAllPieces();
 
-    /* we don't need this anymore */
-    pieceVector.clear();
-
-    // for storing currently clicked Piece
+    // for storing currently clicked Piece, MAX 1
     chk::CircularBuffer<short> circularBuffer{1};
 
     // THE STATUS TEXT

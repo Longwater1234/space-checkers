@@ -17,6 +17,7 @@ struct BasePayload
 struct Welcome : public BasePayload
 {
     chk::PlayerType myTeam{};
+    std::string_view notice{};
     std::vector<int16_t> piecesRed{};
     std::vector<int16_t> piecesBlack{};
 

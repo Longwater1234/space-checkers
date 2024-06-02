@@ -16,7 +16,7 @@ class OnlineGameManager final : public chk::GameManager
   public:
     explicit OnlineGameManager(sf::RenderWindow *windowPtr);
     OnlineGameManager() = delete;
-    void createAllPieces(std::vector<chk::PiecePtr> &pieceList) override;
+    void createAllPieces() override;
 
     // Inherited via GameManager
     void handleEvents(chk::CircularBuffer<short> &circularBuffer) override;
@@ -54,15 +54,18 @@ inline OnlineGameManager::OnlineGameManager(sf::RenderWindow *windowPtr)
  * Wait for server to generate random IDs and deliver the response, then give each player their own set of pieces
  * @param pieceList destination of created pieces
  */
-inline void chk::OnlineGameManager::createAllPieces(std::vector<chk::PiecePtr> &pieceList)
+inline void chk::OnlineGameManager::createAllPieces()
 {
-    // wait for server response
-    this->wsClient->setOnReadyPiecesCallback([this, &pieceList](chk::payload::Welcome &welcome) {
+    this->wsClient->setOnReadyPiecesCallback([this](chk::payload::Welcome &welcome) {
+        std::vector<chk::PiecePtr> pieceList;
+        pieceList.reserve(chk::NUM_PIECES);
+
         this->_myTeam = welcome.myTeam;
         if (this->_myTeam == PlayerType::PLAYER_RED)
         {
             this->isMyTurn = true; // Red always starts game
         }
+        this->updateMessage(welcome.notice);
         auto redItr = welcome.piecesRed.begin();
         auto blackItr = welcome.piecesBlack.begin();
         // create pieces objects, using id's from Server
@@ -121,7 +124,7 @@ inline void chk::OnlineGameManager::createAllPieces(std::vector<chk::PiecePtr> &
 inline void OnlineGameManager::drawBoard()
 {
     const auto mousePos = sf::Mouse::getPosition(*window);
-    // RENDER CHECKERBOARD
+    // DRAW CHECKERBOARD
     for (const auto &cell : this->getBlockList())
     {
         window->draw(*cell);

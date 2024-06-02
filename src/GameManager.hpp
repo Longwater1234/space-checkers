@@ -40,7 +40,7 @@ class GameManager
   public:
     GameManager() = default;
     virtual ~GameManager() = default;
-    virtual void createAllPieces(std::vector<chk::PiecePtr> &pieceList) = 0;
+    virtual void createAllPieces() = 0;
     virtual void handleEvents(chk::CircularBuffer<short> &buffer) = 0;
     virtual void drawBoard() = 0;
     void drawCheckerboard(const sf::Font &font);

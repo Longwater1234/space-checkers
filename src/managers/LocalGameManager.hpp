@@ -12,7 +12,7 @@ class LocalGameManager final : public chk::GameManager
   public:
     explicit LocalGameManager(sf::RenderWindow *windowPtr);
     LocalGameManager() = delete;
-    void createAllPieces(std::vector<chk::PiecePtr> &pieceList) override;
+    void createAllPieces() override;
 
     // Inherited via GameManager
     void drawBoard() override;
@@ -39,11 +39,16 @@ inline LocalGameManager::LocalGameManager(sf::RenderWindow *windowPtr)
  * Create all pieces for both players and add them to pieceList, using stdlib random generator
  * @param pieceList destination of created pieces
  */
-inline void LocalGameManager::createAllPieces(std::vector<chk::PiecePtr> &pieceList)
+inline void LocalGameManager::createAllPieces()
 {
     std::random_device randomDevice;
     std::mt19937 randEngine(randomDevice());
     std::uniform_int_distribution<short> dist(1, std::numeric_limits<short>::max());
+
+    // Reserve container for pieces on board
+    std::vector<chk::PiecePtr> pieceList;
+    pieceList.reserve(chk::NUM_PIECES);
+
     for (uint16_t row = 0; row < NUM_ROWS; row++)
     {
         for (uint16_t col = 0; col < NUM_COLS; col++)
