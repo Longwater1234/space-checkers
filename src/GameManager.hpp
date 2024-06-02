@@ -58,7 +58,7 @@ class GameManager
     // whether it's player Red's turn
     bool playerRedTurn = true;
     // bottom display message
-    std::string currentMsg;
+    mutable std::string currentMsg;
     // whether match is over
     bool gameOver = false;
     // mutex for atomic updates
@@ -94,6 +94,7 @@ class GameManager
     [[nodiscard]] bool hasPendingCaptures() const;
     [[nodiscard]] const bool &isGameOver() const;
     void setSourceCell(const int &src_cell);
+    void doCleanup();
     virtual void handleMovePiece(const chk::PlayerPtr &player, const chk::PlayerPtr &opponent, const Block &destCell,
                                  const short &currentPieceId);
     virtual void handleJumpPiece(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,

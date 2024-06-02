@@ -188,6 +188,18 @@ void GameManager::setSourceCell(const int &src_cell)
 }
 
 /**
+* If needed to halt the game, clear gameMap, pieces for both players, and the Board
+*/
+void chk::GameManager::doCleanup()
+{
+    std::scoped_lock lg(this->my_mutex);
+    this->gameMap.clear();
+    this->player1->emptyBasket();
+    this->player2->emptyBasket();
+    this->gameOver = true;
+}
+
+/**
  * Whether the current player is holding own hunting Piece, AND
  * forcedMoves is not empty
  *

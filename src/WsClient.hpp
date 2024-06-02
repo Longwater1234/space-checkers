@@ -17,7 +17,7 @@ namespace chk
 {
 
 using onReadyCreatePieces = std::function<void(chk::payload::Welcome &)>; // callback after receiving pieces from server
-using onReadyStartGame = std::function<void(chk::payload::StartGame &)>;      // callback after both players done joined
+using onReadyStartGame = std::function<void(chk::payload::StartGame &)>;  // callback after both players done joined
 
 /**
  * This will handle all websocket exchanges with Server
@@ -43,7 +43,7 @@ class WsClient final
     onReadyCreatePieces _onReadyCreatePieces; // callback after creating pieces for both players
     onReadyStartGame _onReadyStartGame;
     std::mutex mut;
-    std::unique_ptr<ix::WebSocket> webSocketPtr = nullptr;
+    std::unique_ptr<ix::WebSocket> webSocketPtr = nullptr; // our Websocket object
     void showErrorPopup();
     void showChatWindow();
     void initGameLoop();
@@ -55,7 +55,7 @@ class WsClient final
 
 inline chk::WsClient::WsClient()
 {
-    // Initialize WS
+    // Required on Windows
     ix::initNetSystem();
     // Our websocket object
     this->webSocketPtr = std::make_unique<ix::WebSocket>();
@@ -93,7 +93,7 @@ inline void WsClient::showConnectWindow()
 {
     static bool is_secure = false;
     ImGui::SetNextWindowSize(ImVec2(sf::Vector2f(300.0, 300.0)));
-    static char inputUrl[256] = "";
+    static char inputUrl[256] = "127.0.0.1:9876/game";
     if (ImGui::Begin("Connect Window", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse))
     {
         ImGui::InputText("Server IP", inputUrl, IM_ARRAYSIZE(inputUrl), ImGuiInputTextFlags_CharsNoBlank);
@@ -188,7 +188,7 @@ inline void WsClient::tryConnect(std::string_view address)
     }
 
     // ping server every 50 seconds
-    this->webSocketPtr->setPingInterval(50);
+    this->webSocketPtr->setPingInterval(30);
 
     // Handle any connection error/timeout
     if (this->webSocketPtr->getReadyState() != ix::ReadyState::Open && this->isDead)
@@ -218,9 +218,9 @@ inline void WsClient::setOnReadyPiecesCallback(const onReadyCreatePieces &callba
 }
 
 /**
-* Set the callback to handle starting game after signal from server
-* @param callback the callback function
-*/
+ * Set the callback to handle starting game after signal from server
+ * @param callback the callback function
+ */
 inline void WsClient::setOnReadyStartGameCallback(const onReadyStartGame &callback)
 {
     this->_onReadyStartGame = callback;

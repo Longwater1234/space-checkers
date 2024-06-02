@@ -8,8 +8,8 @@
 namespace chk
 {
 /**
- * (NOT THREAD SAFE!) Rotating container with strict size limit. If `maxCapacity` is reached, remove the first added item
- * before inserting the new element in. Works in FIFO policy
+ * (NOT THREAD SAFE!) Rotating container with strict size limit. If `maxCapacity` is reached, remove the first added
+ * item before inserting the new element in. Works in FIFO policy
  */
 template <typename T> class CircularBuffer
 {
