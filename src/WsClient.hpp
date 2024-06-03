@@ -16,8 +16,8 @@
 namespace chk
 {
 
-using onReadyCreatePieces = std::function<void(chk::payload::Welcome &)>; // callback after receiving pieces from server
-using onReadyStartGame = std::function<void(chk::payload::StartGame &)>;  // callback after both players done joined
+using onConnectedServer = std::function<void(chk::payload::Welcome &)>;  // callback after connected to server success
+using onReadyStartGame = std::function<void(chk::payload::StartGame &)>; // callback after both players done joined
 
 /**
  * This will handle all websocket exchanges with Server
@@ -27,7 +27,7 @@ class WsClient final
   public:
     WsClient();
     void runMainLoop();
-    void setOnReadyPiecesCallback(const onReadyCreatePieces &callback);
+    void setOnReadyConnectedCallback(const onConnectedServer &callback);
     void setOnReadyStartGameCallback(const onReadyStartGame &callback);
     bool replyServer(const simdjson::dom::object &payload) const;
 
@@ -40,7 +40,7 @@ class WsClient final
     std::atomic_bool conn_clicked = false;          // if 'connect' button clicked
     std::deque<std::string> serverMessages;         // messages from backend server
 
-    onReadyCreatePieces _onReadyCreatePieces; // callback after creating pieces for both players
+    onConnectedServer _onReadyConnected;
     onReadyStartGame _onReadyStartGame;
     std::mutex mut;
     std::unique_ptr<ix::WebSocket> webSocketPtr = nullptr; // our Websocket object
@@ -212,9 +212,9 @@ inline void WsClient::tryConnect(std::string_view address)
  * Set the callback to handle created pieces (from server)
  * @param callback - the callback function
  */
-inline void WsClient::setOnReadyPiecesCallback(const onReadyCreatePieces &callback)
+inline void WsClient::setOnReadyConnectedCallback(const onConnectedServer &callback)
 {
-    this->_onReadyCreatePieces = callback;
+    this->_onReadyConnected = callback;
 }
 
 /**
@@ -287,7 +287,7 @@ inline void WsClient::showChatWindow()
     }
     else
     {
-        // IF THIS chat WINDOW IS CLOSED, SHUTDOWN socket
+        // IF THIS chat WINDOW IS CLOSED, SHUTDOWN socket nicely
         this->webSocketPtr->stop();
         this->isDead = true;
     }
@@ -329,9 +329,9 @@ inline void WsClient::initGameLoop()
                 auto rawTeam = static_cast<uint16_t>(doc.at_key("myTeam").get_uint64());
                 welcome.myTeam = chk::PlayerType{rawTeam};
                 welcome.notice = doc.at_key("notice").get_string();
-                if (this->_onReadyCreatePieces != nullptr)
+                if (this->_onReadyConnected != nullptr)
                 {
-                    this->_onReadyCreatePieces(welcome);
+                    this->_onReadyConnected(welcome);
                 }
             }
             break;

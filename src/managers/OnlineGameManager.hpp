@@ -56,7 +56,7 @@ inline OnlineGameManager::OnlineGameManager(sf::RenderWindow *windowPtr)
  */
 inline void chk::OnlineGameManager::createAllPieces()
 {
-    this->wsClient->setOnReadyPiecesCallback([this](chk::payload::Welcome &welcome) {
+    this->wsClient->setOnReadyConnectedCallback([this](chk::payload::Welcome &welcome) {
         this->_myTeam = welcome.myTeam;
         if (this->_myTeam == PlayerType::PLAYER_RED)
         {
@@ -69,7 +69,7 @@ inline void chk::OnlineGameManager::createAllPieces()
     this->wsClient->setOnReadyStartGameCallback([this](chk::payload::StartGame &payload) {
         this->gameReady = true;
         this->updateMessage(payload.notice);
-
+        // Reserve container for pieces on board
         std::vector<chk::PiecePtr> pieceList;
         pieceList.reserve(chk::NUM_PIECES);
 
