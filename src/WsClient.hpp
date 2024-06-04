@@ -316,13 +316,11 @@ inline void WsClient::initGameLoop()
         {
             if (!msg.empty())
             {
-
-                static simdjson::dom::object doc = jparser.parse(msg);
+                simdjson::dom::object doc = jparser.parse(msg);
                 const auto rawMsgType = static_cast<uint16_t>(doc.at_key("messageType").get_int64());
                 chk::payload::MessageType msgType{rawMsgType};
-                switch (msgType)
+                if (msgType == chk::payload::MessageType::WELCOME)
                 {
-                case chk::payload::MessageType::WELCOME: {
                     /* code */
                     chk::payload::Welcome welcome;
                     auto rawTeam = static_cast<uint16_t>(doc.at_key("myTeam").get_uint64());
@@ -333,9 +331,8 @@ inline void WsClient::initGameLoop()
                         this->_onReadyConnected(welcome);
                     }
                 }
-                break;
-
-                case chk::payload::MessageType::START: {
+                else if (msgType == chk::payload::MessageType::START)
+                {
                     chk::payload::StartGame startPayload;
                     startPayload.notice = doc.at_key("notice").get_string();
                     for (const auto &val : doc.at_key("piecesRed").get_array())
@@ -351,12 +348,6 @@ inline void WsClient::initGameLoop()
                         this->_onReadyStartGame(startPayload);
                     }
                 }
-                break;
-
-                default:
-                    break;
-                }
-
                 std::scoped_lock lg(this->mut);
                 msgBuffer.clean();
             }
