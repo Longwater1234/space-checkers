@@ -56,6 +56,7 @@ inline OnlineGameManager::OnlineGameManager(sf::RenderWindow *windowPtr)
  */
 inline void chk::OnlineGameManager::createAllPieces()
 {
+    //wait for connection success
     this->wsClient->setOnReadyConnectedCallback([this](chk::payload::Welcome &welcome) {
         this->_myTeam = welcome.myTeam;
         if (this->_myTeam == PlayerType::PLAYER_RED)

@@ -64,7 +64,7 @@ int main()
     // THE STATUS TEXT
     sf::Text txtPanel{"Welcome to Checkers", font, 16};
     txtPanel.setFillColor(sf::Color::White);
-    txtPanel.setPosition(sf::Vector2f{0, 8.5 * chk::SIZE_CELL});
+    txtPanel.setPosition(sf::Vector2f{10.0, 8.5 * chk::SIZE_CELL});
     manager->updateMessage("Now playing! RED starts");
 
     // THE MAIN GAME LOOP

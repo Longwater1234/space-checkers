@@ -86,6 +86,8 @@ inline void LocalGameManager::createAllPieces()
             this->player2->receivePiece(kete);
         }
     }
+    // we no longer need this
+    pieceList.clear();
 }
 
 /**
@@ -128,7 +130,7 @@ inline void LocalGameManager::drawBoard()
 }
 
 /**
- * This will be handling all events
+ * This will be handling all UI and mouse events
  * @param buffer stores the currently selected piece
  */
 inline void LocalGameManager::handleEvents(chk::CircularBuffer<short> &buffer)

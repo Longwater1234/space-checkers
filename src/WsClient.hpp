@@ -32,13 +32,13 @@ class WsClient final
     bool replyServer(const simdjson::dom::object &payload) const;
 
   private:
-    std::string final_address;                      // IP or URL of server
-    std::atomic_bool isDead{false};                 // if connection closed
-    std::atomic_bool isConnected{false};            // if done connected to server (else, show loading)
-    chk::CircularBuffer<std::string> msgBuffer{20}; // keep only recent 20 messages
-    mutable std::string errorMsg{};                 // for any websocket errors
-    std::atomic_bool conn_clicked = false;          // if 'connect' button clicked
-    std::deque<std::string> serverMessages;         // messages from backend server
+    std::string final_address;                     // IP or URL of server
+    std::atomic_bool isDead{false};                // if connection closed
+    std::atomic_bool isConnected{false};           // if done connected to server (else, show loading)
+    chk::CircularBuffer<std::string> msgBuffer{1}; // keep only recent 20 messages
+    mutable std::string errorMsg{};                // for any websocket errors
+    std::atomic_bool conn_clicked = false;         // if 'connect' button clicked
+    std::deque<std::string> serverMessages;        // messages from backend server
 
     onConnectedServer _onReadyConnected;
     onReadyStartGame _onReadyStartGame;
@@ -188,7 +188,7 @@ inline void WsClient::tryConnect(std::string_view address)
     }
 
     // ping server every 50 seconds
-    this->webSocketPtr->setPingInterval(30);
+    // this->webSocketPtr->setPingInterval(30);
 
     // Handle any connection error/timeout
     if (this->webSocketPtr->getReadyState() != ix::ReadyState::Open && this->isDead)
@@ -314,51 +314,52 @@ inline void WsClient::initGameLoop()
     {
         for (const auto &msg : this->msgBuffer.getAll())
         {
-            if (msg.empty())
+            if (!msg.empty())
             {
-                continue;
-            }
-            static simdjson::dom::object doc = jparser.parse(msg);
-            const auto rawMsgType = static_cast<uint16_t>(doc.at_key("messageType").get_int64());
-            chk::payload::MessageType msgType{rawMsgType};
-            switch (msgType)
-            {
-            case chk::payload::MessageType::WELCOME: {
-                /* code */
-                chk::payload::Welcome welcome;
-                auto rawTeam = static_cast<uint16_t>(doc.at_key("myTeam").get_uint64());
-                welcome.myTeam = chk::PlayerType{rawTeam};
-                welcome.notice = doc.at_key("notice").get_string();
-                if (this->_onReadyConnected != nullptr)
-                {
-                    this->_onReadyConnected(welcome);
-                }
-            }
-            break;
 
-            case chk::payload::MessageType::START: {
-                chk::payload::StartGame startPayload;
-                startPayload.notice = doc.at_key("notice").get_string();
-                for (const auto &val : doc.at_key("piecesRed").get_array())
+                static simdjson::dom::object doc = jparser.parse(msg);
+                const auto rawMsgType = static_cast<uint16_t>(doc.at_key("messageType").get_int64());
+                chk::payload::MessageType msgType{rawMsgType};
+                switch (msgType)
                 {
-                    startPayload.piecesRed.emplace_back(static_cast<int16_t>(val.get_int64()));
+                case chk::payload::MessageType::WELCOME: {
+                    /* code */
+                    chk::payload::Welcome welcome;
+                    auto rawTeam = static_cast<uint16_t>(doc.at_key("myTeam").get_uint64());
+                    welcome.myTeam = chk::PlayerType{rawTeam};
+                    welcome.notice = doc.at_key("notice").get_string();
+                    if (this->_onReadyConnected != nullptr)
+                    {
+                        this->_onReadyConnected(welcome);
+                    }
                 }
-                for (const auto &val : doc.at_key("piecesBlack").get_array())
-                {
-                    startPayload.piecesBlack.emplace_back(static_cast<int16_t>(val.get_int64()));
-                }
-                if (this->_onReadyStartGame != nullptr)
-                {
-                    this->_onReadyStartGame(startPayload);
-                }
-            }
-            break;
-
-            default:
                 break;
+
+                case chk::payload::MessageType::START: {
+                    chk::payload::StartGame startPayload;
+                    startPayload.notice = doc.at_key("notice").get_string();
+                    for (const auto &val : doc.at_key("piecesRed").get_array())
+                    {
+                        startPayload.piecesRed.emplace_back(static_cast<int16_t>(val.get_int64()));
+                    }
+                    for (const auto &val : doc.at_key("piecesBlack").get_array())
+                    {
+                        startPayload.piecesBlack.emplace_back(static_cast<int16_t>(val.get_int64()));
+                    }
+                    if (this->_onReadyStartGame != nullptr)
+                    {
+                        this->_onReadyStartGame(startPayload);
+                    }
+                }
+                break;
+
+                default:
+                    break;
+                }
+
+                std::scoped_lock lg(this->mut);
+                msgBuffer.clean();
             }
-            std::scoped_lock lg(this->mut);
-            msgBuffer.clean();
         }
     }
     catch (const simdjson::simdjson_error &ex)
