@@ -107,7 +107,7 @@ inline PlayerType Player::getPlayerType() const
 }
 
 /**
- * get this player's name
+ * Get this player's name
  * @return either RED or BLACK
  */
 inline const std::string &Player::getName() const
@@ -136,7 +136,7 @@ inline bool Player::hasThisPiece(const short pieceId) const
 
 /**
  * \brief How many pieces this player currently have?
- * \return count
+ * \return total count
  */
 inline size_t Player::getPieceCount() const
 {

@@ -5,7 +5,7 @@ namespace chk
 {
 /**
  * This class is responsible for offline play
- * @since 2024-11-04
+ * @since 2024-04-11
  */
 class LocalGameManager final : public chk::GameManager
 {
@@ -159,7 +159,7 @@ inline void LocalGameManager::handleEvents(chk::CircularBuffer<short> &buffer)
 
                     if (this->hasPendingCaptures())
                     {
-                        this->handleJumpPiece(hunter, prey, cell);
+                        this->handleCapturePiece(hunter, prey, cell);
                         this->updateMatchStatus(hunter, prey);
                         buffer.clean();
                     }

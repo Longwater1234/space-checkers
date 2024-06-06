@@ -103,14 +103,15 @@ void GameManager::handleMovePiece(const chk::PlayerPtr &player, const chk::Playe
     gameMap.erase(this->sourceCell.value());               // set old location empty!
     gameMap.emplace(destCell->getIndex(), currentPieceId); // fill in the new location
     this->sourceCell = std::nullopt;                       // reset source cell
-    this->identifyTargets(opponent);
+    this->identifyTargets(opponent);                       // check  opportunities for Opponent
+   
     if (!this->forcedMoves.empty())
     {
         spdlog::info(player->getName() + " IS IN DANGER ");
     }
     if (this->_onMoveSuccess != nullptr)
     {
-        // notify move listener
+        // TODO notify server
         _onMoveSuccess(currentPieceId, destCell->getIndex());
     }
     this->playerRedTurn = !this->playerRedTurn; // toggle player turns
@@ -124,8 +125,8 @@ void GameManager::handleMovePiece(const chk::PlayerPtr &player, const chk::Playe
  * @param prey the defensive player
  * @param targetCell the destination of hunter
  */
-void GameManager::handleJumpPiece(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,
-                                  const chk::Block &targetCell)
+void GameManager::handleCapturePiece(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,
+                                     const chk::Block &targetCell)
 {
 
     assert(!(hunter == prey) && "cannot be same player");
@@ -188,12 +189,13 @@ void GameManager::setSourceCell(const int &src_cell)
 }
 
 /**
-* If needed to halt the game, clear gameMap, pieces for both players, and the Board
-*/
+ * If needed to halt the game, clear gameMap, pieces for both players, and the Board
+ */
 void chk::GameManager::doCleanup()
 {
     std::scoped_lock lg(this->my_mutex);
     this->gameMap.clear();
+    this->forcedMoves.clear();
     this->player1->emptyBasket();
     this->player2->emptyBasket();
     this->gameOver = true;

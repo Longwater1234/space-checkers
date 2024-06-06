@@ -4,12 +4,13 @@
 #include "../payloads/ServerStructs.hpp"
 #include "imgui-SFML.h"
 #include <atomic>
+#include <simdjson.h>
 
 namespace chk
 {
 /**
  * This class is responsible for online gameplay
- * @since 2024-11-04
+ * @since 2024-04-11
  */
 class OnlineGameManager final : public chk::GameManager
 {
@@ -26,7 +27,7 @@ class OnlineGameManager final : public chk::GameManager
     // Inherited via GameManager
     void handleMovePiece(const chk::PlayerPtr &player, const chk::PlayerPtr &opponent, const Block &destCell,
                          const short &currentPieceId) override;
-    void handleJumpPiece(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,
+    void handleCapturePiece(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,
                          const chk::Block &targetCell) override;
     void handleCellTap(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey, chk::CircularBuffer<short> &buffer,
                        const chk::Block &cell) override;
@@ -36,6 +37,8 @@ class OnlineGameManager final : public chk::GameManager
     std::unique_ptr<chk::WsClient> wsClient = nullptr;
     std::atomic_bool isMyTurn = false;
     std::atomic_bool gameReady = false;
+    void startMoveListener(); 
+    void startCaptureListener();
 };
 
 inline OnlineGameManager::OnlineGameManager(sf::RenderWindow *windowPtr)
@@ -117,6 +120,9 @@ inline void chk::OnlineGameManager::createAllPieces()
                 this->player2->receivePiece(kete);
             }
         }
+        pieceList.clear();
+        this->startMoveListener();
+        this->startCaptureListener();
     });
 }
 
@@ -168,9 +174,34 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
                                                const Block &destCell, const short &currentPieceId)
 {
     // TODO complete me
+     // VERIFY if move is successful
+    const bool success = player->movePiece(currentPieceId, destCell->getPos());
+    if (!success)
+    {
+        return;
+    }
+    gameMap.erase(this->sourceCell.value());               // set old location empty!
+    gameMap.emplace(destCell->getIndex(), currentPieceId); // fill in the new location
+    this->sourceCell = std::nullopt;                       // reset source cell
+    this->identifyTargets(opponent);                       // check  opportunities for Opponent
+   
+    if (!this->getForcedMoves().empty())
+    {
+        spdlog::info("YOU ARE IN DANGER ");
+    }
+
+    // if (this->_onMoveSuccess != nullptr)
+    // {
+    //     // TODO notify server
+    //     _onMoveSuccess(currentPieceId, destCell->getIndex());
+    // }
+    // {"messageType":0,"fromTeam":0,"PieceId":0,"destPos":{"x":199.77,"y":11.8},"srcCell":0}
+    this->isMyTurn = !this->isMyTurn; // toggle player turns
+    this->updateMessage("You have moved to " + std::to_string(destCell->getIndex()) + ". It's " +
+                        opponent->getName() + "'s turn.");
 }
 
-inline void OnlineGameManager::handleJumpPiece(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,
+inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,
                                                const chk::Block &targetCell)
 {
     // TODO complete me
@@ -180,10 +211,53 @@ inline void OnlineGameManager::handleCellTap(const chk::PlayerPtr &hunter, const
                                              chk::CircularBuffer<short> &buffer, const chk::Block &cell)
 {
     // TODO complete me
-    if (!this->gameReady || this->isGameOver())
+    if (!this->gameReady ||!this->isMyTurn)
     {
         return;
     }
+      // CHECK IF this cell has a Piece
+    const short pieceId = this->getPieceFromCell(cell->getIndex());
+    if (pieceId != -1)
+    {
+        // YES, it has one! CHECK IF THERE IS ANY PENDING "forced jumps"
+        if (!this->getForcedMoves().empty())
+        {
+            this->showForcedMoves(hunter, cell);
+            return;
+        }
+        // OTHERWISE, store it in buffer (for a simple move next)!
+        buffer.addItem(pieceId);
+        this->setSourceCell(cell->getIndex());
+    }
+    else
+    {
+        // Cell is Empty! Let's move a piece (from buffer) here!
+        if (!buffer.isEmpty())
+        {
+            const short movablePieceId = buffer.getTop();
+            if (!hunter->hasThisPiece(movablePieceId))
+            {
+                return;
+            }
+            this->handleMovePiece(hunter, prey, cell, movablePieceId);
+            buffer.clean();
+        }
+    }
+}
+/**
+ * Will be listening for MovePiece updates from wsClient, and update gameBoard
+*/
+inline void OnlineGameManager::startMoveListener()
+{
+    //TODO complete me
+}
+
+/**
+ * Will be listening for all CapturePiece from wsClient, and update gameBoard
+*/
+inline void OnlineGameManager::startCaptureListener()
+{
+    //TODO complete me
 }
 
 /**
@@ -217,7 +291,7 @@ inline void OnlineGameManager::handleEvents(chk::CircularBuffer<short> &circular
 
                     if (this->hasPendingCaptures())
                     {
-                        this->handleJumpPiece(hunter, prey, cell);
+                        this->handleCapturePiece(hunter, prey, cell);
                         this->updateMatchStatus(hunter, prey);
                         circularBuffer.clean();
                     }

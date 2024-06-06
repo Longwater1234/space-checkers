@@ -51,8 +51,6 @@ class GameManager
     [[nodiscard]] const std::string &getCurrentMsg() const;
 
   private:
-    // map of cell_index -> piece_id
-    std::map<int, short> gameMap;
     // flag to check if cache is already filled
     bool alreadyCached = false;
     // whether it's player Red's turn
@@ -70,13 +68,14 @@ class GameManager
 
     [[nodiscard]] bool boardContainsCell(const int &cell_idx) const;
     [[nodiscard]] bool awayFromEdge(const int &cell_idx) const;
-    void identifyTargets(const chk::PlayerPtr &hunter);
     void collectFrontRHS(const chk::PlayerPtr &hunter, const Block &cell_ptr);
     void collectFrontLHS(const chk::PlayerPtr &hunter, const Block &cell_ptr);
     void collectBehindRHS(const chk::PlayerPtr &hunter, const Block &cell_ptr);
     void collectBehindLHS(const chk::PlayerPtr &hunter, const Block &cell_ptr);
 
   protected:
+    // map of cell_index -> piece_id
+    std::map<int, short> gameMap;
     // main window
     sf::RenderWindow *window = nullptr;
     // source cell Index of selected piece
@@ -95,10 +94,11 @@ class GameManager
     [[nodiscard]] const bool &isGameOver() const;
     void setSourceCell(const int &src_cell);
     void doCleanup();
+    void identifyTargets(const chk::PlayerPtr &hunter);
     virtual void handleMovePiece(const chk::PlayerPtr &player, const chk::PlayerPtr &opponent, const Block &destCell,
                                  const short &currentPieceId);
-    virtual void handleJumpPiece(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,
-                                 const chk::Block &targetCell);
+    virtual void handleCapturePiece(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,
+                                    const chk::Block &targetCell);
     virtual void handleCellTap(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,
                                chk::CircularBuffer<short> &buffer, const chk::Block &cell);
     void updateMatchStatus(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2);
