@@ -88,11 +88,11 @@ class GameManager
     chk::PlayerPtr player2 = nullptr;
 
     [[nodiscard]] const bool &isPlayerRedTurn() const;
-    [[nodiscard]] short getPieceFromCell(const int &cell_idx);
+    [[nodiscard]] short getPieceFromCell(int cell_idx);
     [[nodiscard]] const std::vector<chk::Block> &getBlockList() const;
     [[nodiscard]] bool hasPendingCaptures() const;
     [[nodiscard]] const bool &isGameOver() const;
-    void setSourceCell(const int &src_cell);
+    void setSourceCell(int src_cell);
     void doCleanup();
     void identifyTargets(const chk::PlayerPtr &hunter);
     virtual void handleMovePiece(const chk::PlayerPtr &player, const chk::PlayerPtr &opponent, const Block &destCell,

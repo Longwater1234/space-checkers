@@ -62,7 +62,7 @@ inline void chk::OnlineGameManager::createAllPieces()
     // wait for connection success
     this->wsClient->setOnReadyConnectedCallback([this](chk::payload::WelcomePayload &welcome, std::string_view notice) {
         this->myTeam = welcome.my_team();
-        if (this->myTeam == chk::payload::TEAM_RED)
+        if (this->myTeam & chk::payload::TEAM_RED)
         {
             this->isMyTurn = true;
         }
@@ -148,7 +148,7 @@ inline void OnlineGameManager::drawBoard()
     // DRAW RED PIECES
     for (const auto &[id, red_piece] : this->player1->getOwnPieces())
     {
-        if (this->myTeam == TeamColor::TEAM_RED && this->isMyTurn && red_piece->containsPoint(mousePos))
+        if (this->myTeam & TeamColor::TEAM_RED && this->isMyTurn && red_piece->containsPoint(mousePos))
         {
             red_piece->addOutline();
         }
@@ -161,7 +161,7 @@ inline void OnlineGameManager::drawBoard()
     // DRAW BLACK PIECES
     for (const auto &[id, black_piece] : this->player2->getOwnPieces())
     {
-        if (this->myTeam == TeamColor::TEAM_BLACK && this->isMyTurn && black_piece->containsPoint(mousePos))
+        if (this->myTeam & TeamColor::TEAM_BLACK && this->isMyTurn && black_piece->containsPoint(mousePos))
         {
             black_piece->addOutline();
         }
@@ -204,10 +204,10 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
     newDestCell.set_y(destCell->getPos().y);
     movePayload.set_allocated_dest_cell(&newDestCell);
 
-    // create basePayload
-    chk::payload::BasePayload replyPayload;
-    replyPayload.set_allocated_move_payload(&movePayload);
-    if (!this->wsClient->replyServer(replyPayload))
+    // create basePayload (request body)
+    chk::payload::BasePayload requestBody;
+    requestBody.set_allocated_move_payload(&movePayload);
+    if (!this->wsClient->replyServer(requestBody))
     {
         spdlog::error("failed to reply to server");
     }

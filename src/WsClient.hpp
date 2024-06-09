@@ -17,7 +17,7 @@ namespace chk
 
 // when connected to server success
 using onConnectedServer = std::function<void(chk::payload::WelcomePayload &, std::string_view notice)>;
-//when both players joined match
+// when both players joined match
 using onReadyStartGame = std::function<void(chk::payload::StartPayload &, std::string_view notice)>;
 
 /**
@@ -48,7 +48,6 @@ class WsClient final
     std::mutex mut;
     std::unique_ptr<ix::WebSocket> webSocketPtr = nullptr; // our Websocket object
     void showErrorPopup();
-    void showChatWindow();
     void initGameLoop();
     static void showHint(const char *tip);
     void tryConnect(std::string_view address);
@@ -233,59 +232,6 @@ inline bool WsClient::replyServer(const chk::payload::BasePayload &payload) cons
     payload.SerializeToString(&this->protoBucket);
     const auto &result = this->webSocketPtr->send(this->protoBucket, true);
     return result.success;
-}
-
-/**
- * Show the chat window and handle sending messsages
- */
-inline void WsClient::showChatWindow()
-{
-    static bool chatWindow = true;
-    ImGui::SetNextWindowSize(ImVec2(sf::Vector2f{400.0, 400.0}));
-    if (chatWindow)
-    {
-        ImGui::Begin("Echo Chat", &chatWindow, ImGuiWindowFlags_NoResize);
-        if (!this->isConnected)
-        {
-            /* code */
-            ImGui::Text("Connecting to %s", this->final_address.c_str());
-            ImGui::End();
-            return;
-        }
-
-        ImGui::BeginChild("ChatMessages", ImVec2(300.0, 290.0), ImGuiChildFlags_None);
-        for (const auto &msg : this->msgBuffer.getAll())
-        {
-            if (!msg.empty())
-            {
-                ImGui::TextWrapped(u8"%s", msg.c_str());
-            }
-        }
-        ImGui::EndChild();
-
-        ImGui::SetCursorPos(ImVec2(sf::Vector2f{0, 350.0}));
-        ImGui::PushItemWidth(300);
-        static char msgpack[256] = "";
-        if (ImGui::InputTextWithHint(".", "Write message, press Enter", msgpack, IM_ARRAYSIZE(msgpack),
-                                     ImGuiInputTextFlags_EnterReturnsTrue))
-        {
-            if (!std::string_view(msgpack).empty())
-            {
-                std::scoped_lock<std::mutex> lg{this->mut};
-                this->msgBuffer.addItem("You: " + std::string(msgpack));
-                this->webSocketPtr->send(msgpack);
-                memset(msgpack, 0, sizeof(msgpack));
-            }
-        }
-        ImGui::PopItemWidth();
-        ImGui::End();
-    }
-    else
-    {
-        // IF THIS chat WINDOW IS CLOSED, SHUTDOWN socket nicely
-        this->webSocketPtr->stop();
-        this->isDead = true;
-    }
 }
 
 /**
