@@ -1,11 +1,9 @@
 #pragma once
 #include "../GameManager.hpp"
 #include "../WsClient.hpp"
-#include "../payloads/ServerStructs.hpp"
 #include "imgui-SFML.h"
 #include "payloads/base_payload.pb.hpp"
 #include <atomic>
-
 
 namespace chk
 {
@@ -29,7 +27,7 @@ class OnlineGameManager final : public chk::GameManager
     void handleMovePiece(const chk::PlayerPtr &player, const chk::PlayerPtr &opponent, const Block &destCell,
                          const short &currentPieceId) override;
     void handleCapturePiece(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,
-                         const chk::Block &targetCell) override;
+                            const chk::Block &targetCell) override;
     void handleCellTap(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey, chk::CircularBuffer<short> &buffer,
                        const chk::Block &cell) override;
 
@@ -38,7 +36,7 @@ class OnlineGameManager final : public chk::GameManager
     std::unique_ptr<chk::WsClient> wsClient = nullptr;
     std::atomic_bool isMyTurn = false;
     std::atomic_bool gameReady = false;
-    void startMoveListener(); 
+    void startMoveListener();
     void startCaptureListener();
 };
 
@@ -60,14 +58,19 @@ inline OnlineGameManager::OnlineGameManager(sf::RenderWindow *windowPtr)
  */
 inline void chk::OnlineGameManager::createAllPieces()
 {
-    //wait for connection success
+    // wait for connection success
     this->wsClient->setOnReadyConnectedCallback([this](chk::payload::WelcomePayload &welcome, std::string_view notice) {
-        this->_myTeam = chk::PlayerType(welcome.my_team());
-        if (this->_myTeam == PlayerType::PLAYER_RED)
+        if (welcome.my_team() == chk::payload::TEAM_RED)
         {
-            this->isMyTurn = true; // Red always starts game
+            // Red always starts game
+            this->_myTeam = chk::PlayerType::PLAYER_RED;
+            this->isMyTurn = true;
         }
-        this->updateMessage(notice);
+        else
+        {
+            this->_myTeam = chk::PlayerType::PLAYER_BLACK;
+        }
+        this->updateMessage(notice); 
     });
 
     // wait for start game signal
@@ -93,14 +96,16 @@ inline void chk::OnlineGameManager::createAllPieces()
                     if (row < 3 && blackItr != payload.pieces_black().end())
                     {
                         // Half Top cells, put BLACK piece
-                        auto kete = std::make_unique<chk::Piece>(circle, chk::PieceType::Black, *blackItr);
+                        auto kete = std::make_unique<chk::Piece>(circle, chk::PieceType::Black,
+                                                                 static_cast<int16_t>(*blackItr));
                         pieceList.emplace_back(std::move_if_noexcept(kete));
                         ++blackItr;
                     }
                     else if (row > 4 && redItr != payload.pieces_red().end())
                     {
                         // Half Bottom cells, put RED piece
-                        auto kete = std::make_unique<chk::Piece>(circle, chk::PieceType::Red, *redItr);
+                        auto kete =
+                            std::make_unique<chk::Piece>(circle, chk::PieceType::Red, static_cast<int16_t>(*redItr));
                         pieceList.emplace_back(std::move_if_noexcept(kete));
                         ++redItr;
                     }
@@ -175,7 +180,7 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
                                                const Block &destCell, const short &currentPieceId)
 {
     // TODO complete me
-     // VERIFY if move is successful
+    // VERIFY if move is successful
     const bool success = player->movePiece(currentPieceId, destCell->getPos());
     if (!success)
     {
@@ -185,7 +190,7 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
     gameMap.emplace(destCell->getIndex(), currentPieceId); // fill in the new location
     this->sourceCell = std::nullopt;                       // reset source cell
     this->identifyTargets(opponent);                       // check  opportunities for Opponent
-   
+
     if (!this->getForcedMoves().empty())
     {
         spdlog::info("YOU ARE IN DANGER ");
@@ -198,12 +203,12 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
     // }
     // {"messageType":0,"fromTeam":0,"PieceId":0,"destPos":{"x":199.77,"y":11.8},"srcCell":0}
     this->isMyTurn = !this->isMyTurn; // toggle player turns
-    this->updateMessage("You have moved to " + std::to_string(destCell->getIndex()) + ". It's " +
-                        opponent->getName() + "'s turn.");
+    this->updateMessage("You have moved to " + std::to_string(destCell->getIndex()) + ". It's " + opponent->getName() +
+                        "'s turn.");
 }
 
 inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,
-                                               const chk::Block &targetCell)
+                                                  const chk::Block &targetCell)
 {
     // TODO complete me
 }
@@ -212,11 +217,11 @@ inline void OnlineGameManager::handleCellTap(const chk::PlayerPtr &hunter, const
                                              chk::CircularBuffer<short> &buffer, const chk::Block &cell)
 {
     // TODO complete me
-    if (!this->gameReady ||!this->isMyTurn)
+    if (!this->gameReady || !this->isMyTurn)
     {
         return;
     }
-      // CHECK IF this cell has a Piece
+    // CHECK IF this cell has a Piece
     const short pieceId = this->getPieceFromCell(cell->getIndex());
     if (pieceId != -1)
     {
@@ -247,18 +252,18 @@ inline void OnlineGameManager::handleCellTap(const chk::PlayerPtr &hunter, const
 }
 /**
  * Will be listening for MovePiece updates from wsClient, and update gameBoard
-*/
+ */
 inline void OnlineGameManager::startMoveListener()
 {
-    //TODO complete me
+    // TODO complete me
 }
 
 /**
  * Will be listening for all CapturePiece from wsClient, and update gameBoard
-*/
+ */
 inline void OnlineGameManager::startCaptureListener()
 {
-    //TODO complete me
+    // TODO complete me
 }
 
 /**

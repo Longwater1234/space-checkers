@@ -166,6 +166,7 @@ inline void WsClient::tryConnect(std::string_view address)
         if (msg->type == ix::WebSocketMessageType::Message)
         {
             std::scoped_lock<std::mutex> lg{this->mut};
+            spdlog::info("size of payload {} bytes", msg->wireSize);
             this->msgBuffer.addItem(msg->str);
         }
         else if (msg->type == ix::WebSocketMessageType::Open)
