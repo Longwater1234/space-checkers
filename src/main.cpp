@@ -7,14 +7,16 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Window/Mouse.hpp>
 #include <cassert>
-#include <vector>
 #include <fstream>
+#include <vector>
 
 #include "imgui-SFML.h"
 #include "imgui.h"
+#include <google/protobuf/stubs/common.h>
 
 int main()
 {
+    GOOGLE_PROTOBUF_VERIFY_VERSION;
     auto window = sf::RenderWindow{sf::VideoMode{600, 700}, "SpaceCheckers", sf::Style::Titlebar | sf::Style::Close};
     window.setFramerateLimit(60);
     ImGui::SFML::Init(window, false);
@@ -84,5 +86,6 @@ int main()
         window.display();
     }
     ImGui::SFML::Shutdown();
+    google::protobuf::ShutdownProtobufLibrary();
     return EXIT_SUCCESS;
 }

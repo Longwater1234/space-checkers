@@ -11,7 +11,7 @@ if(NOT APPLE)
   set(SFML_STATIC_LIBRARIES TRUE) 
 endif() 
 
-# Absolute path where you installed SFML (Required on Windows)
+# Absolute path where you installed SFML
 set(SFML_HOME "C:/SFML/SFML-2.6.1")
 
 file(GLOB_RECURSE GAME_SRC "src/*.cpp" "src/*.hpp")
@@ -35,7 +35,7 @@ endif()
 
 # link all required libraries 
 target_link_libraries(SpaceCheckers PRIVATE sfml-graphics sfml-window sfml-system ImGui-SFML
-                        ixwebsocket spdlog::spdlog simdjson::simdjson protobuf::libprotobuf)
+                        ixwebsocket spdlog::spdlog protobuf::libprotobuf)
 
 # include SFML headers
 include_directories(${SFML_HOME}/include)   

@@ -3,8 +3,9 @@
 #include "../WsClient.hpp"
 #include "../payloads/ServerStructs.hpp"
 #include "imgui-SFML.h"
+#include "payloads/base_payload.pb.hpp"
 #include <atomic>
-#include <simdjson.h>
+
 
 namespace chk
 {
@@ -60,25 +61,25 @@ inline OnlineGameManager::OnlineGameManager(sf::RenderWindow *windowPtr)
 inline void chk::OnlineGameManager::createAllPieces()
 {
     //wait for connection success
-    this->wsClient->setOnReadyConnectedCallback([this](chk::payload::Welcome &welcome) {
-        this->_myTeam = welcome.myTeam;
+    this->wsClient->setOnReadyConnectedCallback([this](chk::payload::WelcomePayload &welcome, std::string_view notice) {
+        this->_myTeam = chk::PlayerType(welcome.my_team());
         if (this->_myTeam == PlayerType::PLAYER_RED)
         {
             this->isMyTurn = true; // Red always starts game
         }
-        this->updateMessage(welcome.notice);
+        this->updateMessage(notice);
     });
 
     // wait for start game signal
-    this->wsClient->setOnReadyStartGameCallback([this](chk::payload::StartGame &payload) {
+    this->wsClient->setOnReadyStartGameCallback([this](chk::payload::StartPayload &payload, std::string_view notice) {
         this->gameReady = true;
-        this->updateMessage(payload.notice);
+        this->updateMessage(notice);
         // Reserve container for pieces on board
         std::vector<chk::PiecePtr> pieceList;
         pieceList.reserve(chk::NUM_PIECES);
 
-        auto redItr = payload.piecesRed.begin();
-        auto blackItr = payload.piecesBlack.begin();
+        auto redItr = payload.pieces_red().begin();
+        auto blackItr = payload.pieces_black().begin();
         // create pieces objects, using id's from Server
         for (uint16_t row = 0; row < chk::NUM_ROWS; row++)
         {
@@ -89,14 +90,14 @@ inline void chk::OnlineGameManager::createAllPieces()
                     sf::CircleShape circle(0.5 * chk::SIZE_CELL);
                     const float x = static_cast<float>(col % NUM_COLS) * chk::SIZE_CELL;
                     circle.setPosition(sf::Vector2f(x, row * chk::SIZE_CELL));
-                    if (row < 3 && blackItr != payload.piecesBlack.end())
+                    if (row < 3 && blackItr != payload.pieces_black().end())
                     {
                         // Half Top cells, put BLACK piece
                         auto kete = std::make_unique<chk::Piece>(circle, chk::PieceType::Black, *blackItr);
                         pieceList.emplace_back(std::move_if_noexcept(kete));
                         ++blackItr;
                     }
-                    else if (row > 4 && redItr != payload.piecesRed.end())
+                    else if (row > 4 && redItr != payload.pieces_red().end())
                     {
                         // Half Bottom cells, put RED piece
                         auto kete = std::make_unique<chk::Piece>(circle, chk::PieceType::Red, *redItr);
