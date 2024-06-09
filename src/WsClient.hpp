@@ -40,9 +40,11 @@ class WsClient final
     mutable std::string errorMsg{};                // for any websocket errors
     std::atomic_bool conn_clicked = false;         // if 'connect' button clicked
     std::deque<std::string> serverMessages;        // messages from backend server
+    mutable std::string protoBucket{};                     // reusable buffer used to  serialize protobuf
 
     onConnectedServer _onReadyConnected;
     onReadyStartGame _onReadyStartGame;
+
     std::mutex mut;
     std::unique_ptr<ix::WebSocket> webSocketPtr = nullptr; // our Websocket object
     void showErrorPopup();
@@ -238,7 +240,9 @@ inline bool WsClient::replyServer(const chk::payload::BasePayload &payload) cons
     {
         return false;
     }
-    const auto &result = this->webSocketPtr->send(payload.SerializeAsString(), true);
+    payload.SerializeToString(&this->protoBucket);
+    const auto &result = this->webSocketPtr->send(this->protoBucket, true);
+    this->protoBucket.empty();
     return result.success;
 }
 

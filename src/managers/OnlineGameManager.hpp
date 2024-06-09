@@ -7,6 +7,7 @@
 
 namespace chk
 {
+using chk::payload::TeamColor;
 /**
  * This class is responsible for online gameplay
  * @since 2024-04-11
@@ -32,7 +33,7 @@ class OnlineGameManager final : public chk::GameManager
                        const chk::Block &cell) override;
 
   private:
-    chk::PlayerType _myTeam{};
+    chk::payload::TeamColor myTeam{};
     std::unique_ptr<chk::WsClient> wsClient = nullptr;
     std::atomic_bool isMyTurn = false;
     std::atomic_bool gameReady = false;
@@ -60,23 +61,19 @@ inline void chk::OnlineGameManager::createAllPieces()
 {
     // wait for connection success
     this->wsClient->setOnReadyConnectedCallback([this](chk::payload::WelcomePayload &welcome, std::string_view notice) {
-        if (welcome.my_team() == chk::payload::TEAM_RED)
+        this->myTeam = welcome.my_team();
+        if (this->myTeam == chk::payload::TEAM_RED)
         {
-            // Red always starts game
-            this->_myTeam = chk::PlayerType::PLAYER_RED;
             this->isMyTurn = true;
         }
-        else
-        {
-            this->_myTeam = chk::PlayerType::PLAYER_BLACK;
-        }
-        this->updateMessage(notice); 
+        this->updateMessage(notice);
     });
 
     // wait for start game signal
     this->wsClient->setOnReadyStartGameCallback([this](chk::payload::StartPayload &payload, std::string_view notice) {
         this->gameReady = true;
         this->updateMessage(notice);
+
         // Reserve container for pieces on board
         std::vector<chk::PiecePtr> pieceList;
         pieceList.reserve(chk::NUM_PIECES);
@@ -96,8 +93,8 @@ inline void chk::OnlineGameManager::createAllPieces()
                     if (row < 3 && blackItr != payload.pieces_black().end())
                     {
                         // Half Top cells, put BLACK piece
-                        auto kete = std::make_unique<chk::Piece>(circle, chk::PieceType::Black,
-                                                                 static_cast<int16_t>(*blackItr));
+                        auto kete =
+                            std::make_unique<chk::Piece>(circle, chk::PieceType::Black, static_cast<short>(*blackItr));
                         pieceList.emplace_back(std::move_if_noexcept(kete));
                         ++blackItr;
                     }
@@ -105,7 +102,7 @@ inline void chk::OnlineGameManager::createAllPieces()
                     {
                         // Half Bottom cells, put RED piece
                         auto kete =
-                            std::make_unique<chk::Piece>(circle, chk::PieceType::Red, static_cast<int16_t>(*redItr));
+                            std::make_unique<chk::Piece>(circle, chk::PieceType::Red, static_cast<short>(*redItr));
                         pieceList.emplace_back(std::move_if_noexcept(kete));
                         ++redItr;
                     }
@@ -151,7 +148,7 @@ inline void OnlineGameManager::drawBoard()
     // DRAW RED PIECES
     for (const auto &[id, red_piece] : this->player1->getOwnPieces())
     {
-        if (this->_myTeam == PlayerType::PLAYER_RED && this->isMyTurn && red_piece->containsPoint(mousePos))
+        if (this->myTeam == TeamColor::TEAM_RED && this->isMyTurn && red_piece->containsPoint(mousePos))
         {
             red_piece->addOutline();
         }
@@ -164,7 +161,7 @@ inline void OnlineGameManager::drawBoard()
     // DRAW BLACK PIECES
     for (const auto &[id, black_piece] : this->player2->getOwnPieces())
     {
-        if (this->_myTeam == PlayerType::PLAYER_BLACK && this->isMyTurn && black_piece->containsPoint(mousePos))
+        if (this->myTeam == TeamColor::TEAM_BLACK && this->isMyTurn && black_piece->containsPoint(mousePos))
         {
             black_piece->addOutline();
         }
@@ -179,8 +176,8 @@ inline void OnlineGameManager::drawBoard()
 inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, const chk::PlayerPtr &opponent,
                                                const Block &destCell, const short &currentPieceId)
 {
-    // TODO complete me
     // VERIFY if move is successful
+    int copySourceCell = this->sourceCell.value();
     const bool success = player->movePiece(currentPieceId, destCell->getPos());
     if (!success)
     {
@@ -196,12 +193,25 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
         spdlog::info("YOU ARE IN DANGER ");
     }
 
-    // if (this->_onMoveSuccess != nullptr)
-    // {
-    //     // TODO notify server
-    //     _onMoveSuccess(currentPieceId, destCell->getIndex());
-    // }
-    // {"messageType":0,"fromTeam":0,"PieceId":0,"destPos":{"x":199.77,"y":11.8},"srcCell":0}
+    // REPLY TO SERVER
+    // create move payload
+    chk::payload::MovePayload movePayload;
+    movePayload.set_piece_id(currentPieceId);
+    movePayload.set_from_team(this->myTeam);
+    chk::payload::MovePayload_DestCell newDestCell;
+    newDestCell.set_cell_index(copySourceCell);
+    newDestCell.set_x(destCell->getPos().x);
+    newDestCell.set_y(destCell->getPos().y);
+    movePayload.set_allocated_dest_cell(&newDestCell);
+
+    // create basePayload
+    chk::payload::BasePayload replyPayload;
+    replyPayload.set_allocated_move_payload(&movePayload);
+    if (!this->wsClient->replyServer(replyPayload))
+    {
+        spdlog::error("failed to send message");
+    }
+
     this->isMyTurn = !this->isMyTurn; // toggle player turns
     this->updateMessage("You have moved to " + std::to_string(destCell->getIndex()) + ". It's " + opponent->getName() +
                         "'s turn.");
