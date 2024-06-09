@@ -8,11 +8,11 @@
 #include <SFML/Window/Mouse.hpp>
 #include <cassert>
 #include <fstream>
+#include <google/protobuf/stubs/common.h>
 #include <vector>
 
 #include "imgui-SFML.h"
 #include "imgui.h"
-#include <google/protobuf/stubs/common.h>
 
 int main()
 {
