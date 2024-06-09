@@ -15,13 +15,13 @@
 namespace chk
 {
 
-using onConnectedServer =
-    std::function<void(chk::payload::WelcomePayload &, std::string_view notice)>; // callback after connected
-using onReadyStartGame = std::function<void(chk::payload::StartPayload &,
-                                            std::string_view notice)>; // callback after both players done joined
+// when connected to server success
+using onConnectedServer = std::function<void(chk::payload::WelcomePayload &, std::string_view notice)>;
+//when both players joined match
+using onReadyStartGame = std::function<void(chk::payload::StartPayload &, std::string_view notice)>;
 
 /**
- * This will handle all websocket exchanges with Server
+ * This handles all websocket exchanges with Server
  */
 class WsClient final
 {
@@ -40,7 +40,7 @@ class WsClient final
     mutable std::string errorMsg{};                // for any websocket errors
     std::atomic_bool conn_clicked = false;         // if 'connect' button clicked
     std::deque<std::string> serverMessages;        // messages from backend server
-    mutable std::string protoBucket{};                     // reusable buffer used to  serialize protobuf
+    mutable std::string protoBucket{};             // reusable buffer used to serialize payloads to server
 
     onConnectedServer _onReadyConnected;
     onReadyStartGame _onReadyStartGame;
@@ -200,16 +200,6 @@ inline void WsClient::tryConnect(std::string_view address)
         this->webSocketPtr->stop();
         return;
     }
-
-    // ----------->>>>> LISTEN for UI updates from GameManager, forward to server
-    // this->manager->setOnMoveSuccessCallback([this](const short &pieceId, const int &targetCell) {
-    //    // TODO: SERIALIZE TO JSON, and send it here
-    //    std::string pkg = fmt::format("I moved {} to cell index {}", pieceId, targetCell);
-    //    spdlog::info(pkg);
-    //    webSocket.send(pkg);
-    //});
-
-    //  this->showChatWindow();
 }
 
 /**
@@ -242,7 +232,6 @@ inline bool WsClient::replyServer(const chk::payload::BasePayload &payload) cons
     }
     payload.SerializeToString(&this->protoBucket);
     const auto &result = this->webSocketPtr->send(this->protoBucket, true);
-    this->protoBucket.empty();
     return result.success;
 }
 
@@ -320,16 +309,11 @@ inline void WsClient::initGameLoop()
         if (!msg.empty())
         {
             chk::payload::BasePayload basePayload;
-            assert(basePayload.ParseFromString(msg) && "failed to Parse from string");
-            // const auto rawMsgType = static_cast<uint16_t>(doc.at_key("messageType").get_int64());
-            // chk::payload::MessageType msgType{rawMsgType};
+            basePayload.ParseFromString(msg);
             if (basePayload.has_welcome())
             {
                 /* code */
                 chk::payload::WelcomePayload welcome = basePayload.welcome();
-                // auto rawTeam = static_cast<uint16_t>(doc.at_key("myTeam").get_uint64());
-                //  welcome.myTeam = chk::PlayerType{rawTeam};
-                // welcome.notice = doc.at_key("notice").get_string();
                 if (this->_onReadyConnected != nullptr)
                 {
                     this->_onReadyConnected(welcome, basePayload.notice());

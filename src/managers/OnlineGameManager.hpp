@@ -177,7 +177,7 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
                                                const Block &destCell, const short &currentPieceId)
 {
     // VERIFY if move is successful
-    int copySourceCell = this->sourceCell.value();
+    int cellIndexCopy = this->sourceCell.value();
     const bool success = player->movePiece(currentPieceId, destCell->getPos());
     if (!success)
     {
@@ -199,7 +199,7 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
     movePayload.set_piece_id(currentPieceId);
     movePayload.set_from_team(this->myTeam);
     chk::payload::MovePayload_DestCell newDestCell;
-    newDestCell.set_cell_index(copySourceCell);
+    newDestCell.set_cell_index(cellIndexCopy);
     newDestCell.set_x(destCell->getPos().x);
     newDestCell.set_y(destCell->getPos().y);
     movePayload.set_allocated_dest_cell(&newDestCell);
@@ -209,7 +209,7 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
     replyPayload.set_allocated_move_payload(&movePayload);
     if (!this->wsClient->replyServer(replyPayload))
     {
-        spdlog::error("failed to send message");
+        spdlog::error("failed to reply to server");
     }
 
     this->isMyTurn = !this->isMyTurn; // toggle player turns
