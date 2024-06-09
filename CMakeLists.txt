@@ -18,10 +18,10 @@ file(GLOB_RECURSE GAME_SRC "src/*.cpp" "src/*.hpp")
 set(SFML_DIR ${SFML_HOME}/lib/cmake/SFML)
 
 find_package(SFML 2.6 REQUIRED COMPONENTS "graphics" "window" "system")
-find_package(protobuf REQUIRED)
 
 # download extra libs 
 add_subdirectory(dependencies)   
+
 if(WIN32)
   add_executable(SpaceCheckers ${GAME_SRC} ${CMAKE_SOURCE_DIR}/resources/win-icon.rc)
   target_link_libraries(SpaceCheckers PRIVATE sfml-main)

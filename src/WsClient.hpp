@@ -15,9 +15,9 @@
 namespace chk
 {
 
-// when connected to server success
+// callback when connected to server success
 using onConnectedServer = std::function<void(chk::payload::WelcomePayload &, std::string_view notice)>;
-// when both players joined match
+// callback when both players joined match
 using onReadyStartGame = std::function<void(chk::payload::StartPayload &, std::string_view notice)>;
 
 /**
@@ -30,7 +30,7 @@ class WsClient final
     void runMainLoop();
     void setOnReadyConnectedCallback(const onConnectedServer &callback);
     void setOnReadyStartGameCallback(const onReadyStartGame &callback);
-    bool replyServer(const chk::payload::BasePayload &payload) const;
+    bool replyServer(chk::payload::BasePayload *payload) const;
 
   private:
     std::string final_address;                     // IP or URL of server
@@ -223,13 +223,13 @@ inline void WsClient::setOnReadyStartGameCallback(const onReadyStartGame &callba
  * Send JSON response back to server
  * @param payload the request body
  */
-inline bool WsClient::replyServer(const chk::payload::BasePayload &payload) const
+inline bool WsClient::replyServer(chk::payload::BasePayload *payload) const
 {
     if (this->isDead || !this->isConnected)
     {
         return false;
     }
-    payload.SerializeToString(&this->protoBucket);
+    payload->SerializeToString(&this->protoBucket);
     const auto &result = this->webSocketPtr->send(this->protoBucket, true);
     return result.success;
 }

@@ -195,21 +195,22 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
 
     // REPLY TO SERVER
     // create move payload
-    chk::payload::MovePayload movePayload;
-    movePayload.set_piece_id(currentPieceId);
-    movePayload.set_from_team(this->myTeam);
-    chk::payload::MovePayload_DestCell newDestCell;
-    newDestCell.set_cell_index(cellIndexCopy);
-    newDestCell.set_x(destCell->getPos().x);
-    newDestCell.set_y(destCell->getPos().y);
-    movePayload.set_allocated_dest_cell(&newDestCell);
+    auto newDestCell = new chk::payload::MovePayload_DestCell();
+    newDestCell->set_cell_index(cellIndexCopy);
+    newDestCell->set_x(destCell->getPos().x);
+    newDestCell->set_y(destCell->getPos().y);
 
-    // create basePayload (request body)
+    auto movePayload = new chk::payload::MovePayload();
+    movePayload->set_piece_id(currentPieceId);
+    movePayload->set_from_team(this->myTeam);
+    movePayload->set_allocated_dest_cell(newDestCell);
+
+    // create base request body
     chk::payload::BasePayload requestBody;
-    requestBody.set_allocated_move_payload(&movePayload);
-    if (!this->wsClient->replyServer(requestBody))
+    requestBody.set_allocated_move_payload(movePayload);
+    if (!this->wsClient->replyServer(&requestBody))
     {
-        spdlog::error("failed to reply to server");
+        spdlog::error("failed to send message to Server");
     }
 
     this->isMyTurn = !this->isMyTurn; // toggle player turns
