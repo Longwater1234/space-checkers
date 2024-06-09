@@ -20,6 +20,7 @@ bld/
 .idea/
 /cmake-build-*/
 
+
 # Prerequisites
 *.d
 
@@ -28,6 +29,7 @@ bld/
 *.lo
 *.o
 *.obj
+*.bin
 
 # Precompiled Headers
 *.gch

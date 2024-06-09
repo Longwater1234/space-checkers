@@ -8,6 +8,7 @@
 #include <SFML/Window/Mouse.hpp>
 #include <cassert>
 #include <vector>
+#include <fstream>
 
 #include "imgui-SFML.h"
 #include "imgui.h"
