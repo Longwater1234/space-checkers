@@ -145,22 +145,21 @@ void GameManager::handleCapturePiece(const chk::PlayerPtr &hunter, const chk::Pl
             gameMap.emplace(targetCell->getIndex(), hunterPieceId); // fill in hunter new location
             prey->losePiece(target.preyPieceId);                    // the defending player loses 1 piece
             this->sourceCell = std::nullopt;                        // reset source cell
-
-            // FIXME do not RUN this next line if this "hunter" piece just became KING!
-            this->identifyTargets(hunter); // Check for extra opportunities NOW!
-            if (this->forcedMoves.empty())
-            {
-                // NO MORE JUMPS AVAILABLE. SWITCH TURNS to opponent
-                this->identifyTargets(prey);
-                this->playerRedTurn = !this->playerRedTurn;
-            }
-            else
-            {
-                spdlog::info(prey->getName() + " IS IN DANGER");
-                this->updateMessage(prey->getName() + " IS IN DANGER");
-            }
             break;
         }
+    }
+    // FIXME do not RUN this next line if this "hunter" piece just became KING!
+    this->identifyTargets(hunter); // Check for extra opportunities NOW!
+    if (this->forcedMoves.empty())
+    {
+        // NO MORE JUMPS AVAILABLE. SWITCH TURNS to opponent
+        this->identifyTargets(prey);
+        this->playerRedTurn = !this->playerRedTurn;
+    }
+    else
+    {
+        spdlog::info(prey->getName() + " IS IN DANGER");
+        this->updateMessage(prey->getName() + " IS IN DANGER");
     }
 }
 
@@ -260,7 +259,7 @@ void GameManager::updateMatchStatus(const chk::PlayerPtr &p1, const chk::PlayerP
     {
         this->gameOver = true;
         const std::string &winnerName = p1Count > p2Count ? p1->getName() : p2->getName();
-        this->updateMessage("GAME OVER!" + winnerName + " won!");
+        this->updateMessage("GAME OVER! " + winnerName + " won!");
     }
 }
 
