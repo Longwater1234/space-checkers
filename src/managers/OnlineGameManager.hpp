@@ -39,6 +39,7 @@ class OnlineGameManager final : public chk::GameManager
     std::atomic_bool gameReady = false;
     void startMoveListener();
     void startCaptureListener();
+    void startDeathListener();
 };
 
 inline OnlineGameManager::OnlineGameManager(sf::RenderWindow *windowPtr)
@@ -126,6 +127,7 @@ inline void chk::OnlineGameManager::createAllPieces()
         pieceList.clear();
         this->startMoveListener();
         this->startCaptureListener();
+        this->startDeathListener();
     });
 }
 
@@ -275,6 +277,16 @@ inline void OnlineGameManager::startMoveListener()
 inline void OnlineGameManager::startCaptureListener()
 {
     // TODO complete me
+}
+
+/**
+* Will be listening for abrupt connection cut-off caused by I/O error
+*/
+inline void OnlineGameManager::startDeathListener()
+{
+    //this->wsClient->setOnDeathCallback([this]() -> {
+    //        this->
+    //});
 }
 
 /**

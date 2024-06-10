@@ -19,6 +19,8 @@ namespace chk
 using onConnectedServer = std::function<void(chk::payload::WelcomePayload &, std::string_view notice)>;
 // callback when both players joined match
 using onReadyStartGame = std::function<void(chk::payload::StartPayload &, std::string_view notice)>;
+// when connection to server dies non-gracefully
+using onDeathCallback = std::function<void(bool)>;
 
 /**
  * This handles all websocket exchanges with Server
@@ -30,6 +32,7 @@ class WsClient final
     void runMainLoop();
     void setOnReadyConnectedCallback(const onConnectedServer &callback);
     void setOnReadyStartGameCallback(const onReadyStartGame &callback);
+    void setOnDeathCallback(const onDeathCallback &callback);
     bool replyServer(chk::payload::BasePayload *payload) const;
 
   private:
@@ -44,6 +47,7 @@ class WsClient final
 
     onConnectedServer _onReadyConnected;
     onReadyStartGame _onReadyStartGame;
+    onDeathCallback _onDeathCallback;
 
     std::mutex mut;
     std::unique_ptr<ix::WebSocket> webSocketPtr = nullptr; // our Websocket object
@@ -144,6 +148,9 @@ inline void WsClient::runMainLoop()
     // connection failure 🙁
     if (this->isDead) {
        this->showErrorPopup();
+       if (this->_onDeathCallback !=nullptr) {
+        _onDeathCallback(true);
+       }
     }
     // clang-format on
 }
@@ -167,7 +174,6 @@ inline void WsClient::tryConnect(std::string_view address)
         if (msg->type == ix::WebSocketMessageType::Message)
         {
             std::scoped_lock<std::mutex> lg{this->mut};
-            spdlog::info("size of payload {} bytes", msg->wireSize);
             this->msgBuffer.addItem(msg->str);
         }
         else if (msg->type == ix::WebSocketMessageType::Open)
@@ -217,6 +223,15 @@ inline void WsClient::setOnReadyConnectedCallback(const onConnectedServer &callb
 inline void WsClient::setOnReadyStartGameCallback(const onReadyStartGame &callback)
 {
     this->_onReadyStartGame = callback;
+}
+
+/**
+ * Set the callback to handle connection failures or sudden cut-off
+ * @param callback the callback function
+ */
+inline void WsClient::setOnDeathCallback(const onDeathCallback &callback)
+{
+    this->_onDeathCallback = callback;
 }
 
 /**
