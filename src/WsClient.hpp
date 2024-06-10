@@ -126,6 +126,7 @@ inline void WsClient::resetAllStates()
     this->conn_clicked = false;
     this->isDead = false;
     this->errorMsg.clear();
+    this->webSocketPtr->stop();
 }
 
 /**
@@ -148,7 +149,7 @@ inline void WsClient::runMainLoop()
     // connection failure 🙁
     if (this->isDead) {
        this->showErrorPopup();
-       if (this->_onDeathCallback !=nullptr) {
+       if (this->_onDeathCallback != nullptr) {
         _onDeathCallback(true);
        }
     }

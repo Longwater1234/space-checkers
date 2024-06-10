@@ -1,8 +1,8 @@
 #pragma once
 #include "../GameManager.hpp"
 #include "../WsClient.hpp"
-#include "imgui-SFML.h"
 #include "../payloads/base_payload.pb.hpp"
+#include "imgui-SFML.h"
 #include <atomic>
 
 namespace chk
@@ -280,13 +280,11 @@ inline void OnlineGameManager::startCaptureListener()
 }
 
 /**
-* Will be listening for abrupt connection cut-off caused by I/O error
-*/
+ * Will be listening for abrupt connection cut-off caused by I/O error
+ */
 inline void OnlineGameManager::startDeathListener()
 {
-    //this->wsClient->setOnDeathCallback([this]() -> {
-    //        this->
-    //});
+    this->wsClient->setOnDeathCallback([this](bool isDead) { this->doCleanup(); });
 }
 
 /**

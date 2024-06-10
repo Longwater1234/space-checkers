@@ -25,8 +25,6 @@ namespace chk
 {
 using Block = std::unique_ptr<chk::Cell>;
 using PlayerPtr = std::unique_ptr<chk::Player>;
-using onMoveSuccessCallback = std::function<void(short, int)>; // callback after moving
-using onJumpSuccess = std::function<void(short, int)>;         // callback after capturing
 
 constexpr uint16_t NUM_ROWS{8};
 constexpr uint16_t NUM_COLS{8};
@@ -46,7 +44,6 @@ class GameManager
     void drawCheckerboard(const sf::Font &font);
     void updateMessage(std::string_view msg);
     void matchCellsToPieces(const std::vector<chk::PiecePtr> &pieceList);
-    void setOnMoveSuccessCallback(const onMoveSuccessCallback &callback);
     [[nodiscard]] const std::unordered_map<short, chk::CaptureTarget> &getForcedMoves() const;
     [[nodiscard]] const std::string &getCurrentMsg() const;
 
@@ -63,8 +60,6 @@ class GameManager
     std::mutex my_mutex;
     // collection of my next targets (Map<HunterPieceID, CaptureTarget>)
     std::unordered_map<short, chk::CaptureTarget> forcedMoves{};
-    // callback after successfully moved piece
-    onMoveSuccessCallback _onMoveSuccess;
 
     [[nodiscard]] bool boardContainsCell(const int &cell_idx) const;
     [[nodiscard]] bool awayFromEdge(const int &cell_idx) const;

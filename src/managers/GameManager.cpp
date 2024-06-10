@@ -109,11 +109,6 @@ void GameManager::handleMovePiece(const chk::PlayerPtr &player, const chk::Playe
     {
         spdlog::info(player->getName() + " IS IN DANGER ");
     }
-    if (this->_onMoveSuccess != nullptr)
-    {
-        // TODO notify server
-        _onMoveSuccess(currentPieceId, destCell->getIndex());
-    }
     this->playerRedTurn = !this->playerRedTurn; // toggle player turns
     this->updateMessage(player->getName() + " has moved to " + std::to_string(destCell->getIndex()) + ". It's " +
                         opponent->getName() + "'s turn.");
@@ -150,9 +145,8 @@ void GameManager::handleCapturePiece(const chk::PlayerPtr &hunter, const chk::Pl
             gameMap.emplace(targetCell->getIndex(), hunterPieceId); // fill in hunter new location
             prey->losePiece(target.preyPieceId);                    // the defending player loses 1 piece
             this->sourceCell = std::nullopt;                        // reset source cell
-            this->forcedMoves.clear();                              // reset forced jumps
 
-            // FIXME do not RUN this next line if "hunter" just became KING!
+            // FIXME do not RUN this next line if this "hunter" piece just became KING!
             this->identifyTargets(hunter); // Check for extra opportunities NOW!
             if (this->forcedMoves.empty())
             {
@@ -189,7 +183,7 @@ void GameManager::setSourceCell(int src_cell)
 }
 
 /**
- * If needed to halt the game, clear gameMap, pieces for both players, and the Board
+ * If game has been cutoff suddenly (for I/O Error), clear gameMap, pieces for both players, and the Board
  */
 void chk::GameManager::doCleanup()
 {
@@ -198,6 +192,7 @@ void chk::GameManager::doCleanup()
     this->forcedMoves.clear();
     this->player1->emptyBasket();
     this->player2->emptyBasket();
+    this->updateMessage("Match has ended!");
     this->gameOver = true;
 }
 
@@ -267,14 +262,6 @@ void GameManager::updateMatchStatus(const chk::PlayerPtr &p1, const chk::PlayerP
         const std::string &winnerName = p1Count > p2Count ? p1->getName() : p2->getName();
         this->updateMessage("GAME OVER!" + winnerName + " won!");
     }
-}
-
-/**
- * Set callback for when piece is moved succesfully
- */
-void chk::GameManager::setOnMoveSuccessCallback(const onMoveSuccessCallback &callback)
-{
-    this->_onMoveSuccess = callback;
 }
 
 /**
