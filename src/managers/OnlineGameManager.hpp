@@ -52,15 +52,8 @@ inline OnlineGameManager::OnlineGameManager(sf::RenderWindow *windowPtr)
     this->player1 = std::make_unique<chk::Player>(chk::PlayerType::PLAYER_RED);
     this->player2 = std::make_unique<chk::Player>(chk::PlayerType::PLAYER_BLACK);
     assert(!(*player1 == *player2));
-}
 
-/**
- * Wait for server to generate random IDs and deliver the response, then give each player their own set of pieces
- * @param pieceList destination of created pieces
- */
-inline void chk::OnlineGameManager::createAllPieces()
-{
-    // wait for connection success
+    // set Listener for connection success
     this->wsClient->setOnReadyConnectedCallback([this](chk::payload::WelcomePayload &welcome, std::string_view notice) {
         this->myTeam = welcome.my_team();
         if (this->myTeam & chk::payload::TEAM_RED)
@@ -69,8 +62,15 @@ inline void chk::OnlineGameManager::createAllPieces()
         }
         this->updateMessage(notice);
     });
+}
 
-    // wait for start game signal
+/**
+ * Wait for server to generate random IDs and deliver the response, then give each player their own set of pieces
+ * @param pieceList destination of created pieces
+ */
+inline void chk::OnlineGameManager::createAllPieces()
+{
+    // wait for server to send Piece Ids
     this->wsClient->setOnReadyStartGameCallback([this](chk::payload::StartPayload &payload, std::string_view notice) {
         this->gameReady = true;
         this->updateMessage(notice);
@@ -81,7 +81,7 @@ inline void chk::OnlineGameManager::createAllPieces()
 
         auto redItr = payload.pieces_red().begin();
         auto blackItr = payload.pieces_black().begin();
-        // create pieces objects, using id's from Server
+        // create pieces objects, and position them on Board
         for (uint16_t row = 0; row < chk::NUM_ROWS; row++)
         {
             for (uint16_t col = 0; col < chk::NUM_COLS; col++)

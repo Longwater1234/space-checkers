@@ -16,6 +16,7 @@
 
 int main()
 {
+
     GOOGLE_PROTOBUF_VERIFY_VERSION;
     auto window = sf::RenderWindow{sf::VideoMode{600, 700}, "SpaceCheckers", sf::Style::Titlebar | sf::Style::Close};
     window.setFramerateLimit(60);
@@ -68,7 +69,12 @@ int main()
     sf::Text txtPanel{"", font, 16};
     txtPanel.setFillColor(sf::Color::White);
     txtPanel.setPosition(sf::Vector2f{10.0, 8.5 * chk::SIZE_CELL});
-    manager->updateMessage("Welcome to Checkers");
+    manager->updateMessage("Welcome to Space Checkers");
+
+    if (userChoice == chk::UserChoice::LOCAL_PLAY)
+    {
+        manager->updateMessage("Now playing! It's RED's turn");
+    }
 
     // THE MAIN GAME LOOP
     sf::Clock deltaClock;

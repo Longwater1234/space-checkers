@@ -42,7 +42,6 @@ class WsClient final
     chk::CircularBuffer<std::string> msgBuffer{1}; // keep only recent 20 messages
     mutable std::string errorMsg{};                // for any websocket errors
     std::atomic_bool conn_clicked = false;         // if 'connect' button clicked
-    std::deque<std::string> serverMessages;        // messages from backend server
     mutable std::string protoBucket{};             // reusable buffer used to serialize payloads to server
 
     onConnectedServer _onReadyConnected;
@@ -196,9 +195,6 @@ inline void WsClient::tryConnect(std::string_view address)
     {
         this->webSocketPtr->start();
     }
-
-    // ping server every 50 seconds
-    // this->webSocketPtr->setPingInterval(30);
 
     // Handle any connection error/timeout
     if (this->webSocketPtr->getReadyState() != ix::ReadyState::Open && this->isDead)

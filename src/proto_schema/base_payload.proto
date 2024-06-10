@@ -11,6 +11,7 @@ message BasePayload {
     WelcomePayload welcome = 5;
     MovePayload move_payload = 4;
     StartPayload start = 6;
+    ExitPayload exit_payload = 7;
   }
 }
 
@@ -37,13 +38,18 @@ message MovePayload {
   message DestCell {
     int32 cell_index = 1;
     float x = 2;
-    float y = 3; 
+    float y = 3;
   }
-  //from which player
+  // from which player
   TeamColor from_team = 1;
-  //moving piece id
+  // moving piece id
   int32 piece_id = 2;
-  //destination cell
+  // destination cell
   DestCell dest_cell = 3;
 }
 
+// whenever any of the players exits, or game is over
+message ExitPayload {
+  // which player initiated exit (RED, BLACK, or unspecified)
+  TeamColor from_term = 1;
+}

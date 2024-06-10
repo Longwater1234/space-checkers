@@ -88,6 +88,25 @@ struct MovePayload_DestCellDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 MovePayload_DestCellDefaultTypeInternal _MovePayload_DestCell_default_instance_;
 
+inline constexpr ExitPayload::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : from_term_{static_cast< ::chk::payload::TeamColor >(0)},
+        _cached_size_{0} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR ExitPayload::ExitPayload(::_pbi::ConstantInitialized)
+    : _impl_(::_pbi::ConstantInitialized()) {}
+struct ExitPayloadDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR ExitPayloadDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~ExitPayloadDefaultTypeInternal() {}
+  union {
+    ExitPayload _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ExitPayloadDefaultTypeInternal _ExitPayload_default_instance_;
+
 inline constexpr MovePayload::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : _cached_size_{0},
@@ -151,6 +170,7 @@ const ::uint32_t
         ::_pbi::kInvalidFieldOffsetTag,
         ::_pbi::kInvalidFieldOffsetTag,
         ::_pbi::kInvalidFieldOffsetTag,
+        ::_pbi::kInvalidFieldOffsetTag,
         PROTOBUF_FIELD_OFFSET(::chk::payload::BasePayload, _impl_.inner_),
         ~0u,  // no _has_bits_
         PROTOBUF_FIELD_OFFSET(::chk::payload::WelcomePayload, _internal_metadata_),
@@ -196,15 +216,25 @@ const ::uint32_t
         ~0u,
         ~0u,
         0,
+        ~0u,  // no _has_bits_
+        PROTOBUF_FIELD_OFFSET(::chk::payload::ExitPayload, _internal_metadata_),
+        ~0u,  // no _extensions_
+        ~0u,  // no _oneof_case_
+        ~0u,  // no _weak_field_map_
+        ~0u,  // no _inlined_string_donated_
+        ~0u,  // no _split_
+        ~0u,  // no sizeof(Split)
+        PROTOBUF_FIELD_OFFSET(::chk::payload::ExitPayload, _impl_.from_term_),
 };
 
 static const ::_pbi::MigrationSchema
     schemas[] ABSL_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
         {0, -1, -1, sizeof(::chk::payload::BasePayload)},
-        {13, -1, -1, sizeof(::chk::payload::WelcomePayload)},
-        {22, -1, -1, sizeof(::chk::payload::StartPayload)},
-        {32, -1, -1, sizeof(::chk::payload::MovePayload_DestCell)},
-        {43, 54, -1, sizeof(::chk::payload::MovePayload)},
+        {14, -1, -1, sizeof(::chk::payload::WelcomePayload)},
+        {23, -1, -1, sizeof(::chk::payload::StartPayload)},
+        {33, -1, -1, sizeof(::chk::payload::MovePayload_DestCell)},
+        {44, 55, -1, sizeof(::chk::payload::MovePayload)},
+        {58, -1, -1, sizeof(::chk::payload::ExitPayload)},
 };
 static const ::_pb::Message* const file_default_instances[] = {
     &::chk::payload::_BasePayload_default_instance_._instance,
@@ -212,37 +242,41 @@ static const ::_pb::Message* const file_default_instances[] = {
     &::chk::payload::_StartPayload_default_instance_._instance,
     &::chk::payload::_MovePayload_DestCell_default_instance_._instance,
     &::chk::payload::_MovePayload_default_instance_._instance,
+    &::chk::payload::_ExitPayload_default_instance_._instance,
 };
 const char descriptor_table_protodef_base_5fpayload_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
-    "\n\022base_payload.proto\022\013chk.payload\"\264\001\n\013Ba"
+    "\n\022base_payload.proto\022\013chk.payload\"\346\001\n\013Ba"
     "sePayload\022\016\n\006notice\030\002 \001(\t\022.\n\007welcome\030\005 \001"
     "(\0132\033.chk.payload.WelcomePayloadH\000\0220\n\014mov"
     "e_payload\030\004 \001(\0132\030.chk.payload.MovePayloa"
     "dH\000\022*\n\005start\030\006 \001(\0132\031.chk.payload.StartPa"
-    "yloadH\000B\007\n\005inner\"9\n\016WelcomePayload\022\'\n\007my"
-    "_team\030\001 \001(\0162\026.chk.payload.TeamColor\"8\n\014S"
-    "tartPayload\022\022\n\npieces_red\030\001 \003(\005\022\024\n\014piece"
-    "s_black\030\002 \003(\005\"\266\001\n\013MovePayload\022)\n\tfrom_te"
-    "am\030\001 \001(\0162\026.chk.payload.TeamColor\022\020\n\010piec"
-    "e_id\030\002 \001(\005\0224\n\tdest_cell\030\003 \001(\0132!.chk.payl"
-    "oad.MovePayload.DestCell\0324\n\010DestCell\022\022\n\n"
-    "cell_index\030\001 \001(\005\022\t\n\001x\030\002 \001(\002\022\t\n\001y\030\003 \001(\002*\?"
-    "\n\tTeamColor\022\024\n\020TEAM_UNSPECIFIED\020\000\022\014\n\010TEA"
-    "M_RED\020\001\022\016\n\nTEAM_BLACK\020\002B\027Z\025checkers-back"
-    "end/gameb\006proto3"
+    "yloadH\000\0220\n\014exit_payload\030\007 \001(\0132\030.chk.payl"
+    "oad.ExitPayloadH\000B\007\n\005inner\"9\n\016WelcomePay"
+    "load\022\'\n\007my_team\030\001 \001(\0162\026.chk.payload.Team"
+    "Color\"8\n\014StartPayload\022\022\n\npieces_red\030\001 \003("
+    "\005\022\024\n\014pieces_black\030\002 \003(\005\"\266\001\n\013MovePayload\022"
+    ")\n\tfrom_team\030\001 \001(\0162\026.chk.payload.TeamCol"
+    "or\022\020\n\010piece_id\030\002 \001(\005\0224\n\tdest_cell\030\003 \001(\0132"
+    "!.chk.payload.MovePayload.DestCell\0324\n\010De"
+    "stCell\022\022\n\ncell_index\030\001 \001(\005\022\t\n\001x\030\002 \001(\002\022\t\n"
+    "\001y\030\003 \001(\002\"8\n\013ExitPayload\022)\n\tfrom_term\030\001 \001"
+    "(\0162\026.chk.payload.TeamColor*\?\n\tTeamColor\022"
+    "\024\n\020TEAM_UNSPECIFIED\020\000\022\014\n\010TEAM_RED\020\001\022\016\n\nT"
+    "EAM_BLACK\020\002B\027Z\025checkers-backend/gameb\006pr"
+    "oto3"
 };
 static ::absl::once_flag descriptor_table_base_5fpayload_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_base_5fpayload_2eproto = {
     false,
     false,
-    616,
+    724,
     descriptor_table_protodef_base_5fpayload_2eproto,
     "base_payload.proto",
     &descriptor_table_base_5fpayload_2eproto_once,
     nullptr,
     0,
-    5,
+    6,
     schemas,
     file_default_instances,
     TableStruct_base_5fpayload_2eproto::offsets,
@@ -307,6 +341,19 @@ void BasePayload::set_allocated_start(::chk::payload::StartPayload* start) {
   }
   // @@protoc_insertion_point(field_set_allocated:chk.payload.BasePayload.start)
 }
+void BasePayload::set_allocated_exit_payload(::chk::payload::ExitPayload* exit_payload) {
+  ::google::protobuf::Arena* message_arena = GetArena();
+  clear_inner();
+  if (exit_payload) {
+    ::google::protobuf::Arena* submessage_arena = exit_payload->GetArena();
+    if (message_arena != submessage_arena) {
+      exit_payload = ::google::protobuf::internal::GetOwnedMessage(message_arena, exit_payload, submessage_arena);
+    }
+    set_has_exit_payload();
+    _impl_.inner_.exit_payload_ = exit_payload;
+  }
+  // @@protoc_insertion_point(field_set_allocated:chk.payload.BasePayload.exit_payload)
+}
 BasePayload::BasePayload(::google::protobuf::Arena* arena)
     : ::google::protobuf::Message(arena) {
   SharedCtor(arena);
@@ -340,6 +387,9 @@ BasePayload::BasePayload(
         break;
       case kStart:
         _impl_.inner_.start_ = ::google::protobuf::Message::CopyConstruct<::chk::payload::StartPayload>(arena, *from._impl_.inner_.start_);
+        break;
+      case kExitPayload:
+        _impl_.inner_.exit_payload_ = ::google::protobuf::Message::CopyConstruct<::chk::payload::ExitPayload>(arena, *from._impl_.inner_.exit_payload_);
         break;
   }
 
@@ -398,6 +448,14 @@ void BasePayload::clear_inner() {
       }
       break;
     }
+    case kExitPayload: {
+      if (GetArena() == nullptr) {
+        delete _impl_.inner_.exit_payload_;
+      } else if (::google::protobuf::internal::DebugHardenClearOneofMessageOnArena()) {
+        ::google::protobuf::internal::MaybePoisonAfterClear(_impl_.inner_.exit_payload_);
+      }
+      break;
+    }
     case INNER_NOT_SET: {
       break;
     }
@@ -427,16 +485,16 @@ BasePayload::GetClassData() const {
   return _data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<0, 4, 3, 38, 2> BasePayload::_table_ = {
+const ::_pbi::TcParseTable<0, 5, 4, 38, 2> BasePayload::_table_ = {
   {
     0,  // no _has_bits_
     0, // no _extensions_
-    6, 0,  // max_field_number, fast_idx_mask
+    7, 0,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294967237,  // skipmap
+    4294967173,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    4,  // num_field_entries
-    3,  // num_aux_entries
+    5,  // num_field_entries
+    4,  // num_aux_entries
     offsetof(decltype(_table_), aux_entries),
     &_BasePayload_default_instance_._instance,
     nullptr,  // post_loop_handler
@@ -463,10 +521,14 @@ const ::_pbi::TcParseTable<0, 4, 3, 38, 2> BasePayload::_table_ = {
     // .chk.payload.StartPayload start = 6;
     {PROTOBUF_FIELD_OFFSET(BasePayload, _impl_.inner_.start_), _Internal::kOneofCaseOffset + 0, 2,
     (0 | ::_fl::kFcOneof | ::_fl::kMessage | ::_fl::kTvTable)},
+    // .chk.payload.ExitPayload exit_payload = 7;
+    {PROTOBUF_FIELD_OFFSET(BasePayload, _impl_.inner_.exit_payload_), _Internal::kOneofCaseOffset + 0, 3,
+    (0 | ::_fl::kFcOneof | ::_fl::kMessage | ::_fl::kTvTable)},
   }}, {{
     {::_pbi::TcParser::GetTable<::chk::payload::MovePayload>()},
     {::_pbi::TcParser::GetTable<::chk::payload::WelcomePayload>()},
     {::_pbi::TcParser::GetTable<::chk::payload::StartPayload>()},
+    {::_pbi::TcParser::GetTable<::chk::payload::ExitPayload>()},
   }}, {{
     "\27\6\0\0\0\0\0\0"
     "chk.payload.BasePayload"
@@ -517,6 +579,11 @@ PROTOBUF_NOINLINE void BasePayload::Clear() {
           6, *_impl_.inner_.start_, _impl_.inner_.start_->GetCachedSize(), target, stream);
       break;
     }
+    case kExitPayload: {
+      target = ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
+          7, *_impl_.inner_.exit_payload_, _impl_.inner_.exit_payload_->GetCachedSize(), target, stream);
+      break;
+    }
     default:
       break;
   }
@@ -560,6 +627,12 @@ PROTOBUF_NOINLINE void BasePayload::Clear() {
     case kStart: {
       total_size +=
           1 + ::google::protobuf::internal::WireFormatLite::MessageSize(*_impl_.inner_.start_);
+      break;
+    }
+    // .chk.payload.ExitPayload exit_payload = 7;
+    case kExitPayload: {
+      total_size +=
+          1 + ::google::protobuf::internal::WireFormatLite::MessageSize(*_impl_.inner_.exit_payload_);
       break;
     }
     case INNER_NOT_SET: {
@@ -617,6 +690,15 @@ void BasePayload::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::goo
               ::google::protobuf::Message::CopyConstruct<::chk::payload::StartPayload>(arena, *from._impl_.inner_.start_);
         } else {
           _this->_impl_.inner_.start_->MergeFrom(from._internal_start());
+        }
+        break;
+      }
+      case kExitPayload: {
+        if (oneof_needs_init) {
+          _this->_impl_.inner_.exit_payload_ =
+              ::google::protobuf::Message::CopyConstruct<::chk::payload::ExitPayload>(arena, *from._impl_.inner_.exit_payload_);
+        } else {
+          _this->_impl_.inner_.exit_payload_->MergeFrom(from._internal_exit_payload());
         }
         break;
       }
@@ -1582,6 +1664,178 @@ void MovePayload::InternalSwap(MovePayload* PROTOBUF_RESTRICT other) {
 }
 
 ::google::protobuf::Metadata MovePayload::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+}
+// ===================================================================
+
+class ExitPayload::_Internal {
+ public:
+};
+
+ExitPayload::ExitPayload(::google::protobuf::Arena* arena)
+    : ::google::protobuf::Message(arena) {
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:chk.payload.ExitPayload)
+}
+ExitPayload::ExitPayload(
+    ::google::protobuf::Arena* arena, const ExitPayload& from)
+    : ExitPayload(arena) {
+  MergeFrom(from);
+}
+inline PROTOBUF_NDEBUG_INLINE ExitPayload::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : _cached_size_{0} {}
+
+inline void ExitPayload::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+  _impl_.from_term_ = {};
+}
+ExitPayload::~ExitPayload() {
+  // @@protoc_insertion_point(destructor:chk.payload.ExitPayload)
+  _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  SharedDtor();
+}
+inline void ExitPayload::SharedDtor() {
+  ABSL_DCHECK(GetArena() == nullptr);
+  _impl_.~Impl_();
+}
+
+const ::google::protobuf::MessageLite::ClassData*
+ExitPayload::GetClassData() const {
+  PROTOBUF_CONSTINIT static const ::google::protobuf::MessageLite::
+      ClassDataFull _data_ = {
+          {
+              &_table_.header,
+              nullptr,  // OnDemandRegisterArenaDtor
+              nullptr,  // IsInitialized
+              PROTOBUF_FIELD_OFFSET(ExitPayload, _impl_._cached_size_),
+              false,
+          },
+          &ExitPayload::MergeImpl,
+          &ExitPayload::kDescriptorMethods,
+          &descriptor_table_base_5fpayload_2eproto,
+          nullptr,  // tracker
+      };
+  ::google::protobuf::internal::PrefetchToLocalCache(&_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(_data_.tc_table);
+  return _data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<0, 1, 0, 0, 2> ExitPayload::_table_ = {
+  {
+    0,  // no _has_bits_
+    0, // no _extensions_
+    1, 0,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967294,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    1,  // num_field_entries
+    0,  // num_aux_entries
+    offsetof(decltype(_table_), field_names),  // no aux_entries
+    &_ExitPayload_default_instance_._instance,
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::chk::payload::ExitPayload>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    // .chk.payload.TeamColor from_term = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(ExitPayload, _impl_.from_term_), 63>(),
+     {8, 63, 0, PROTOBUF_FIELD_OFFSET(ExitPayload, _impl_.from_term_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // .chk.payload.TeamColor from_term = 1;
+    {PROTOBUF_FIELD_OFFSET(ExitPayload, _impl_.from_term_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kOpenEnum)},
+  }},
+  // no aux_entries
+  {{
+  }},
+};
+
+PROTOBUF_NOINLINE void ExitPayload::Clear() {
+// @@protoc_insertion_point(message_clear_start:chk.payload.ExitPayload)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  _impl_.from_term_ = 0;
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+::uint8_t* ExitPayload::_InternalSerialize(
+    ::uint8_t* target,
+    ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:chk.payload.ExitPayload)
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  // .chk.payload.TeamColor from_term = 1;
+  if (this->_internal_from_term() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteEnumToArray(
+        1, this->_internal_from_term(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target =
+        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+            _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:chk.payload.ExitPayload)
+  return target;
+}
+
+::size_t ExitPayload::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:chk.payload.ExitPayload)
+  ::size_t total_size = 0;
+
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // .chk.payload.TeamColor from_term = 1;
+  if (this->_internal_from_term() != 0) {
+    total_size += 1 +
+                  ::_pbi::WireFormatLite::EnumSize(this->_internal_from_term());
+  }
+
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
+}
+
+
+void ExitPayload::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::protobuf::MessageLite& from_msg) {
+  auto* const _this = static_cast<ExitPayload*>(&to_msg);
+  auto& from = static_cast<const ExitPayload&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:chk.payload.ExitPayload)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (from._internal_from_term() != 0) {
+    _this->_impl_.from_term_ = from._impl_.from_term_;
+  }
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void ExitPayload::CopyFrom(const ExitPayload& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:chk.payload.ExitPayload)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+
+void ExitPayload::InternalSwap(ExitPayload* PROTOBUF_RESTRICT other) {
+  using std::swap;
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  swap(_impl_.from_term_, other->_impl_.from_term_);
+}
+
+::google::protobuf::Metadata ExitPayload::GetMetadata() const {
   return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
 }
 // @@protoc_insertion_point(namespace_scope)

@@ -55,6 +55,9 @@ namespace payload {
 class BasePayload;
 struct BasePayloadDefaultTypeInternal;
 extern BasePayloadDefaultTypeInternal _BasePayload_default_instance_;
+class ExitPayload;
+struct ExitPayloadDefaultTypeInternal;
+extern ExitPayloadDefaultTypeInternal _ExitPayload_default_instance_;
 class MovePayload;
 struct MovePayloadDefaultTypeInternal;
 extern MovePayloadDefaultTypeInternal _MovePayload_default_instance_;
@@ -683,6 +686,177 @@ class MovePayload_DestCell final : public ::google::protobuf::Message
 };
 // -------------------------------------------------------------------
 
+class ExitPayload final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:chk.payload.ExitPayload) */ {
+ public:
+  inline ExitPayload() : ExitPayload(nullptr) {}
+  ~ExitPayload() override;
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR ExitPayload(
+      ::google::protobuf::internal::ConstantInitialized);
+
+  inline ExitPayload(const ExitPayload& from) : ExitPayload(nullptr, from) {}
+  inline ExitPayload(ExitPayload&& from) noexcept
+      : ExitPayload(nullptr, std::move(from)) {}
+  inline ExitPayload& operator=(const ExitPayload& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline ExitPayload& operator=(ExitPayload&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetArena() == from.GetArena()
+#ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetArena() != nullptr
+#endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const ExitPayload& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const ExitPayload* internal_default_instance() {
+    return reinterpret_cast<const ExitPayload*>(
+        &_ExitPayload_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 5;
+  friend void swap(ExitPayload& a, ExitPayload& b) { a.Swap(&b); }
+  inline void Swap(ExitPayload* other) {
+    if (other == this) return;
+#ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() != nullptr && GetArena() == other->GetArena()) {
+#else   // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() == other->GetArena()) {
+#endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(ExitPayload* other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  ExitPayload* New(::google::protobuf::Arena* arena = nullptr) const final {
+    return ::google::protobuf::Message::DefaultConstruct<ExitPayload>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const ExitPayload& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const ExitPayload& from) { ExitPayload::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(
+      ::google::protobuf::MessageLite& to_msg,
+      const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() final;
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* arena);
+  void SharedDtor();
+  void InternalSwap(ExitPayload* other);
+ private:
+  friend class ::google::protobuf::internal::AnyMetadata;
+  static ::absl::string_view FullMessageName() { return "chk.payload.ExitPayload"; }
+
+ protected:
+  explicit ExitPayload(::google::protobuf::Arena* arena);
+  ExitPayload(::google::protobuf::Arena* arena, const ExitPayload& from);
+  ExitPayload(::google::protobuf::Arena* arena, ExitPayload&& from) noexcept
+      : ExitPayload(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::Message::ClassData* GetClassData() const final;
+
+ public:
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kFromTermFieldNumber = 1,
+  };
+  // .chk.payload.TeamColor from_term = 1;
+  void clear_from_term() ;
+  ::chk::payload::TeamColor from_term() const;
+  void set_from_term(::chk::payload::TeamColor value);
+
+  private:
+  ::chk::payload::TeamColor _internal_from_term() const;
+  void _internal_set_from_term(::chk::payload::TeamColor value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:chk.payload.ExitPayload)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<
+      0, 1, 0,
+      0, 2>
+      _table_;
+
+  static constexpr const void* _raw_default_instance_ =
+      &_ExitPayload_default_instance_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(
+        ::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena);
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena, const Impl_& from,
+                          const ExitPayload& from_msg);
+    int from_term_;
+    mutable ::google::protobuf::internal::CachedSize _cached_size_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_base_5fpayload_2eproto;
+};
+// -------------------------------------------------------------------
+
 class MovePayload final : public ::google::protobuf::Message
 /* @@protoc_insertion_point(class_definition:chk.payload.MovePayload) */ {
  public:
@@ -940,6 +1114,7 @@ class BasePayload final : public ::google::protobuf::Message
     kWelcome = 5,
     kMovePayload = 4,
     kStart = 6,
+    kExitPayload = 7,
     INNER_NOT_SET = 0,
   };
   static inline const BasePayload* internal_default_instance() {
@@ -1019,6 +1194,7 @@ class BasePayload final : public ::google::protobuf::Message
     kWelcomeFieldNumber = 5,
     kMovePayloadFieldNumber = 4,
     kStartFieldNumber = 6,
+    kExitPayloadFieldNumber = 7,
   };
   // string notice = 2;
   void clear_notice() ;
@@ -1093,6 +1269,25 @@ class BasePayload final : public ::google::protobuf::Message
   ::chk::payload::StartPayload* _internal_mutable_start();
 
   public:
+  // .chk.payload.ExitPayload exit_payload = 7;
+  bool has_exit_payload() const;
+  private:
+  bool _internal_has_exit_payload() const;
+
+  public:
+  void clear_exit_payload() ;
+  const ::chk::payload::ExitPayload& exit_payload() const;
+  PROTOBUF_NODISCARD ::chk::payload::ExitPayload* release_exit_payload();
+  ::chk::payload::ExitPayload* mutable_exit_payload();
+  void set_allocated_exit_payload(::chk::payload::ExitPayload* value);
+  void unsafe_arena_set_allocated_exit_payload(::chk::payload::ExitPayload* value);
+  ::chk::payload::ExitPayload* unsafe_arena_release_exit_payload();
+
+  private:
+  const ::chk::payload::ExitPayload& _internal_exit_payload() const;
+  ::chk::payload::ExitPayload* _internal_mutable_exit_payload();
+
+  public:
   void clear_inner();
   InnerCase inner_case() const;
   // @@protoc_insertion_point(class_scope:chk.payload.BasePayload)
@@ -1101,11 +1296,12 @@ class BasePayload final : public ::google::protobuf::Message
   void set_has_welcome();
   void set_has_move_payload();
   void set_has_start();
+  void set_has_exit_payload();
   inline bool has_inner() const;
   inline void clear_has_inner();
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      0, 4, 3,
+      0, 5, 4,
       38, 2>
       _table_;
 
@@ -1133,6 +1329,7 @@ class BasePayload final : public ::google::protobuf::Message
       ::chk::payload::WelcomePayload* welcome_;
       ::chk::payload::MovePayload* move_payload_;
       ::chk::payload::StartPayload* start_;
+      ::chk::payload::ExitPayload* exit_payload_;
     } inner_;
     mutable ::google::protobuf::internal::CachedSize _cached_size_;
     ::uint32_t _oneof_case_[1];
@@ -1442,6 +1639,85 @@ inline ::chk::payload::StartPayload* BasePayload::_internal_mutable_start() {
 inline ::chk::payload::StartPayload* BasePayload::mutable_start() ABSL_ATTRIBUTE_LIFETIME_BOUND {
   ::chk::payload::StartPayload* _msg = _internal_mutable_start();
   // @@protoc_insertion_point(field_mutable:chk.payload.BasePayload.start)
+  return _msg;
+}
+
+// .chk.payload.ExitPayload exit_payload = 7;
+inline bool BasePayload::has_exit_payload() const {
+  return inner_case() == kExitPayload;
+}
+inline bool BasePayload::_internal_has_exit_payload() const {
+  return inner_case() == kExitPayload;
+}
+inline void BasePayload::set_has_exit_payload() {
+  _impl_._oneof_case_[0] = kExitPayload;
+}
+inline void BasePayload::clear_exit_payload() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (inner_case() == kExitPayload) {
+    if (GetArena() == nullptr) {
+      delete _impl_.inner_.exit_payload_;
+    } else if (::google::protobuf::internal::DebugHardenClearOneofMessageOnArena()) {
+      ::google::protobuf::internal::MaybePoisonAfterClear(_impl_.inner_.exit_payload_);
+    }
+    clear_has_inner();
+  }
+}
+inline ::chk::payload::ExitPayload* BasePayload::release_exit_payload() {
+  // @@protoc_insertion_point(field_release:chk.payload.BasePayload.exit_payload)
+  if (inner_case() == kExitPayload) {
+    clear_has_inner();
+    auto* temp = _impl_.inner_.exit_payload_;
+    if (GetArena() != nullptr) {
+      temp = ::google::protobuf::internal::DuplicateIfNonNull(temp);
+    }
+    _impl_.inner_.exit_payload_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline const ::chk::payload::ExitPayload& BasePayload::_internal_exit_payload() const {
+  return inner_case() == kExitPayload ? *_impl_.inner_.exit_payload_ : reinterpret_cast<::chk::payload::ExitPayload&>(::chk::payload::_ExitPayload_default_instance_);
+}
+inline const ::chk::payload::ExitPayload& BasePayload::exit_payload() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:chk.payload.BasePayload.exit_payload)
+  return _internal_exit_payload();
+}
+inline ::chk::payload::ExitPayload* BasePayload::unsafe_arena_release_exit_payload() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:chk.payload.BasePayload.exit_payload)
+  if (inner_case() == kExitPayload) {
+    clear_has_inner();
+    auto* temp = _impl_.inner_.exit_payload_;
+    _impl_.inner_.exit_payload_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline void BasePayload::unsafe_arena_set_allocated_exit_payload(::chk::payload::ExitPayload* value) {
+  // We rely on the oneof clear method to free the earlier contents
+  // of this oneof. We can directly use the pointer we're given to
+  // set the new value.
+  clear_inner();
+  if (value) {
+    set_has_exit_payload();
+    _impl_.inner_.exit_payload_ = value;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:chk.payload.BasePayload.exit_payload)
+}
+inline ::chk::payload::ExitPayload* BasePayload::_internal_mutable_exit_payload() {
+  if (inner_case() != kExitPayload) {
+    clear_inner();
+    set_has_exit_payload();
+    _impl_.inner_.exit_payload_ =
+        ::google::protobuf::Message::DefaultConstruct<::chk::payload::ExitPayload>(GetArena());
+  }
+  return _impl_.inner_.exit_payload_;
+}
+inline ::chk::payload::ExitPayload* BasePayload::mutable_exit_payload() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::chk::payload::ExitPayload* _msg = _internal_mutable_exit_payload();
+  // @@protoc_insertion_point(field_mutable:chk.payload.BasePayload.exit_payload)
   return _msg;
 }
 
@@ -1786,6 +2062,32 @@ inline void MovePayload::set_allocated_dest_cell(::chk::payload::MovePayload_Des
 
   _impl_.dest_cell_ = reinterpret_cast<::chk::payload::MovePayload_DestCell*>(value);
   // @@protoc_insertion_point(field_set_allocated:chk.payload.MovePayload.dest_cell)
+}
+
+// -------------------------------------------------------------------
+
+// ExitPayload
+
+// .chk.payload.TeamColor from_term = 1;
+inline void ExitPayload::clear_from_term() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.from_term_ = 0;
+}
+inline ::chk::payload::TeamColor ExitPayload::from_term() const {
+  // @@protoc_insertion_point(field_get:chk.payload.ExitPayload.from_term)
+  return _internal_from_term();
+}
+inline void ExitPayload::set_from_term(::chk::payload::TeamColor value) {
+  _internal_set_from_term(value);
+  // @@protoc_insertion_point(field_set:chk.payload.ExitPayload.from_term)
+}
+inline ::chk::payload::TeamColor ExitPayload::_internal_from_term() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return static_cast<::chk::payload::TeamColor>(_impl_.from_term_);
+}
+inline void ExitPayload::_internal_set_from_term(::chk::payload::TeamColor value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.from_term_ = value;
 }
 
 #ifdef __GNUC__
