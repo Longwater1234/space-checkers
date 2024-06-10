@@ -2,7 +2,7 @@
 #include "../GameManager.hpp"
 #include "../WsClient.hpp"
 #include "imgui-SFML.h"
-#include "payloads/base_payload.pb.hpp"
+#include "../payloads/base_payload.pb.hpp"
 #include <atomic>
 
 namespace chk
