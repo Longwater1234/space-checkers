@@ -175,6 +175,13 @@ inline void OnlineGameManager::drawBoard()
     }
 }
 
+/**
+ * Move the selected piece to clicked cell, then update the gameMap and notify Server
+ * @param player current player
+ * @param opponent opposing player
+ * @param destCell target cell
+ * @param currentPieceId the selected PieceId
+ */
 inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, const chk::PlayerPtr &opponent,
                                                const Block &destCell, const short &currentPieceId)
 {
@@ -220,16 +227,28 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
                         "'s turn.");
 }
 
+/**
+ * Perform capturing of "prey's" pieces by "hunter", then update gameMap, and notify Server
+ * @param hunter the attacking player
+ * @param prey the defensive player
+ * @param targetCell the destination of hunter
+ */
 inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,
                                                   const chk::Block &targetCell)
 {
     // TODO complete me
 }
 
+/**
+ * When current player taps any playable cell.
+ * @param hunter currentPlayer
+ * @param prey the opposing player
+ * @param buffer Temporary store for clicked Pieces
+ * @param cell Tapped cell
+ */
 inline void OnlineGameManager::handleCellTap(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,
                                              chk::CircularBuffer<short> &buffer, const chk::Block &cell)
 {
-    // TODO complete me
     if (!this->gameReady || !this->isMyTurn)
     {
         return;
@@ -264,7 +283,7 @@ inline void OnlineGameManager::handleCellTap(const chk::PlayerPtr &hunter, const
     }
 }
 /**
- * Will be listening for MovePiece updates from wsClient, and update gameBoard
+ * Listening for MovePiece updates from wsClient, and update gameBoard
  */
 inline void OnlineGameManager::startMoveListener()
 {
@@ -272,7 +291,7 @@ inline void OnlineGameManager::startMoveListener()
 }
 
 /**
- * Will be listening for all CapturePiece from wsClient, and update gameBoard
+ * Listening for all CapturePiece from wsClient, and update gameBoard
  */
 inline void OnlineGameManager::startCaptureListener()
 {
@@ -280,7 +299,7 @@ inline void OnlineGameManager::startCaptureListener()
 }
 
 /**
- * Will be listening for abrupt connection cut-off caused by I/O error
+ * Listening for killed connection in WsClient
  */
 inline void OnlineGameManager::startDeathListener()
 {
