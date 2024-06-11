@@ -982,11 +982,12 @@ class MovePayload final : public ::google::protobuf::Message
 
   // accessors -------------------------------------------------------
   enum : int {
-    kDestCellFieldNumber = 3,
+    kDestCellFieldNumber = 4,
     kFromTeamFieldNumber = 1,
     kPieceIdFieldNumber = 2,
+    kSourceCellFieldNumber = 3,
   };
-  // .chk.payload.MovePayload.DestCell dest_cell = 3;
+  // .chk.payload.MovePayload.DestCell dest_cell = 4;
   bool has_dest_cell() const;
   void clear_dest_cell() ;
   const ::chk::payload::MovePayload_DestCell& dest_cell() const;
@@ -1021,12 +1022,22 @@ class MovePayload final : public ::google::protobuf::Message
   void _internal_set_piece_id(::int32_t value);
 
   public:
+  // int32 source_cell = 3;
+  void clear_source_cell() ;
+  ::int32_t source_cell() const;
+  void set_source_cell(::int32_t value);
+
+  private:
+  ::int32_t _internal_source_cell() const;
+  void _internal_set_source_cell(::int32_t value);
+
+  public:
   // @@protoc_insertion_point(class_scope:chk.payload.MovePayload)
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      2, 3, 1,
+      2, 4, 1,
       0, 2>
       _table_;
 
@@ -1052,6 +1063,7 @@ class MovePayload final : public ::google::protobuf::Message
     ::chk::payload::MovePayload_DestCell* dest_cell_;
     int from_team_;
     ::int32_t piece_id_;
+    ::int32_t source_cell_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
   union { Impl_ _impl_; };
@@ -1968,7 +1980,29 @@ inline void MovePayload::_internal_set_piece_id(::int32_t value) {
   _impl_.piece_id_ = value;
 }
 
-// .chk.payload.MovePayload.DestCell dest_cell = 3;
+// int32 source_cell = 3;
+inline void MovePayload::clear_source_cell() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.source_cell_ = 0;
+}
+inline ::int32_t MovePayload::source_cell() const {
+  // @@protoc_insertion_point(field_get:chk.payload.MovePayload.source_cell)
+  return _internal_source_cell();
+}
+inline void MovePayload::set_source_cell(::int32_t value) {
+  _internal_set_source_cell(value);
+  // @@protoc_insertion_point(field_set:chk.payload.MovePayload.source_cell)
+}
+inline ::int32_t MovePayload::_internal_source_cell() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.source_cell_;
+}
+inline void MovePayload::_internal_set_source_cell(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.source_cell_ = value;
+}
+
+// .chk.payload.MovePayload.DestCell dest_cell = 4;
 inline bool MovePayload::has_dest_cell() const {
   bool value = (_impl_._has_bits_[0] & 0x00000001u) != 0;
   PROTOBUF_ASSUME(!value || _impl_.dest_cell_ != nullptr);

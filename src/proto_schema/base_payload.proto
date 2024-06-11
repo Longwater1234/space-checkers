@@ -44,8 +44,10 @@ message MovePayload {
   TeamColor from_team = 1;
   // moving piece id
   int32 piece_id = 2;
+  // older cell index for this pieceId
+  int32 source_cell = 3;
   // destination cell
-  DestCell dest_cell = 3;
+  DestCell dest_cell = 4;
 }
 
 // whenever any of the players exits, or game is over

@@ -298,6 +298,13 @@ inline void WsClient::initGameLoop()
                     this->_onReadyStartGame(startPayload, basePayload.notice());
                 }
             }
+            else if (basePayload.has_exit_payload())
+            {
+                std::scoped_lock lg(this->mut);
+                spdlog::error(basePayload.notice());
+                this->errorMsg = basePayload.notice();
+                this->isDead = true;
+            }
             else if (basePayload.has_move_payload())
             {
                 chk::payload::MovePayload movePayload = basePayload.move_payload();

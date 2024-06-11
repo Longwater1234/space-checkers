@@ -209,12 +209,13 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
     // REPLY TO SERVER
     // create proto DestCell
     auto newDestCell = new chk::payload::MovePayload_DestCell();
-    newDestCell->set_cell_index(cellIndexCopy);
+    newDestCell->set_cell_index(destCell->getIndex());
     newDestCell->set_x(destCell->getPos().x);
     newDestCell->set_y(destCell->getPos().y);
 
-    // create protobuf Movepayload
+    // create Movepayload rotobuf
     auto movePayload = new chk::payload::MovePayload();
+    movePayload->set_source_cell(cellIndexCopy);
     movePayload->set_piece_id(currentPieceId);
     movePayload->set_from_team(TeamColor::TEAM_RED);
     if (this->myTeam == chk::PlayerType::PLAYER_BLACK)
@@ -230,7 +231,7 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
     {
         spdlog::error("failed to send message to Server");
     }
-
+     
     this->isMyTurn = !this->isMyTurn; // toggle player turns
     this->updateMessage("You have moved to " + std::to_string(destCell->getIndex()) + ". It's " + opponent->getName() +
                         "'s turn.");
