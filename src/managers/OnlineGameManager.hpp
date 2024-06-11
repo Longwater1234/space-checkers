@@ -33,7 +33,7 @@ class OnlineGameManager final : public chk::GameManager
                        const chk::Block &cell) override;
 
   private:
-    chk::payload::TeamColor myTeam{};
+    chk::PlayerType myTeam{};
     std::unique_ptr<chk::WsClient> wsClient = nullptr;
     std::atomic_bool isMyTurn = false;
     std::atomic_bool gameReady = false;
@@ -55,10 +55,14 @@ inline OnlineGameManager::OnlineGameManager(sf::RenderWindow *windowPtr)
 
     // set Listener for connection success
     this->wsClient->setOnReadyConnectedCallback([this](chk::payload::WelcomePayload &welcome, std::string_view notice) {
-        this->myTeam = welcome.my_team();
-        if (this->myTeam & chk::payload::TEAM_RED)
+        if (welcome.my_team() & TeamColor::TEAM_RED)
         {
+            this->myTeam = chk::PlayerType::PLAYER_RED;
             this->isMyTurn = true;
+        }
+        else
+        {
+            this->myTeam = chk::PlayerType::PLAYER_BLACK;
         }
         this->updateMessage(notice);
     });
@@ -150,7 +154,7 @@ inline void OnlineGameManager::drawBoard()
     // DRAW RED PIECES
     for (const auto &[id, red_piece] : this->player1->getOwnPieces())
     {
-        if (this->myTeam & TeamColor::TEAM_RED && this->isMyTurn && red_piece->containsPoint(mousePos))
+        if (this->myTeam == chk::PlayerType::PLAYER_RED && this->isMyTurn && red_piece->containsPoint(mousePos))
         {
             red_piece->addOutline();
         }
@@ -163,7 +167,7 @@ inline void OnlineGameManager::drawBoard()
     // DRAW BLACK PIECES
     for (const auto &[id, black_piece] : this->player2->getOwnPieces())
     {
-        if (this->myTeam & TeamColor::TEAM_BLACK && this->isMyTurn && black_piece->containsPoint(mousePos))
+        if (this->myTeam == chk::PlayerType::PLAYER_BLACK && this->isMyTurn && black_piece->containsPoint(mousePos))
         {
             black_piece->addOutline();
         }
@@ -203,15 +207,20 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
     }
 
     // REPLY TO SERVER
-    // create move payload
+    // create proto DestCell
     auto newDestCell = new chk::payload::MovePayload_DestCell();
     newDestCell->set_cell_index(cellIndexCopy);
     newDestCell->set_x(destCell->getPos().x);
     newDestCell->set_y(destCell->getPos().y);
 
+    // create protobuf Movepayload
     auto movePayload = new chk::payload::MovePayload();
     movePayload->set_piece_id(currentPieceId);
-    movePayload->set_from_team(this->myTeam);
+    movePayload->set_from_team(TeamColor::TEAM_RED);
+    if (this->myTeam == chk::PlayerType::PLAYER_BLACK)
+    {
+        movePayload->set_from_team(TeamColor::TEAM_BLACK);
+    }
     movePayload->set_allocated_dest_cell(newDestCell);
 
     // create base request body
@@ -283,15 +292,19 @@ inline void OnlineGameManager::handleCellTap(const chk::PlayerPtr &hunter, const
     }
 }
 /**
- * Listening for MovePiece updates from wsClient, and update gameBoard
+ * Listening for MovePiece events from wsClient, and update gameBoard
  */
 inline void OnlineGameManager::startMoveListener()
 {
     // TODO complete me
+    this->wsClient->setOnMovePieceCallback([this](const chk::payload::MovePayload &payload) {
+        // TODO HANDLE ME
+        //  MAYBE NEED VALIDATION TOO
+    });
 }
 
 /**
- * Listening for all CapturePiece from wsClient, and update gameBoard
+ * Listening for CapturePiece events from wsClient, and update gameBoard
  */
 inline void OnlineGameManager::startCaptureListener()
 {
@@ -307,7 +320,7 @@ inline void OnlineGameManager::startDeathListener()
 }
 
 /**
- * This will be handling all events
+ * This will be handling all UI events
  * @param circularBuffer stores the currently selected piece
  */
 inline void OnlineGameManager::handleEvents(chk::CircularBuffer<short> &circularBuffer)

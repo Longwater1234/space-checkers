@@ -21,6 +21,8 @@ using onConnectedServer = std::function<void(chk::payload::WelcomePayload &, std
 using onReadyStartGame = std::function<void(chk::payload::StartPayload &, std::string_view notice)>;
 // when connection to server dies non-gracefully
 using onDeathCallback = std::function<void(bool)>;
+// when opponent makes a simple move
+using onMovePieceCallback = std::function<void(chk::payload::MovePayload &)>;
 
 /**
  * This handles all websocket exchanges with Server
@@ -33,6 +35,7 @@ class WsClient final
     void setOnReadyConnectedCallback(const onConnectedServer &callback);
     void setOnReadyStartGameCallback(const onReadyStartGame &callback);
     void setOnDeathCallback(const onDeathCallback &callback);
+    void setOnMovePieceCallback(const onMovePieceCallback &callback);
     bool replyServer(chk::payload::BasePayload *payload) const;
 
   private:
@@ -47,6 +50,7 @@ class WsClient final
     onConnectedServer _onReadyConnected;
     onReadyStartGame _onReadyStartGame;
     onDeathCallback _onDeathCallback;
+    onMovePieceCallback _onMovePieceCallback;
 
     std::mutex mut;
     std::unique_ptr<ix::WebSocket> webSocketPtr = nullptr; // our Websocket object
@@ -232,6 +236,15 @@ inline void WsClient::setOnDeathCallback(const onDeathCallback &callback)
 }
 
 /**
+ * Set the callback for handling Opponent moving their piece
+ * @param callback the callback function
+ */
+inline void WsClient::setOnMovePieceCallback(const onMovePieceCallback &callback)
+{
+    this->_onMovePieceCallback = callback;
+}
+
+/**
  * Send JSON response back to server
  * @param payload the request body
  */
@@ -283,6 +296,15 @@ inline void WsClient::initGameLoop()
                 if (this->_onReadyStartGame != nullptr)
                 {
                     this->_onReadyStartGame(startPayload, basePayload.notice());
+                }
+            }
+            else if (basePayload.has_move_payload())
+            {
+                chk::payload::MovePayload movePayload = basePayload.move_payload();
+                spdlog::info(movePayload.DebugString());
+                if (this->_onMovePieceCallback != nullptr)
+                {
+                    this->_onMovePieceCallback(movePayload);
                 }
             }
             std::scoped_lock lg(this->mut);
