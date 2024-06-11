@@ -70,7 +70,7 @@ inline chk::WsClient::WsClient()
     this->webSocketPtr = std::make_unique<ix::WebSocket>();
     // set inital connection timeout
     this->webSocketPtr->setHandshakeTimeout(10);
-    // once dead, dont revive
+    // once dead, DO NOT revive
     this->webSocketPtr->disableAutomaticReconnection();
     ix::SocketTLSOptions tlsOptions;
 #ifndef _WIN32
@@ -282,7 +282,7 @@ inline void WsClient::initGameLoop()
         if (!msg.empty())
         {
             chk::payload::BasePayload basePayload;
-            basePayload.ParseFromString(msg);
+            assert(basePayload.ParseFromString(msg) && "could not parse payload");
             if (basePayload.has_welcome())
             {
                 /* code */
