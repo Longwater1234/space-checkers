@@ -231,7 +231,7 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
     {
         spdlog::error("failed to send message to Server");
     }
-     
+
     this->isMyTurn = !this->isMyTurn; // toggle player turns
     this->updateMessage("You have moved to " + std::to_string(destCell->getIndex()) + ". It's " + opponent->getName() +
                         "'s turn.");

@@ -186,7 +186,6 @@ void GameManager::setSourceCell(int src_cell)
  */
 void chk::GameManager::doCleanup()
 {
-    std::scoped_lock lg(this->my_mutex);
     this->gameMap.clear();
     this->forcedMoves.clear();
     this->player1->emptyBasket();

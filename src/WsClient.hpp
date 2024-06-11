@@ -70,6 +70,8 @@ inline chk::WsClient::WsClient()
     this->webSocketPtr = std::make_unique<ix::WebSocket>();
     // set inital connection timeout
     this->webSocketPtr->setHandshakeTimeout(10);
+    // once dead, dont revive
+    this->webSocketPtr->disableAutomaticReconnection();
     ix::SocketTLSOptions tlsOptions;
 #ifndef _WIN32
     // Currently system CAs are not supported on non-Windows platforms with mbedtls
@@ -255,7 +257,7 @@ inline bool WsClient::replyServer(chk::payload::BasePayload *payload) const
         return false;
     }
     payload->SerializeToString(&this->protoBucket);
-    const auto &result = this->webSocketPtr->send(this->protoBucket, true);
+    const auto &result = this->webSocketPtr->sendBinary(this->protoBucket);
     return result.success;
 }
 
@@ -301,8 +303,8 @@ inline void WsClient::initGameLoop()
             else if (basePayload.has_exit_payload())
             {
                 std::scoped_lock lg(this->mut);
-                spdlog::error(basePayload.notice());
                 this->errorMsg = basePayload.notice();
+                spdlog::error(basePayload.notice());
                 this->isDead = true;
             }
             else if (basePayload.has_move_payload())
