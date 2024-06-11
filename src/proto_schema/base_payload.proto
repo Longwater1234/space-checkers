@@ -51,5 +51,5 @@ message MovePayload {
 // whenever any of the players exits, or game is over
 message ExitPayload {
   // which player initiated exit (RED, BLACK, or unspecified)
-  TeamColor from_term = 1;
+  TeamColor from_team = 1;
 }

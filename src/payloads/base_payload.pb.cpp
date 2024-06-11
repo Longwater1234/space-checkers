@@ -90,7 +90,7 @@ PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
 
 inline constexpr ExitPayload::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
-      : from_term_{static_cast< ::chk::payload::TeamColor >(0)},
+      : from_team_{static_cast< ::chk::payload::TeamColor >(0)},
         _cached_size_{0} {}
 
 template <typename>
@@ -224,7 +224,7 @@ const ::uint32_t
         ~0u,  // no _inlined_string_donated_
         ~0u,  // no _split_
         ~0u,  // no sizeof(Split)
-        PROTOBUF_FIELD_OFFSET(::chk::payload::ExitPayload, _impl_.from_term_),
+        PROTOBUF_FIELD_OFFSET(::chk::payload::ExitPayload, _impl_.from_team_),
 };
 
 static const ::_pbi::MigrationSchema
@@ -260,7 +260,7 @@ const char descriptor_table_protodef_base_5fpayload_2eproto[] ABSL_ATTRIBUTE_SEC
     "or\022\020\n\010piece_id\030\002 \001(\005\0224\n\tdest_cell\030\003 \001(\0132"
     "!.chk.payload.MovePayload.DestCell\0324\n\010De"
     "stCell\022\022\n\ncell_index\030\001 \001(\005\022\t\n\001x\030\002 \001(\002\022\t\n"
-    "\001y\030\003 \001(\002\"8\n\013ExitPayload\022)\n\tfrom_term\030\001 \001"
+    "\001y\030\003 \001(\002\"8\n\013ExitPayload\022)\n\tfrom_team\030\001 \001"
     "(\0162\026.chk.payload.TeamColor*\?\n\tTeamColor\022"
     "\024\n\020TEAM_UNSPECIFIED\020\000\022\014\n\010TEAM_RED\020\001\022\016\n\nT"
     "EAM_BLACK\020\002B\027Z\025checkers-backend/gameb\006pr"
@@ -1689,7 +1689,7 @@ inline PROTOBUF_NDEBUG_INLINE ExitPayload::Impl_::Impl_(
 
 inline void ExitPayload::SharedCtor(::_pb::Arena* arena) {
   new (&_impl_) Impl_(internal_visibility(), arena);
-  _impl_.from_term_ = {};
+  _impl_.from_team_ = {};
 }
 ExitPayload::~ExitPayload() {
   // @@protoc_insertion_point(destructor:chk.payload.ExitPayload)
@@ -1740,14 +1740,14 @@ const ::_pbi::TcParseTable<0, 1, 0, 0, 2> ExitPayload::_table_ = {
     ::_pbi::TcParser::GetTable<::chk::payload::ExitPayload>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
-    // .chk.payload.TeamColor from_term = 1;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(ExitPayload, _impl_.from_term_), 63>(),
-     {8, 63, 0, PROTOBUF_FIELD_OFFSET(ExitPayload, _impl_.from_term_)}},
+    // .chk.payload.TeamColor from_team = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(ExitPayload, _impl_.from_team_), 63>(),
+     {8, 63, 0, PROTOBUF_FIELD_OFFSET(ExitPayload, _impl_.from_team_)}},
   }}, {{
     65535, 65535
   }}, {{
-    // .chk.payload.TeamColor from_term = 1;
-    {PROTOBUF_FIELD_OFFSET(ExitPayload, _impl_.from_term_), 0, 0,
+    // .chk.payload.TeamColor from_team = 1;
+    {PROTOBUF_FIELD_OFFSET(ExitPayload, _impl_.from_team_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kOpenEnum)},
   }},
   // no aux_entries
@@ -1762,7 +1762,7 @@ PROTOBUF_NOINLINE void ExitPayload::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  _impl_.from_term_ = 0;
+  _impl_.from_team_ = 0;
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
 }
 
@@ -1773,11 +1773,11 @@ PROTOBUF_NOINLINE void ExitPayload::Clear() {
   ::uint32_t cached_has_bits = 0;
   (void)cached_has_bits;
 
-  // .chk.payload.TeamColor from_term = 1;
-  if (this->_internal_from_term() != 0) {
+  // .chk.payload.TeamColor from_team = 1;
+  if (this->_internal_from_team() != 0) {
     target = stream->EnsureSpace(target);
     target = ::_pbi::WireFormatLite::WriteEnumToArray(
-        1, this->_internal_from_term(), target);
+        1, this->_internal_from_team(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -1797,10 +1797,10 @@ PROTOBUF_NOINLINE void ExitPayload::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  // .chk.payload.TeamColor from_term = 1;
-  if (this->_internal_from_term() != 0) {
+  // .chk.payload.TeamColor from_team = 1;
+  if (this->_internal_from_team() != 0) {
     total_size += 1 +
-                  ::_pbi::WireFormatLite::EnumSize(this->_internal_from_term());
+                  ::_pbi::WireFormatLite::EnumSize(this->_internal_from_team());
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
@@ -1815,8 +1815,8 @@ void ExitPayload::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::goo
   ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  if (from._internal_from_term() != 0) {
-    _this->_impl_.from_term_ = from._impl_.from_term_;
+  if (from._internal_from_team() != 0) {
+    _this->_impl_.from_team_ = from._impl_.from_team_;
   }
   _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
 }
@@ -1832,7 +1832,7 @@ void ExitPayload::CopyFrom(const ExitPayload& from) {
 void ExitPayload::InternalSwap(ExitPayload* PROTOBUF_RESTRICT other) {
   using std::swap;
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  swap(_impl_.from_term_, other->_impl_.from_term_);
+  swap(_impl_.from_team_, other->_impl_.from_team_);
 }
 
 ::google::protobuf::Metadata ExitPayload::GetMetadata() const {

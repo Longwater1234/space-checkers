@@ -810,16 +810,16 @@ class ExitPayload final : public ::google::protobuf::Message
 
   // accessors -------------------------------------------------------
   enum : int {
-    kFromTermFieldNumber = 1,
+    kFromTeamFieldNumber = 1,
   };
-  // .chk.payload.TeamColor from_term = 1;
-  void clear_from_term() ;
-  ::chk::payload::TeamColor from_term() const;
-  void set_from_term(::chk::payload::TeamColor value);
+  // .chk.payload.TeamColor from_team = 1;
+  void clear_from_team() ;
+  ::chk::payload::TeamColor from_team() const;
+  void set_from_team(::chk::payload::TeamColor value);
 
   private:
-  ::chk::payload::TeamColor _internal_from_term() const;
-  void _internal_set_from_term(::chk::payload::TeamColor value);
+  ::chk::payload::TeamColor _internal_from_team() const;
+  void _internal_set_from_team(::chk::payload::TeamColor value);
 
   public:
   // @@protoc_insertion_point(class_scope:chk.payload.ExitPayload)
@@ -848,7 +848,7 @@ class ExitPayload final : public ::google::protobuf::Message
     inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
                           ::google::protobuf::Arena* arena, const Impl_& from,
                           const ExitPayload& from_msg);
-    int from_term_;
+    int from_team_;
     mutable ::google::protobuf::internal::CachedSize _cached_size_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
@@ -2068,26 +2068,26 @@ inline void MovePayload::set_allocated_dest_cell(::chk::payload::MovePayload_Des
 
 // ExitPayload
 
-// .chk.payload.TeamColor from_term = 1;
-inline void ExitPayload::clear_from_term() {
+// .chk.payload.TeamColor from_team = 1;
+inline void ExitPayload::clear_from_team() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.from_term_ = 0;
+  _impl_.from_team_ = 0;
 }
-inline ::chk::payload::TeamColor ExitPayload::from_term() const {
-  // @@protoc_insertion_point(field_get:chk.payload.ExitPayload.from_term)
-  return _internal_from_term();
+inline ::chk::payload::TeamColor ExitPayload::from_team() const {
+  // @@protoc_insertion_point(field_get:chk.payload.ExitPayload.from_team)
+  return _internal_from_team();
 }
-inline void ExitPayload::set_from_term(::chk::payload::TeamColor value) {
-  _internal_set_from_term(value);
-  // @@protoc_insertion_point(field_set:chk.payload.ExitPayload.from_term)
+inline void ExitPayload::set_from_team(::chk::payload::TeamColor value) {
+  _internal_set_from_team(value);
+  // @@protoc_insertion_point(field_set:chk.payload.ExitPayload.from_team)
 }
-inline ::chk::payload::TeamColor ExitPayload::_internal_from_term() const {
+inline ::chk::payload::TeamColor ExitPayload::_internal_from_team() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
-  return static_cast<::chk::payload::TeamColor>(_impl_.from_term_);
+  return static_cast<::chk::payload::TeamColor>(_impl_.from_team_);
 }
-inline void ExitPayload::_internal_set_from_term(::chk::payload::TeamColor value) {
+inline void ExitPayload::_internal_set_from_team(::chk::payload::TeamColor value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.from_term_ = value;
+  _impl_.from_team_ = value;
 }
 
 #ifdef __GNUC__

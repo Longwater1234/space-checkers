@@ -182,7 +182,7 @@ void GameManager::setSourceCell(int src_cell)
 }
 
 /**
- * If game has been cutoff suddenly (for I/O Error), clear gameMap, pieces for both players, and the Board
+ * If game has been cutoff suddenly, clear gameMap, pieces for both players, and the Board
  */
 void chk::GameManager::doCleanup()
 {
