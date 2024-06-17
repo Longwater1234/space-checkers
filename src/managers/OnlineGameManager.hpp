@@ -189,8 +189,33 @@ inline void OnlineGameManager::drawBoard()
 inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, const chk::PlayerPtr &opponent,
                                                const Block &destCell, const short &currentPieceId)
 {
+    // FIRST SEND TO SERVER for validation
+    auto newDestCell = new chk::payload::MovePayload_DestCell();
+    newDestCell->set_cell_index(destCell->getIndex());
+    newDestCell->set_x(destCell->getPos().x);
+    newDestCell->set_y(destCell->getPos().y);
+
+    // create Movepayload Protobuf
+    auto movePayload = new chk::payload::MovePayload();
+    movePayload->set_source_cell(this->sourceCell.value());
+    movePayload->set_piece_id(currentPieceId);
+    movePayload->set_from_team(TeamColor::TEAM_RED);
+    if (this->myTeam == chk::PlayerType::PLAYER_BLACK)
+    {
+        movePayload->set_from_team(TeamColor::TEAM_BLACK);
+    }
+    movePayload->set_allocated_dest_cell(newDestCell);
+
+    // create basePayload and send
+    chk::payload::BasePayload requestBody;
+    requestBody.set_allocated_move_payload(movePayload);
+    if (!this->wsClient->replyServer(&requestBody))
+    {
+        spdlog::error("failed to send message to Server");
+        return;
+    }
+
     // VERIFY if move is successful
-    int cellIndexCopy = this->sourceCell.value();
     const bool success = player->movePiece(currentPieceId, destCell->getPos());
     if (!success)
     {
@@ -204,32 +229,6 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
     if (!this->getForcedMoves().empty())
     {
         spdlog::info("YOU ARE IN DANGER ");
-    }
-
-    // REPLY TO SERVER
-    // create proto DestCell
-    auto newDestCell = new chk::payload::MovePayload_DestCell();
-    newDestCell->set_cell_index(destCell->getIndex());
-    newDestCell->set_x(destCell->getPos().x);
-    newDestCell->set_y(destCell->getPos().y);
-
-    // create Movepayload rotobuf
-    auto movePayload = new chk::payload::MovePayload();
-    movePayload->set_source_cell(cellIndexCopy);
-    movePayload->set_piece_id(currentPieceId);
-    movePayload->set_from_team(TeamColor::TEAM_RED);
-    if (this->myTeam == chk::PlayerType::PLAYER_BLACK)
-    {
-        movePayload->set_from_team(TeamColor::TEAM_BLACK);
-    }
-    movePayload->set_allocated_dest_cell(newDestCell);
-
-    // create base request body
-    chk::payload::BasePayload requestBody;
-    requestBody.set_allocated_move_payload(movePayload);
-    if (!this->wsClient->replyServer(&requestBody))
-    {
-        spdlog::error("failed to send message to Server");
     }
 
     this->isMyTurn = !this->isMyTurn; // toggle player turns
@@ -300,7 +299,7 @@ inline void OnlineGameManager::startMoveListener()
     // TODO complete me
     this->wsClient->setOnMovePieceCallback([this](const chk::payload::MovePayload &payload) {
         // TODO HANDLE ME
-        //  MAYBE NEED VALIDATION TOO
+        // NEED VALIDATION
     });
 }
 
@@ -317,7 +316,10 @@ inline void OnlineGameManager::startCaptureListener()
  */
 inline void OnlineGameManager::startDeathListener()
 {
-    this->wsClient->setOnDeathCallback([this](bool isDead) { this->doCleanup(); });
+    this->wsClient->setOnDeathCallback([this](std::string_view notice) {
+        this->updateMessage(notice);
+        this->doCleanup();
+    });
 }
 
 /**

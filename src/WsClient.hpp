@@ -20,7 +20,7 @@ using onConnectedServer = std::function<void(chk::payload::WelcomePayload &, std
 // callback when both players joined match
 using onReadyStartGame = std::function<void(chk::payload::StartPayload &, std::string_view notice)>;
 // when connection to server dies non-gracefully
-using onDeathCallback = std::function<void(bool)>;
+using onDeathCallback = std::function<void(std::string_view notice)>;
 // when opponent makes a simple move
 using onMovePieceCallback = std::function<void(chk::payload::MovePayload &)>;
 
@@ -155,7 +155,7 @@ inline void WsClient::runMainLoop()
     if (this->isDead) {
        this->showErrorPopup();
        if (this->_onDeathCallback != nullptr) {
-        _onDeathCallback(true);
+        _onDeathCallback(this->errorMsg);
        }
     }
     // clang-format on

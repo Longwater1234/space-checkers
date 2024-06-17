@@ -190,7 +190,7 @@ void chk::GameManager::doCleanup()
     this->forcedMoves.clear();
     this->player1->emptyBasket();
     this->player2->emptyBasket();
-    this->updateMessage("Match has ended!");
+  //  this->updateMessage("Match has ended!");
     this->gameOver = true;
 }
 

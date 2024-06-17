@@ -7,7 +7,6 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Window/Mouse.hpp>
 #include <cassert>
-#include <fstream>
 #include <google/protobuf/stubs/common.h>
 #include <vector>
 
@@ -53,7 +52,7 @@ int main()
     sf::Font font;
     if (!font.loadFromFile(chk::getResourcePath(chk::FONT_PATH)))
     {
-        perror("cannot find font file");
+        std::perror("cannot find font file");
         exit(EXIT_FAILURE);
     }
 
