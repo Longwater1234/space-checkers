@@ -117,6 +117,7 @@ inline void chk::OnlineGameManager::createAllPieces()
 
         // GIVE EACH PLAYER their own piece
         this->matchCellsToPieces(pieceList);
+
         for (auto &kete : pieceList)
         {
             if (kete->getPieceType() == chk::PieceType::Red)
