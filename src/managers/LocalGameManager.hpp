@@ -36,7 +36,7 @@ inline LocalGameManager::LocalGameManager(sf::RenderWindow *windowPtr)
 }
 
 /**
- * Create all pieces for both players and add them to pieceList, using stdlib random generator
+ * Create all pieces for both players and add them to pieceList, using STL random num generator
  * @param pieceList destination of created pieces
  */
 inline void LocalGameManager::createAllPieces()

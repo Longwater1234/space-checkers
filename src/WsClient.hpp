@@ -19,7 +19,7 @@ namespace chk
 using onConnectedServer = std::function<void(chk::payload::WelcomePayload &, std::string_view notice)>;
 // callback when both players joined match
 using onReadyStartGame = std::function<void(chk::payload::StartPayload &, std::string_view notice)>;
-// when connection to server dies non-gracefully
+// when connection to server interrupted or dies
 using onDeathCallback = std::function<void(std::string_view notice)>;
 // when opponent makes a simple move
 using onMovePieceCallback = std::function<void(chk::payload::MovePayload &)>;
@@ -36,7 +36,7 @@ class WsClient final
     void setOnReadyStartGameCallback(const onReadyStartGame &callback);
     void setOnDeathCallback(const onDeathCallback &callback);
     void setOnMovePieceCallback(const onMovePieceCallback &callback);
-    bool replyServer(chk::payload::BasePayload *payload) const;
+    bool replyServerAsync(chk::payload::BasePayload *payload) const;
 
   private:
     std::string final_address;                     // IP or URL of server
@@ -45,7 +45,7 @@ class WsClient final
     chk::CircularBuffer<std::string> msgBuffer{1}; // keep only recent 20 messages
     mutable std::string errorMsg{};                // for any websocket errors
     std::atomic_bool conn_clicked = false;         // if 'connect' button clicked
-    mutable std::string protoBucket{};             // reusable buffer used to serialize payloads to server
+    mutable std::string protoBucket{};             // reusable buffer used to serialize payloads
 
     onConnectedServer _onReadyConnected;
     onReadyStartGame _onReadyStartGame;
@@ -247,10 +247,10 @@ inline void WsClient::setOnMovePieceCallback(const onMovePieceCallback &callback
 }
 
 /**
- * Send JSON response back to server
+ * Send Protobuf response back to server
  * @param payload the request body
  */
-inline bool WsClient::replyServer(chk::payload::BasePayload *payload) const
+inline bool WsClient::replyServerAsync(chk::payload::BasePayload *payload) const
 {
     if (this->isDead || !this->isConnected)
     {

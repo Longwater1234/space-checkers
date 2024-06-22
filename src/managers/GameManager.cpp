@@ -182,7 +182,7 @@ void GameManager::setSourceCell(int src_cell)
 }
 
 /**
- * If game has been cutoff suddenly, clear gameMap, pieces for both players, and the Board
+ * If match is interrupted, clear all: pieces for both players, gameMap, and the Board
  */
 void chk::GameManager::doCleanup()
 {
@@ -190,7 +190,6 @@ void chk::GameManager::doCleanup()
     this->forcedMoves.clear();
     this->player1->emptyBasket();
     this->player2->emptyBasket();
-    //  this->updateMessage("Match has ended!");
     this->gameOver = true;
 }
 
@@ -206,10 +205,10 @@ bool GameManager::hasPendingCaptures() const
 }
 
 /**
- * Using cached hashmap, get the PieceId placed at this cell_index
+ * Using cached gameMap, get the PieceId placed at this cell_index
  *
  * @param cell_idx the clicked cell
- * @return positive int or -1 if not found
+ * @return positive number or -1 if not found
  */
 short GameManager::getPieceFromCell(int cell_idx)
 {
@@ -241,7 +240,7 @@ void GameManager::matchCellsToPieces(const std::vector<chk::PiecePtr> &pieceList
         }
     }
     this->alreadyCached = true;
-    spdlog::info("hashmap size " + std::to_string(gameMap.size()));
+    spdlog::info("gamMap size " + std::to_string(gameMap.size()));
 }
 
 /**
@@ -308,7 +307,7 @@ void chk::GameManager::handleCellTap(const chk::PlayerPtr &hunter, const chk::Pl
 }
 
 /**
- * When player is forced to capture opponent's piece, highlight their pieces.
+ * When player is forced to capture opponent's piece, highlight their hunter pieces with GREEN.
  * @param player current player
  * @param cell selected cell
  */
@@ -329,6 +328,7 @@ void chk::GameManager::showForcedMoves(const chk::PlayerPtr &player, const chk::
     }
     else
     {
+        // GOOD! user has selected own Hunter Piece
         this->setSourceCell(cell->getIndex());
     }
 }
@@ -417,7 +417,7 @@ void GameManager::collectFrontLHS(const chk::PlayerPtr &hunter, const Block &cel
     bool hasEnemyAhead = false;
     short deltaForward = cell_ptr->getIsEvenRow() ? 4 : 5;
     short deltaBehindEnemy = cell_ptr->getIsEvenRow() ? 5 : 4;
-    int mSign = 1;
+    int mSign = +1; // direction. up +1, down -1
 
     // if player piece is Black (PLAYER 2)
     if (hunter->getPlayerType() == PlayerType::PLAYER_BLACK)
@@ -476,7 +476,7 @@ void GameManager::collectFrontRHS(const chk::PlayerPtr &hunter, const Block &cel
     bool hasEnemyAhead = false;
     short deltaForward = cell_ptr->getIsEvenRow() ? 3 : 4;
     short deltaBehindEnemy = cell_ptr->getIsEvenRow() ? 4 : 3;
-    int mSign = 1;
+    int mSign = +1; // direction. up +1, down -1
 
     // if piece is Black (PLAYER 2)
     if (hunter->getPlayerType() == PlayerType::PLAYER_BLACK)
@@ -532,7 +532,7 @@ void GameManager::collectBehindRHS(const PlayerPtr &hunter, const Block &cell_pt
     bool hasEnemyAhead = false;
     short deltaForward = cell_ptr->getIsEvenRow() ? 5 : 4;
     short deltaBehindEnemy = cell_ptr->getIsEvenRow() ? 4 : 5;
-    int mSign = +1;
+    int mSign = +1; // direction. up +1, down -1
 
     // if piece is Black (PLAYER 2)
     if (hunter->getPlayerType() == PlayerType::PLAYER_BLACK)
@@ -588,7 +588,7 @@ void GameManager::collectBehindLHS(const PlayerPtr &hunter, const Block &cell_pt
     bool hasEnemyAhead = false;
     short deltaForward = cell_ptr->getIsEvenRow() ? 4 : 3;
     short deltaBehindEnemy = cell_ptr->getIsEvenRow() ? 3 : 4;
-    int mSign = 1;
+    int mSign = +1; // direction. up +1, down -1
 
     // if piece is Black (PLAYER 2)
     if (hunter->getPlayerType() == PlayerType::PLAYER_BLACK)

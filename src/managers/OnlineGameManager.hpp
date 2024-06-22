@@ -190,7 +190,7 @@ inline void OnlineGameManager::drawBoard()
 inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, const chk::PlayerPtr &opponent,
                                                const Block &destCell, const short &currentPieceId)
 {
-    // FIRST SEND TO SERVER for validation
+    // FIRST create destCell payload
     auto newDestCell = new chk::payload::MovePayload_DestCell();
     newDestCell->set_cell_index(destCell->getIndex());
     newDestCell->set_x(destCell->getPos().x);
@@ -207,12 +207,13 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
     }
     movePayload->set_allocated_dest_cell(newDestCell);
 
-    // create basePayload and send
+    //finally, SEND TO SERVER for validation
     chk::payload::BasePayload requestBody;
     requestBody.set_allocated_move_payload(movePayload);
-    if (!this->wsClient->replyServer(&requestBody))
+    if (!this->wsClient->replyServerAsync(&requestBody))
     {
         spdlog::error("failed to send message to Server");
+        this->updateMessage("failed to send message to Server");
         return;
     }
 
@@ -300,7 +301,7 @@ inline void OnlineGameManager::startMoveListener()
     // TODO complete me
     this->wsClient->setOnMovePieceCallback([this](const chk::payload::MovePayload &payload) {
         // TODO HANDLE ME
-        // NEED VALIDATION
+
     });
 }
 
