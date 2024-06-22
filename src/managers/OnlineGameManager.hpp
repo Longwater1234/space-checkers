@@ -207,7 +207,7 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
     }
     movePayload->set_allocated_dest_cell(newDestCell);
 
-    //finally, SEND TO SERVER for validation
+    // finally, SEND TO SERVER for validation
     chk::payload::BasePayload requestBody;
     requestBody.set_allocated_move_payload(movePayload);
     if (!this->wsClient->replyServerAsync(&requestBody))
@@ -299,9 +299,28 @@ inline void OnlineGameManager::handleCellTap(const chk::PlayerPtr &hunter, const
 inline void OnlineGameManager::startMoveListener()
 {
     // TODO complete me
-    this->wsClient->setOnMovePieceCallback([this](const chk::payload::MovePayload &payload) {
-        // TODO HANDLE ME
+    this->wsClient->setOnMovePieceCallback([this](chk::payload::MovePayload &payload) {
+        // which player just made the move
+        const chk::PlayerPtr &targetPlayer = payload.from_team() & TeamColor::TEAM_RED ? this->player1 : this->player2;
+        const chk::PlayerPtr &myTeam = payload.from_team() & TeamColor::TEAM_RED ? this->player2 : this->player1;
+        sf::Vector2f targetPosition = sf::Vector2f{payload.dest_cell().x(), payload.dest_cell().y()};
+        const bool success = targetPlayer->movePiece(payload.piece_id(), targetPosition);
+        if (!success)
+        {
+            return;
+        }
+        gameMap.erase(payload.source_cell());                                  // set old location empty!
+        gameMap.emplace(payload.dest_cell().cell_index(), payload.piece_id()); // fill in the new location
+        this->identifyTargets(myTeam);                                         // check  opportunities for Opponent
 
+        if (!this->getForcedMoves().empty())
+        {
+            spdlog::info("OPPONENT IS IN DANGER");
+        }
+
+        this->isMyTurn = !this->isMyTurn; // toggle player turns
+        this->updateMessage("Opponent moved to " + std::to_string(payload.dest_cell().cell_index()) +
+                            ". It's your turn.");
     });
 }
 
