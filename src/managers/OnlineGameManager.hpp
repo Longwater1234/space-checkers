@@ -54,13 +54,13 @@ inline OnlineGameManager::OnlineGameManager(sf::RenderWindow *windowPtr)
 
     // set Listener for connection success
     this->wsClient->setOnReadyConnectedCallback([this](chk::payload::WelcomePayload &welcome, std::string_view notice) {
-        if (welcome.my_team() == TeamColor::TEAM_RED)
+        if (welcome.my_team() & TeamColor::TEAM_RED)
         {
             this->myTeam = chk::PlayerType::PLAYER_RED;
             this->isMyTurn = true;
             spdlog::info("I AM PLAYER RED");
         }
-        else if (welcome.my_team() == TeamColor::TEAM_BLACK)
+        else
         {
             this->myTeam = chk::PlayerType::PLAYER_BLACK;
             this->isMyTurn = false;
@@ -323,7 +323,7 @@ inline void OnlineGameManager::handleEvents(chk::CircularBuffer<short> &circular
             {
                 if (cell->containsPoint(clickedPos) && cell->getIndex() != -1)
                 {
-                    const auto &hunter = this->myTeam == chk::PlayerType::PLAYER_RED ? this->player1 : this->player2; // Me
+                    const auto &hunter = this->myTeam == chk::PlayerType::PLAYER_RED ? this->player1 : this->player2;
                     const auto &opponent = this->myTeam == chk::PlayerType::PLAYER_RED ? this->player2 : this->player1;
 
                     if (this->hasPendingCaptures())
@@ -345,17 +345,16 @@ inline void OnlineGameManager::handleEvents(chk::CircularBuffer<short> &circular
 }
 
 /**
- * Listening for MovePiece events from wsClient, and update gameBoard
+ * Listening for "MovePiece" events from server, and update gameBoard
  */
 inline void OnlineGameManager::startMoveListener()
 {
-    // TODO complete me
     this->wsClient->setOnMovePieceCallback([this](chk::payload::MovePayload &payload) {
-        // which player just made the move
+        // which player (RED or BLACK) made the Move
         const chk::PlayerPtr &opponent = payload.from_team() & TeamColor::TEAM_RED ? this->player1 : this->player2;
         const chk::PlayerPtr &myTeam = payload.from_team() & TeamColor::TEAM_RED ? this->player2 : this->player1;
         sf::Vector2f targetPosition = sf::Vector2f{payload.dest_cell().x(), payload.dest_cell().y()};
-        const bool success = opponent->movePiece(payload.piece_id(), targetPosition);
+        const bool success = opponent->movePiece(static_cast<short>(payload.piece_id()), targetPosition);
         if (!success)
         {
             return;
@@ -376,7 +375,7 @@ inline void OnlineGameManager::startMoveListener()
 }
 
 /**
- * Listening for CapturePiece events from wsClient, and update gameBoard
+ * Listening for CapturePiece events from server, and update gameBoard
  */
 inline void OnlineGameManager::startCaptureListener()
 {
