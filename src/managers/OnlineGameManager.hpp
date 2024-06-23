@@ -33,7 +33,7 @@ class OnlineGameManager final : public chk::GameManager
                        const chk::Block &cell) override;
 
   private:
-    chk::PlayerType myTeam{};
+    mutable chk::PlayerType myTeam{};
     std::unique_ptr<chk::WsClient> wsClient = nullptr;
     std::atomic_bool isMyTurn = false;
     std::atomic_bool gameReady = false;
@@ -51,18 +51,20 @@ inline OnlineGameManager::OnlineGameManager(sf::RenderWindow *windowPtr)
     // CREATE TWO unique PLAYERS
     this->player1 = std::make_unique<chk::Player>(chk::PlayerType::PLAYER_RED);
     this->player2 = std::make_unique<chk::Player>(chk::PlayerType::PLAYER_BLACK);
-    assert(!(*player1 == *player2));
 
     // set Listener for connection success
     this->wsClient->setOnReadyConnectedCallback([this](chk::payload::WelcomePayload &welcome, std::string_view notice) {
-        if (welcome.my_team() & TeamColor::TEAM_RED)
+        if (welcome.my_team() == TeamColor::TEAM_RED)
         {
             this->myTeam = chk::PlayerType::PLAYER_RED;
             this->isMyTurn = true;
+            spdlog::info("I AM PLAYER RED");
         }
-        else
+        else if (welcome.my_team() == TeamColor::TEAM_BLACK)
         {
             this->myTeam = chk::PlayerType::PLAYER_BLACK;
+            this->isMyTurn = false;
+            spdlog::info("I AM PLAYER BLACK");
         }
         this->updateMessage(notice);
     });
@@ -190,33 +192,7 @@ inline void OnlineGameManager::drawBoard()
 inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, const chk::PlayerPtr &opponent,
                                                const Block &destCell, const short &currentPieceId)
 {
-    // FIRST create destCell payload
-    auto newDestCell = new chk::payload::MovePayload_DestCell();
-    newDestCell->set_cell_index(destCell->getIndex());
-    newDestCell->set_x(destCell->getPos().x);
-    newDestCell->set_y(destCell->getPos().y);
-
-    // create Movepayload Protobuf
-    auto movePayload = new chk::payload::MovePayload();
-    movePayload->set_source_cell(this->sourceCell.value());
-    movePayload->set_piece_id(currentPieceId);
-    movePayload->set_from_team(TeamColor::TEAM_RED);
-    if (this->myTeam == chk::PlayerType::PLAYER_BLACK)
-    {
-        movePayload->set_from_team(TeamColor::TEAM_BLACK);
-    }
-    movePayload->set_allocated_dest_cell(newDestCell);
-
-    // finally, SEND TO SERVER for validation
-    chk::payload::BasePayload requestBody;
-    requestBody.set_allocated_move_payload(movePayload);
-    if (!this->wsClient->replyServerAsync(&requestBody))
-    {
-        spdlog::error("failed to send message to Server");
-        this->updateMessage("failed to send message to Server");
-        return;
-    }
-
+    int sourceCellCopy = this->sourceCell.value();
     // VERIFY if move is successful
     const bool success = player->movePiece(currentPieceId, destCell->getPos());
     if (!success)
@@ -231,6 +207,33 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
     if (!this->getForcedMoves().empty())
     {
         spdlog::info("YOU ARE IN DANGER ");
+    }
+
+    // SEND TO SERVER for validation
+    auto newDestCell = new chk::payload::MovePayload_DestCell();
+    newDestCell->set_cell_index(destCell->getIndex());
+    newDestCell->set_x(destCell->getPos().x);
+    newDestCell->set_y(destCell->getPos().y);
+
+    // create Movepayload Protobuf
+    auto movePayload = new chk::payload::MovePayload();
+    movePayload->set_source_cell(sourceCellCopy);
+    movePayload->set_piece_id(currentPieceId);
+    movePayload->set_from_team(TeamColor::TEAM_RED);
+    if (this->myTeam == chk::PlayerType::PLAYER_BLACK)
+    {
+        movePayload->set_from_team(TeamColor::TEAM_BLACK);
+    }
+    movePayload->set_allocated_dest_cell(newDestCell);
+
+    // finally, create base
+    chk::payload::BasePayload requestBody;
+    requestBody.set_allocated_move_payload(movePayload);
+    if (!this->wsClient->replyServerAsync(&requestBody))
+    {
+        spdlog::error("failed to send message to Server");
+        this->updateMessage("failed to send message to Server");
+        return;
     }
 
     this->isMyTurn = !this->isMyTurn; // toggle player turns
@@ -293,6 +296,54 @@ inline void OnlineGameManager::handleCellTap(const chk::PlayerPtr &hunter, const
         }
     }
 }
+
+/**
+ * This will be handling all UI events
+ * @param circularBuffer stores the currently selected piece
+ */
+inline void OnlineGameManager::handleEvents(chk::CircularBuffer<short> &circularBuffer)
+{
+    for (auto event = sf::Event{}; window->pollEvent(event);)
+    {
+        ImGui::SFML::ProcessEvent(*this->window, event);
+        if (event.type == sf::Event::Closed)
+        {
+            window->close();
+        }
+        if (event.type == sf::Event::MouseButtonPressed && sf::Mouse::isButtonPressed(sf::Mouse::Left))
+        {
+            const auto clickedPos = sf::Mouse::getPosition(*window);
+            /* Check window bounds */
+            if (clickedPos.y > chk::SIZE_CELL * 8)
+            {
+                continue;
+            }
+            // START inner loop:
+            for (auto &cell : this->getBlockList())
+            {
+                if (cell->containsPoint(clickedPos) && cell->getIndex() != -1)
+                {
+                    const auto &myTeam = this->myTeam == chk::PlayerType::PLAYER_RED ? this->player1 : this->player2;
+                    const auto &opponent = this->myTeam == chk::PlayerType::PLAYER_RED ? this->player2 : this->player1;
+
+                    if (this->hasPendingCaptures())
+                    {
+                        this->handleCapturePiece(myTeam, opponent, cell);
+                        this->updateMatchStatus(myTeam, opponent);
+                        circularBuffer.clean();
+                    }
+                    else
+                    {
+                        this->handleCellTap(myTeam, opponent, circularBuffer, cell);
+                    }
+                    // END inner loop
+                    break;
+                }
+            }
+        }
+    }
+}
+
 /**
  * Listening for MovePiece events from wsClient, and update gameBoard
  */
@@ -301,10 +352,10 @@ inline void OnlineGameManager::startMoveListener()
     // TODO complete me
     this->wsClient->setOnMovePieceCallback([this](chk::payload::MovePayload &payload) {
         // which player just made the move
-        const chk::PlayerPtr &targetPlayer = payload.from_team() & TeamColor::TEAM_RED ? this->player1 : this->player2;
+        const chk::PlayerPtr &opponent = payload.from_team() & TeamColor::TEAM_RED ? this->player1 : this->player2;
         const chk::PlayerPtr &myTeam = payload.from_team() & TeamColor::TEAM_RED ? this->player2 : this->player1;
         sf::Vector2f targetPosition = sf::Vector2f{payload.dest_cell().x(), payload.dest_cell().y()};
-        const bool success = targetPlayer->movePiece(payload.piece_id(), targetPosition);
+        const bool success = opponent->movePiece(payload.piece_id(), targetPosition);
         if (!success)
         {
             return;
@@ -341,53 +392,6 @@ inline void OnlineGameManager::startDeathListener()
         this->updateMessage(notice);
         this->doCleanup();
     });
-}
-
-/**
- * This will be handling all UI events
- * @param circularBuffer stores the currently selected piece
- */
-inline void OnlineGameManager::handleEvents(chk::CircularBuffer<short> &circularBuffer)
-{
-    for (auto event = sf::Event{}; window->pollEvent(event);)
-    {
-        ImGui::SFML::ProcessEvent(*this->window, event);
-        if (event.type == sf::Event::Closed)
-        {
-            window->close();
-        }
-        if (event.type == sf::Event::MouseButtonPressed && sf::Mouse::isButtonPressed(sf::Mouse::Left))
-        {
-            const auto clickedPos = sf::Mouse::getPosition(*window);
-            /* Check window bounds */
-            if (clickedPos.y > chk::SIZE_CELL * 8)
-            {
-                continue;
-            }
-            // START inner loop:
-            for (auto &cell : this->getBlockList())
-            {
-                if (cell->containsPoint(clickedPos) && cell->getIndex() != -1)
-                {
-                    const auto &hunter = this->isPlayerRedTurn() ? this->player1 : this->player2;
-                    const auto &prey = this->isPlayerRedTurn() ? this->player2 : this->player1;
-
-                    if (this->hasPendingCaptures())
-                    {
-                        this->handleCapturePiece(hunter, prey, cell);
-                        this->updateMatchStatus(hunter, prey);
-                        circularBuffer.clean();
-                    }
-                    else
-                    {
-                        this->handleCellTap(hunter, prey, circularBuffer, cell);
-                    }
-                    // END inner loop
-                    break;
-                }
-            }
-        }
-    }
 }
 
 } // namespace chk
