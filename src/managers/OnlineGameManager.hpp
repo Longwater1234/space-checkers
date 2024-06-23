@@ -192,13 +192,13 @@ inline void OnlineGameManager::drawBoard()
 inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, const chk::PlayerPtr &opponent,
                                                const Block &destCell, const short &currentPieceId)
 {
-    int sourceCellCopy = this->sourceCell.value();
     // VERIFY if move is successful
     const bool success = player->movePiece(currentPieceId, destCell->getPos());
     if (!success)
     {
         return;
     }
+    int sourceCellCopy = this->sourceCell.value();
     gameMap.erase(this->sourceCell.value());               // set old location empty!
     gameMap.emplace(destCell->getIndex(), currentPieceId); // fill in the new location
     this->sourceCell = std::nullopt;                       // reset source cell
@@ -226,7 +226,7 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
     }
     movePayload->set_allocated_dest_cell(newDestCell);
 
-    // finally, create base
+    // finally, create Base proto
     chk::payload::BasePayload requestBody;
     requestBody.set_allocated_move_payload(movePayload);
     if (!this->wsClient->replyServerAsync(&requestBody))
@@ -323,18 +323,18 @@ inline void OnlineGameManager::handleEvents(chk::CircularBuffer<short> &circular
             {
                 if (cell->containsPoint(clickedPos) && cell->getIndex() != -1)
                 {
-                    const auto &myTeam = this->myTeam == chk::PlayerType::PLAYER_RED ? this->player1 : this->player2;
+                    const auto &hunter = this->myTeam == chk::PlayerType::PLAYER_RED ? this->player1 : this->player2; // Me
                     const auto &opponent = this->myTeam == chk::PlayerType::PLAYER_RED ? this->player2 : this->player1;
 
                     if (this->hasPendingCaptures())
                     {
-                        this->handleCapturePiece(myTeam, opponent, cell);
-                        this->updateMatchStatus(myTeam, opponent);
+                        this->handleCapturePiece(hunter, opponent, cell);
+                        this->updateMatchStatus(hunter, opponent);
                         circularBuffer.clean();
                     }
                     else
                     {
-                        this->handleCellTap(myTeam, opponent, circularBuffer, cell);
+                        this->handleCellTap(hunter, opponent, circularBuffer, cell);
                     }
                     // END inner loop
                     break;
