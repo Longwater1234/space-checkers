@@ -41,7 +41,7 @@ class WsClient final
     std::string final_address;                     // IP or URL of server
     std::atomic_bool isDead{false};                // if connection closed
     std::atomic_bool isConnected{false};           // if done connected to server (else, show loading)
-    chk::CircularBuffer<std::string> msgBuffer{2}; // keep only recent 2 messages
+    chk::CircularBuffer<std::string> msgBuffer{1}; // keep only recent 1 message
     mutable std::string errorMsg{};                // for any websocket errors
     std::atomic_bool conn_clicked = false;         // if 'connect' button clicked
     mutable std::string protoBucket{};             // reusable buffer used to serialize payloads
@@ -54,7 +54,7 @@ class WsClient final
     std::mutex mut;
     std::unique_ptr<ix::WebSocket> webSocketPtr = nullptr; // our Websocket object
     void showErrorPopup();
-    void initGameLoop();
+    void runGameLoop();
     static void showHint(const char *tip);
     void tryConnect(std::string_view address);
     void showConnectWindow();
@@ -138,6 +138,7 @@ inline void WsClient::resetAllStates()
  */
 inline void WsClient::runMainLoop()
 {
+
     // clang-format off
     if (!isConnected) {
         if (!conn_clicked) {
@@ -148,7 +149,7 @@ inline void WsClient::runMainLoop()
     }
     // already connected
     else {
-        this->initGameLoop();
+        this->runGameLoop();
     }
     // connection failure 🙁
     if (this->isDead) {
@@ -174,6 +175,7 @@ inline void WsClient::tryConnect(std::string_view address)
         ImGui::Text("Connecting to %s", this->final_address.c_str());
         ImGui::End();
     }
+
     // Setup a callback to be fired when an Async event is received
     this->webSocketPtr->setOnMessageCallback([this](const ix::WebSocketMessagePtr &msg) {
         if (msg->type == ix::WebSocketMessageType::Message)
@@ -186,8 +188,16 @@ inline void WsClient::tryConnect(std::string_view address)
             spdlog::info("Connection established");
             this->isConnected = true;
         }
+        else if (msg->type == ix::WebSocketMessageType::Close)
+        {
+            std::scoped_lock lg{this->mut};
+            this->errorMsg = "Error: disconnected from Server!";
+            spdlog::error(this->errorMsg);
+            this->isDead = true;
+        }
         else if (msg->type == ix::WebSocketMessageType::Error)
         {
+
             std::scoped_lock lg{this->mut};
             this->errorMsg = "Connection error: " + msg->errorInfo.reason;
             spdlog::error(this->errorMsg);
@@ -263,7 +273,7 @@ inline bool WsClient::replyServerAsync(chk::payload::BasePayload *payload) const
 /**
  * Exchange messages with the server and update the game accordingly. if any error happen, close connection
  */
-inline void WsClient::initGameLoop()
+inline void WsClient::runGameLoop()
 {
     if (!this->isConnected)
     {

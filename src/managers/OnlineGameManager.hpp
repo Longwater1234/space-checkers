@@ -228,13 +228,12 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
     }
     movePayload->set_allocated_dest_cell(newDestCell);
 
-    // finally, create Base proto
+    // finally, create Base request
     chk::payload::BasePayload requestBody;
     requestBody.set_allocated_move_payload(movePayload);
     if (!this->wsClient->replyServerAsync(&requestBody))
     {
         spdlog::error("failed to send message to Server");
-        this->updateMessage("failed to send message to Server");
         return;
     }
 
