@@ -53,21 +53,22 @@ inline OnlineGameManager::OnlineGameManager(sf::RenderWindow *windowPtr)
     this->player2 = std::make_unique<chk::Player>(chk::PlayerType::PLAYER_BLACK);
 
     // set Listener for connection success
-    this->wsClient->setOnReadyConnectedCallback([this](chk::payload::WelcomePayload &welcome, std::string_view notice) {
-        if (welcome.my_team() & TeamColor::TEAM_RED)
-        {
-            this->myTeam = chk::PlayerType::PLAYER_RED;
-            this->isMyTurn = true;
-            spdlog::info("I AM PLAYER RED");
-        }
-        else
-        {
-            this->myTeam = chk::PlayerType::PLAYER_BLACK;
-            this->isMyTurn = false;
-            spdlog::info("I AM PLAYER BLACK");
-        }
-        this->updateMessage(notice);
-    });
+    this->wsClient->setOnReadyConnectedCallback(
+        [this](const chk::payload::WelcomePayload &welcome, std::string_view notice) {
+            if (welcome.my_team() & TeamColor::TEAM_RED)
+            {
+                this->myTeam = chk::PlayerType::PLAYER_RED;
+                this->isMyTurn = true;
+                spdlog::info("I AM PLAYER RED");
+            }
+            else
+            {
+                this->myTeam = chk::PlayerType::PLAYER_BLACK;
+                this->isMyTurn = false;
+                spdlog::info("I AM PLAYER BLACK");
+            }
+            this->updateMessage(notice);
+        });
 }
 
 /**
@@ -77,7 +78,8 @@ inline OnlineGameManager::OnlineGameManager(sf::RenderWindow *windowPtr)
 inline void chk::OnlineGameManager::createAllPieces()
 {
     // wait for server to send Piece Ids
-    this->wsClient->setOnReadyStartGameCallback([this](chk::payload::StartPayload &payload, std::string_view notice) {
+    this->wsClient->setOnReadyStartGameCallback([this](const chk::payload::StartPayload &payload,
+                                                       std::string_view notice) {
         this->gameReady = true;
         this->updateMessage(notice);
 
@@ -349,11 +351,11 @@ inline void OnlineGameManager::handleEvents(chk::CircularBuffer<short> &circular
  */
 inline void OnlineGameManager::startMoveListener()
 {
-    this->wsClient->setOnMovePieceCallback([this](chk::payload::MovePayload &payload) {
+    this->wsClient->setOnMovePieceCallback([this](const chk::payload::MovePayload &payload) {
         // which player (RED or BLACK) made the Move
         const chk::PlayerPtr &opponent = payload.from_team() & TeamColor::TEAM_RED ? this->player1 : this->player2;
         const chk::PlayerPtr &myTeam = payload.from_team() & TeamColor::TEAM_RED ? this->player2 : this->player1;
-        sf::Vector2f targetPosition = sf::Vector2f{payload.dest_cell().x(), payload.dest_cell().y()};
+        const auto targetPosition = sf::Vector2f{payload.dest_cell().x(), payload.dest_cell().y()};
         const bool success = opponent->movePiece(static_cast<short>(payload.piece_id()), targetPosition);
         if (!success)
         {
@@ -383,7 +385,7 @@ inline void OnlineGameManager::startCaptureListener()
 }
 
 /**
- * Listening for killed connection in WsClient
+ * Listening for killed connection from WsClient
  */
 inline void OnlineGameManager::startDeathListener()
 {

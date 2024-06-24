@@ -2,7 +2,6 @@
 #include "CircularBuffer.hpp"
 #include "payloads/base_payload.pb.hpp"
 #include <atomic>
-#include <iostream>
 #include <ixwebsocket/IXNetSystem.h>
 #include <ixwebsocket/IXWebSocket.h>
 #include <mutex>
@@ -16,13 +15,13 @@ namespace chk
 {
 
 // callback when connected to server success
-using onConnectedServer = std::function<void(chk::payload::WelcomePayload &, std::string_view notice)>;
+using onConnectedServer = std::function<void(const chk::payload::WelcomePayload &, std::string_view notice)>;
 // callback when both players joined match
-using onReadyStartGame = std::function<void(chk::payload::StartPayload &, std::string_view notice)>;
-// when connection to server interrupted or dies
+using onReadyStartGame = std::function<void(const chk::payload::StartPayload &, std::string_view notice)>;
+// when server kills our connection
 using onDeathCallback = std::function<void(std::string_view notice)>;
 // when opponent makes a simple move
-using onMovePieceCallback = std::function<void(chk::payload::MovePayload &)>;
+using onMovePieceCallback = std::function<void(const chk::payload::MovePayload &)>;
 
 /**
  * This handles all websocket exchanges with Server
@@ -42,7 +41,7 @@ class WsClient final
     std::string final_address;                     // IP or URL of server
     std::atomic_bool isDead{false};                // if connection closed
     std::atomic_bool isConnected{false};           // if done connected to server (else, show loading)
-    chk::CircularBuffer<std::string> msgBuffer{1}; // keep only recent 20 messages
+    chk::CircularBuffer<std::string> msgBuffer{2}; // keep only recent 2 messages
     mutable std::string errorMsg{};                // for any websocket errors
     std::atomic_bool conn_clicked = false;         // if 'connect' button clicked
     mutable std::string protoBucket{};             // reusable buffer used to serialize payloads
@@ -111,7 +110,7 @@ inline void WsClient::showConnectWindow()
         ImGui::SameLine();
         WsClient::showHint("eg: 127.0.0.1:8080 OR myserver.example.org");
         ImGui::Checkbox("Secure", &is_secure);
-        if (!std::string_view(inputUrl).empty() && ImGui::Button("Connect", ImVec2(100.0f, 0)))
+        if (!std::string_view(inputUrl).empty() && ImGui::Button("Connect", ImVec2{100.0f, 0}))
         {
             const char *suffix = is_secure ? "wss://" : "ws://";
             this->final_address = suffix + std::string(inputUrl);
@@ -229,7 +228,7 @@ inline void WsClient::setOnReadyStartGameCallback(const onReadyStartGame &callba
 }
 
 /**
- * Set the callback to handle connection failures or sudden cut-off
+ * Set the callback to handle connection failures or server kickouts
  * @param callback the callback function
  */
 inline void WsClient::setOnDeathCallback(const onDeathCallback &callback)
