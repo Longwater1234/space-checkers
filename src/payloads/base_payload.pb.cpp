@@ -3,7 +3,7 @@
 // source: base_payload.proto
 // Protobuf C++ Version: 5.27.1
 // clang-format off
-#include "base_payload.pb.hpp"
+#include "base_payload.pb.h"
 
 #include <algorithm>
 #include <type_traits>
@@ -28,7 +28,10 @@ namespace payload {
 
 inline constexpr WelcomePayload::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
-      : my_team_{static_cast< ::chk::payload::TeamColor >(0)},
+      : server_version_(
+            &::google::protobuf::internal::fixed_address_empty_string,
+            ::_pbi::ConstantInitialized()),
+        my_team_{static_cast< ::chk::payload::TeamColor >(0)},
         _cached_size_{0} {}
 
 template <typename>
@@ -66,27 +69,6 @@ struct StartPayloadDefaultTypeInternal {
 
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 StartPayloadDefaultTypeInternal _StartPayload_default_instance_;
-
-inline constexpr PlayerBasket_PieceItem::Impl_::Impl_(
-    ::_pbi::ConstantInitialized) noexcept
-      : piece_id_{0},
-        x_{0},
-        y_{0},
-        _cached_size_{0} {}
-
-template <typename>
-PROTOBUF_CONSTEXPR PlayerBasket_PieceItem::PlayerBasket_PieceItem(::_pbi::ConstantInitialized)
-    : _impl_(::_pbi::ConstantInitialized()) {}
-struct PlayerBasket_PieceItemDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR PlayerBasket_PieceItemDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
-  ~PlayerBasket_PieceItemDefaultTypeInternal() {}
-  union {
-    PlayerBasket_PieceItem _instance;
-  };
-};
-
-PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
-    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 PlayerBasket_PieceItemDefaultTypeInternal _PlayerBasket_PieceItem_default_instance_;
 
 inline constexpr MovePayload_DestCell::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
@@ -128,24 +110,26 @@ struct ExitPayloadDefaultTypeInternal {
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 ExitPayloadDefaultTypeInternal _ExitPayload_default_instance_;
 
-inline constexpr PlayerBasket::Impl_::Impl_(
+inline constexpr CapturePayload_TargetDetails::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
-      : piece_list_{},
+      : prey_piece_id_{0},
+        prey_cell_idx_{0},
+        hunter_next_cell_{0},
         _cached_size_{0} {}
 
 template <typename>
-PROTOBUF_CONSTEXPR PlayerBasket::PlayerBasket(::_pbi::ConstantInitialized)
+PROTOBUF_CONSTEXPR CapturePayload_TargetDetails::CapturePayload_TargetDetails(::_pbi::ConstantInitialized)
     : _impl_(::_pbi::ConstantInitialized()) {}
-struct PlayerBasketDefaultTypeInternal {
-  PROTOBUF_CONSTEXPR PlayerBasketDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
-  ~PlayerBasketDefaultTypeInternal() {}
+struct CapturePayload_TargetDetailsDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR CapturePayload_TargetDetailsDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~CapturePayload_TargetDetailsDefaultTypeInternal() {}
   union {
-    PlayerBasket _instance;
+    CapturePayload_TargetDetails _instance;
   };
 };
 
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
-    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 PlayerBasketDefaultTypeInternal _PlayerBasket_default_instance_;
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 CapturePayload_TargetDetailsDefaultTypeInternal _CapturePayload_TargetDetails_default_instance_;
 
 inline constexpr MovePayload::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
@@ -168,6 +152,27 @@ struct MovePayloadDefaultTypeInternal {
 
 PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
     PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 MovePayloadDefaultTypeInternal _MovePayload_default_instance_;
+
+inline constexpr CapturePayload::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : _cached_size_{0},
+        details_{nullptr},
+        from_team_{static_cast< ::chk::payload::TeamColor >(0)},
+        hunter_piece_id_{0} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR CapturePayload::CapturePayload(::_pbi::ConstantInitialized)
+    : _impl_(::_pbi::ConstantInitialized()) {}
+struct CapturePayloadDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR CapturePayloadDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~CapturePayloadDefaultTypeInternal() {}
+  union {
+    CapturePayload _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 CapturePayloadDefaultTypeInternal _CapturePayload_default_instance_;
 
 inline constexpr BasePayload::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
@@ -223,6 +228,7 @@ const ::uint32_t
         ~0u,  // no _split_
         ~0u,  // no sizeof(Split)
         PROTOBUF_FIELD_OFFSET(::chk::payload::WelcomePayload, _impl_.my_team_),
+        PROTOBUF_FIELD_OFFSET(::chk::payload::WelcomePayload, _impl_.server_version_),
         ~0u,  // no _has_bits_
         PROTOBUF_FIELD_OFFSET(::chk::payload::StartPayload, _internal_metadata_),
         ~0u,  // no _extensions_
@@ -270,37 +276,42 @@ const ::uint32_t
         ~0u,  // no sizeof(Split)
         PROTOBUF_FIELD_OFFSET(::chk::payload::ExitPayload, _impl_.from_team_),
         ~0u,  // no _has_bits_
-        PROTOBUF_FIELD_OFFSET(::chk::payload::PlayerBasket_PieceItem, _internal_metadata_),
+        PROTOBUF_FIELD_OFFSET(::chk::payload::CapturePayload_TargetDetails, _internal_metadata_),
         ~0u,  // no _extensions_
         ~0u,  // no _oneof_case_
         ~0u,  // no _weak_field_map_
         ~0u,  // no _inlined_string_donated_
         ~0u,  // no _split_
         ~0u,  // no sizeof(Split)
-        PROTOBUF_FIELD_OFFSET(::chk::payload::PlayerBasket_PieceItem, _impl_.piece_id_),
-        PROTOBUF_FIELD_OFFSET(::chk::payload::PlayerBasket_PieceItem, _impl_.x_),
-        PROTOBUF_FIELD_OFFSET(::chk::payload::PlayerBasket_PieceItem, _impl_.y_),
-        ~0u,  // no _has_bits_
-        PROTOBUF_FIELD_OFFSET(::chk::payload::PlayerBasket, _internal_metadata_),
+        PROTOBUF_FIELD_OFFSET(::chk::payload::CapturePayload_TargetDetails, _impl_.prey_piece_id_),
+        PROTOBUF_FIELD_OFFSET(::chk::payload::CapturePayload_TargetDetails, _impl_.prey_cell_idx_),
+        PROTOBUF_FIELD_OFFSET(::chk::payload::CapturePayload_TargetDetails, _impl_.hunter_next_cell_),
+        PROTOBUF_FIELD_OFFSET(::chk::payload::CapturePayload, _impl_._has_bits_),
+        PROTOBUF_FIELD_OFFSET(::chk::payload::CapturePayload, _internal_metadata_),
         ~0u,  // no _extensions_
         ~0u,  // no _oneof_case_
         ~0u,  // no _weak_field_map_
         ~0u,  // no _inlined_string_donated_
         ~0u,  // no _split_
         ~0u,  // no sizeof(Split)
-        PROTOBUF_FIELD_OFFSET(::chk::payload::PlayerBasket, _impl_.piece_list_),
+        PROTOBUF_FIELD_OFFSET(::chk::payload::CapturePayload, _impl_.from_team_),
+        PROTOBUF_FIELD_OFFSET(::chk::payload::CapturePayload, _impl_.hunter_piece_id_),
+        PROTOBUF_FIELD_OFFSET(::chk::payload::CapturePayload, _impl_.details_),
+        ~0u,
+        ~0u,
+        0,
 };
 
 static const ::_pbi::MigrationSchema
     schemas[] ABSL_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
         {0, -1, -1, sizeof(::chk::payload::BasePayload)},
         {15, -1, -1, sizeof(::chk::payload::WelcomePayload)},
-        {24, -1, -1, sizeof(::chk::payload::StartPayload)},
-        {34, -1, -1, sizeof(::chk::payload::MovePayload_DestCell)},
-        {45, 57, -1, sizeof(::chk::payload::MovePayload)},
-        {61, -1, -1, sizeof(::chk::payload::ExitPayload)},
-        {70, -1, -1, sizeof(::chk::payload::PlayerBasket_PieceItem)},
-        {81, -1, -1, sizeof(::chk::payload::PlayerBasket)},
+        {25, -1, -1, sizeof(::chk::payload::StartPayload)},
+        {35, -1, -1, sizeof(::chk::payload::MovePayload_DestCell)},
+        {46, 58, -1, sizeof(::chk::payload::MovePayload)},
+        {62, -1, -1, sizeof(::chk::payload::ExitPayload)},
+        {71, -1, -1, sizeof(::chk::payload::CapturePayload_TargetDetails)},
+        {82, 93, -1, sizeof(::chk::payload::CapturePayload)},
 };
 static const ::_pb::Message* const file_default_instances[] = {
     &::chk::payload::_BasePayload_default_instance_._instance,
@@ -309,41 +320,44 @@ static const ::_pb::Message* const file_default_instances[] = {
     &::chk::payload::_MovePayload_DestCell_default_instance_._instance,
     &::chk::payload::_MovePayload_default_instance_._instance,
     &::chk::payload::_ExitPayload_default_instance_._instance,
-    &::chk::payload::_PlayerBasket_PieceItem_default_instance_._instance,
-    &::chk::payload::_PlayerBasket_default_instance_._instance,
+    &::chk::payload::_CapturePayload_TargetDetails_default_instance_._instance,
+    &::chk::payload::_CapturePayload_default_instance_._instance,
 };
 const char descriptor_table_protodef_base_5fpayload_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
-    "\n\022base_payload.proto\022\013chk.payload\"\232\002\n\013Ba"
+    "\n\022base_payload.proto\022\013chk.payload\"\236\002\n\013Ba"
     "sePayload\022\016\n\006notice\030\002 \001(\t\022.\n\007welcome\030\003 \001"
     "(\0132\033.chk.payload.WelcomePayloadH\000\0220\n\014mov"
     "e_payload\030\004 \001(\0132\030.chk.payload.MovePayloa"
     "dH\000\022*\n\005start\030\005 \001(\0132\031.chk.payload.StartPa"
     "yloadH\000\0220\n\014exit_payload\030\006 \001(\0132\030.chk.payl"
-    "oad.ExitPayloadH\000\0222\n\rplayer_basket\030\007 \001(\013"
-    "2\031.chk.payload.PlayerBasketH\000B\007\n\005inner\"9"
-    "\n\016WelcomePayload\022\'\n\007my_team\030\001 \001(\0162\026.chk."
-    "payload.TeamColor\"8\n\014StartPayload\022\022\n\npie"
-    "ces_red\030\001 \003(\005\022\024\n\014pieces_black\030\002 \003(\005\"\313\001\n\013"
-    "MovePayload\022)\n\tfrom_team\030\001 \001(\0162\026.chk.pay"
-    "load.TeamColor\022\020\n\010piece_id\030\002 \001(\005\022\023\n\013sour"
-    "ce_cell\030\003 \001(\005\0224\n\tdest_cell\030\004 \001(\0132!.chk.p"
-    "ayload.MovePayload.DestCell\0324\n\010DestCell\022"
-    "\022\n\ncell_index\030\001 \001(\005\022\t\n\001x\030\002 \001(\002\022\t\n\001y\030\003 \001("
-    "\002\"8\n\013ExitPayload\022)\n\tfrom_team\030\001 \001(\0162\026.ch"
-    "k.payload.TeamColor\"|\n\014PlayerBasket\0227\n\np"
-    "iece_list\030\001 \003(\0132#.chk.payload.PlayerBask"
-    "et.PieceItem\0323\n\tPieceItem\022\020\n\010piece_id\030\001 "
-    "\001(\005\022\t\n\001x\030\002 \001(\002\022\t\n\001y\030\003 \001(\002*\?\n\tTeamColor\022\024"
-    "\n\020TEAM_UNSPECIFIED\020\000\022\014\n\010TEAM_RED\020\001\022\016\n\nTE"
-    "AM_BLACK\020\002B\027Z\025checkers-backend/gameb\006pro"
-    "to3"
+    "oad.ExitPayloadH\000\0226\n\017capture_payload\030\007 \001"
+    "(\0132\033.chk.payload.CapturePayloadH\000B\007\n\005inn"
+    "er\"Q\n\016WelcomePayload\022\'\n\007my_team\030\001 \001(\0162\026."
+    "chk.payload.TeamColor\022\026\n\016server_version\030"
+    "\002 \001(\t\"8\n\014StartPayload\022\022\n\npieces_red\030\001 \003("
+    "\005\022\024\n\014pieces_black\030\002 \003(\005\"\313\001\n\013MovePayload\022"
+    ")\n\tfrom_team\030\001 \001(\0162\026.chk.payload.TeamCol"
+    "or\022\020\n\010piece_id\030\002 \001(\005\022\023\n\013source_cell\030\003 \001("
+    "\005\0224\n\tdest_cell\030\004 \001(\0132!.chk.payload.MoveP"
+    "ayload.DestCell\0324\n\010DestCell\022\022\n\ncell_inde"
+    "x\030\001 \001(\005\022\t\n\001x\030\002 \001(\002\022\t\n\001y\030\003 \001(\002\"8\n\013ExitPay"
+    "load\022)\n\tfrom_team\030\001 \001(\0162\026.chk.payload.Te"
+    "amColor\"\351\001\n\016CapturePayload\022)\n\tfrom_team\030"
+    "\001 \001(\0162\026.chk.payload.TeamColor\022\027\n\017hunter_"
+    "piece_id\030\002 \001(\005\022:\n\007details\030\003 \001(\0132).chk.pa"
+    "yload.CapturePayload.TargetDetails\032W\n\rTa"
+    "rgetDetails\022\025\n\rprey_piece_id\030\001 \001(\005\022\025\n\rpr"
+    "ey_cell_idx\030\002 \001(\005\022\030\n\020hunter_next_cell\030\003 "
+    "\001(\005*\?\n\tTeamColor\022\024\n\020TEAM_UNSPECIFIED\020\000\022\014"
+    "\n\010TEAM_RED\020\001\022\016\n\nTEAM_BLACK\020\002B\027Z\025checkers"
+    "-backend/gameb\006proto3"
 };
 static ::absl::once_flag descriptor_table_base_5fpayload_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_base_5fpayload_2eproto = {
     false,
     false,
-    923,
+    1061,
     descriptor_table_protodef_base_5fpayload_2eproto,
     "base_payload.proto",
     &descriptor_table_base_5fpayload_2eproto_once,
@@ -427,18 +441,18 @@ void BasePayload::set_allocated_exit_payload(::chk::payload::ExitPayload* exit_p
   }
   // @@protoc_insertion_point(field_set_allocated:chk.payload.BasePayload.exit_payload)
 }
-void BasePayload::set_allocated_player_basket(::chk::payload::PlayerBasket* player_basket) {
+void BasePayload::set_allocated_capture_payload(::chk::payload::CapturePayload* capture_payload) {
   ::google::protobuf::Arena* message_arena = GetArena();
   clear_inner();
-  if (player_basket) {
-    ::google::protobuf::Arena* submessage_arena = player_basket->GetArena();
+  if (capture_payload) {
+    ::google::protobuf::Arena* submessage_arena = capture_payload->GetArena();
     if (message_arena != submessage_arena) {
-      player_basket = ::google::protobuf::internal::GetOwnedMessage(message_arena, player_basket, submessage_arena);
+      capture_payload = ::google::protobuf::internal::GetOwnedMessage(message_arena, capture_payload, submessage_arena);
     }
-    set_has_player_basket();
-    _impl_.inner_.player_basket_ = player_basket;
+    set_has_capture_payload();
+    _impl_.inner_.capture_payload_ = capture_payload;
   }
-  // @@protoc_insertion_point(field_set_allocated:chk.payload.BasePayload.player_basket)
+  // @@protoc_insertion_point(field_set_allocated:chk.payload.BasePayload.capture_payload)
 }
 BasePayload::BasePayload(::google::protobuf::Arena* arena)
     : ::google::protobuf::Message(arena) {
@@ -477,8 +491,8 @@ BasePayload::BasePayload(
       case kExitPayload:
         _impl_.inner_.exit_payload_ = ::google::protobuf::Message::CopyConstruct<::chk::payload::ExitPayload>(arena, *from._impl_.inner_.exit_payload_);
         break;
-      case kPlayerBasket:
-        _impl_.inner_.player_basket_ = ::google::protobuf::Message::CopyConstruct<::chk::payload::PlayerBasket>(arena, *from._impl_.inner_.player_basket_);
+      case kCapturePayload:
+        _impl_.inner_.capture_payload_ = ::google::protobuf::Message::CopyConstruct<::chk::payload::CapturePayload>(arena, *from._impl_.inner_.capture_payload_);
         break;
   }
 
@@ -545,11 +559,11 @@ void BasePayload::clear_inner() {
       }
       break;
     }
-    case kPlayerBasket: {
+    case kCapturePayload: {
       if (GetArena() == nullptr) {
-        delete _impl_.inner_.player_basket_;
+        delete _impl_.inner_.capture_payload_;
       } else if (::google::protobuf::internal::DebugHardenClearOneofMessageOnArena()) {
-        ::google::protobuf::internal::MaybePoisonAfterClear(_impl_.inner_.player_basket_);
+        ::google::protobuf::internal::MaybePoisonAfterClear(_impl_.inner_.capture_payload_);
       }
       break;
     }
@@ -621,15 +635,15 @@ const ::_pbi::TcParseTable<0, 6, 5, 38, 2> BasePayload::_table_ = {
     // .chk.payload.ExitPayload exit_payload = 6;
     {PROTOBUF_FIELD_OFFSET(BasePayload, _impl_.inner_.exit_payload_), _Internal::kOneofCaseOffset + 0, 3,
     (0 | ::_fl::kFcOneof | ::_fl::kMessage | ::_fl::kTvTable)},
-    // .chk.payload.PlayerBasket player_basket = 7;
-    {PROTOBUF_FIELD_OFFSET(BasePayload, _impl_.inner_.player_basket_), _Internal::kOneofCaseOffset + 0, 4,
+    // .chk.payload.CapturePayload capture_payload = 7;
+    {PROTOBUF_FIELD_OFFSET(BasePayload, _impl_.inner_.capture_payload_), _Internal::kOneofCaseOffset + 0, 4,
     (0 | ::_fl::kFcOneof | ::_fl::kMessage | ::_fl::kTvTable)},
   }}, {{
     {::_pbi::TcParser::GetTable<::chk::payload::WelcomePayload>()},
     {::_pbi::TcParser::GetTable<::chk::payload::MovePayload>()},
     {::_pbi::TcParser::GetTable<::chk::payload::StartPayload>()},
     {::_pbi::TcParser::GetTable<::chk::payload::ExitPayload>()},
-    {::_pbi::TcParser::GetTable<::chk::payload::PlayerBasket>()},
+    {::_pbi::TcParser::GetTable<::chk::payload::CapturePayload>()},
   }}, {{
     "\27\6\0\0\0\0\0\0"
     "chk.payload.BasePayload"
@@ -685,9 +699,9 @@ PROTOBUF_NOINLINE void BasePayload::Clear() {
           6, *_impl_.inner_.exit_payload_, _impl_.inner_.exit_payload_->GetCachedSize(), target, stream);
       break;
     }
-    case kPlayerBasket: {
+    case kCapturePayload: {
       target = ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
-          7, *_impl_.inner_.player_basket_, _impl_.inner_.player_basket_->GetCachedSize(), target, stream);
+          7, *_impl_.inner_.capture_payload_, _impl_.inner_.capture_payload_->GetCachedSize(), target, stream);
       break;
     }
     default:
@@ -741,10 +755,10 @@ PROTOBUF_NOINLINE void BasePayload::Clear() {
           1 + ::google::protobuf::internal::WireFormatLite::MessageSize(*_impl_.inner_.exit_payload_);
       break;
     }
-    // .chk.payload.PlayerBasket player_basket = 7;
-    case kPlayerBasket: {
+    // .chk.payload.CapturePayload capture_payload = 7;
+    case kCapturePayload: {
       total_size +=
-          1 + ::google::protobuf::internal::WireFormatLite::MessageSize(*_impl_.inner_.player_basket_);
+          1 + ::google::protobuf::internal::WireFormatLite::MessageSize(*_impl_.inner_.capture_payload_);
       break;
     }
     case INNER_NOT_SET: {
@@ -814,12 +828,12 @@ void BasePayload::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::goo
         }
         break;
       }
-      case kPlayerBasket: {
+      case kCapturePayload: {
         if (oneof_needs_init) {
-          _this->_impl_.inner_.player_basket_ =
-              ::google::protobuf::Message::CopyConstruct<::chk::payload::PlayerBasket>(arena, *from._impl_.inner_.player_basket_);
+          _this->_impl_.inner_.capture_payload_ =
+              ::google::protobuf::Message::CopyConstruct<::chk::payload::CapturePayload>(arena, *from._impl_.inner_.capture_payload_);
         } else {
-          _this->_impl_.inner_.player_basket_->MergeFrom(from._internal_player_basket());
+          _this->_impl_.inner_.capture_payload_->MergeFrom(from._internal_capture_payload());
         }
         break;
       }
@@ -862,15 +876,30 @@ WelcomePayload::WelcomePayload(::google::protobuf::Arena* arena)
   SharedCtor(arena);
   // @@protoc_insertion_point(arena_constructor:chk.payload.WelcomePayload)
 }
+inline PROTOBUF_NDEBUG_INLINE WelcomePayload::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
+    const Impl_& from, const ::chk::payload::WelcomePayload& from_msg)
+      : server_version_(arena, from.server_version_),
+        _cached_size_{0} {}
+
 WelcomePayload::WelcomePayload(
-    ::google::protobuf::Arena* arena, const WelcomePayload& from)
-    : WelcomePayload(arena) {
-  MergeFrom(from);
+    ::google::protobuf::Arena* arena,
+    const WelcomePayload& from)
+    : ::google::protobuf::Message(arena) {
+  WelcomePayload* const _this = this;
+  (void)_this;
+  _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
+      from._internal_metadata_);
+  new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
+  _impl_.my_team_ = from._impl_.my_team_;
+
+  // @@protoc_insertion_point(copy_constructor:chk.payload.WelcomePayload)
 }
 inline PROTOBUF_NDEBUG_INLINE WelcomePayload::Impl_::Impl_(
     ::google::protobuf::internal::InternalVisibility visibility,
     ::google::protobuf::Arena* arena)
-      : _cached_size_{0} {}
+      : server_version_(arena),
+        _cached_size_{0} {}
 
 inline void WelcomePayload::SharedCtor(::_pb::Arena* arena) {
   new (&_impl_) Impl_(internal_visibility(), arena);
@@ -883,6 +912,7 @@ WelcomePayload::~WelcomePayload() {
 }
 inline void WelcomePayload::SharedDtor() {
   ABSL_DCHECK(GetArena() == nullptr);
+  _impl_.server_version_.Destroy();
   _impl_.~Impl_();
 }
 
@@ -907,15 +937,15 @@ WelcomePayload::GetClassData() const {
   return _data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<0, 1, 0, 0, 2> WelcomePayload::_table_ = {
+const ::_pbi::TcParseTable<1, 2, 0, 49, 2> WelcomePayload::_table_ = {
   {
     0,  // no _has_bits_
     0, // no _extensions_
-    1, 0,  // max_field_number, fast_idx_mask
+    2, 8,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294967294,  // skipmap
+    4294967292,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    1,  // num_field_entries
+    2,  // num_field_entries
     0,  // num_aux_entries
     offsetof(decltype(_table_), field_names),  // no aux_entries
     &_WelcomePayload_default_instance_._instance,
@@ -925,6 +955,9 @@ const ::_pbi::TcParseTable<0, 1, 0, 0, 2> WelcomePayload::_table_ = {
     ::_pbi::TcParser::GetTable<::chk::payload::WelcomePayload>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
+    // string server_version = 2;
+    {::_pbi::TcParser::FastUS1,
+     {18, 63, 0, PROTOBUF_FIELD_OFFSET(WelcomePayload, _impl_.server_version_)}},
     // .chk.payload.TeamColor my_team = 1;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(WelcomePayload, _impl_.my_team_), 63>(),
      {8, 63, 0, PROTOBUF_FIELD_OFFSET(WelcomePayload, _impl_.my_team_)}},
@@ -934,9 +967,15 @@ const ::_pbi::TcParseTable<0, 1, 0, 0, 2> WelcomePayload::_table_ = {
     // .chk.payload.TeamColor my_team = 1;
     {PROTOBUF_FIELD_OFFSET(WelcomePayload, _impl_.my_team_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kOpenEnum)},
+    // string server_version = 2;
+    {PROTOBUF_FIELD_OFFSET(WelcomePayload, _impl_.server_version_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kUtf8String | ::_fl::kRepAString)},
   }},
   // no aux_entries
   {{
+    "\32\0\16\0\0\0\0\0"
+    "chk.payload.WelcomePayload"
+    "server_version"
   }},
 };
 
@@ -947,6 +986,7 @@ PROTOBUF_NOINLINE void WelcomePayload::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
+  _impl_.server_version_.ClearToEmpty();
   _impl_.my_team_ = 0;
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
 }
@@ -963,6 +1003,14 @@ PROTOBUF_NOINLINE void WelcomePayload::Clear() {
     target = stream->EnsureSpace(target);
     target = ::_pbi::WireFormatLite::WriteEnumToArray(
         1, this->_internal_my_team(), target);
+  }
+
+  // string server_version = 2;
+  if (!this->_internal_server_version().empty()) {
+    const std::string& _s = this->_internal_server_version();
+    ::google::protobuf::internal::WireFormatLite::VerifyUtf8String(
+        _s.data(), static_cast<int>(_s.length()), ::google::protobuf::internal::WireFormatLite::SERIALIZE, "chk.payload.WelcomePayload.server_version");
+    target = stream->WriteStringMaybeAliased(2, _s, target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -982,6 +1030,13 @@ PROTOBUF_NOINLINE void WelcomePayload::Clear() {
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
+  ::_pbi::Prefetch5LinesFrom7Lines(reinterpret_cast<const void*>(this));
+  // string server_version = 2;
+  if (!this->_internal_server_version().empty()) {
+    total_size += 1 + ::google::protobuf::internal::WireFormatLite::StringSize(
+                                    this->_internal_server_version());
+  }
+
   // .chk.payload.TeamColor my_team = 1;
   if (this->_internal_my_team() != 0) {
     total_size += 1 +
@@ -1000,6 +1055,9 @@ void WelcomePayload::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::
   ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
+  if (!from._internal_server_version().empty()) {
+    _this->_internal_set_server_version(from._internal_server_version());
+  }
   if (from._internal_my_team() != 0) {
     _this->_impl_.my_team_ = from._impl_.my_team_;
   }
@@ -1016,7 +1074,10 @@ void WelcomePayload::CopyFrom(const WelcomePayload& from) {
 
 void WelcomePayload::InternalSwap(WelcomePayload* PROTOBUF_RESTRICT other) {
   using std::swap;
+  auto* arena = GetArena();
+  ABSL_DCHECK_EQ(arena, other->GetArena());
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  ::_pbi::ArenaStringPtr::InternalSwap(&_impl_.server_version_, &other->_impl_.server_version_, arena);
   swap(_impl_.my_team_, other->_impl_.my_team_);
 }
 
@@ -1982,57 +2043,57 @@ void ExitPayload::InternalSwap(ExitPayload* PROTOBUF_RESTRICT other) {
 }
 // ===================================================================
 
-class PlayerBasket_PieceItem::_Internal {
+class CapturePayload_TargetDetails::_Internal {
  public:
 };
 
-PlayerBasket_PieceItem::PlayerBasket_PieceItem(::google::protobuf::Arena* arena)
+CapturePayload_TargetDetails::CapturePayload_TargetDetails(::google::protobuf::Arena* arena)
     : ::google::protobuf::Message(arena) {
   SharedCtor(arena);
-  // @@protoc_insertion_point(arena_constructor:chk.payload.PlayerBasket.PieceItem)
+  // @@protoc_insertion_point(arena_constructor:chk.payload.CapturePayload.TargetDetails)
 }
-PlayerBasket_PieceItem::PlayerBasket_PieceItem(
-    ::google::protobuf::Arena* arena, const PlayerBasket_PieceItem& from)
-    : PlayerBasket_PieceItem(arena) {
+CapturePayload_TargetDetails::CapturePayload_TargetDetails(
+    ::google::protobuf::Arena* arena, const CapturePayload_TargetDetails& from)
+    : CapturePayload_TargetDetails(arena) {
   MergeFrom(from);
 }
-inline PROTOBUF_NDEBUG_INLINE PlayerBasket_PieceItem::Impl_::Impl_(
+inline PROTOBUF_NDEBUG_INLINE CapturePayload_TargetDetails::Impl_::Impl_(
     ::google::protobuf::internal::InternalVisibility visibility,
     ::google::protobuf::Arena* arena)
       : _cached_size_{0} {}
 
-inline void PlayerBasket_PieceItem::SharedCtor(::_pb::Arena* arena) {
+inline void CapturePayload_TargetDetails::SharedCtor(::_pb::Arena* arena) {
   new (&_impl_) Impl_(internal_visibility(), arena);
   ::memset(reinterpret_cast<char *>(&_impl_) +
-               offsetof(Impl_, piece_id_),
+               offsetof(Impl_, prey_piece_id_),
            0,
-           offsetof(Impl_, y_) -
-               offsetof(Impl_, piece_id_) +
-               sizeof(Impl_::y_));
+           offsetof(Impl_, hunter_next_cell_) -
+               offsetof(Impl_, prey_piece_id_) +
+               sizeof(Impl_::hunter_next_cell_));
 }
-PlayerBasket_PieceItem::~PlayerBasket_PieceItem() {
-  // @@protoc_insertion_point(destructor:chk.payload.PlayerBasket.PieceItem)
+CapturePayload_TargetDetails::~CapturePayload_TargetDetails() {
+  // @@protoc_insertion_point(destructor:chk.payload.CapturePayload.TargetDetails)
   _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
   SharedDtor();
 }
-inline void PlayerBasket_PieceItem::SharedDtor() {
+inline void CapturePayload_TargetDetails::SharedDtor() {
   ABSL_DCHECK(GetArena() == nullptr);
   _impl_.~Impl_();
 }
 
 const ::google::protobuf::MessageLite::ClassData*
-PlayerBasket_PieceItem::GetClassData() const {
+CapturePayload_TargetDetails::GetClassData() const {
   PROTOBUF_CONSTINIT static const ::google::protobuf::MessageLite::
       ClassDataFull _data_ = {
           {
               &_table_.header,
               nullptr,  // OnDemandRegisterArenaDtor
               nullptr,  // IsInitialized
-              PROTOBUF_FIELD_OFFSET(PlayerBasket_PieceItem, _impl_._cached_size_),
+              PROTOBUF_FIELD_OFFSET(CapturePayload_TargetDetails, _impl_._cached_size_),
               false,
           },
-          &PlayerBasket_PieceItem::MergeImpl,
-          &PlayerBasket_PieceItem::kDescriptorMethods,
+          &CapturePayload_TargetDetails::MergeImpl,
+          &CapturePayload_TargetDetails::kDescriptorMethods,
           &descriptor_table_base_5fpayload_2eproto,
           nullptr,  // tracker
       };
@@ -2041,7 +2102,7 @@ PlayerBasket_PieceItem::GetClassData() const {
   return _data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<2, 3, 0, 0, 2> PlayerBasket_PieceItem::_table_ = {
+const ::_pbi::TcParseTable<2, 3, 0, 0, 2> CapturePayload_TargetDetails::_table_ = {
   {
     0,  // no _has_bits_
     0, // no _extensions_
@@ -2052,90 +2113,80 @@ const ::_pbi::TcParseTable<2, 3, 0, 0, 2> PlayerBasket_PieceItem::_table_ = {
     3,  // num_field_entries
     0,  // num_aux_entries
     offsetof(decltype(_table_), field_names),  // no aux_entries
-    &_PlayerBasket_PieceItem_default_instance_._instance,
+    &_CapturePayload_TargetDetails_default_instance_._instance,
     nullptr,  // post_loop_handler
     ::_pbi::TcParser::GenericFallback,  // fallback
     #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
-    ::_pbi::TcParser::GetTable<::chk::payload::PlayerBasket_PieceItem>(),  // to_prefetch
+    ::_pbi::TcParser::GetTable<::chk::payload::CapturePayload_TargetDetails>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
     {::_pbi::TcParser::MiniParse, {}},
-    // int32 piece_id = 1;
-    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(PlayerBasket_PieceItem, _impl_.piece_id_), 63>(),
-     {8, 63, 0, PROTOBUF_FIELD_OFFSET(PlayerBasket_PieceItem, _impl_.piece_id_)}},
-    // float x = 2;
-    {::_pbi::TcParser::FastF32S1,
-     {21, 63, 0, PROTOBUF_FIELD_OFFSET(PlayerBasket_PieceItem, _impl_.x_)}},
-    // float y = 3;
-    {::_pbi::TcParser::FastF32S1,
-     {29, 63, 0, PROTOBUF_FIELD_OFFSET(PlayerBasket_PieceItem, _impl_.y_)}},
+    // int32 prey_piece_id = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(CapturePayload_TargetDetails, _impl_.prey_piece_id_), 63>(),
+     {8, 63, 0, PROTOBUF_FIELD_OFFSET(CapturePayload_TargetDetails, _impl_.prey_piece_id_)}},
+    // int32 prey_cell_idx = 2;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(CapturePayload_TargetDetails, _impl_.prey_cell_idx_), 63>(),
+     {16, 63, 0, PROTOBUF_FIELD_OFFSET(CapturePayload_TargetDetails, _impl_.prey_cell_idx_)}},
+    // int32 hunter_next_cell = 3;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(CapturePayload_TargetDetails, _impl_.hunter_next_cell_), 63>(),
+     {24, 63, 0, PROTOBUF_FIELD_OFFSET(CapturePayload_TargetDetails, _impl_.hunter_next_cell_)}},
   }}, {{
     65535, 65535
   }}, {{
-    // int32 piece_id = 1;
-    {PROTOBUF_FIELD_OFFSET(PlayerBasket_PieceItem, _impl_.piece_id_), 0, 0,
+    // int32 prey_piece_id = 1;
+    {PROTOBUF_FIELD_OFFSET(CapturePayload_TargetDetails, _impl_.prey_piece_id_), 0, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
-    // float x = 2;
-    {PROTOBUF_FIELD_OFFSET(PlayerBasket_PieceItem, _impl_.x_), 0, 0,
-    (0 | ::_fl::kFcSingular | ::_fl::kFloat)},
-    // float y = 3;
-    {PROTOBUF_FIELD_OFFSET(PlayerBasket_PieceItem, _impl_.y_), 0, 0,
-    (0 | ::_fl::kFcSingular | ::_fl::kFloat)},
+    // int32 prey_cell_idx = 2;
+    {PROTOBUF_FIELD_OFFSET(CapturePayload_TargetDetails, _impl_.prey_cell_idx_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // int32 hunter_next_cell = 3;
+    {PROTOBUF_FIELD_OFFSET(CapturePayload_TargetDetails, _impl_.hunter_next_cell_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
   }},
   // no aux_entries
   {{
   }},
 };
 
-PROTOBUF_NOINLINE void PlayerBasket_PieceItem::Clear() {
-// @@protoc_insertion_point(message_clear_start:chk.payload.PlayerBasket.PieceItem)
+PROTOBUF_NOINLINE void CapturePayload_TargetDetails::Clear() {
+// @@protoc_insertion_point(message_clear_start:chk.payload.CapturePayload.TargetDetails)
   ::google::protobuf::internal::TSanWrite(&_impl_);
   ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  ::memset(&_impl_.piece_id_, 0, static_cast<::size_t>(
-      reinterpret_cast<char*>(&_impl_.y_) -
-      reinterpret_cast<char*>(&_impl_.piece_id_)) + sizeof(_impl_.y_));
+  ::memset(&_impl_.prey_piece_id_, 0, static_cast<::size_t>(
+      reinterpret_cast<char*>(&_impl_.hunter_next_cell_) -
+      reinterpret_cast<char*>(&_impl_.prey_piece_id_)) + sizeof(_impl_.hunter_next_cell_));
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
 }
 
-::uint8_t* PlayerBasket_PieceItem::_InternalSerialize(
+::uint8_t* CapturePayload_TargetDetails::_InternalSerialize(
     ::uint8_t* target,
     ::google::protobuf::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:chk.payload.PlayerBasket.PieceItem)
+  // @@protoc_insertion_point(serialize_to_array_start:chk.payload.CapturePayload.TargetDetails)
   ::uint32_t cached_has_bits = 0;
   (void)cached_has_bits;
 
-  // int32 piece_id = 1;
-  if (this->_internal_piece_id() != 0) {
+  // int32 prey_piece_id = 1;
+  if (this->_internal_prey_piece_id() != 0) {
     target = ::google::protobuf::internal::WireFormatLite::
         WriteInt32ToArrayWithField<1>(
-            stream, this->_internal_piece_id(), target);
+            stream, this->_internal_prey_piece_id(), target);
   }
 
-  // float x = 2;
-  static_assert(sizeof(::uint32_t) == sizeof(float),
-                "Code assumes ::uint32_t and float are the same size.");
-  float tmp_x = this->_internal_x();
-  ::uint32_t raw_x;
-  memcpy(&raw_x, &tmp_x, sizeof(tmp_x));
-  if (raw_x != 0) {
-    target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteFloatToArray(
-        2, this->_internal_x(), target);
+  // int32 prey_cell_idx = 2;
+  if (this->_internal_prey_cell_idx() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::
+        WriteInt32ToArrayWithField<2>(
+            stream, this->_internal_prey_cell_idx(), target);
   }
 
-  // float y = 3;
-  static_assert(sizeof(::uint32_t) == sizeof(float),
-                "Code assumes ::uint32_t and float are the same size.");
-  float tmp_y = this->_internal_y();
-  ::uint32_t raw_y;
-  memcpy(&raw_y, &tmp_y, sizeof(tmp_y));
-  if (raw_y != 0) {
-    target = stream->EnsureSpace(target);
-    target = ::_pbi::WireFormatLite::WriteFloatToArray(
-        3, this->_internal_y(), target);
+  // int32 hunter_next_cell = 3;
+  if (this->_internal_hunter_next_cell() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::
+        WriteInt32ToArrayWithField<3>(
+            stream, this->_internal_hunter_next_cell(), target);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -2143,12 +2194,12 @@ PROTOBUF_NOINLINE void PlayerBasket_PieceItem::Clear() {
         ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
             _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:chk.payload.PlayerBasket.PieceItem)
+  // @@protoc_insertion_point(serialize_to_array_end:chk.payload.CapturePayload.TargetDetails)
   return target;
 }
 
-::size_t PlayerBasket_PieceItem::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:chk.payload.PlayerBasket.PieceItem)
+::size_t CapturePayload_TargetDetails::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:chk.payload.CapturePayload.TargetDetails)
   ::size_t total_size = 0;
 
   ::uint32_t cached_has_bits = 0;
@@ -2156,149 +2207,152 @@ PROTOBUF_NOINLINE void PlayerBasket_PieceItem::Clear() {
   (void) cached_has_bits;
 
   ::_pbi::Prefetch5LinesFrom7Lines(reinterpret_cast<const void*>(this));
-  // int32 piece_id = 1;
-  if (this->_internal_piece_id() != 0) {
+  // int32 prey_piece_id = 1;
+  if (this->_internal_prey_piece_id() != 0) {
     total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
-        this->_internal_piece_id());
+        this->_internal_prey_piece_id());
   }
 
-  // float x = 2;
-  static_assert(sizeof(::uint32_t) == sizeof(float),
-                "Code assumes ::uint32_t and float are the same size.");
-  float tmp_x = this->_internal_x();
-  ::uint32_t raw_x;
-  memcpy(&raw_x, &tmp_x, sizeof(tmp_x));
-  if (raw_x != 0) {
-    total_size += 5;
+  // int32 prey_cell_idx = 2;
+  if (this->_internal_prey_cell_idx() != 0) {
+    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+        this->_internal_prey_cell_idx());
   }
 
-  // float y = 3;
-  static_assert(sizeof(::uint32_t) == sizeof(float),
-                "Code assumes ::uint32_t and float are the same size.");
-  float tmp_y = this->_internal_y();
-  ::uint32_t raw_y;
-  memcpy(&raw_y, &tmp_y, sizeof(tmp_y));
-  if (raw_y != 0) {
-    total_size += 5;
+  // int32 hunter_next_cell = 3;
+  if (this->_internal_hunter_next_cell() != 0) {
+    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+        this->_internal_hunter_next_cell());
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
 
-void PlayerBasket_PieceItem::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::protobuf::MessageLite& from_msg) {
-  auto* const _this = static_cast<PlayerBasket_PieceItem*>(&to_msg);
-  auto& from = static_cast<const PlayerBasket_PieceItem&>(from_msg);
-  // @@protoc_insertion_point(class_specific_merge_from_start:chk.payload.PlayerBasket.PieceItem)
+void CapturePayload_TargetDetails::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::protobuf::MessageLite& from_msg) {
+  auto* const _this = static_cast<CapturePayload_TargetDetails*>(&to_msg);
+  auto& from = static_cast<const CapturePayload_TargetDetails&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:chk.payload.CapturePayload.TargetDetails)
   ABSL_DCHECK_NE(&from, _this);
   ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  if (from._internal_piece_id() != 0) {
-    _this->_impl_.piece_id_ = from._impl_.piece_id_;
+  if (from._internal_prey_piece_id() != 0) {
+    _this->_impl_.prey_piece_id_ = from._impl_.prey_piece_id_;
   }
-  static_assert(sizeof(::uint32_t) == sizeof(float),
-                "Code assumes ::uint32_t and float are the same size.");
-  float tmp_x = from._internal_x();
-  ::uint32_t raw_x;
-  memcpy(&raw_x, &tmp_x, sizeof(tmp_x));
-  if (raw_x != 0) {
-    _this->_impl_.x_ = from._impl_.x_;
+  if (from._internal_prey_cell_idx() != 0) {
+    _this->_impl_.prey_cell_idx_ = from._impl_.prey_cell_idx_;
   }
-  static_assert(sizeof(::uint32_t) == sizeof(float),
-                "Code assumes ::uint32_t and float are the same size.");
-  float tmp_y = from._internal_y();
-  ::uint32_t raw_y;
-  memcpy(&raw_y, &tmp_y, sizeof(tmp_y));
-  if (raw_y != 0) {
-    _this->_impl_.y_ = from._impl_.y_;
+  if (from._internal_hunter_next_cell() != 0) {
+    _this->_impl_.hunter_next_cell_ = from._impl_.hunter_next_cell_;
   }
   _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
 }
 
-void PlayerBasket_PieceItem::CopyFrom(const PlayerBasket_PieceItem& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:chk.payload.PlayerBasket.PieceItem)
+void CapturePayload_TargetDetails::CopyFrom(const CapturePayload_TargetDetails& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:chk.payload.CapturePayload.TargetDetails)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
 
-void PlayerBasket_PieceItem::InternalSwap(PlayerBasket_PieceItem* PROTOBUF_RESTRICT other) {
+void CapturePayload_TargetDetails::InternalSwap(CapturePayload_TargetDetails* PROTOBUF_RESTRICT other) {
   using std::swap;
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   ::google::protobuf::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(PlayerBasket_PieceItem, _impl_.y_)
-      + sizeof(PlayerBasket_PieceItem::_impl_.y_)
-      - PROTOBUF_FIELD_OFFSET(PlayerBasket_PieceItem, _impl_.piece_id_)>(
-          reinterpret_cast<char*>(&_impl_.piece_id_),
-          reinterpret_cast<char*>(&other->_impl_.piece_id_));
+      PROTOBUF_FIELD_OFFSET(CapturePayload_TargetDetails, _impl_.hunter_next_cell_)
+      + sizeof(CapturePayload_TargetDetails::_impl_.hunter_next_cell_)
+      - PROTOBUF_FIELD_OFFSET(CapturePayload_TargetDetails, _impl_.prey_piece_id_)>(
+          reinterpret_cast<char*>(&_impl_.prey_piece_id_),
+          reinterpret_cast<char*>(&other->_impl_.prey_piece_id_));
 }
 
-::google::protobuf::Metadata PlayerBasket_PieceItem::GetMetadata() const {
+::google::protobuf::Metadata CapturePayload_TargetDetails::GetMetadata() const {
   return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
 }
 // ===================================================================
 
-class PlayerBasket::_Internal {
+class CapturePayload::_Internal {
  public:
+  using HasBits =
+      decltype(std::declval<CapturePayload>()._impl_._has_bits_);
+  static constexpr ::int32_t kHasBitsOffset =
+      8 * PROTOBUF_FIELD_OFFSET(CapturePayload, _impl_._has_bits_);
 };
 
-PlayerBasket::PlayerBasket(::google::protobuf::Arena* arena)
+CapturePayload::CapturePayload(::google::protobuf::Arena* arena)
     : ::google::protobuf::Message(arena) {
   SharedCtor(arena);
-  // @@protoc_insertion_point(arena_constructor:chk.payload.PlayerBasket)
+  // @@protoc_insertion_point(arena_constructor:chk.payload.CapturePayload)
 }
-inline PROTOBUF_NDEBUG_INLINE PlayerBasket::Impl_::Impl_(
+inline PROTOBUF_NDEBUG_INLINE CapturePayload::Impl_::Impl_(
     ::google::protobuf::internal::InternalVisibility visibility, ::google::protobuf::Arena* arena,
-    const Impl_& from, const ::chk::payload::PlayerBasket& from_msg)
-      : piece_list_{visibility, arena, from.piece_list_},
+    const Impl_& from, const ::chk::payload::CapturePayload& from_msg)
+      : _has_bits_{from._has_bits_},
         _cached_size_{0} {}
 
-PlayerBasket::PlayerBasket(
+CapturePayload::CapturePayload(
     ::google::protobuf::Arena* arena,
-    const PlayerBasket& from)
+    const CapturePayload& from)
     : ::google::protobuf::Message(arena) {
-  PlayerBasket* const _this = this;
+  CapturePayload* const _this = this;
   (void)_this;
   _internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(
       from._internal_metadata_);
   new (&_impl_) Impl_(internal_visibility(), arena, from._impl_, from);
+  ::uint32_t cached_has_bits = _impl_._has_bits_[0];
+  _impl_.details_ = (cached_has_bits & 0x00000001u) ? ::google::protobuf::Message::CopyConstruct<::chk::payload::CapturePayload_TargetDetails>(
+                              arena, *from._impl_.details_)
+                        : nullptr;
+  ::memcpy(reinterpret_cast<char *>(&_impl_) +
+               offsetof(Impl_, from_team_),
+           reinterpret_cast<const char *>(&from._impl_) +
+               offsetof(Impl_, from_team_),
+           offsetof(Impl_, hunter_piece_id_) -
+               offsetof(Impl_, from_team_) +
+               sizeof(Impl_::hunter_piece_id_));
 
-  // @@protoc_insertion_point(copy_constructor:chk.payload.PlayerBasket)
+  // @@protoc_insertion_point(copy_constructor:chk.payload.CapturePayload)
 }
-inline PROTOBUF_NDEBUG_INLINE PlayerBasket::Impl_::Impl_(
+inline PROTOBUF_NDEBUG_INLINE CapturePayload::Impl_::Impl_(
     ::google::protobuf::internal::InternalVisibility visibility,
     ::google::protobuf::Arena* arena)
-      : piece_list_{visibility, arena},
-        _cached_size_{0} {}
+      : _cached_size_{0} {}
 
-inline void PlayerBasket::SharedCtor(::_pb::Arena* arena) {
+inline void CapturePayload::SharedCtor(::_pb::Arena* arena) {
   new (&_impl_) Impl_(internal_visibility(), arena);
+  ::memset(reinterpret_cast<char *>(&_impl_) +
+               offsetof(Impl_, details_),
+           0,
+           offsetof(Impl_, hunter_piece_id_) -
+               offsetof(Impl_, details_) +
+               sizeof(Impl_::hunter_piece_id_));
 }
-PlayerBasket::~PlayerBasket() {
-  // @@protoc_insertion_point(destructor:chk.payload.PlayerBasket)
+CapturePayload::~CapturePayload() {
+  // @@protoc_insertion_point(destructor:chk.payload.CapturePayload)
   _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
   SharedDtor();
 }
-inline void PlayerBasket::SharedDtor() {
+inline void CapturePayload::SharedDtor() {
   ABSL_DCHECK(GetArena() == nullptr);
+  delete _impl_.details_;
   _impl_.~Impl_();
 }
 
 const ::google::protobuf::MessageLite::ClassData*
-PlayerBasket::GetClassData() const {
+CapturePayload::GetClassData() const {
   PROTOBUF_CONSTINIT static const ::google::protobuf::MessageLite::
       ClassDataFull _data_ = {
           {
               &_table_.header,
               nullptr,  // OnDemandRegisterArenaDtor
               nullptr,  // IsInitialized
-              PROTOBUF_FIELD_OFFSET(PlayerBasket, _impl_._cached_size_),
+              PROTOBUF_FIELD_OFFSET(CapturePayload, _impl_._cached_size_),
               false,
           },
-          &PlayerBasket::MergeImpl,
-          &PlayerBasket::kDescriptorMethods,
+          &CapturePayload::MergeImpl,
+          &CapturePayload::kDescriptorMethods,
           &descriptor_table_base_5fpayload_2eproto,
           nullptr,  // tracker
       };
@@ -2307,66 +2361,97 @@ PlayerBasket::GetClassData() const {
   return _data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<0, 1, 1, 0, 2> PlayerBasket::_table_ = {
+const ::_pbi::TcParseTable<2, 3, 1, 0, 2> CapturePayload::_table_ = {
   {
-    0,  // no _has_bits_
+    PROTOBUF_FIELD_OFFSET(CapturePayload, _impl_._has_bits_),
     0, // no _extensions_
-    1, 0,  // max_field_number, fast_idx_mask
+    3, 24,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294967294,  // skipmap
+    4294967288,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    1,  // num_field_entries
+    3,  // num_field_entries
     1,  // num_aux_entries
     offsetof(decltype(_table_), aux_entries),
-    &_PlayerBasket_default_instance_._instance,
+    &_CapturePayload_default_instance_._instance,
     nullptr,  // post_loop_handler
     ::_pbi::TcParser::GenericFallback,  // fallback
     #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
-    ::_pbi::TcParser::GetTable<::chk::payload::PlayerBasket>(),  // to_prefetch
+    ::_pbi::TcParser::GetTable<::chk::payload::CapturePayload>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
-    // repeated .chk.payload.PlayerBasket.PieceItem piece_list = 1;
-    {::_pbi::TcParser::FastMtR1,
-     {10, 63, 0, PROTOBUF_FIELD_OFFSET(PlayerBasket, _impl_.piece_list_)}},
+    {::_pbi::TcParser::MiniParse, {}},
+    // .chk.payload.TeamColor from_team = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(CapturePayload, _impl_.from_team_), 63>(),
+     {8, 63, 0, PROTOBUF_FIELD_OFFSET(CapturePayload, _impl_.from_team_)}},
+    // int32 hunter_piece_id = 2;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(CapturePayload, _impl_.hunter_piece_id_), 63>(),
+     {16, 63, 0, PROTOBUF_FIELD_OFFSET(CapturePayload, _impl_.hunter_piece_id_)}},
+    // .chk.payload.CapturePayload.TargetDetails details = 3;
+    {::_pbi::TcParser::FastMtS1,
+     {26, 0, 0, PROTOBUF_FIELD_OFFSET(CapturePayload, _impl_.details_)}},
   }}, {{
     65535, 65535
   }}, {{
-    // repeated .chk.payload.PlayerBasket.PieceItem piece_list = 1;
-    {PROTOBUF_FIELD_OFFSET(PlayerBasket, _impl_.piece_list_), 0, 0,
-    (0 | ::_fl::kFcRepeated | ::_fl::kMessage | ::_fl::kTvTable)},
+    // .chk.payload.TeamColor from_team = 1;
+    {PROTOBUF_FIELD_OFFSET(CapturePayload, _impl_.from_team_), -1, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kOpenEnum)},
+    // int32 hunter_piece_id = 2;
+    {PROTOBUF_FIELD_OFFSET(CapturePayload, _impl_.hunter_piece_id_), -1, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // .chk.payload.CapturePayload.TargetDetails details = 3;
+    {PROTOBUF_FIELD_OFFSET(CapturePayload, _impl_.details_), _Internal::kHasBitsOffset + 0, 0,
+    (0 | ::_fl::kFcOptional | ::_fl::kMessage | ::_fl::kTvTable)},
   }}, {{
-    {::_pbi::TcParser::GetTable<::chk::payload::PlayerBasket_PieceItem>()},
+    {::_pbi::TcParser::GetTable<::chk::payload::CapturePayload_TargetDetails>()},
   }}, {{
   }},
 };
 
-PROTOBUF_NOINLINE void PlayerBasket::Clear() {
-// @@protoc_insertion_point(message_clear_start:chk.payload.PlayerBasket)
+PROTOBUF_NOINLINE void CapturePayload::Clear() {
+// @@protoc_insertion_point(message_clear_start:chk.payload.CapturePayload)
   ::google::protobuf::internal::TSanWrite(&_impl_);
   ::uint32_t cached_has_bits = 0;
   // Prevent compiler warnings about cached_has_bits being unused
   (void) cached_has_bits;
 
-  _impl_.piece_list_.Clear();
+  cached_has_bits = _impl_._has_bits_[0];
+  if (cached_has_bits & 0x00000001u) {
+    ABSL_DCHECK(_impl_.details_ != nullptr);
+    _impl_.details_->Clear();
+  }
+  ::memset(&_impl_.from_team_, 0, static_cast<::size_t>(
+      reinterpret_cast<char*>(&_impl_.hunter_piece_id_) -
+      reinterpret_cast<char*>(&_impl_.from_team_)) + sizeof(_impl_.hunter_piece_id_));
+  _impl_._has_bits_.Clear();
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
 }
 
-::uint8_t* PlayerBasket::_InternalSerialize(
+::uint8_t* CapturePayload::_InternalSerialize(
     ::uint8_t* target,
     ::google::protobuf::io::EpsCopyOutputStream* stream) const {
-  // @@protoc_insertion_point(serialize_to_array_start:chk.payload.PlayerBasket)
+  // @@protoc_insertion_point(serialize_to_array_start:chk.payload.CapturePayload)
   ::uint32_t cached_has_bits = 0;
   (void)cached_has_bits;
 
-  // repeated .chk.payload.PlayerBasket.PieceItem piece_list = 1;
-  for (unsigned i = 0, n = static_cast<unsigned>(
-                           this->_internal_piece_list_size());
-       i < n; i++) {
-    const auto& repfield = this->_internal_piece_list().Get(i);
-    target =
-        ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
-            1, repfield, repfield.GetCachedSize(),
-            target, stream);
+  // .chk.payload.TeamColor from_team = 1;
+  if (this->_internal_from_team() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteEnumToArray(
+        1, this->_internal_from_team(), target);
+  }
+
+  // int32 hunter_piece_id = 2;
+  if (this->_internal_hunter_piece_id() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::
+        WriteInt32ToArrayWithField<2>(
+            stream, this->_internal_hunter_piece_id(), target);
+  }
+
+  cached_has_bits = _impl_._has_bits_[0];
+  // .chk.payload.CapturePayload.TargetDetails details = 3;
+  if (cached_has_bits & 0x00000001u) {
+    target = ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
+        3, *_impl_.details_, _impl_.details_->GetCachedSize(), target, stream);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -2374,12 +2459,12 @@ PROTOBUF_NOINLINE void PlayerBasket::Clear() {
         ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
             _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:chk.payload.PlayerBasket)
+  // @@protoc_insertion_point(serialize_to_array_end:chk.payload.CapturePayload)
   return target;
 }
 
-::size_t PlayerBasket::ByteSizeLong() const {
-// @@protoc_insertion_point(message_byte_size_start:chk.payload.PlayerBasket)
+::size_t CapturePayload::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:chk.payload.CapturePayload)
   ::size_t total_size = 0;
 
   ::uint32_t cached_has_bits = 0;
@@ -2387,43 +2472,79 @@ PROTOBUF_NOINLINE void PlayerBasket::Clear() {
   (void) cached_has_bits;
 
   ::_pbi::Prefetch5LinesFrom7Lines(reinterpret_cast<const void*>(this));
-  // repeated .chk.payload.PlayerBasket.PieceItem piece_list = 1;
-  total_size += 1UL * this->_internal_piece_list_size();
-  for (const auto& msg : this->_internal_piece_list()) {
-    total_size += ::google::protobuf::internal::WireFormatLite::MessageSize(msg);
+  // .chk.payload.CapturePayload.TargetDetails details = 3;
+  cached_has_bits = _impl_._has_bits_[0];
+  if (cached_has_bits & 0x00000001u) {
+    total_size +=
+        1 + ::google::protobuf::internal::WireFormatLite::MessageSize(*_impl_.details_);
   }
+
+  // .chk.payload.TeamColor from_team = 1;
+  if (this->_internal_from_team() != 0) {
+    total_size += 1 +
+                  ::_pbi::WireFormatLite::EnumSize(this->_internal_from_team());
+  }
+
+  // int32 hunter_piece_id = 2;
+  if (this->_internal_hunter_piece_id() != 0) {
+    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+        this->_internal_hunter_piece_id());
+  }
+
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
 }
 
 
-void PlayerBasket::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::protobuf::MessageLite& from_msg) {
-  auto* const _this = static_cast<PlayerBasket*>(&to_msg);
-  auto& from = static_cast<const PlayerBasket&>(from_msg);
-  // @@protoc_insertion_point(class_specific_merge_from_start:chk.payload.PlayerBasket)
+void CapturePayload::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::protobuf::MessageLite& from_msg) {
+  auto* const _this = static_cast<CapturePayload*>(&to_msg);
+  auto& from = static_cast<const CapturePayload&>(from_msg);
+  ::google::protobuf::Arena* arena = _this->GetArena();
+  // @@protoc_insertion_point(class_specific_merge_from_start:chk.payload.CapturePayload)
   ABSL_DCHECK_NE(&from, _this);
   ::uint32_t cached_has_bits = 0;
   (void) cached_has_bits;
 
-  _this->_internal_mutable_piece_list()->MergeFrom(
-      from._internal_piece_list());
+  cached_has_bits = from._impl_._has_bits_[0];
+  if (cached_has_bits & 0x00000001u) {
+    ABSL_DCHECK(from._impl_.details_ != nullptr);
+    if (_this->_impl_.details_ == nullptr) {
+      _this->_impl_.details_ =
+          ::google::protobuf::Message::CopyConstruct<::chk::payload::CapturePayload_TargetDetails>(arena, *from._impl_.details_);
+    } else {
+      _this->_impl_.details_->MergeFrom(*from._impl_.details_);
+    }
+  }
+  if (from._internal_from_team() != 0) {
+    _this->_impl_.from_team_ = from._impl_.from_team_;
+  }
+  if (from._internal_hunter_piece_id() != 0) {
+    _this->_impl_.hunter_piece_id_ = from._impl_.hunter_piece_id_;
+  }
+  _this->_impl_._has_bits_[0] |= cached_has_bits;
   _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
 }
 
-void PlayerBasket::CopyFrom(const PlayerBasket& from) {
-// @@protoc_insertion_point(class_specific_copy_from_start:chk.payload.PlayerBasket)
+void CapturePayload::CopyFrom(const CapturePayload& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:chk.payload.CapturePayload)
   if (&from == this) return;
   Clear();
   MergeFrom(from);
 }
 
 
-void PlayerBasket::InternalSwap(PlayerBasket* PROTOBUF_RESTRICT other) {
+void CapturePayload::InternalSwap(CapturePayload* PROTOBUF_RESTRICT other) {
   using std::swap;
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
-  _impl_.piece_list_.InternalSwap(&other->_impl_.piece_list_);
+  swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
+  ::google::protobuf::internal::memswap<
+      PROTOBUF_FIELD_OFFSET(CapturePayload, _impl_.hunter_piece_id_)
+      + sizeof(CapturePayload::_impl_.hunter_piece_id_)
+      - PROTOBUF_FIELD_OFFSET(CapturePayload, _impl_.details_)>(
+          reinterpret_cast<char*>(&_impl_.details_),
+          reinterpret_cast<char*>(&other->_impl_.details_));
 }
 
-::google::protobuf::Metadata PlayerBasket::GetMetadata() const {
+::google::protobuf::Metadata CapturePayload::GetMetadata() const {
   return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
 }
 // @@protoc_insertion_point(namespace_scope)
