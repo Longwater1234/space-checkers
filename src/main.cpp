@@ -58,10 +58,10 @@ int main()
 
     manager->drawCheckerboard(font);
 
-    // create pieces with random ID and give each player their own
+    // create pieces give each player their own
     manager->createAllPieces();
 
-    // for storing currently clicked Piece, MAX 1
+    // Storing currently clicked Piece. (NOTE: using braces constructor)
     chk::CircularBuffer<short> circularBuffer{1};
 
     // THE STATUS TEXT

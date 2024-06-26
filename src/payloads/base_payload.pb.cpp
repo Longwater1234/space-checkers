@@ -3,7 +3,7 @@
 // source: base_payload.proto
 // Protobuf C++ Version: 5.27.1
 // clang-format off
-#include "base_payload.pb.h"
+#include "base_payload.pb.hpp"
 
 #include <algorithm>
 #include <type_traits>
