@@ -36,7 +36,7 @@ inline LocalGameManager::LocalGameManager(sf::RenderWindow *windowPtr)
 }
 
 /**
- * Create all pieces for both players and add them to pieceList, using STL random num generator
+ * Create all pieces for both players and add them to pieceList, using std C++ random num generator
  * @param pieceList destination of created pieces
  */
 inline void LocalGameManager::createAllPieces()
@@ -159,8 +159,8 @@ inline void LocalGameManager::handleEvents(chk::CircularBuffer<short> &buffer)
 
                     if (this->hasPendingCaptures())
                     {
-                        this->handleCapturePiece(hunter, prey, cell);
-                        this->updateMatchStatus(hunter, prey);
+                        GameManager::handleCapturePiece(hunter, prey, cell);
+                        GameManager:updateMatchStatus(hunter, prey);
                         buffer.clean();
                     }
                     else

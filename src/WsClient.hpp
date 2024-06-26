@@ -69,7 +69,7 @@ inline chk::WsClient::WsClient()
     this->webSocketPtr = std::make_unique<ix::WebSocket>();
     // set inital connection timeout
     this->webSocketPtr->setHandshakeTimeout(10);
-    // once dead, DO NOT revive
+    // once dead, DO NOT try reconnect
     this->webSocketPtr->disableAutomaticReconnection();
     ix::SocketTLSOptions tlsOptions;
 #ifndef _WIN32
@@ -188,13 +188,13 @@ inline void WsClient::tryConnect(std::string_view address)
             spdlog::info("Connection established");
             this->isConnected = true;
         }
-        else if (msg->type == ix::WebSocketMessageType::Close)
+         else if (msg->type == ix::WebSocketMessageType::Close)
         {
-            std::scoped_lock lg{this->mut};
-            this->errorMsg = "Error: disconnected from Server!";
-            spdlog::error(this->errorMsg);
-            this->isDead = true;
-        }
+             std::scoped_lock lg{this->mut};
+             this->errorMsg = "Error: disconnected from Server!";
+             spdlog::error(this->errorMsg);
+             this->isDead = true;
+         }
         else if (msg->type == ix::WebSocketMessageType::Error)
         {
 

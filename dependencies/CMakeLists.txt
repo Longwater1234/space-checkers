@@ -5,14 +5,13 @@ include(zlib.cmake)
 include(mbedtls.cmake)
 include(ixwebsocket.cmake)
 include(spdlog.cmake)
-# include(simdjson.cmake)
 include(protobuf.cmake)
 
-# GET ImGui 1.90.4
+# GET ImGui 1.90.8
 CPMAddPackage(
   NAME imgui
-  URL "https://github.com/ocornut/imgui/archive/refs/tags/v1.90.4.tar.gz"
-  VERSION		1.90.4
+  URL "https://github.com/ocornut/imgui/archive/refs/tags/v1.90.8.tar.gz"
+  VERSION		1.90.8
   DOWNLOAD_EXTRACT_TIMESTAMP TRUE 
 ) 
 

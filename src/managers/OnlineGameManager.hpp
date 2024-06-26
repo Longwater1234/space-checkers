@@ -330,7 +330,7 @@ inline void OnlineGameManager::handleEvents(chk::CircularBuffer<short> &circular
                     if (this->hasPendingCaptures())
                     {
                         this->handleCapturePiece(hunter, opponent, cell);
-                        this->updateMatchStatus(hunter, opponent);
+                        GameManager::updateMatchStatus(hunter, opponent);
                         circularBuffer.clean();
                     }
                     else
