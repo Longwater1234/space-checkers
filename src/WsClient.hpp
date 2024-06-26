@@ -188,13 +188,13 @@ inline void WsClient::tryConnect(std::string_view address)
             spdlog::info("Connection established");
             this->isConnected = true;
         }
-         else if (msg->type == ix::WebSocketMessageType::Close)
+        else if (msg->type == ix::WebSocketMessageType::Close)
         {
-             std::scoped_lock lg{this->mut};
-             this->errorMsg = "Error: disconnected from Server!";
-             spdlog::error(this->errorMsg);
-             this->isDead = true;
-         }
+            std::scoped_lock lg{this->mut};
+            this->errorMsg = "Error: disconnected from Server!";
+            spdlog::error(this->errorMsg);
+            this->isDead = true;
+        }
         else if (msg->type == ix::WebSocketMessageType::Error)
         {
 

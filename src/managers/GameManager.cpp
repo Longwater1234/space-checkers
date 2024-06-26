@@ -188,8 +188,8 @@ void chk::GameManager::doCleanup()
 {
     this->gameMap.clear();
     this->forcedMoves.clear();
-    this->player1->emptyBasket();
-    this->player2->emptyBasket();
+    this->playerRed->emptyBasket();
+    this->playerBlack->emptyBasket();
     this->gameOver = true;
 }
 

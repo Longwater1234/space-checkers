@@ -12,7 +12,7 @@ message BasePayload {
     MovePayload move_payload = 4;
     StartPayload start = 5;
     ExitPayload exit_payload = 6;
-    PlayerBasket player_basket = 7;
+    CapturePayload capture_payload = 7;
   }
 }
 
@@ -25,6 +25,8 @@ enum TeamColor {
 message WelcomePayload {
   // Color of this player pieces
   TeamColor my_team = 1;
+  // in the form of X.Y.Z
+  string server_version = 2;
 }
 
 message StartPayload {
@@ -51,18 +53,27 @@ message MovePayload {
   DestCell dest_cell = 4;
 }
 
-// whenever any of the players exits, or game is over
+// whenever any of the players exits, or server terminates Match
 message ExitPayload {
   // which player initiated exit (RED, BLACK, or unspecified)
   TeamColor from_team = 1;
 }
 
-// contains list of all player's pieces and their location
-message PlayerBasket {
-  message PieceItem {
-    int32 piece_id = 1;
-    float x = 2;
-    float y = 3;
+// when hunter player is capturing opponent's piece
+message CapturePayload {
+  // extra details about this capture
+  message TargetDetails {
+    /** ID of the piece that is to be captured */
+    int32 prey_piece_id = 1;
+    // the cell Index hosting this target piece
+    int32 prey_cell_idx = 2;
+    // Destination of hunterPiece after capturing prey
+    int32 hunter_next_cell = 3;
   }
-  repeated PieceItem piece_list = 1;
+
+  // from which player
+  TeamColor from_team = 1;
+  // the attacking player's piece
+  int32 hunter_piece_id = 2;
+  TargetDetails details = 3;
 }

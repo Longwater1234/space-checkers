@@ -77,10 +77,10 @@ class GameManager
     std::optional<int> sourceCell;
     // all checkerboard cells
     std::vector<chk::Block> blockList{};
-    // first player (RED)
-    chk::PlayerPtr player1 = nullptr;
-    // second player (BLACK)
-    chk::PlayerPtr player2 = nullptr;
+    // first player (p1)
+    chk::PlayerPtr playerRed = nullptr;
+    // second player (p2)
+    chk::PlayerPtr playerBlack = nullptr;
 
     [[nodiscard]] const bool &isPlayerRedTurn() const;
     [[nodiscard]] short getPieceFromCell(int cell_idx);

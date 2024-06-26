@@ -49,8 +49,8 @@ inline OnlineGameManager::OnlineGameManager(sf::RenderWindow *windowPtr)
     this->blockList.reserve(chk::NUM_COLS * chk::NUM_COLS);
     this->wsClient = std::make_unique<chk::WsClient>();
     // CREATE TWO unique PLAYERS
-    this->player1 = std::make_unique<chk::Player>(chk::PlayerType::PLAYER_RED);
-    this->player2 = std::make_unique<chk::Player>(chk::PlayerType::PLAYER_BLACK);
+    this->playerRed = std::make_unique<chk::Player>(chk::PlayerType::PLAYER_RED);
+    this->playerBlack = std::make_unique<chk::Player>(chk::PlayerType::PLAYER_BLACK);
 
     // set Listener for connection success
     this->wsClient->setOnReadyConnectedCallback(
@@ -126,11 +126,11 @@ inline void chk::OnlineGameManager::createAllPieces()
         {
             if (kete->getPieceType() == chk::PieceType::Red)
             {
-                this->player1->receivePiece(kete);
+                this->playerRed->receivePiece(kete);
             }
             else
             {
-                this->player2->receivePiece(kete);
+                this->playerBlack->receivePiece(kete);
             }
         }
         pieceList.clear();
@@ -157,7 +157,7 @@ inline void OnlineGameManager::drawBoard()
         wsClient->runMainLoop();
     }
     // DRAW RED PIECES
-    for (const auto &[id, red_piece] : this->player1->getOwnPieces())
+    for (const auto &[id, red_piece] : this->playerRed->getOwnPieces())
     {
         if (this->myTeam == chk::PlayerType::PLAYER_RED && this->isMyTurn && red_piece->containsPoint(mousePos))
         {
@@ -170,7 +170,7 @@ inline void OnlineGameManager::drawBoard()
         window->draw(*red_piece);
     }
     // DRAW BLACK PIECES
-    for (const auto &[id, black_piece] : this->player2->getOwnPieces())
+    for (const auto &[id, black_piece] : this->playerBlack->getOwnPieces())
     {
         if (this->myTeam == chk::PlayerType::PLAYER_BLACK && this->isMyTurn && black_piece->containsPoint(mousePos))
         {
@@ -324,18 +324,19 @@ inline void OnlineGameManager::handleEvents(chk::CircularBuffer<short> &circular
             {
                 if (cell->containsPoint(clickedPos) && cell->getIndex() != -1)
                 {
-                    const auto &hunter = this->myTeam == chk::PlayerType::PLAYER_RED ? this->player1 : this->player2;
-                    const auto &opponent = this->myTeam == chk::PlayerType::PLAYER_RED ? this->player2 : this->player1;
+                    // Me
+                    const auto &mine = myTeam == chk::PlayerType::PLAYER_RED ? this->playerRed : this->playerBlack;
+                    const auto &opponent = myTeam == chk::PlayerType::PLAYER_RED ? this->playerBlack : this->playerRed;
 
                     if (this->hasPendingCaptures())
                     {
-                        this->handleCapturePiece(hunter, opponent, cell);
-                        GameManager::updateMatchStatus(hunter, opponent);
+                        this->handleCapturePiece(mine, opponent, cell);
+                        GameManager::updateMatchStatus(mine, opponent);
                         circularBuffer.clean();
                     }
                     else
                     {
-                        this->handleCellTap(hunter, opponent, circularBuffer, cell);
+                        this->handleCellTap(mine, opponent, circularBuffer, cell);
                     }
                     // END inner loop
                     break;
@@ -351,9 +352,10 @@ inline void OnlineGameManager::handleEvents(chk::CircularBuffer<short> &circular
 inline void OnlineGameManager::startMoveListener()
 {
     this->wsClient->setOnMovePieceCallback([this](const chk::payload::MovePayload &payload) {
-        // which player (RED or BLACK) made the Move
-        const chk::PlayerPtr &opponent = payload.from_team() & TeamColor::TEAM_RED ? this->player1 : this->player2;
-        const chk::PlayerPtr &myTeam = payload.from_team() & TeamColor::TEAM_RED ? this->player2 : this->player1;
+        // which player made the Move?
+        const chk::PlayerPtr &opponent =
+            payload.from_team() & TeamColor::TEAM_RED ? this->playerRed : this->playerBlack;
+        const chk::PlayerPtr &myTeam = payload.from_team() & TeamColor::TEAM_RED ? this->playerBlack : this->playerRed;
         const auto targetPosition = sf::Vector2f{payload.dest_cell().x(), payload.dest_cell().y()};
         const bool success = opponent->movePiece(static_cast<short>(payload.piece_id()), targetPosition);
         if (!success)

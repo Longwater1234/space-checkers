@@ -30,9 +30,9 @@ inline LocalGameManager::LocalGameManager(sf::RenderWindow *windowPtr)
     this->blockList.reserve(chk::NUM_COLS * chk::NUM_COLS);
 
     // CREATE TWO unique PLAYERS
-    this->player1 = std::make_unique<chk::Player>(chk::PlayerType::PLAYER_RED);
-    this->player2 = std::make_unique<chk::Player>(chk::PlayerType::PLAYER_BLACK);
-    assert(!(*player1 == *player2));
+    this->playerRed = std::make_unique<chk::Player>(chk::PlayerType::PLAYER_RED);
+    this->playerBlack = std::make_unique<chk::Player>(chk::PlayerType::PLAYER_BLACK);
+    assert(!(*playerRed == *playerBlack));
 }
 
 /**
@@ -79,11 +79,11 @@ inline void LocalGameManager::createAllPieces()
     {
         if (kete->getPieceType() == chk::PieceType::Red)
         {
-            this->player1->receivePiece(kete);
+            this->playerRed->receivePiece(kete);
         }
         else
         {
-            this->player2->receivePiece(kete);
+            this->playerBlack->receivePiece(kete);
         }
     }
     // we no longer need this
@@ -102,7 +102,7 @@ inline void LocalGameManager::drawBoard()
         window->draw(*cell);
     }
     // DRAW RED PIECES
-    for (const auto &[id, red_piece] : this->player1->getOwnPieces())
+    for (const auto &[id, red_piece] : this->playerRed->getOwnPieces())
     {
         if (this->isPlayerRedTurn() && red_piece->containsPoint(mousePos))
         {
@@ -115,7 +115,7 @@ inline void LocalGameManager::drawBoard()
         window->draw(*red_piece);
     }
     // DRAW BLACK PIECES
-    for (const auto &[id, black_piece] : this->player2->getOwnPieces())
+    for (const auto &[id, black_piece] : this->playerBlack->getOwnPieces())
     {
         if (!this->isPlayerRedTurn() && black_piece->containsPoint(mousePos))
         {
@@ -154,13 +154,13 @@ inline void LocalGameManager::handleEvents(chk::CircularBuffer<short> &buffer)
                 // inner loop
                 if (cell->containsPoint(clickedPos) && cell->getIndex() != -1)
                 {
-                    const auto &hunter = this->isPlayerRedTurn() ? this->player1 : this->player2;
-                    const auto &prey = this->isPlayerRedTurn() ? this->player2 : this->player1;
+                    const auto &hunter = this->isPlayerRedTurn() ? this->playerRed : this->playerBlack;
+                    const auto &prey = this->isPlayerRedTurn() ? this->playerBlack : this->playerRed;
 
                     if (this->hasPendingCaptures())
                     {
                         GameManager::handleCapturePiece(hunter, prey, cell);
-                        GameManager:updateMatchStatus(hunter, prey);
+                        GameManager::updateMatchStatus(hunter, prey);
                         buffer.clean();
                     }
                     else
