@@ -17,7 +17,8 @@ set(SFML_HOME "C:/SFML/SFML-2.6.1")
 file(GLOB_RECURSE GAME_SRC "src/*.cpp" "src/*.hpp")
 set(SFML_DIR ${SFML_HOME}/lib/cmake/SFML)
 
-find_package(SFML 2.6 REQUIRED COMPONENTS "graphics" "window" "system")
+find_package(SFML 2.6 REQUIRED COMPONENTS "graphics" "window" "system") 
+# find_package(OpenSSL)
 
 # download extra libs 
 add_subdirectory(dependencies)   

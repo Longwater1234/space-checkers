@@ -288,46 +288,53 @@ inline void WsClient::runGameLoop()
 
     for (const auto &msg : this->msgBuffer.getAll())
     {
-        if (!msg.empty())
+        if (msg.empty())
         {
-            chk::payload::BasePayload basePayload;
-            assert(basePayload.ParseFromString(msg) && "could not parse payload");
-            if (basePayload.has_welcome())
-            {
-                /* code */
-                chk::payload::WelcomePayload welcome = basePayload.welcome();
-                if (this->_onReadyConnected != nullptr)
-                {
-                    this->_onReadyConnected(welcome, basePayload.notice());
-                }
-            }
-            else if (basePayload.has_start())
-            {
-                chk::payload::StartPayload startPayload = basePayload.start();
-                if (this->_onReadyStartGame != nullptr)
-                {
-                    this->_onReadyStartGame(startPayload, basePayload.notice());
-                }
-            }
-            else if (basePayload.has_exit_payload())
-            {
-                std::scoped_lock lg(this->mut);
-                this->errorMsg = basePayload.notice();
-                spdlog::error(basePayload.notice());
-                this->isDead = true;
-            }
-            else if (basePayload.has_move_payload())
-            {
-                chk::payload::MovePayload movePayload = basePayload.move_payload();
-                spdlog::info(movePayload.DebugString());
-                if (this->_onMovePieceCallback != nullptr)
-                {
-                    this->_onMovePieceCallback(movePayload);
-                }
-            }
-            std::scoped_lock lg(this->mut);
-            msgBuffer.clean();
+            continue;
         }
+        chk::payload::BasePayload basePayload;
+        if (!basePayload.ParseFromString(msg))
+        {
+            std::scoped_lock lg(this->mut);
+            this->errorMsg = "Profobuf: Could not parse payload";
+            this->isDead = true;
+            return;
+        }
+        if (basePayload.has_welcome())
+        {
+            /* code */
+            chk::payload::WelcomePayload welcome = basePayload.welcome();
+            if (this->_onReadyConnected != nullptr)
+            {
+                this->_onReadyConnected(welcome, basePayload.notice());
+            }
+        }
+        else if (basePayload.has_start())
+        {
+            chk::payload::StartPayload startPayload = basePayload.start();
+            if (this->_onReadyStartGame != nullptr)
+            {
+                this->_onReadyStartGame(startPayload, basePayload.notice());
+            }
+        }
+        else if (basePayload.has_exit_payload())
+        {
+            std::scoped_lock lg(this->mut);
+            this->errorMsg = basePayload.notice();
+            spdlog::error(basePayload.notice());
+            this->isDead = true;
+        }
+        else if (basePayload.has_move_payload())
+        {
+            chk::payload::MovePayload movePayload = basePayload.move_payload();
+            spdlog::info(movePayload.DebugString());
+            if (this->_onMovePieceCallback != nullptr)
+            {
+                this->_onMovePieceCallback(movePayload);
+            }
+        }
+        std::scoped_lock lg(this->mut);
+        msgBuffer.clean();
     }
 }
 
