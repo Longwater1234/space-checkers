@@ -1415,11 +1415,12 @@ class CapturePayload final : public ::google::protobuf::Message
 
   // accessors -------------------------------------------------------
   enum : int {
-    kDetailsFieldNumber = 3,
+    kDetailsFieldNumber = 4,
     kFromTeamFieldNumber = 1,
     kHunterPieceIdFieldNumber = 2,
+    kHunterCellFieldNumber = 3,
   };
-  // .chk.payload.CapturePayload.TargetDetails details = 3;
+  // .chk.payload.CapturePayload.TargetDetails details = 4;
   bool has_details() const;
   void clear_details() ;
   const ::chk::payload::CapturePayload_TargetDetails& details() const;
@@ -1454,12 +1455,22 @@ class CapturePayload final : public ::google::protobuf::Message
   void _internal_set_hunter_piece_id(::int32_t value);
 
   public:
+  // int32 hunter_cell = 3;
+  void clear_hunter_cell() ;
+  ::int32_t hunter_cell() const;
+  void set_hunter_cell(::int32_t value);
+
+  private:
+  ::int32_t _internal_hunter_cell() const;
+  void _internal_set_hunter_cell(::int32_t value);
+
+  public:
   // @@protoc_insertion_point(class_scope:chk.payload.CapturePayload)
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      2, 3, 1,
+      2, 4, 1,
       0, 2>
       _table_;
 
@@ -1485,6 +1496,7 @@ class CapturePayload final : public ::google::protobuf::Message
     ::chk::payload::CapturePayload_TargetDetails* details_;
     int from_team_;
     ::int32_t hunter_piece_id_;
+    ::int32_t hunter_cell_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
   union { Impl_ _impl_; };
@@ -2815,7 +2827,29 @@ inline void CapturePayload::_internal_set_hunter_piece_id(::int32_t value) {
   _impl_.hunter_piece_id_ = value;
 }
 
-// .chk.payload.CapturePayload.TargetDetails details = 3;
+// int32 hunter_cell = 3;
+inline void CapturePayload::clear_hunter_cell() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.hunter_cell_ = 0;
+}
+inline ::int32_t CapturePayload::hunter_cell() const {
+  // @@protoc_insertion_point(field_get:chk.payload.CapturePayload.hunter_cell)
+  return _internal_hunter_cell();
+}
+inline void CapturePayload::set_hunter_cell(::int32_t value) {
+  _internal_set_hunter_cell(value);
+  // @@protoc_insertion_point(field_set:chk.payload.CapturePayload.hunter_cell)
+}
+inline ::int32_t CapturePayload::_internal_hunter_cell() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.hunter_cell_;
+}
+inline void CapturePayload::_internal_set_hunter_cell(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.hunter_cell_ = value;
+}
+
+// .chk.payload.CapturePayload.TargetDetails details = 4;
 inline bool CapturePayload::has_details() const {
   bool value = (_impl_._has_bits_[0] & 0x00000001u) != 0;
   PROTOBUF_ASSUME(!value || _impl_.details_ != nullptr);

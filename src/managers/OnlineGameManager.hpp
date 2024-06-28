@@ -51,6 +51,7 @@ inline OnlineGameManager::OnlineGameManager(sf::RenderWindow *windowPtr)
     // CREATE TWO unique PLAYERS
     this->playerRed = std::make_unique<chk::Player>(chk::PlayerType::PLAYER_RED);
     this->playerBlack = std::make_unique<chk::Player>(chk::PlayerType::PLAYER_BLACK);
+    assert(!(*playerRed == *playerBlack));
 
     // set Listener for connection success
     this->wsClient->setOnReadyConnectedCallback(

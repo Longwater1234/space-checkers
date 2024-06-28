@@ -158,7 +158,8 @@ inline constexpr CapturePayload::Impl_::Impl_(
       : _cached_size_{0},
         details_{nullptr},
         from_team_{static_cast< ::chk::payload::TeamColor >(0)},
-        hunter_piece_id_{0} {}
+        hunter_piece_id_{0},
+        hunter_cell_{0} {}
 
 template <typename>
 PROTOBUF_CONSTEXPR CapturePayload::CapturePayload(::_pbi::ConstantInitialized)
@@ -296,7 +297,9 @@ const ::uint32_t
         ~0u,  // no sizeof(Split)
         PROTOBUF_FIELD_OFFSET(::chk::payload::CapturePayload, _impl_.from_team_),
         PROTOBUF_FIELD_OFFSET(::chk::payload::CapturePayload, _impl_.hunter_piece_id_),
+        PROTOBUF_FIELD_OFFSET(::chk::payload::CapturePayload, _impl_.hunter_cell_),
         PROTOBUF_FIELD_OFFSET(::chk::payload::CapturePayload, _impl_.details_),
+        ~0u,
         ~0u,
         ~0u,
         0,
@@ -311,7 +314,7 @@ static const ::_pbi::MigrationSchema
         {46, 58, -1, sizeof(::chk::payload::MovePayload)},
         {62, -1, -1, sizeof(::chk::payload::ExitPayload)},
         {71, -1, -1, sizeof(::chk::payload::CapturePayload_TargetDetails)},
-        {82, 93, -1, sizeof(::chk::payload::CapturePayload)},
+        {82, 94, -1, sizeof(::chk::payload::CapturePayload)},
 };
 static const ::_pb::Message* const file_default_instances[] = {
     &::chk::payload::_BasePayload_default_instance_._instance,
@@ -343,21 +346,22 @@ const char descriptor_table_protodef_base_5fpayload_2eproto[] ABSL_ATTRIBUTE_SEC
     "ayload.DestCell\0324\n\010DestCell\022\022\n\ncell_inde"
     "x\030\001 \001(\005\022\t\n\001x\030\002 \001(\002\022\t\n\001y\030\003 \001(\002\"8\n\013ExitPay"
     "load\022)\n\tfrom_team\030\001 \001(\0162\026.chk.payload.Te"
-    "amColor\"\351\001\n\016CapturePayload\022)\n\tfrom_team\030"
+    "amColor\"\376\001\n\016CapturePayload\022)\n\tfrom_team\030"
     "\001 \001(\0162\026.chk.payload.TeamColor\022\027\n\017hunter_"
-    "piece_id\030\002 \001(\005\022:\n\007details\030\003 \001(\0132).chk.pa"
-    "yload.CapturePayload.TargetDetails\032W\n\rTa"
-    "rgetDetails\022\025\n\rprey_piece_id\030\001 \001(\005\022\025\n\rpr"
-    "ey_cell_idx\030\002 \001(\005\022\030\n\020hunter_next_cell\030\003 "
-    "\001(\005*\?\n\tTeamColor\022\024\n\020TEAM_UNSPECIFIED\020\000\022\014"
-    "\n\010TEAM_RED\020\001\022\016\n\nTEAM_BLACK\020\002B\027Z\025checkers"
-    "-backend/gameb\006proto3"
+    "piece_id\030\002 \001(\005\022\023\n\013hunter_cell\030\003 \001(\005\022:\n\007d"
+    "etails\030\004 \001(\0132).chk.payload.CapturePayloa"
+    "d.TargetDetails\032W\n\rTargetDetails\022\025\n\rprey"
+    "_piece_id\030\001 \001(\005\022\025\n\rprey_cell_idx\030\002 \001(\005\022\030"
+    "\n\020hunter_next_cell\030\003 \001(\005*\?\n\tTeamColor\022\024\n"
+    "\020TEAM_UNSPECIFIED\020\000\022\014\n\010TEAM_RED\020\001\022\016\n\nTEA"
+    "M_BLACK\020\002B\027Z\025checkers-backend/gameb\006prot"
+    "o3"
 };
 static ::absl::once_flag descriptor_table_base_5fpayload_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_base_5fpayload_2eproto = {
     false,
     false,
-    1061,
+    1082,
     descriptor_table_protodef_base_5fpayload_2eproto,
     "base_payload.proto",
     &descriptor_table_base_5fpayload_2eproto_once,
@@ -2309,9 +2313,9 @@ CapturePayload::CapturePayload(
                offsetof(Impl_, from_team_),
            reinterpret_cast<const char *>(&from._impl_) +
                offsetof(Impl_, from_team_),
-           offsetof(Impl_, hunter_piece_id_) -
+           offsetof(Impl_, hunter_cell_) -
                offsetof(Impl_, from_team_) +
-               sizeof(Impl_::hunter_piece_id_));
+               sizeof(Impl_::hunter_cell_));
 
   // @@protoc_insertion_point(copy_constructor:chk.payload.CapturePayload)
 }
@@ -2325,9 +2329,9 @@ inline void CapturePayload::SharedCtor(::_pb::Arena* arena) {
   ::memset(reinterpret_cast<char *>(&_impl_) +
                offsetof(Impl_, details_),
            0,
-           offsetof(Impl_, hunter_piece_id_) -
+           offsetof(Impl_, hunter_cell_) -
                offsetof(Impl_, details_) +
-               sizeof(Impl_::hunter_piece_id_));
+               sizeof(Impl_::hunter_cell_));
 }
 CapturePayload::~CapturePayload() {
   // @@protoc_insertion_point(destructor:chk.payload.CapturePayload)
@@ -2361,15 +2365,15 @@ CapturePayload::GetClassData() const {
   return _data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<2, 3, 1, 0, 2> CapturePayload::_table_ = {
+const ::_pbi::TcParseTable<2, 4, 1, 0, 2> CapturePayload::_table_ = {
   {
     PROTOBUF_FIELD_OFFSET(CapturePayload, _impl_._has_bits_),
     0, // no _extensions_
-    3, 24,  // max_field_number, fast_idx_mask
+    4, 24,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294967288,  // skipmap
+    4294967280,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    3,  // num_field_entries
+    4,  // num_field_entries
     1,  // num_aux_entries
     offsetof(decltype(_table_), aux_entries),
     &_CapturePayload_default_instance_._instance,
@@ -2379,16 +2383,18 @@ const ::_pbi::TcParseTable<2, 3, 1, 0, 2> CapturePayload::_table_ = {
     ::_pbi::TcParser::GetTable<::chk::payload::CapturePayload>(),  // to_prefetch
     #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
   }, {{
-    {::_pbi::TcParser::MiniParse, {}},
+    // .chk.payload.CapturePayload.TargetDetails details = 4;
+    {::_pbi::TcParser::FastMtS1,
+     {34, 0, 0, PROTOBUF_FIELD_OFFSET(CapturePayload, _impl_.details_)}},
     // .chk.payload.TeamColor from_team = 1;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(CapturePayload, _impl_.from_team_), 63>(),
      {8, 63, 0, PROTOBUF_FIELD_OFFSET(CapturePayload, _impl_.from_team_)}},
     // int32 hunter_piece_id = 2;
     {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(CapturePayload, _impl_.hunter_piece_id_), 63>(),
      {16, 63, 0, PROTOBUF_FIELD_OFFSET(CapturePayload, _impl_.hunter_piece_id_)}},
-    // .chk.payload.CapturePayload.TargetDetails details = 3;
-    {::_pbi::TcParser::FastMtS1,
-     {26, 0, 0, PROTOBUF_FIELD_OFFSET(CapturePayload, _impl_.details_)}},
+    // int32 hunter_cell = 3;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(CapturePayload, _impl_.hunter_cell_), 63>(),
+     {24, 63, 0, PROTOBUF_FIELD_OFFSET(CapturePayload, _impl_.hunter_cell_)}},
   }}, {{
     65535, 65535
   }}, {{
@@ -2398,7 +2404,10 @@ const ::_pbi::TcParseTable<2, 3, 1, 0, 2> CapturePayload::_table_ = {
     // int32 hunter_piece_id = 2;
     {PROTOBUF_FIELD_OFFSET(CapturePayload, _impl_.hunter_piece_id_), -1, 0,
     (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
-    // .chk.payload.CapturePayload.TargetDetails details = 3;
+    // int32 hunter_cell = 3;
+    {PROTOBUF_FIELD_OFFSET(CapturePayload, _impl_.hunter_cell_), -1, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kInt32)},
+    // .chk.payload.CapturePayload.TargetDetails details = 4;
     {PROTOBUF_FIELD_OFFSET(CapturePayload, _impl_.details_), _Internal::kHasBitsOffset + 0, 0,
     (0 | ::_fl::kFcOptional | ::_fl::kMessage | ::_fl::kTvTable)},
   }}, {{
@@ -2420,8 +2429,8 @@ PROTOBUF_NOINLINE void CapturePayload::Clear() {
     _impl_.details_->Clear();
   }
   ::memset(&_impl_.from_team_, 0, static_cast<::size_t>(
-      reinterpret_cast<char*>(&_impl_.hunter_piece_id_) -
-      reinterpret_cast<char*>(&_impl_.from_team_)) + sizeof(_impl_.hunter_piece_id_));
+      reinterpret_cast<char*>(&_impl_.hunter_cell_) -
+      reinterpret_cast<char*>(&_impl_.from_team_)) + sizeof(_impl_.hunter_cell_));
   _impl_._has_bits_.Clear();
   _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
 }
@@ -2447,11 +2456,18 @@ PROTOBUF_NOINLINE void CapturePayload::Clear() {
             stream, this->_internal_hunter_piece_id(), target);
   }
 
+  // int32 hunter_cell = 3;
+  if (this->_internal_hunter_cell() != 0) {
+    target = ::google::protobuf::internal::WireFormatLite::
+        WriteInt32ToArrayWithField<3>(
+            stream, this->_internal_hunter_cell(), target);
+  }
+
   cached_has_bits = _impl_._has_bits_[0];
-  // .chk.payload.CapturePayload.TargetDetails details = 3;
+  // .chk.payload.CapturePayload.TargetDetails details = 4;
   if (cached_has_bits & 0x00000001u) {
     target = ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
-        3, *_impl_.details_, _impl_.details_->GetCachedSize(), target, stream);
+        4, *_impl_.details_, _impl_.details_->GetCachedSize(), target, stream);
   }
 
   if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
@@ -2472,7 +2488,7 @@ PROTOBUF_NOINLINE void CapturePayload::Clear() {
   (void) cached_has_bits;
 
   ::_pbi::Prefetch5LinesFrom7Lines(reinterpret_cast<const void*>(this));
-  // .chk.payload.CapturePayload.TargetDetails details = 3;
+  // .chk.payload.CapturePayload.TargetDetails details = 4;
   cached_has_bits = _impl_._has_bits_[0];
   if (cached_has_bits & 0x00000001u) {
     total_size +=
@@ -2489,6 +2505,12 @@ PROTOBUF_NOINLINE void CapturePayload::Clear() {
   if (this->_internal_hunter_piece_id() != 0) {
     total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
         this->_internal_hunter_piece_id());
+  }
+
+  // int32 hunter_cell = 3;
+  if (this->_internal_hunter_cell() != 0) {
+    total_size += ::_pbi::WireFormatLite::Int32SizePlusOne(
+        this->_internal_hunter_cell());
   }
 
   return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
@@ -2520,6 +2542,9 @@ void CapturePayload::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::
   if (from._internal_hunter_piece_id() != 0) {
     _this->_impl_.hunter_piece_id_ = from._impl_.hunter_piece_id_;
   }
+  if (from._internal_hunter_cell() != 0) {
+    _this->_impl_.hunter_cell_ = from._impl_.hunter_cell_;
+  }
   _this->_impl_._has_bits_[0] |= cached_has_bits;
   _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
 }
@@ -2537,8 +2562,8 @@ void CapturePayload::InternalSwap(CapturePayload* PROTOBUF_RESTRICT other) {
   _internal_metadata_.InternalSwap(&other->_internal_metadata_);
   swap(_impl_._has_bits_[0], other->_impl_._has_bits_[0]);
   ::google::protobuf::internal::memswap<
-      PROTOBUF_FIELD_OFFSET(CapturePayload, _impl_.hunter_piece_id_)
-      + sizeof(CapturePayload::_impl_.hunter_piece_id_)
+      PROTOBUF_FIELD_OFFSET(CapturePayload, _impl_.hunter_cell_)
+      + sizeof(CapturePayload::_impl_.hunter_cell_)
       - PROTOBUF_FIELD_OFFSET(CapturePayload, _impl_.details_)>(
           reinterpret_cast<char*>(&_impl_.details_),
           reinterpret_cast<char*>(&other->_impl_.details_));

@@ -124,7 +124,7 @@ void GameManager::handleCapturePiece(const chk::PlayerPtr &hunter, const chk::Pl
                                      const chk::Block &targetCell)
 {
 
-    assert(!(hunter == prey) && "cannot be same player");
+    assert(!(hunter == prey) && "cannot pass the same player");
     if (this->gameOver || this->getPieceFromCell(targetCell->getIndex()) != -1)
     {
         // STOP if game over OR there's already a Piece on target cell

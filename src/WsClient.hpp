@@ -151,7 +151,7 @@ inline void WsClient::runMainLoop()
     else {
         this->runGameLoop();
     }
-    // connection failure 🙁
+    // some error happened 🙁
     if (this->isDead) {
        this->showErrorPopup();
        if (this->_onDeathCallback != nullptr) {
@@ -258,6 +258,7 @@ inline void WsClient::setOnMovePieceCallback(const onMovePieceCallback &callback
 /**
  * Send Protobuf response back to server
  * @param payload the request body
+ * @return TRUE if sent successfully, else FALSE
  */
 inline bool WsClient::replyServerAsync(chk::payload::BasePayload *payload) const
 {
