@@ -67,15 +67,21 @@ message CapturePayload {
     int32 prey_piece_id = 1;
     // the cell Index hosting this target piece
     int32 prey_cell_idx = 2;
-    // Destination of hunterPiece after capturing prey
-    int32 hunter_next_cell = 3;
+    // source cell of hunter
+    int32 hunter_src_cell = 3;
+  }
+
+  // Destination of hunterPiece after capturing prey
+  message HunterDestCell {
+    int32 cell_index = 1;
+    float x = 2;
+    float y = 3;
   }
 
   // from which player
   TeamColor from_team = 1;
   // the attacking player's piece
   int32 hunter_piece_id = 2;
-  // source cell of hunter
-  int32 hunter_cell = 3;
   TargetDetails details = 4;
+  HunterDestCell hunter_dest_cell = 5;
 }

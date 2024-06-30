@@ -58,6 +58,9 @@ extern BasePayloadDefaultTypeInternal _BasePayload_default_instance_;
 class CapturePayload;
 struct CapturePayloadDefaultTypeInternal;
 extern CapturePayloadDefaultTypeInternal _CapturePayload_default_instance_;
+class CapturePayload_HunterDestCell;
+struct CapturePayload_HunterDestCellDefaultTypeInternal;
+extern CapturePayload_HunterDestCellDefaultTypeInternal _CapturePayload_HunterDestCell_default_instance_;
 class CapturePayload_TargetDetails;
 struct CapturePayload_TargetDetailsDefaultTypeInternal;
 extern CapturePayload_TargetDetailsDefaultTypeInternal _CapturePayload_TargetDetails_default_instance_;
@@ -1007,7 +1010,7 @@ class CapturePayload_TargetDetails final : public ::google::protobuf::Message
   enum : int {
     kPreyPieceIdFieldNumber = 1,
     kPreyCellIdxFieldNumber = 2,
-    kHunterNextCellFieldNumber = 3,
+    kHunterSrcCellFieldNumber = 3,
   };
   // int32 prey_piece_id = 1;
   void clear_prey_piece_id() ;
@@ -1029,14 +1032,14 @@ class CapturePayload_TargetDetails final : public ::google::protobuf::Message
   void _internal_set_prey_cell_idx(::int32_t value);
 
   public:
-  // int32 hunter_next_cell = 3;
-  void clear_hunter_next_cell() ;
-  ::int32_t hunter_next_cell() const;
-  void set_hunter_next_cell(::int32_t value);
+  // int32 hunter_src_cell = 3;
+  void clear_hunter_src_cell() ;
+  ::int32_t hunter_src_cell() const;
+  void set_hunter_src_cell(::int32_t value);
 
   private:
-  ::int32_t _internal_hunter_next_cell() const;
-  void _internal_set_hunter_next_cell(::int32_t value);
+  ::int32_t _internal_hunter_src_cell() const;
+  void _internal_set_hunter_src_cell(::int32_t value);
 
   public:
   // @@protoc_insertion_point(class_scope:chk.payload.CapturePayload.TargetDetails)
@@ -1067,7 +1070,202 @@ class CapturePayload_TargetDetails final : public ::google::protobuf::Message
                           const CapturePayload_TargetDetails& from_msg);
     ::int32_t prey_piece_id_;
     ::int32_t prey_cell_idx_;
-    ::int32_t hunter_next_cell_;
+    ::int32_t hunter_src_cell_;
+    mutable ::google::protobuf::internal::CachedSize _cached_size_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_base_5fpayload_2eproto;
+};
+// -------------------------------------------------------------------
+
+class CapturePayload_HunterDestCell final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:chk.payload.CapturePayload.HunterDestCell) */ {
+ public:
+  inline CapturePayload_HunterDestCell() : CapturePayload_HunterDestCell(nullptr) {}
+  ~CapturePayload_HunterDestCell() override;
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR CapturePayload_HunterDestCell(
+      ::google::protobuf::internal::ConstantInitialized);
+
+  inline CapturePayload_HunterDestCell(const CapturePayload_HunterDestCell& from) : CapturePayload_HunterDestCell(nullptr, from) {}
+  inline CapturePayload_HunterDestCell(CapturePayload_HunterDestCell&& from) noexcept
+      : CapturePayload_HunterDestCell(nullptr, std::move(from)) {}
+  inline CapturePayload_HunterDestCell& operator=(const CapturePayload_HunterDestCell& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline CapturePayload_HunterDestCell& operator=(CapturePayload_HunterDestCell&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetArena() == from.GetArena()
+#ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetArena() != nullptr
+#endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const CapturePayload_HunterDestCell& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const CapturePayload_HunterDestCell* internal_default_instance() {
+    return reinterpret_cast<const CapturePayload_HunterDestCell*>(
+        &_CapturePayload_HunterDestCell_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 7;
+  friend void swap(CapturePayload_HunterDestCell& a, CapturePayload_HunterDestCell& b) { a.Swap(&b); }
+  inline void Swap(CapturePayload_HunterDestCell* other) {
+    if (other == this) return;
+#ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() != nullptr && GetArena() == other->GetArena()) {
+#else   // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() == other->GetArena()) {
+#endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(CapturePayload_HunterDestCell* other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  CapturePayload_HunterDestCell* New(::google::protobuf::Arena* arena = nullptr) const final {
+    return ::google::protobuf::Message::DefaultConstruct<CapturePayload_HunterDestCell>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const CapturePayload_HunterDestCell& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const CapturePayload_HunterDestCell& from) { CapturePayload_HunterDestCell::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(
+      ::google::protobuf::MessageLite& to_msg,
+      const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() final;
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* arena);
+  void SharedDtor();
+  void InternalSwap(CapturePayload_HunterDestCell* other);
+ private:
+  friend class ::google::protobuf::internal::AnyMetadata;
+  static ::absl::string_view FullMessageName() { return "chk.payload.CapturePayload.HunterDestCell"; }
+
+ protected:
+  explicit CapturePayload_HunterDestCell(::google::protobuf::Arena* arena);
+  CapturePayload_HunterDestCell(::google::protobuf::Arena* arena, const CapturePayload_HunterDestCell& from);
+  CapturePayload_HunterDestCell(::google::protobuf::Arena* arena, CapturePayload_HunterDestCell&& from) noexcept
+      : CapturePayload_HunterDestCell(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::Message::ClassData* GetClassData() const final;
+
+ public:
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kCellIndexFieldNumber = 1,
+    kXFieldNumber = 2,
+    kYFieldNumber = 3,
+  };
+  // int32 cell_index = 1;
+  void clear_cell_index() ;
+  ::int32_t cell_index() const;
+  void set_cell_index(::int32_t value);
+
+  private:
+  ::int32_t _internal_cell_index() const;
+  void _internal_set_cell_index(::int32_t value);
+
+  public:
+  // float x = 2;
+  void clear_x() ;
+  float x() const;
+  void set_x(float value);
+
+  private:
+  float _internal_x() const;
+  void _internal_set_x(float value);
+
+  public:
+  // float y = 3;
+  void clear_y() ;
+  float y() const;
+  void set_y(float value);
+
+  private:
+  float _internal_y() const;
+  void _internal_set_y(float value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:chk.payload.CapturePayload.HunterDestCell)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<
+      2, 3, 0,
+      0, 2>
+      _table_;
+
+  static constexpr const void* _raw_default_instance_ =
+      &_CapturePayload_HunterDestCell_default_instance_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(
+        ::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena);
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena, const Impl_& from,
+                          const CapturePayload_HunterDestCell& from_msg);
+    ::int32_t cell_index_;
+    float x_;
+    float y_;
     mutable ::google::protobuf::internal::CachedSize _cached_size_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
@@ -1345,7 +1543,7 @@ class CapturePayload final : public ::google::protobuf::Message
     return reinterpret_cast<const CapturePayload*>(
         &_CapturePayload_default_instance_);
   }
-  static constexpr int kIndexInFileMessages = 7;
+  static constexpr int kIndexInFileMessages = 8;
   friend void swap(CapturePayload& a, CapturePayload& b) { a.Swap(&b); }
   inline void Swap(CapturePayload* other) {
     if (other == this) return;
@@ -1412,13 +1610,14 @@ class CapturePayload final : public ::google::protobuf::Message
   ::google::protobuf::Metadata GetMetadata() const;
   // nested types ----------------------------------------------------
   using TargetDetails = CapturePayload_TargetDetails;
+  using HunterDestCell = CapturePayload_HunterDestCell;
 
   // accessors -------------------------------------------------------
   enum : int {
     kDetailsFieldNumber = 4,
+    kHunterDestCellFieldNumber = 5,
     kFromTeamFieldNumber = 1,
     kHunterPieceIdFieldNumber = 2,
-    kHunterCellFieldNumber = 3,
   };
   // .chk.payload.CapturePayload.TargetDetails details = 4;
   bool has_details() const;
@@ -1433,6 +1632,21 @@ class CapturePayload final : public ::google::protobuf::Message
   private:
   const ::chk::payload::CapturePayload_TargetDetails& _internal_details() const;
   ::chk::payload::CapturePayload_TargetDetails* _internal_mutable_details();
+
+  public:
+  // .chk.payload.CapturePayload.HunterDestCell hunter_dest_cell = 5;
+  bool has_hunter_dest_cell() const;
+  void clear_hunter_dest_cell() ;
+  const ::chk::payload::CapturePayload_HunterDestCell& hunter_dest_cell() const;
+  PROTOBUF_NODISCARD ::chk::payload::CapturePayload_HunterDestCell* release_hunter_dest_cell();
+  ::chk::payload::CapturePayload_HunterDestCell* mutable_hunter_dest_cell();
+  void set_allocated_hunter_dest_cell(::chk::payload::CapturePayload_HunterDestCell* value);
+  void unsafe_arena_set_allocated_hunter_dest_cell(::chk::payload::CapturePayload_HunterDestCell* value);
+  ::chk::payload::CapturePayload_HunterDestCell* unsafe_arena_release_hunter_dest_cell();
+
+  private:
+  const ::chk::payload::CapturePayload_HunterDestCell& _internal_hunter_dest_cell() const;
+  ::chk::payload::CapturePayload_HunterDestCell* _internal_mutable_hunter_dest_cell();
 
   public:
   // .chk.payload.TeamColor from_team = 1;
@@ -1455,22 +1669,12 @@ class CapturePayload final : public ::google::protobuf::Message
   void _internal_set_hunter_piece_id(::int32_t value);
 
   public:
-  // int32 hunter_cell = 3;
-  void clear_hunter_cell() ;
-  ::int32_t hunter_cell() const;
-  void set_hunter_cell(::int32_t value);
-
-  private:
-  ::int32_t _internal_hunter_cell() const;
-  void _internal_set_hunter_cell(::int32_t value);
-
-  public:
   // @@protoc_insertion_point(class_scope:chk.payload.CapturePayload)
  private:
   class _Internal;
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      2, 4, 1,
+      3, 4, 2,
       0, 2>
       _table_;
 
@@ -1494,9 +1698,9 @@ class CapturePayload final : public ::google::protobuf::Message
     ::google::protobuf::internal::HasBits<1> _has_bits_;
     mutable ::google::protobuf::internal::CachedSize _cached_size_;
     ::chk::payload::CapturePayload_TargetDetails* details_;
+    ::chk::payload::CapturePayload_HunterDestCell* hunter_dest_cell_;
     int from_team_;
     ::int32_t hunter_piece_id_;
-    ::int32_t hunter_cell_;
     PROTOBUF_TSAN_DECLARE_MEMBER
   };
   union { Impl_ _impl_; };
@@ -2757,26 +2961,96 @@ inline void CapturePayload_TargetDetails::_internal_set_prey_cell_idx(::int32_t 
   _impl_.prey_cell_idx_ = value;
 }
 
-// int32 hunter_next_cell = 3;
-inline void CapturePayload_TargetDetails::clear_hunter_next_cell() {
+// int32 hunter_src_cell = 3;
+inline void CapturePayload_TargetDetails::clear_hunter_src_cell() {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.hunter_next_cell_ = 0;
+  _impl_.hunter_src_cell_ = 0;
 }
-inline ::int32_t CapturePayload_TargetDetails::hunter_next_cell() const {
-  // @@protoc_insertion_point(field_get:chk.payload.CapturePayload.TargetDetails.hunter_next_cell)
-  return _internal_hunter_next_cell();
+inline ::int32_t CapturePayload_TargetDetails::hunter_src_cell() const {
+  // @@protoc_insertion_point(field_get:chk.payload.CapturePayload.TargetDetails.hunter_src_cell)
+  return _internal_hunter_src_cell();
 }
-inline void CapturePayload_TargetDetails::set_hunter_next_cell(::int32_t value) {
-  _internal_set_hunter_next_cell(value);
-  // @@protoc_insertion_point(field_set:chk.payload.CapturePayload.TargetDetails.hunter_next_cell)
+inline void CapturePayload_TargetDetails::set_hunter_src_cell(::int32_t value) {
+  _internal_set_hunter_src_cell(value);
+  // @@protoc_insertion_point(field_set:chk.payload.CapturePayload.TargetDetails.hunter_src_cell)
 }
-inline ::int32_t CapturePayload_TargetDetails::_internal_hunter_next_cell() const {
+inline ::int32_t CapturePayload_TargetDetails::_internal_hunter_src_cell() const {
   ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.hunter_next_cell_;
+  return _impl_.hunter_src_cell_;
 }
-inline void CapturePayload_TargetDetails::_internal_set_hunter_next_cell(::int32_t value) {
+inline void CapturePayload_TargetDetails::_internal_set_hunter_src_cell(::int32_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.hunter_next_cell_ = value;
+  _impl_.hunter_src_cell_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// CapturePayload_HunterDestCell
+
+// int32 cell_index = 1;
+inline void CapturePayload_HunterDestCell::clear_cell_index() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.cell_index_ = 0;
+}
+inline ::int32_t CapturePayload_HunterDestCell::cell_index() const {
+  // @@protoc_insertion_point(field_get:chk.payload.CapturePayload.HunterDestCell.cell_index)
+  return _internal_cell_index();
+}
+inline void CapturePayload_HunterDestCell::set_cell_index(::int32_t value) {
+  _internal_set_cell_index(value);
+  // @@protoc_insertion_point(field_set:chk.payload.CapturePayload.HunterDestCell.cell_index)
+}
+inline ::int32_t CapturePayload_HunterDestCell::_internal_cell_index() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.cell_index_;
+}
+inline void CapturePayload_HunterDestCell::_internal_set_cell_index(::int32_t value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.cell_index_ = value;
+}
+
+// float x = 2;
+inline void CapturePayload_HunterDestCell::clear_x() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.x_ = 0;
+}
+inline float CapturePayload_HunterDestCell::x() const {
+  // @@protoc_insertion_point(field_get:chk.payload.CapturePayload.HunterDestCell.x)
+  return _internal_x();
+}
+inline void CapturePayload_HunterDestCell::set_x(float value) {
+  _internal_set_x(value);
+  // @@protoc_insertion_point(field_set:chk.payload.CapturePayload.HunterDestCell.x)
+}
+inline float CapturePayload_HunterDestCell::_internal_x() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.x_;
+}
+inline void CapturePayload_HunterDestCell::_internal_set_x(float value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.x_ = value;
+}
+
+// float y = 3;
+inline void CapturePayload_HunterDestCell::clear_y() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.y_ = 0;
+}
+inline float CapturePayload_HunterDestCell::y() const {
+  // @@protoc_insertion_point(field_get:chk.payload.CapturePayload.HunterDestCell.y)
+  return _internal_y();
+}
+inline void CapturePayload_HunterDestCell::set_y(float value) {
+  _internal_set_y(value);
+  // @@protoc_insertion_point(field_set:chk.payload.CapturePayload.HunterDestCell.y)
+}
+inline float CapturePayload_HunterDestCell::_internal_y() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return _impl_.y_;
+}
+inline void CapturePayload_HunterDestCell::_internal_set_y(float value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.y_ = value;
 }
 
 // -------------------------------------------------------------------
@@ -2825,28 +3099,6 @@ inline ::int32_t CapturePayload::_internal_hunter_piece_id() const {
 inline void CapturePayload::_internal_set_hunter_piece_id(::int32_t value) {
   ::google::protobuf::internal::TSanWrite(&_impl_);
   _impl_.hunter_piece_id_ = value;
-}
-
-// int32 hunter_cell = 3;
-inline void CapturePayload::clear_hunter_cell() {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.hunter_cell_ = 0;
-}
-inline ::int32_t CapturePayload::hunter_cell() const {
-  // @@protoc_insertion_point(field_get:chk.payload.CapturePayload.hunter_cell)
-  return _internal_hunter_cell();
-}
-inline void CapturePayload::set_hunter_cell(::int32_t value) {
-  _internal_set_hunter_cell(value);
-  // @@protoc_insertion_point(field_set:chk.payload.CapturePayload.hunter_cell)
-}
-inline ::int32_t CapturePayload::_internal_hunter_cell() const {
-  ::google::protobuf::internal::TSanRead(&_impl_);
-  return _impl_.hunter_cell_;
-}
-inline void CapturePayload::_internal_set_hunter_cell(::int32_t value) {
-  ::google::protobuf::internal::TSanWrite(&_impl_);
-  _impl_.hunter_cell_ = value;
 }
 
 // .chk.payload.CapturePayload.TargetDetails details = 4;
@@ -2943,6 +3195,102 @@ inline void CapturePayload::set_allocated_details(::chk::payload::CapturePayload
 
   _impl_.details_ = reinterpret_cast<::chk::payload::CapturePayload_TargetDetails*>(value);
   // @@protoc_insertion_point(field_set_allocated:chk.payload.CapturePayload.details)
+}
+
+// .chk.payload.CapturePayload.HunterDestCell hunter_dest_cell = 5;
+inline bool CapturePayload::has_hunter_dest_cell() const {
+  bool value = (_impl_._has_bits_[0] & 0x00000002u) != 0;
+  PROTOBUF_ASSUME(!value || _impl_.hunter_dest_cell_ != nullptr);
+  return value;
+}
+inline void CapturePayload::clear_hunter_dest_cell() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (_impl_.hunter_dest_cell_ != nullptr) _impl_.hunter_dest_cell_->Clear();
+  _impl_._has_bits_[0] &= ~0x00000002u;
+}
+inline const ::chk::payload::CapturePayload_HunterDestCell& CapturePayload::_internal_hunter_dest_cell() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  const ::chk::payload::CapturePayload_HunterDestCell* p = _impl_.hunter_dest_cell_;
+  return p != nullptr ? *p : reinterpret_cast<const ::chk::payload::CapturePayload_HunterDestCell&>(::chk::payload::_CapturePayload_HunterDestCell_default_instance_);
+}
+inline const ::chk::payload::CapturePayload_HunterDestCell& CapturePayload::hunter_dest_cell() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:chk.payload.CapturePayload.hunter_dest_cell)
+  return _internal_hunter_dest_cell();
+}
+inline void CapturePayload::unsafe_arena_set_allocated_hunter_dest_cell(::chk::payload::CapturePayload_HunterDestCell* value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (GetArena() == nullptr) {
+    delete reinterpret_cast<::google::protobuf::MessageLite*>(_impl_.hunter_dest_cell_);
+  }
+  _impl_.hunter_dest_cell_ = reinterpret_cast<::chk::payload::CapturePayload_HunterDestCell*>(value);
+  if (value != nullptr) {
+    _impl_._has_bits_[0] |= 0x00000002u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000002u;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:chk.payload.CapturePayload.hunter_dest_cell)
+}
+inline ::chk::payload::CapturePayload_HunterDestCell* CapturePayload::release_hunter_dest_cell() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+
+  _impl_._has_bits_[0] &= ~0x00000002u;
+  ::chk::payload::CapturePayload_HunterDestCell* released = _impl_.hunter_dest_cell_;
+  _impl_.hunter_dest_cell_ = nullptr;
+#ifdef PROTOBUF_FORCE_COPY_IN_RELEASE
+  auto* old = reinterpret_cast<::google::protobuf::MessageLite*>(released);
+  released = ::google::protobuf::internal::DuplicateIfNonNull(released);
+  if (GetArena() == nullptr) {
+    delete old;
+  }
+#else   // PROTOBUF_FORCE_COPY_IN_RELEASE
+  if (GetArena() != nullptr) {
+    released = ::google::protobuf::internal::DuplicateIfNonNull(released);
+  }
+#endif  // !PROTOBUF_FORCE_COPY_IN_RELEASE
+  return released;
+}
+inline ::chk::payload::CapturePayload_HunterDestCell* CapturePayload::unsafe_arena_release_hunter_dest_cell() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  // @@protoc_insertion_point(field_release:chk.payload.CapturePayload.hunter_dest_cell)
+
+  _impl_._has_bits_[0] &= ~0x00000002u;
+  ::chk::payload::CapturePayload_HunterDestCell* temp = _impl_.hunter_dest_cell_;
+  _impl_.hunter_dest_cell_ = nullptr;
+  return temp;
+}
+inline ::chk::payload::CapturePayload_HunterDestCell* CapturePayload::_internal_mutable_hunter_dest_cell() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (_impl_.hunter_dest_cell_ == nullptr) {
+    auto* p = ::google::protobuf::Message::DefaultConstruct<::chk::payload::CapturePayload_HunterDestCell>(GetArena());
+    _impl_.hunter_dest_cell_ = reinterpret_cast<::chk::payload::CapturePayload_HunterDestCell*>(p);
+  }
+  return _impl_.hunter_dest_cell_;
+}
+inline ::chk::payload::CapturePayload_HunterDestCell* CapturePayload::mutable_hunter_dest_cell() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  _impl_._has_bits_[0] |= 0x00000002u;
+  ::chk::payload::CapturePayload_HunterDestCell* _msg = _internal_mutable_hunter_dest_cell();
+  // @@protoc_insertion_point(field_mutable:chk.payload.CapturePayload.hunter_dest_cell)
+  return _msg;
+}
+inline void CapturePayload::set_allocated_hunter_dest_cell(::chk::payload::CapturePayload_HunterDestCell* value) {
+  ::google::protobuf::Arena* message_arena = GetArena();
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (message_arena == nullptr) {
+    delete (_impl_.hunter_dest_cell_);
+  }
+
+  if (value != nullptr) {
+    ::google::protobuf::Arena* submessage_arena = (value)->GetArena();
+    if (message_arena != submessage_arena) {
+      value = ::google::protobuf::internal::GetOwnedMessage(message_arena, value, submessage_arena);
+    }
+    _impl_._has_bits_[0] |= 0x00000002u;
+  } else {
+    _impl_._has_bits_[0] &= ~0x00000002u;
+  }
+
+  _impl_.hunter_dest_cell_ = reinterpret_cast<::chk::payload::CapturePayload_HunterDestCell*>(value);
+  // @@protoc_insertion_point(field_set_allocated:chk.payload.CapturePayload.hunter_dest_cell)
 }
 
 #ifdef __GNUC__
