@@ -212,7 +212,7 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
         spdlog::info("YOU ARE IN DANGER ");
     }
 
-    // SEND TO SERVER for validation
+    // SEND TO SERVER for validation and update
     auto newDestCell = new chk::payload::MovePayload_DestCell();
     newDestCell->set_cell_index(destCell->getIndex());
     newDestCell->set_x(destCell->getPos().x);
@@ -252,7 +252,81 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
 inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,
                                                   const chk::Block &targetCell)
 {
-    // TODO complete me
+    // using namespace chk::payload;
+    // call base method
+    if (!this->isMyTurn || this->getPieceFromCell(targetCell->getIndex()) != -1)
+    {
+        // STOP if game over OR there's already a Piece on target cell
+        return;
+    }
+
+    int copyHunterPiece = 0; // hunter pieceId
+    int copySrcCell = 0;     // hunter src cell
+    int copyPreyPieceId = 0;
+    int copyPreyCell = 0;
+    for (const auto &[hunterPieceId, target] : this->getForcedMoves())
+    {
+        if (target.hunterNextCell == targetCell->getIndex())
+        {
+            if (!hunter->captureEnemyWith(hunterPieceId, targetCell->getPos()))
+            {
+                return;
+            }
+            this->updateMessage(hunter->getName() + " has captured " + prey->getName() + "'s piece!");
+            copySrcCell = this->sourceCell.value();
+            gameMap.erase(this->sourceCell.value());                // set hunter's old location empty!
+            gameMap.erase(target.preyCellIdx);                      // set Prey's old location empty!
+            gameMap.emplace(targetCell->getIndex(), hunterPieceId); // fill in hunter new location
+            prey->losePiece(target.preyPieceId);                    // the defending player loses 1 piece
+            this->sourceCell = std::nullopt;                        // reset source cell
+            // create copies for sending to server
+            copyHunterPiece = hunterPieceId;
+            copyPreyPieceId = target.preyPieceId;
+            copyPreyCell = target.preyCellIdx;
+
+            break;
+        }
+    }
+
+    // SEND to server:
+    auto capturePayload = new chk::payload::CapturePayload();
+    capturePayload->set_hunter_piece_id(copyHunterPiece);
+    capturePayload->set_from_team(TeamColor::TEAM_RED);
+    if (this->myTeam == chk::PlayerType::PLAYER_BLACK)
+    {
+        capturePayload->set_from_team(TeamColor::TEAM_BLACK);
+    }
+    // prey details
+    auto *details = new chk::payload::CapturePayload_TargetDetails();
+    details->set_hunter_src_cell(copySrcCell);
+    details->set_prey_cell_idx(copyPreyCell);
+    details->set_prey_piece_id(copyPreyPieceId);
+    capturePayload->set_allocated_details(details);
+
+    // hunter landing cell
+    auto *hunterDestCell = new chk::payload::CapturePayload_HunterDestCell();
+    hunterDestCell->set_cell_index(targetCell->getIndex());
+    hunterDestCell->set_x(targetCell->getPos().x);
+    hunterDestCell->set_y(targetCell->getPos().y);
+    capturePayload->set_allocated_hunter_dest_cell(hunterDestCell);
+
+    // finally create basePayload
+    chk::payload::BasePayload basePayload;
+    basePayload.set_allocated_capture_payload(capturePayload);
+    if (!this->wsClient->replyServerAsync(&basePayload))
+    {
+        spdlog::error("failed to send message to Server");
+        return;
+    }
+
+    // Check for extra opportunities NOW!
+    GameManager::identifyTargets(hunter);
+    if (this->getForcedMoves().empty())
+    {
+        // NO MORE JUMPS AVAILABLE. SWITCH TURNS to opponent
+        this->identifyTargets(prey);
+        this->isMyTurn = !this->isMyTurn;
+    }
 }
 
 /**
@@ -383,7 +457,9 @@ inline void OnlineGameManager::startMoveListener()
  */
 inline void OnlineGameManager::startCaptureListener()
 {
-    // TODO complete me
+     this->wsClient->setOnCapturePieceCallback([this](const chk::payload::CapturePayload &payload) {
+        
+     });
 }
 
 /**

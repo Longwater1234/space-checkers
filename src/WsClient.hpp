@@ -22,6 +22,8 @@ using onReadyStartGame = std::function<void(const chk::payload::StartPayload &, 
 using onDeathCallback = std::function<void(std::string_view notice)>;
 // when opponent makes a simple move
 using onMovePieceCallback = std::function<void(const chk::payload::MovePayload &)>;
+// when opponent captures my piece
+using onCaptureCallback = std::function<void(const chk::payload::CapturePayload &)>;
 
 /**
  * This handles all websocket exchanges with Server
@@ -35,6 +37,7 @@ class WsClient final
     void setOnReadyStartGameCallback(const onReadyStartGame &callback);
     void setOnDeathCallback(const onDeathCallback &callback);
     void setOnMovePieceCallback(const onMovePieceCallback &callback);
+    void setOnCapturePieceCallback(const onCaptureCallback &callback);
     bool replyServerAsync(chk::payload::BasePayload *payload) const;
 
   private:
@@ -50,6 +53,7 @@ class WsClient final
     onReadyStartGame _onReadyStartGame;
     onDeathCallback _onDeathCallback;
     onMovePieceCallback _onMovePieceCallback;
+    onCaptureCallback _onCaptureCallback;
 
     std::mutex mut;
     std::unique_ptr<ix::WebSocket> webSocketPtr = nullptr; // our Websocket object
@@ -256,6 +260,15 @@ inline void WsClient::setOnMovePieceCallback(const onMovePieceCallback &callback
 }
 
 /**
+ * Set the callback for handling Opponent capturing my Piece
+ * @param callback the callback function
+ */
+inline void WsClient::setOnCapturePieceCallback(const onCaptureCallback &callback)
+{
+    this->_onCaptureCallback = callback;
+}
+
+/**
  * Send Protobuf response back to server
  * @param payload the request body
  * @return TRUE if sent successfully, else FALSE
@@ -327,11 +340,16 @@ inline void WsClient::runGameLoop()
         }
         else if (basePayload.has_move_payload())
         {
-            chk::payload::MovePayload movePayload = basePayload.move_payload();
-            spdlog::info(movePayload.DebugString());
             if (this->_onMovePieceCallback != nullptr)
             {
-                this->_onMovePieceCallback(movePayload);
+                this->_onMovePieceCallback(basePayload.move_payload());
+            }
+        }
+        else if (basePayload.has_capture_payload())
+        {
+            if (this->_onCaptureCallback != nullptr)
+            {
+                this->_onCaptureCallback(basePayload.capture_payload());
             }
         }
         std::scoped_lock lg(this->mut);
