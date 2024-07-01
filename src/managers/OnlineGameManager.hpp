@@ -212,7 +212,7 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
         spdlog::info("YOU ARE IN DANGER ");
     }
 
-    // SEND TO SERVER for validation and update
+    // prepare to send to SERVER
     auto newDestCell = new chk::payload::MovePayload_DestCell();
     newDestCell->set_cell_index(destCell->getIndex());
     newDestCell->set_x(destCell->getPos().x);
@@ -256,7 +256,7 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
     // call base method
     if (!this->isMyTurn || this->getPieceFromCell(targetCell->getIndex()) != -1)
     {
-        // STOP if game over OR there's already a Piece on target cell
+        // STOP if not my turn OR there's already a Piece on target cell
         return;
     }
 
@@ -272,7 +272,7 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
             {
                 return;
             }
-            this->updateMessage(hunter->getName() + " has captured " + prey->getName() + "'s piece!");
+            this->updateMessage("You have captured " + prey->getName() + "'s piece!");
             copySrcCell = this->sourceCell.value();
             gameMap.erase(this->sourceCell.value());                // set hunter's old location empty!
             gameMap.erase(target.preyCellIdx);                      // set Prey's old location empty!
@@ -283,13 +283,12 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
             copyHunterPiece = hunterPieceId;
             copyPreyPieceId = target.preyPieceId;
             copyPreyCell = target.preyCellIdx;
-
             break;
         }
     }
 
-    // SEND to server:
-    auto capturePayload = new chk::payload::CapturePayload();
+    // prepare to send to server:
+    auto *capturePayload = new chk::payload::CapturePayload();
     capturePayload->set_hunter_piece_id(copyHunterPiece);
     capturePayload->set_from_team(TeamColor::TEAM_RED);
     if (this->myTeam == chk::PlayerType::PLAYER_BLACK)
@@ -428,18 +427,17 @@ inline void OnlineGameManager::startMoveListener()
 {
     this->wsClient->setOnMovePieceCallback([this](const chk::payload::MovePayload &payload) {
         // which player made the Move?
-        const chk::PlayerPtr &opponent =
-            payload.from_team() & TeamColor::TEAM_RED ? this->playerRed : this->playerBlack;
+        const chk::PlayerPtr &enemy = payload.from_team() & TeamColor::TEAM_RED ? this->playerRed : this->playerBlack;
         const chk::PlayerPtr &myTeam = payload.from_team() & TeamColor::TEAM_RED ? this->playerBlack : this->playerRed;
         const auto targetPosition = sf::Vector2f{payload.dest_cell().x(), payload.dest_cell().y()};
-        const bool success = opponent->movePiece(static_cast<short>(payload.piece_id()), targetPosition);
+        const bool success = enemy->movePiece(static_cast<short>(payload.piece_id()), targetPosition);
         if (!success)
         {
             return;
         }
         gameMap.erase(payload.source_cell());                                  // set old location empty!
         gameMap.emplace(payload.dest_cell().cell_index(), payload.piece_id()); // fill in the new location
-        this->identifyTargets(myTeam);                                         // check  opportunities for Opponent
+        this->identifyTargets(myTeam);                                         // check for my opportunities
 
         if (!this->getForcedMoves().empty())
         {
@@ -457,9 +455,33 @@ inline void OnlineGameManager::startMoveListener()
  */
 inline void OnlineGameManager::startCaptureListener()
 {
-     this->wsClient->setOnCapturePieceCallback([this](const chk::payload::CapturePayload &payload) {
-        
-     });
+    this->wsClient->setOnCapturePieceCallback([this](const chk::payload::CapturePayload &payload) {
+        // which player made the capture?
+        const chk::PlayerPtr &other = payload.from_team() & TeamColor::TEAM_RED ? this->playerRed : this->playerBlack;
+        const chk::PlayerPtr &myTeam = payload.from_team() & TeamColor::TEAM_RED ? this->playerBlack : this->playerRed;
+        const auto targetCell = sf::Vector2f{payload.hunter_dest_cell().x(), payload.hunter_dest_cell().y()};
+        const auto hunterPieceId = static_cast<short>(payload.hunter_piece_id());
+
+        if (!other->captureEnemyWith(hunterPieceId, targetCell))
+        {
+            return;
+        }
+
+        this->updateMessage(other->getName() + " has captured your piece!");
+        gameMap.erase(payload.details().hunter_src_cell());                      // set hunter's old location empty!
+        gameMap.erase(payload.details().prey_cell_idx());                        // set my old location empty!
+        gameMap.emplace(payload.hunter_dest_cell().cell_index(), hunterPieceId); // fill in hunter new location
+        myTeam->losePiece(payload.details().prey_piece_id());                    // I will lose 1 piece
+
+        // Check for extra opportunities NOW for Enemy
+        GameManager::identifyTargets(other);
+        if (this->getForcedMoves().empty())
+        {
+            // NO MORE JUMPS AVAILABLE. SWITCH TURNS to opponent
+            this->identifyTargets(myTeam);
+            this->isMyTurn = !this->isMyTurn;
+        }
+    });
 }
 
 /**
