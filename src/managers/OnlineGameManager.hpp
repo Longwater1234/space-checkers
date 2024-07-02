@@ -318,7 +318,7 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
         return;
     }
 
-    // Check for extra opportunities NOW!
+    // Check for extra opportunities (for myself) NOW!
     GameManager::identifyTargets(hunter);
     if (this->getForcedMoves().empty())
     {
