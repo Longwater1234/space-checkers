@@ -201,7 +201,6 @@ inline void WsClient::tryConnect(std::string_view address)
         }
         else if (msg->type == ix::WebSocketMessageType::Error)
         {
-
             std::scoped_lock lg{this->mut};
             this->errorMsg = "Connection error: " + msg->errorInfo.reason;
             spdlog::error(this->errorMsg);
