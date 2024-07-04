@@ -37,6 +37,7 @@ class OnlineGameManager final : public chk::GameManager
     std::unique_ptr<chk::WsClient> wsClient = nullptr;
     std::atomic_bool isMyTurn = false;
     std::atomic_bool gameReady = false;
+    std::mutex mut;
     void startMoveListener();
     void startCaptureListener();
     void startDeathListener();
@@ -338,6 +339,7 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
 inline void OnlineGameManager::handleCellTap(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,
                                              chk::CircularBuffer<short> &buffer, const chk::Block &cell)
 {
+    spdlog::info("is my turn {}", this->isMyTurn.load());
     if (!this->gameReady || !this->isMyTurn)
     {
         return;
@@ -437,8 +439,8 @@ inline void OnlineGameManager::startMoveListener()
         }
         gameMap.erase(payload.source_cell());                                  // set old location empty!
         gameMap.emplace(payload.dest_cell().cell_index(), payload.piece_id()); // fill in the new location
-        this->identifyTargets(myTeam);                                         // check for my opportunities
-
+        std::scoped_lock lg(this->mut);                                        // lock mutex
+        GameManager::identifyTargets(myTeam);                                  // check for my opportunities
         if (!this->getForcedMoves().empty())
         {
             spdlog::info("OPPONENT IS IN DANGER");
@@ -473,8 +475,8 @@ inline void OnlineGameManager::startCaptureListener()
         gameMap.emplace(payload.hunter_dest_cell().cell_index(), hunterPieceId); // fill in hunter new location
         myTeam->losePiece(payload.details().prey_piece_id());                    // I will lose 1 piece
 
-        // Check for extra opportunities NOW for Enemy
-        GameManager::identifyTargets(other);
+        std::scoped_lock lg(this->mut);      // lock mutex
+        GameManager::identifyTargets(other); // Check for extra opportunities NOW for Enemy
         if (this->getForcedMoves().empty())
         {
             // NO MORE JUMPS AVAILABLE. SWITCH TURNS to opponent
