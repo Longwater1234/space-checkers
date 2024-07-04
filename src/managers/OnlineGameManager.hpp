@@ -456,7 +456,7 @@ inline void OnlineGameManager::startMoveListener()
 inline void OnlineGameManager::startCaptureListener()
 {
     this->wsClient->setOnCapturePieceCallback([this](const chk::payload::CapturePayload &payload) {
-        // which player made the capture?
+        // which color is the Opponent?
         const chk::PlayerPtr &other = payload.from_team() & TeamColor::TEAM_RED ? this->playerRed : this->playerBlack;
         const chk::PlayerPtr &myTeam = payload.from_team() & TeamColor::TEAM_RED ? this->playerBlack : this->playerRed;
         const auto targetCell = sf::Vector2f{payload.hunter_dest_cell().x(), payload.hunter_dest_cell().y()};
