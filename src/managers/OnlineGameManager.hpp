@@ -428,7 +428,7 @@ inline void OnlineGameManager::handleEvents(chk::CircularBuffer<short> &circular
 inline void OnlineGameManager::startMoveListener()
 {
     this->wsClient->setOnMovePieceCallback([this](const chk::payload::MovePayload &payload) {
-        // which player made the Move?
+        // which color is the Opponent?
         const chk::PlayerPtr &enemy = payload.from_team() & TeamColor::TEAM_RED ? this->playerRed : this->playerBlack;
         const chk::PlayerPtr &myTeam = payload.from_team() & TeamColor::TEAM_RED ? this->playerBlack : this->playerRed;
         const auto targetPosition = sf::Vector2f{payload.dest_cell().x(), payload.dest_cell().y()};
