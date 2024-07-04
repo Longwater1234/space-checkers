@@ -79,6 +79,9 @@ extern StartPayloadDefaultTypeInternal _StartPayload_default_instance_;
 class WelcomePayload;
 struct WelcomePayloadDefaultTypeInternal;
 extern WelcomePayloadDefaultTypeInternal _WelcomePayload_default_instance_;
+class WinLosePayload;
+struct WinLosePayloadDefaultTypeInternal;
+extern WinLosePayloadDefaultTypeInternal _WinLosePayload_default_instance_;
 }  // namespace payload
 }  // namespace chk
 namespace google {
@@ -126,6 +129,177 @@ inline bool TeamColor_Parse(absl::string_view name, TeamColor* value) {
 // ===================================================================
 
 
+// -------------------------------------------------------------------
+
+class WinLosePayload final : public ::google::protobuf::Message
+/* @@protoc_insertion_point(class_definition:chk.payload.WinLosePayload) */ {
+ public:
+  inline WinLosePayload() : WinLosePayload(nullptr) {}
+  ~WinLosePayload() override;
+  template <typename = void>
+  explicit PROTOBUF_CONSTEXPR WinLosePayload(
+      ::google::protobuf::internal::ConstantInitialized);
+
+  inline WinLosePayload(const WinLosePayload& from) : WinLosePayload(nullptr, from) {}
+  inline WinLosePayload(WinLosePayload&& from) noexcept
+      : WinLosePayload(nullptr, std::move(from)) {}
+  inline WinLosePayload& operator=(const WinLosePayload& from) {
+    CopyFrom(from);
+    return *this;
+  }
+  inline WinLosePayload& operator=(WinLosePayload&& from) noexcept {
+    if (this == &from) return *this;
+    if (GetArena() == from.GetArena()
+#ifdef PROTOBUF_FORCE_COPY_IN_MOVE
+        && GetArena() != nullptr
+#endif  // !PROTOBUF_FORCE_COPY_IN_MOVE
+    ) {
+      InternalSwap(&from);
+    } else {
+      CopyFrom(from);
+    }
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance);
+  }
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields()
+      ABSL_ATTRIBUTE_LIFETIME_BOUND {
+    return _internal_metadata_.mutable_unknown_fields<::google::protobuf::UnknownFieldSet>();
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor() {
+    return GetDescriptor();
+  }
+  static const ::google::protobuf::Descriptor* GetDescriptor() {
+    return default_instance().GetMetadata().descriptor;
+  }
+  static const ::google::protobuf::Reflection* GetReflection() {
+    return default_instance().GetMetadata().reflection;
+  }
+  static const WinLosePayload& default_instance() {
+    return *internal_default_instance();
+  }
+  static inline const WinLosePayload* internal_default_instance() {
+    return reinterpret_cast<const WinLosePayload*>(
+        &_WinLosePayload_default_instance_);
+  }
+  static constexpr int kIndexInFileMessages = 9;
+  friend void swap(WinLosePayload& a, WinLosePayload& b) { a.Swap(&b); }
+  inline void Swap(WinLosePayload* other) {
+    if (other == this) return;
+#ifdef PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() != nullptr && GetArena() == other->GetArena()) {
+#else   // PROTOBUF_FORCE_COPY_IN_SWAP
+    if (GetArena() == other->GetArena()) {
+#endif  // !PROTOBUF_FORCE_COPY_IN_SWAP
+      InternalSwap(other);
+    } else {
+      ::google::protobuf::internal::GenericSwap(this, other);
+    }
+  }
+  void UnsafeArenaSwap(WinLosePayload* other) {
+    if (other == this) return;
+    ABSL_DCHECK(GetArena() == other->GetArena());
+    InternalSwap(other);
+  }
+
+  // implements Message ----------------------------------------------
+
+  WinLosePayload* New(::google::protobuf::Arena* arena = nullptr) const final {
+    return ::google::protobuf::Message::DefaultConstruct<WinLosePayload>(arena);
+  }
+  using ::google::protobuf::Message::CopyFrom;
+  void CopyFrom(const WinLosePayload& from);
+  using ::google::protobuf::Message::MergeFrom;
+  void MergeFrom(const WinLosePayload& from) { WinLosePayload::MergeImpl(*this, from); }
+
+  private:
+  static void MergeImpl(
+      ::google::protobuf::MessageLite& to_msg,
+      const ::google::protobuf::MessageLite& from_msg);
+
+  public:
+  bool IsInitialized() const {
+    return true;
+  }
+  ABSL_ATTRIBUTE_REINITIALIZES void Clear() final;
+  ::size_t ByteSizeLong() const final;
+  ::uint8_t* _InternalSerialize(
+      ::uint8_t* target,
+      ::google::protobuf::io::EpsCopyOutputStream* stream) const final;
+  int GetCachedSize() const { return _impl_._cached_size_.Get(); }
+
+  private:
+  void SharedCtor(::google::protobuf::Arena* arena);
+  void SharedDtor();
+  void InternalSwap(WinLosePayload* other);
+ private:
+  friend class ::google::protobuf::internal::AnyMetadata;
+  static ::absl::string_view FullMessageName() { return "chk.payload.WinLosePayload"; }
+
+ protected:
+  explicit WinLosePayload(::google::protobuf::Arena* arena);
+  WinLosePayload(::google::protobuf::Arena* arena, const WinLosePayload& from);
+  WinLosePayload(::google::protobuf::Arena* arena, WinLosePayload&& from) noexcept
+      : WinLosePayload(arena) {
+    *this = ::std::move(from);
+  }
+  const ::google::protobuf::Message::ClassData* GetClassData() const final;
+
+ public:
+  ::google::protobuf::Metadata GetMetadata() const;
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+  enum : int {
+    kWinnerFieldNumber = 1,
+  };
+  // .chk.payload.TeamColor winner = 1;
+  void clear_winner() ;
+  ::chk::payload::TeamColor winner() const;
+  void set_winner(::chk::payload::TeamColor value);
+
+  private:
+  ::chk::payload::TeamColor _internal_winner() const;
+  void _internal_set_winner(::chk::payload::TeamColor value);
+
+  public:
+  // @@protoc_insertion_point(class_scope:chk.payload.WinLosePayload)
+ private:
+  class _Internal;
+  friend class ::google::protobuf::internal::TcParser;
+  static const ::google::protobuf::internal::TcParseTable<
+      0, 1, 0,
+      0, 2>
+      _table_;
+
+  static constexpr const void* _raw_default_instance_ =
+      &_WinLosePayload_default_instance_;
+
+  friend class ::google::protobuf::MessageLite;
+  friend class ::google::protobuf::Arena;
+  template <typename T>
+  friend class ::google::protobuf::Arena::InternalHelper;
+  using InternalArenaConstructable_ = void;
+  using DestructorSkippable_ = void;
+  struct Impl_ {
+    inline explicit constexpr Impl_(
+        ::google::protobuf::internal::ConstantInitialized) noexcept;
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena);
+    inline explicit Impl_(::google::protobuf::internal::InternalVisibility visibility,
+                          ::google::protobuf::Arena* arena, const Impl_& from,
+                          const WinLosePayload& from_msg);
+    int winner_;
+    mutable ::google::protobuf::internal::CachedSize _cached_size_;
+    PROTOBUF_TSAN_DECLARE_MEMBER
+  };
+  union { Impl_ _impl_; };
+  friend struct ::TableStruct_base_5fpayload_2eproto;
+};
 // -------------------------------------------------------------------
 
 class WelcomePayload final : public ::google::protobuf::Message
@@ -1765,6 +1939,7 @@ class BasePayload final : public ::google::protobuf::Message
     kStart = 5,
     kExitPayload = 6,
     kCapturePayload = 7,
+    kWinlosePayload = 8,
     INNER_NOT_SET = 0,
   };
   static inline const BasePayload* internal_default_instance() {
@@ -1846,6 +2021,7 @@ class BasePayload final : public ::google::protobuf::Message
     kStartFieldNumber = 5,
     kExitPayloadFieldNumber = 6,
     kCapturePayloadFieldNumber = 7,
+    kWinlosePayloadFieldNumber = 8,
   };
   // string notice = 2;
   void clear_notice() ;
@@ -1958,6 +2134,25 @@ class BasePayload final : public ::google::protobuf::Message
   ::chk::payload::CapturePayload* _internal_mutable_capture_payload();
 
   public:
+  // .chk.payload.WinLosePayload winlose_payload = 8;
+  bool has_winlose_payload() const;
+  private:
+  bool _internal_has_winlose_payload() const;
+
+  public:
+  void clear_winlose_payload() ;
+  const ::chk::payload::WinLosePayload& winlose_payload() const;
+  PROTOBUF_NODISCARD ::chk::payload::WinLosePayload* release_winlose_payload();
+  ::chk::payload::WinLosePayload* mutable_winlose_payload();
+  void set_allocated_winlose_payload(::chk::payload::WinLosePayload* value);
+  void unsafe_arena_set_allocated_winlose_payload(::chk::payload::WinLosePayload* value);
+  ::chk::payload::WinLosePayload* unsafe_arena_release_winlose_payload();
+
+  private:
+  const ::chk::payload::WinLosePayload& _internal_winlose_payload() const;
+  ::chk::payload::WinLosePayload* _internal_mutable_winlose_payload();
+
+  public:
   void clear_inner();
   InnerCase inner_case() const;
   // @@protoc_insertion_point(class_scope:chk.payload.BasePayload)
@@ -1968,11 +2163,12 @@ class BasePayload final : public ::google::protobuf::Message
   void set_has_start();
   void set_has_exit_payload();
   void set_has_capture_payload();
+  void set_has_winlose_payload();
   inline bool has_inner() const;
   inline void clear_has_inner();
   friend class ::google::protobuf::internal::TcParser;
   static const ::google::protobuf::internal::TcParseTable<
-      0, 6, 5,
+      0, 7, 6,
       38, 2>
       _table_;
 
@@ -2002,6 +2198,7 @@ class BasePayload final : public ::google::protobuf::Message
       ::chk::payload::StartPayload* start_;
       ::chk::payload::ExitPayload* exit_payload_;
       ::chk::payload::CapturePayload* capture_payload_;
+      ::chk::payload::WinLosePayload* winlose_payload_;
     } inner_;
     mutable ::google::protobuf::internal::CachedSize _cached_size_;
     ::uint32_t _oneof_case_[1];
@@ -2469,6 +2666,85 @@ inline ::chk::payload::CapturePayload* BasePayload::_internal_mutable_capture_pa
 inline ::chk::payload::CapturePayload* BasePayload::mutable_capture_payload() ABSL_ATTRIBUTE_LIFETIME_BOUND {
   ::chk::payload::CapturePayload* _msg = _internal_mutable_capture_payload();
   // @@protoc_insertion_point(field_mutable:chk.payload.BasePayload.capture_payload)
+  return _msg;
+}
+
+// .chk.payload.WinLosePayload winlose_payload = 8;
+inline bool BasePayload::has_winlose_payload() const {
+  return inner_case() == kWinlosePayload;
+}
+inline bool BasePayload::_internal_has_winlose_payload() const {
+  return inner_case() == kWinlosePayload;
+}
+inline void BasePayload::set_has_winlose_payload() {
+  _impl_._oneof_case_[0] = kWinlosePayload;
+}
+inline void BasePayload::clear_winlose_payload() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  if (inner_case() == kWinlosePayload) {
+    if (GetArena() == nullptr) {
+      delete _impl_.inner_.winlose_payload_;
+    } else if (::google::protobuf::internal::DebugHardenClearOneofMessageOnArena()) {
+      ::google::protobuf::internal::MaybePoisonAfterClear(_impl_.inner_.winlose_payload_);
+    }
+    clear_has_inner();
+  }
+}
+inline ::chk::payload::WinLosePayload* BasePayload::release_winlose_payload() {
+  // @@protoc_insertion_point(field_release:chk.payload.BasePayload.winlose_payload)
+  if (inner_case() == kWinlosePayload) {
+    clear_has_inner();
+    auto* temp = _impl_.inner_.winlose_payload_;
+    if (GetArena() != nullptr) {
+      temp = ::google::protobuf::internal::DuplicateIfNonNull(temp);
+    }
+    _impl_.inner_.winlose_payload_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline const ::chk::payload::WinLosePayload& BasePayload::_internal_winlose_payload() const {
+  return inner_case() == kWinlosePayload ? *_impl_.inner_.winlose_payload_ : reinterpret_cast<::chk::payload::WinLosePayload&>(::chk::payload::_WinLosePayload_default_instance_);
+}
+inline const ::chk::payload::WinLosePayload& BasePayload::winlose_payload() const ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  // @@protoc_insertion_point(field_get:chk.payload.BasePayload.winlose_payload)
+  return _internal_winlose_payload();
+}
+inline ::chk::payload::WinLosePayload* BasePayload::unsafe_arena_release_winlose_payload() {
+  // @@protoc_insertion_point(field_unsafe_arena_release:chk.payload.BasePayload.winlose_payload)
+  if (inner_case() == kWinlosePayload) {
+    clear_has_inner();
+    auto* temp = _impl_.inner_.winlose_payload_;
+    _impl_.inner_.winlose_payload_ = nullptr;
+    return temp;
+  } else {
+    return nullptr;
+  }
+}
+inline void BasePayload::unsafe_arena_set_allocated_winlose_payload(::chk::payload::WinLosePayload* value) {
+  // We rely on the oneof clear method to free the earlier contents
+  // of this oneof. We can directly use the pointer we're given to
+  // set the new value.
+  clear_inner();
+  if (value) {
+    set_has_winlose_payload();
+    _impl_.inner_.winlose_payload_ = value;
+  }
+  // @@protoc_insertion_point(field_unsafe_arena_set_allocated:chk.payload.BasePayload.winlose_payload)
+}
+inline ::chk::payload::WinLosePayload* BasePayload::_internal_mutable_winlose_payload() {
+  if (inner_case() != kWinlosePayload) {
+    clear_inner();
+    set_has_winlose_payload();
+    _impl_.inner_.winlose_payload_ =
+        ::google::protobuf::Message::DefaultConstruct<::chk::payload::WinLosePayload>(GetArena());
+  }
+  return _impl_.inner_.winlose_payload_;
+}
+inline ::chk::payload::WinLosePayload* BasePayload::mutable_winlose_payload() ABSL_ATTRIBUTE_LIFETIME_BOUND {
+  ::chk::payload::WinLosePayload* _msg = _internal_mutable_winlose_payload();
+  // @@protoc_insertion_point(field_mutable:chk.payload.BasePayload.winlose_payload)
   return _msg;
 }
 
@@ -3291,6 +3567,32 @@ inline void CapturePayload::set_allocated_hunter_dest_cell(::chk::payload::Captu
 
   _impl_.hunter_dest_cell_ = reinterpret_cast<::chk::payload::CapturePayload_HunterDestCell*>(value);
   // @@protoc_insertion_point(field_set_allocated:chk.payload.CapturePayload.hunter_dest_cell)
+}
+
+// -------------------------------------------------------------------
+
+// WinLosePayload
+
+// .chk.payload.TeamColor winner = 1;
+inline void WinLosePayload::clear_winner() {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.winner_ = 0;
+}
+inline ::chk::payload::TeamColor WinLosePayload::winner() const {
+  // @@protoc_insertion_point(field_get:chk.payload.WinLosePayload.winner)
+  return _internal_winner();
+}
+inline void WinLosePayload::set_winner(::chk::payload::TeamColor value) {
+  _internal_set_winner(value);
+  // @@protoc_insertion_point(field_set:chk.payload.WinLosePayload.winner)
+}
+inline ::chk::payload::TeamColor WinLosePayload::_internal_winner() const {
+  ::google::protobuf::internal::TSanRead(&_impl_);
+  return static_cast<::chk::payload::TeamColor>(_impl_.winner_);
+}
+inline void WinLosePayload::_internal_set_winner(::chk::payload::TeamColor value) {
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  _impl_.winner_ = value;
 }
 
 #ifdef __GNUC__

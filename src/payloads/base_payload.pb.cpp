@@ -26,6 +26,25 @@ namespace _fl = ::google::protobuf::internal::field_layout;
 namespace chk {
 namespace payload {
 
+inline constexpr WinLosePayload::Impl_::Impl_(
+    ::_pbi::ConstantInitialized) noexcept
+      : winner_{static_cast< ::chk::payload::TeamColor >(0)},
+        _cached_size_{0} {}
+
+template <typename>
+PROTOBUF_CONSTEXPR WinLosePayload::WinLosePayload(::_pbi::ConstantInitialized)
+    : _impl_(::_pbi::ConstantInitialized()) {}
+struct WinLosePayloadDefaultTypeInternal {
+  PROTOBUF_CONSTEXPR WinLosePayloadDefaultTypeInternal() : _instance(::_pbi::ConstantInitialized{}) {}
+  ~WinLosePayloadDefaultTypeInternal() {}
+  union {
+    WinLosePayload _instance;
+  };
+};
+
+PROTOBUF_ATTRIBUTE_NO_DESTROY PROTOBUF_CONSTINIT
+    PROTOBUF_ATTRIBUTE_INIT_PRIORITY1 WinLosePayloadDefaultTypeInternal _WinLosePayload_default_instance_;
+
 inline constexpr WelcomePayload::Impl_::Impl_(
     ::_pbi::ConstantInitialized) noexcept
       : server_version_(
@@ -240,6 +259,7 @@ const ::uint32_t
         ::_pbi::kInvalidFieldOffsetTag,
         ::_pbi::kInvalidFieldOffsetTag,
         ::_pbi::kInvalidFieldOffsetTag,
+        ::_pbi::kInvalidFieldOffsetTag,
         PROTOBUF_FIELD_OFFSET(::chk::payload::BasePayload, _impl_.inner_),
         ~0u,  // no _has_bits_
         PROTOBUF_FIELD_OFFSET(::chk::payload::WelcomePayload, _internal_metadata_),
@@ -335,19 +355,29 @@ const ::uint32_t
         ~0u,
         0,
         1,
+        ~0u,  // no _has_bits_
+        PROTOBUF_FIELD_OFFSET(::chk::payload::WinLosePayload, _internal_metadata_),
+        ~0u,  // no _extensions_
+        ~0u,  // no _oneof_case_
+        ~0u,  // no _weak_field_map_
+        ~0u,  // no _inlined_string_donated_
+        ~0u,  // no _split_
+        ~0u,  // no sizeof(Split)
+        PROTOBUF_FIELD_OFFSET(::chk::payload::WinLosePayload, _impl_.winner_),
 };
 
 static const ::_pbi::MigrationSchema
     schemas[] ABSL_ATTRIBUTE_SECTION_VARIABLE(protodesc_cold) = {
         {0, -1, -1, sizeof(::chk::payload::BasePayload)},
-        {15, -1, -1, sizeof(::chk::payload::WelcomePayload)},
-        {25, -1, -1, sizeof(::chk::payload::StartPayload)},
-        {35, -1, -1, sizeof(::chk::payload::MovePayload_DestCell)},
-        {46, 58, -1, sizeof(::chk::payload::MovePayload)},
-        {62, -1, -1, sizeof(::chk::payload::ExitPayload)},
-        {71, -1, -1, sizeof(::chk::payload::CapturePayload_TargetDetails)},
-        {82, -1, -1, sizeof(::chk::payload::CapturePayload_HunterDestCell)},
-        {93, 105, -1, sizeof(::chk::payload::CapturePayload)},
+        {16, -1, -1, sizeof(::chk::payload::WelcomePayload)},
+        {26, -1, -1, sizeof(::chk::payload::StartPayload)},
+        {36, -1, -1, sizeof(::chk::payload::MovePayload_DestCell)},
+        {47, 59, -1, sizeof(::chk::payload::MovePayload)},
+        {63, -1, -1, sizeof(::chk::payload::ExitPayload)},
+        {72, -1, -1, sizeof(::chk::payload::CapturePayload_TargetDetails)},
+        {83, -1, -1, sizeof(::chk::payload::CapturePayload_HunterDestCell)},
+        {94, 106, -1, sizeof(::chk::payload::CapturePayload)},
+        {110, -1, -1, sizeof(::chk::payload::WinLosePayload)},
 };
 static const ::_pb::Message* const file_default_instances[] = {
     &::chk::payload::_BasePayload_default_instance_._instance,
@@ -359,51 +389,55 @@ static const ::_pb::Message* const file_default_instances[] = {
     &::chk::payload::_CapturePayload_TargetDetails_default_instance_._instance,
     &::chk::payload::_CapturePayload_HunterDestCell_default_instance_._instance,
     &::chk::payload::_CapturePayload_default_instance_._instance,
+    &::chk::payload::_WinLosePayload_default_instance_._instance,
 };
 const char descriptor_table_protodef_base_5fpayload_2eproto[] ABSL_ATTRIBUTE_SECTION_VARIABLE(
     protodesc_cold) = {
-    "\n\022base_payload.proto\022\013chk.payload\"\236\002\n\013Ba"
+    "\n\022base_payload.proto\022\013chk.payload\"\326\002\n\013Ba"
     "sePayload\022\016\n\006notice\030\002 \001(\t\022.\n\007welcome\030\003 \001"
     "(\0132\033.chk.payload.WelcomePayloadH\000\0220\n\014mov"
     "e_payload\030\004 \001(\0132\030.chk.payload.MovePayloa"
     "dH\000\022*\n\005start\030\005 \001(\0132\031.chk.payload.StartPa"
     "yloadH\000\0220\n\014exit_payload\030\006 \001(\0132\030.chk.payl"
     "oad.ExitPayloadH\000\0226\n\017capture_payload\030\007 \001"
-    "(\0132\033.chk.payload.CapturePayloadH\000B\007\n\005inn"
-    "er\"Q\n\016WelcomePayload\022\'\n\007my_team\030\001 \001(\0162\026."
-    "chk.payload.TeamColor\022\026\n\016server_version\030"
-    "\002 \001(\t\"8\n\014StartPayload\022\022\n\npieces_red\030\001 \003("
-    "\005\022\024\n\014pieces_black\030\002 \003(\005\"\313\001\n\013MovePayload\022"
-    ")\n\tfrom_team\030\001 \001(\0162\026.chk.payload.TeamCol"
-    "or\022\020\n\010piece_id\030\002 \001(\005\022\023\n\013source_cell\030\003 \001("
-    "\005\0224\n\tdest_cell\030\004 \001(\0132!.chk.payload.MoveP"
-    "ayload.DestCell\0324\n\010DestCell\022\022\n\ncell_inde"
-    "x\030\001 \001(\005\022\t\n\001x\030\002 \001(\002\022\t\n\001y\030\003 \001(\002\"8\n\013ExitPay"
-    "load\022)\n\tfrom_team\030\001 \001(\0162\026.chk.payload.Te"
-    "amColor\"\352\002\n\016CapturePayload\022)\n\tfrom_team\030"
-    "\001 \001(\0162\026.chk.payload.TeamColor\022\027\n\017hunter_"
-    "piece_id\030\002 \001(\005\022:\n\007details\030\004 \001(\0132).chk.pa"
-    "yload.CapturePayload.TargetDetails\022D\n\020hu"
-    "nter_dest_cell\030\005 \001(\0132*.chk.payload.Captu"
-    "rePayload.HunterDestCell\032V\n\rTargetDetail"
-    "s\022\025\n\rprey_piece_id\030\001 \001(\005\022\025\n\rprey_cell_id"
-    "x\030\002 \001(\005\022\027\n\017hunter_src_cell\030\003 \001(\005\032:\n\016Hunt"
-    "erDestCell\022\022\n\ncell_index\030\001 \001(\005\022\t\n\001x\030\002 \001("
-    "\002\022\t\n\001y\030\003 \001(\002*\?\n\tTeamColor\022\024\n\020TEAM_UNSPEC"
-    "IFIED\020\000\022\014\n\010TEAM_RED\020\001\022\016\n\nTEAM_BLACK\020\002B\027Z"
-    "\025checkers-backend/gameb\006proto3"
+    "(\0132\033.chk.payload.CapturePayloadH\000\0226\n\017win"
+    "lose_payload\030\010 \001(\0132\033.chk.payload.WinLose"
+    "PayloadH\000B\007\n\005inner\"Q\n\016WelcomePayload\022\'\n\007"
+    "my_team\030\001 \001(\0162\026.chk.payload.TeamColor\022\026\n"
+    "\016server_version\030\002 \001(\t\"8\n\014StartPayload\022\022\n"
+    "\npieces_red\030\001 \003(\005\022\024\n\014pieces_black\030\002 \003(\005\""
+    "\313\001\n\013MovePayload\022)\n\tfrom_team\030\001 \001(\0162\026.chk"
+    ".payload.TeamColor\022\020\n\010piece_id\030\002 \001(\005\022\023\n\013"
+    "source_cell\030\003 \001(\005\0224\n\tdest_cell\030\004 \001(\0132!.c"
+    "hk.payload.MovePayload.DestCell\0324\n\010DestC"
+    "ell\022\022\n\ncell_index\030\001 \001(\005\022\t\n\001x\030\002 \001(\002\022\t\n\001y\030"
+    "\003 \001(\002\"8\n\013ExitPayload\022)\n\tfrom_team\030\001 \001(\0162"
+    "\026.chk.payload.TeamColor\"\352\002\n\016CapturePaylo"
+    "ad\022)\n\tfrom_team\030\001 \001(\0162\026.chk.payload.Team"
+    "Color\022\027\n\017hunter_piece_id\030\002 \001(\005\022:\n\007detail"
+    "s\030\004 \001(\0132).chk.payload.CapturePayload.Tar"
+    "getDetails\022D\n\020hunter_dest_cell\030\005 \001(\0132*.c"
+    "hk.payload.CapturePayload.HunterDestCell"
+    "\032V\n\rTargetDetails\022\025\n\rprey_piece_id\030\001 \001(\005"
+    "\022\025\n\rprey_cell_idx\030\002 \001(\005\022\027\n\017hunter_src_ce"
+    "ll\030\003 \001(\005\032:\n\016HunterDestCell\022\022\n\ncell_index"
+    "\030\001 \001(\005\022\t\n\001x\030\002 \001(\002\022\t\n\001y\030\003 \001(\002\"8\n\016WinLoseP"
+    "ayload\022&\n\006winner\030\001 \001(\0162\026.chk.payload.Tea"
+    "mColor*\?\n\tTeamColor\022\024\n\020TEAM_UNSPECIFIED\020"
+    "\000\022\014\n\010TEAM_RED\020\001\022\016\n\nTEAM_BLACK\020\002B\027Z\025check"
+    "ers-backend/gameb\006proto3"
 };
 static ::absl::once_flag descriptor_table_base_5fpayload_2eproto_once;
 PROTOBUF_CONSTINIT const ::_pbi::DescriptorTable descriptor_table_base_5fpayload_2eproto = {
     false,
     false,
-    1190,
+    1304,
     descriptor_table_protodef_base_5fpayload_2eproto,
     "base_payload.proto",
     &descriptor_table_base_5fpayload_2eproto_once,
     nullptr,
     0,
-    9,
+    10,
     schemas,
     file_default_instances,
     TableStruct_base_5fpayload_2eproto::offsets,
@@ -494,6 +528,19 @@ void BasePayload::set_allocated_capture_payload(::chk::payload::CapturePayload* 
   }
   // @@protoc_insertion_point(field_set_allocated:chk.payload.BasePayload.capture_payload)
 }
+void BasePayload::set_allocated_winlose_payload(::chk::payload::WinLosePayload* winlose_payload) {
+  ::google::protobuf::Arena* message_arena = GetArena();
+  clear_inner();
+  if (winlose_payload) {
+    ::google::protobuf::Arena* submessage_arena = winlose_payload->GetArena();
+    if (message_arena != submessage_arena) {
+      winlose_payload = ::google::protobuf::internal::GetOwnedMessage(message_arena, winlose_payload, submessage_arena);
+    }
+    set_has_winlose_payload();
+    _impl_.inner_.winlose_payload_ = winlose_payload;
+  }
+  // @@protoc_insertion_point(field_set_allocated:chk.payload.BasePayload.winlose_payload)
+}
 BasePayload::BasePayload(::google::protobuf::Arena* arena)
     : ::google::protobuf::Message(arena) {
   SharedCtor(arena);
@@ -533,6 +580,9 @@ BasePayload::BasePayload(
         break;
       case kCapturePayload:
         _impl_.inner_.capture_payload_ = ::google::protobuf::Message::CopyConstruct<::chk::payload::CapturePayload>(arena, *from._impl_.inner_.capture_payload_);
+        break;
+      case kWinlosePayload:
+        _impl_.inner_.winlose_payload_ = ::google::protobuf::Message::CopyConstruct<::chk::payload::WinLosePayload>(arena, *from._impl_.inner_.winlose_payload_);
         break;
   }
 
@@ -607,6 +657,14 @@ void BasePayload::clear_inner() {
       }
       break;
     }
+    case kWinlosePayload: {
+      if (GetArena() == nullptr) {
+        delete _impl_.inner_.winlose_payload_;
+      } else if (::google::protobuf::internal::DebugHardenClearOneofMessageOnArena()) {
+        ::google::protobuf::internal::MaybePoisonAfterClear(_impl_.inner_.winlose_payload_);
+      }
+      break;
+    }
     case INNER_NOT_SET: {
       break;
     }
@@ -636,16 +694,16 @@ BasePayload::GetClassData() const {
   return _data_.base();
 }
 PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
-const ::_pbi::TcParseTable<0, 6, 5, 38, 2> BasePayload::_table_ = {
+const ::_pbi::TcParseTable<0, 7, 6, 38, 2> BasePayload::_table_ = {
   {
     0,  // no _has_bits_
     0, // no _extensions_
-    7, 0,  // max_field_number, fast_idx_mask
+    8, 0,  // max_field_number, fast_idx_mask
     offsetof(decltype(_table_), field_lookup_table),
-    4294967169,  // skipmap
+    4294967041,  // skipmap
     offsetof(decltype(_table_), field_entries),
-    6,  // num_field_entries
-    5,  // num_aux_entries
+    7,  // num_field_entries
+    6,  // num_aux_entries
     offsetof(decltype(_table_), aux_entries),
     &_BasePayload_default_instance_._instance,
     nullptr,  // post_loop_handler
@@ -678,12 +736,16 @@ const ::_pbi::TcParseTable<0, 6, 5, 38, 2> BasePayload::_table_ = {
     // .chk.payload.CapturePayload capture_payload = 7;
     {PROTOBUF_FIELD_OFFSET(BasePayload, _impl_.inner_.capture_payload_), _Internal::kOneofCaseOffset + 0, 4,
     (0 | ::_fl::kFcOneof | ::_fl::kMessage | ::_fl::kTvTable)},
+    // .chk.payload.WinLosePayload winlose_payload = 8;
+    {PROTOBUF_FIELD_OFFSET(BasePayload, _impl_.inner_.winlose_payload_), _Internal::kOneofCaseOffset + 0, 5,
+    (0 | ::_fl::kFcOneof | ::_fl::kMessage | ::_fl::kTvTable)},
   }}, {{
     {::_pbi::TcParser::GetTable<::chk::payload::WelcomePayload>()},
     {::_pbi::TcParser::GetTable<::chk::payload::MovePayload>()},
     {::_pbi::TcParser::GetTable<::chk::payload::StartPayload>()},
     {::_pbi::TcParser::GetTable<::chk::payload::ExitPayload>()},
     {::_pbi::TcParser::GetTable<::chk::payload::CapturePayload>()},
+    {::_pbi::TcParser::GetTable<::chk::payload::WinLosePayload>()},
   }}, {{
     "\27\6\0\0\0\0\0\0"
     "chk.payload.BasePayload"
@@ -744,6 +806,11 @@ PROTOBUF_NOINLINE void BasePayload::Clear() {
           7, *_impl_.inner_.capture_payload_, _impl_.inner_.capture_payload_->GetCachedSize(), target, stream);
       break;
     }
+    case kWinlosePayload: {
+      target = ::google::protobuf::internal::WireFormatLite::InternalWriteMessage(
+          8, *_impl_.inner_.winlose_payload_, _impl_.inner_.winlose_payload_->GetCachedSize(), target, stream);
+      break;
+    }
     default:
       break;
   }
@@ -799,6 +866,12 @@ PROTOBUF_NOINLINE void BasePayload::Clear() {
     case kCapturePayload: {
       total_size +=
           1 + ::google::protobuf::internal::WireFormatLite::MessageSize(*_impl_.inner_.capture_payload_);
+      break;
+    }
+    // .chk.payload.WinLosePayload winlose_payload = 8;
+    case kWinlosePayload: {
+      total_size +=
+          1 + ::google::protobuf::internal::WireFormatLite::MessageSize(*_impl_.inner_.winlose_payload_);
       break;
     }
     case INNER_NOT_SET: {
@@ -874,6 +947,15 @@ void BasePayload::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::goo
               ::google::protobuf::Message::CopyConstruct<::chk::payload::CapturePayload>(arena, *from._impl_.inner_.capture_payload_);
         } else {
           _this->_impl_.inner_.capture_payload_->MergeFrom(from._internal_capture_payload());
+        }
+        break;
+      }
+      case kWinlosePayload: {
+        if (oneof_needs_init) {
+          _this->_impl_.inner_.winlose_payload_ =
+              ::google::protobuf::Message::CopyConstruct<::chk::payload::WinLosePayload>(arena, *from._impl_.inner_.winlose_payload_);
+        } else {
+          _this->_impl_.inner_.winlose_payload_->MergeFrom(from._internal_winlose_payload());
         }
         break;
       }
@@ -2888,6 +2970,178 @@ void CapturePayload::InternalSwap(CapturePayload* PROTOBUF_RESTRICT other) {
 }
 
 ::google::protobuf::Metadata CapturePayload::GetMetadata() const {
+  return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
+}
+// ===================================================================
+
+class WinLosePayload::_Internal {
+ public:
+};
+
+WinLosePayload::WinLosePayload(::google::protobuf::Arena* arena)
+    : ::google::protobuf::Message(arena) {
+  SharedCtor(arena);
+  // @@protoc_insertion_point(arena_constructor:chk.payload.WinLosePayload)
+}
+WinLosePayload::WinLosePayload(
+    ::google::protobuf::Arena* arena, const WinLosePayload& from)
+    : WinLosePayload(arena) {
+  MergeFrom(from);
+}
+inline PROTOBUF_NDEBUG_INLINE WinLosePayload::Impl_::Impl_(
+    ::google::protobuf::internal::InternalVisibility visibility,
+    ::google::protobuf::Arena* arena)
+      : _cached_size_{0} {}
+
+inline void WinLosePayload::SharedCtor(::_pb::Arena* arena) {
+  new (&_impl_) Impl_(internal_visibility(), arena);
+  _impl_.winner_ = {};
+}
+WinLosePayload::~WinLosePayload() {
+  // @@protoc_insertion_point(destructor:chk.payload.WinLosePayload)
+  _internal_metadata_.Delete<::google::protobuf::UnknownFieldSet>();
+  SharedDtor();
+}
+inline void WinLosePayload::SharedDtor() {
+  ABSL_DCHECK(GetArena() == nullptr);
+  _impl_.~Impl_();
+}
+
+const ::google::protobuf::MessageLite::ClassData*
+WinLosePayload::GetClassData() const {
+  PROTOBUF_CONSTINIT static const ::google::protobuf::MessageLite::
+      ClassDataFull _data_ = {
+          {
+              &_table_.header,
+              nullptr,  // OnDemandRegisterArenaDtor
+              nullptr,  // IsInitialized
+              PROTOBUF_FIELD_OFFSET(WinLosePayload, _impl_._cached_size_),
+              false,
+          },
+          &WinLosePayload::MergeImpl,
+          &WinLosePayload::kDescriptorMethods,
+          &descriptor_table_base_5fpayload_2eproto,
+          nullptr,  // tracker
+      };
+  ::google::protobuf::internal::PrefetchToLocalCache(&_data_);
+  ::google::protobuf::internal::PrefetchToLocalCache(_data_.tc_table);
+  return _data_.base();
+}
+PROTOBUF_CONSTINIT PROTOBUF_ATTRIBUTE_INIT_PRIORITY1
+const ::_pbi::TcParseTable<0, 1, 0, 0, 2> WinLosePayload::_table_ = {
+  {
+    0,  // no _has_bits_
+    0, // no _extensions_
+    1, 0,  // max_field_number, fast_idx_mask
+    offsetof(decltype(_table_), field_lookup_table),
+    4294967294,  // skipmap
+    offsetof(decltype(_table_), field_entries),
+    1,  // num_field_entries
+    0,  // num_aux_entries
+    offsetof(decltype(_table_), field_names),  // no aux_entries
+    &_WinLosePayload_default_instance_._instance,
+    nullptr,  // post_loop_handler
+    ::_pbi::TcParser::GenericFallback,  // fallback
+    #ifdef PROTOBUF_PREFETCH_PARSE_TABLE
+    ::_pbi::TcParser::GetTable<::chk::payload::WinLosePayload>(),  // to_prefetch
+    #endif  // PROTOBUF_PREFETCH_PARSE_TABLE
+  }, {{
+    // .chk.payload.TeamColor winner = 1;
+    {::_pbi::TcParser::SingularVarintNoZag1<::uint32_t, offsetof(WinLosePayload, _impl_.winner_), 63>(),
+     {8, 63, 0, PROTOBUF_FIELD_OFFSET(WinLosePayload, _impl_.winner_)}},
+  }}, {{
+    65535, 65535
+  }}, {{
+    // .chk.payload.TeamColor winner = 1;
+    {PROTOBUF_FIELD_OFFSET(WinLosePayload, _impl_.winner_), 0, 0,
+    (0 | ::_fl::kFcSingular | ::_fl::kOpenEnum)},
+  }},
+  // no aux_entries
+  {{
+  }},
+};
+
+PROTOBUF_NOINLINE void WinLosePayload::Clear() {
+// @@protoc_insertion_point(message_clear_start:chk.payload.WinLosePayload)
+  ::google::protobuf::internal::TSanWrite(&_impl_);
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  _impl_.winner_ = 0;
+  _internal_metadata_.Clear<::google::protobuf::UnknownFieldSet>();
+}
+
+::uint8_t* WinLosePayload::_InternalSerialize(
+    ::uint8_t* target,
+    ::google::protobuf::io::EpsCopyOutputStream* stream) const {
+  // @@protoc_insertion_point(serialize_to_array_start:chk.payload.WinLosePayload)
+  ::uint32_t cached_has_bits = 0;
+  (void)cached_has_bits;
+
+  // .chk.payload.TeamColor winner = 1;
+  if (this->_internal_winner() != 0) {
+    target = stream->EnsureSpace(target);
+    target = ::_pbi::WireFormatLite::WriteEnumToArray(
+        1, this->_internal_winner(), target);
+  }
+
+  if (PROTOBUF_PREDICT_FALSE(_internal_metadata_.have_unknown_fields())) {
+    target =
+        ::_pbi::WireFormat::InternalSerializeUnknownFieldsToArray(
+            _internal_metadata_.unknown_fields<::google::protobuf::UnknownFieldSet>(::google::protobuf::UnknownFieldSet::default_instance), target, stream);
+  }
+  // @@protoc_insertion_point(serialize_to_array_end:chk.payload.WinLosePayload)
+  return target;
+}
+
+::size_t WinLosePayload::ByteSizeLong() const {
+// @@protoc_insertion_point(message_byte_size_start:chk.payload.WinLosePayload)
+  ::size_t total_size = 0;
+
+  ::uint32_t cached_has_bits = 0;
+  // Prevent compiler warnings about cached_has_bits being unused
+  (void) cached_has_bits;
+
+  // .chk.payload.TeamColor winner = 1;
+  if (this->_internal_winner() != 0) {
+    total_size += 1 +
+                  ::_pbi::WireFormatLite::EnumSize(this->_internal_winner());
+  }
+
+  return MaybeComputeUnknownFieldsSize(total_size, &_impl_._cached_size_);
+}
+
+
+void WinLosePayload::MergeImpl(::google::protobuf::MessageLite& to_msg, const ::google::protobuf::MessageLite& from_msg) {
+  auto* const _this = static_cast<WinLosePayload*>(&to_msg);
+  auto& from = static_cast<const WinLosePayload&>(from_msg);
+  // @@protoc_insertion_point(class_specific_merge_from_start:chk.payload.WinLosePayload)
+  ABSL_DCHECK_NE(&from, _this);
+  ::uint32_t cached_has_bits = 0;
+  (void) cached_has_bits;
+
+  if (from._internal_winner() != 0) {
+    _this->_impl_.winner_ = from._impl_.winner_;
+  }
+  _this->_internal_metadata_.MergeFrom<::google::protobuf::UnknownFieldSet>(from._internal_metadata_);
+}
+
+void WinLosePayload::CopyFrom(const WinLosePayload& from) {
+// @@protoc_insertion_point(class_specific_copy_from_start:chk.payload.WinLosePayload)
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+
+void WinLosePayload::InternalSwap(WinLosePayload* PROTOBUF_RESTRICT other) {
+  using std::swap;
+  _internal_metadata_.InternalSwap(&other->_internal_metadata_);
+  swap(_impl_.winner_, other->_impl_.winner_);
+}
+
+::google::protobuf::Metadata WinLosePayload::GetMetadata() const {
   return ::google::protobuf::Message::GetMetadataImpl(GetClassData()->full());
 }
 // @@protoc_insertion_point(namespace_scope)

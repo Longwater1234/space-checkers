@@ -13,6 +13,7 @@ message BasePayload {
     StartPayload start = 5;
     ExitPayload exit_payload = 6;
     CapturePayload capture_payload = 7;
+    WinLosePayload winlose_payload = 8;
   }
 }
 
@@ -84,4 +85,10 @@ message CapturePayload {
   int32 hunter_piece_id = 2;
   TargetDetails details = 4;
   HunterDestCell hunter_dest_cell = 5;
+}
+
+/** When one of player wins. Also, this ends the  match */
+message WinLosePayload {
+  //which player won
+  TeamColor winner = 1;
 }
