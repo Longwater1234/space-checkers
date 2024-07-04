@@ -1,8 +1,9 @@
 # space-checkers
 
 Online Multiplayer Checkers game in C++ built with SFML 2.6 and ixWebsockets. With very minimal dependencies (no BOOST lib), and
-a simple build process. All dependencies are auto-downloaded and built for you using CPM (see folder `dependencies`). The only dependency you need
+a simple build process. All dependencies are auto-downloaded and built for you using **CPM.cmake** (see folder `dependencies`). The only dependency you need
 pre-installed is SFML 2.6.
+
 
 ### Main Libraries Used
 - SFML 2.6.1
