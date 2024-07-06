@@ -200,8 +200,10 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
     const bool success = player->movePiece(currentPieceId, destCell->getPos());
     if (!success)
     {
+        spdlog::info("not successful move");
         return;
     }
+    spdlog::info("successful move");
     int sourceCellCopy = this->sourceCell.value();
     gameMap.erase(this->sourceCell.value());               // set old location empty!
     gameMap.emplace(destCell->getIndex(), currentPieceId); // fill in the new location
@@ -214,13 +216,13 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
     }
 
     // prepare to send to SERVER
-    auto newDestCell = new chk::payload::MovePayload_DestCell();
+    auto *newDestCell = new chk::payload::MovePayload_DestCell();
     newDestCell->set_cell_index(destCell->getIndex());
     newDestCell->set_x(destCell->getPos().x);
     newDestCell->set_y(destCell->getPos().y);
 
     // create Movepayload Protobuf
-    auto movePayload = new chk::payload::MovePayload();
+    auto *movePayload = new chk::payload::MovePayload();
     movePayload->set_source_cell(sourceCellCopy);
     movePayload->set_piece_id(currentPieceId);
     movePayload->set_from_team(TeamColor::TEAM_RED);
@@ -339,7 +341,6 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
 inline void OnlineGameManager::handleCellTap(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,
                                              chk::CircularBuffer<short> &buffer, const chk::Block &cell)
 {
-    spdlog::info("is my turn {}", this->isMyTurn.load());
     if (!this->gameReady || !this->isMyTurn)
     {
         return;
@@ -476,7 +477,7 @@ inline void OnlineGameManager::startCaptureListener()
         myTeam->losePiece(payload.details().prey_piece_id());                    // I will lose 1 piece
 
         std::scoped_lock lg(this->mut);      // lock mutex
-        GameManager::identifyTargets(other); // Check for extra opportunities NOW for Enemy
+        GameManager::identifyTargets(other); // Check for extra opportunities NOW (for Enemy)
         if (this->getForcedMoves().empty())
         {
             // NO MORE JUMPS AVAILABLE. SWITCH TURNS to opponent
@@ -487,7 +488,7 @@ inline void OnlineGameManager::startCaptureListener()
 }
 
 /**
- * Listening for killed connection from WsClient
+ * Listening for killed connection from server
  */
 inline void OnlineGameManager::startDeathListener()
 {

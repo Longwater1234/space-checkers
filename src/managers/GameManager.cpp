@@ -547,7 +547,7 @@ void GameManager::collectBehindRHS(const PlayerPtr &hunter, const Block &cell_pt
         return;
     }
 
-    const short pieceId_NW = this->getPieceFromCell(cellAheadIdx); //North west (hunter King reverse dir)
+    const short pieceId_NW = this->getPieceFromCell(cellAheadIdx); // North west (hunter King reverse dir)
     hasEnemyAhead = pieceId_NW != -1 && !hunter->hasThisPiece(pieceId_NW);
 
     int cellBehindEnemy = cell_ptr->getIndex() - (deltaBehindEnemy * mSign) - (deltaForward * mSign);
@@ -555,7 +555,7 @@ void GameManager::collectBehindRHS(const PlayerPtr &hunter, const Block &cell_pt
     {
         return;
     }
-    const short pieceId_SE = this->getPieceFromCell(cellBehindEnemy); //South East of enemy
+    const short pieceId_SE = this->getPieceFromCell(cellBehindEnemy); // South East of enemy
     enemyOpenBehind = pieceId_SE == -1;
 
     if (hasEnemyAhead && enemyOpenBehind)
@@ -602,7 +602,7 @@ void GameManager::collectBehindLHS(const PlayerPtr &hunter, const Block &cell_pt
     {
         return;
     }
-    const short pieceId_NE = this->getPieceFromCell(cellAheadIdx); //North east (hunter King reverse dir)
+    const short pieceId_NE = this->getPieceFromCell(cellAheadIdx); // North east (hunter King reverse dir)
     hasEnemyAhead = pieceId_NE != -1 && !hunter->hasThisPiece(pieceId_NE);
 
     int cellBehindEnemy = cell_ptr->getIndex() - (deltaBehindEnemy * mSign) - (deltaForward * mSign);

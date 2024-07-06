@@ -25,6 +25,7 @@ template <typename T> class CircularBuffer
     CircularBuffer(CircularBuffer &other) = delete;
     void addItem(const T &item);
     T &getTop();
+    void removeFirst();
     [[nodiscard]] bool isEmpty() const;
     const std::deque<T> &getAll() const;
     void clean();
@@ -69,6 +70,14 @@ template <typename T> inline const std::deque<T> &CircularBuffer<T>::getAll() co
 template <typename T> T &CircularBuffer<T>::getTop()
 {
     return m_deque.front();
+}
+
+/**
+ * Remove the first inserted (oldest) element from buffer
+ */
+template <typename T> void CircularBuffer<T>::removeFirst()
+{
+    m_deque.pop_front();
 }
 
 /**

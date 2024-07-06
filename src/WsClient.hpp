@@ -44,7 +44,7 @@ class WsClient final
     std::string final_address;                     // IP or URL of server
     std::atomic_bool isDead{false};                // if connection closed
     std::atomic_bool isConnected{false};           // if done connected to server (else, show loading)
-    chk::CircularBuffer<std::string> msgBuffer{1}; // keep only recent 1 message
+    chk::CircularBuffer<std::string> msgBuffer{5}; // keep only recent 1 message
     mutable std::string errorMsg{};                // for any websocket errors
     std::atomic_bool conn_clicked = false;         // if 'connect' button clicked
     mutable std::string protoBucket{};             // reusable buffer used to serialize payloads
@@ -67,7 +67,6 @@ class WsClient final
 
 inline chk::WsClient::WsClient()
 {
-    // Required on Windows
     ix::initNetSystem();
     // Our websocket object
     this->webSocketPtr = std::make_unique<ix::WebSocket>();
@@ -75,6 +74,9 @@ inline chk::WsClient::WsClient()
     this->webSocketPtr->setHandshakeTimeout(10);
     // once dead, DO NOT try reconnect
     this->webSocketPtr->disableAutomaticReconnection();
+    // ping server every 20 seconds
+    this->webSocketPtr->setPingInterval(20);
+
     ix::SocketTLSOptions tlsOptions;
 #ifndef _WIN32
     // Currently system CAs are not supported on non-Windows platforms with mbedtls
@@ -194,7 +196,7 @@ inline void WsClient::tryConnect(std::string_view address)
         }
         else if (msg->type == ix::WebSocketMessageType::Close)
         {
-            std::scoped_lock lg{this->mut};
+            // std::scoped_lock lg{this->mut};
             this->errorMsg = "Error: disconnected from Server!";
             spdlog::error(this->errorMsg);
             this->isDead = true;
@@ -313,6 +315,9 @@ inline void WsClient::runGameLoop()
             this->isDead = true;
             return;
         }
+        std::scoped_lock lg(this->mut);
+        this->msgBuffer.removeFirst();
+
         if (basePayload.has_welcome())
         {
             /* code */
@@ -351,8 +356,6 @@ inline void WsClient::runGameLoop()
                 this->_onCaptureCallback(basePayload.capture_payload());
             }
         }
-        std::scoped_lock lg(this->mut);
-        msgBuffer.clean();
     }
 }
 
