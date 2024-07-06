@@ -1,4 +1,4 @@
-# Build results
+# Build directories
 [Dd]ebug/
 [Dd]ebugPublic/
 [Rr]elease/
@@ -18,6 +18,8 @@ bld/
 # Clion
 *.iml
 .idea/
+/cmake-build-*/
+
 
 # Prerequisites
 *.d
@@ -27,6 +29,7 @@ bld/
 *.lo
 *.o
 *.obj
+*.bin
 
 # Precompiled Headers
 *.gch
@@ -53,6 +56,5 @@ bld/
 *.app
 *.zip
 *.rar
-/cmake-build-*/
-**/.DS_Store
+.DS_Store
 game_map.txt

@@ -5,14 +5,14 @@ namespace chk
 {
 /**
  * This class is responsible for offline play
- * @since 2024-11-04
+ * @since 2024-04-11
  */
 class LocalGameManager final : public chk::GameManager
 {
   public:
     explicit LocalGameManager(sf::RenderWindow *windowPtr);
     LocalGameManager() = delete;
-    void createAllPieces(std::vector<chk::PiecePtr> &pieceList) override;
+    void createAllPieces() override;
 
     // Inherited via GameManager
     void drawBoard() override;
@@ -30,20 +30,25 @@ inline LocalGameManager::LocalGameManager(sf::RenderWindow *windowPtr)
     this->blockList.reserve(chk::NUM_COLS * chk::NUM_COLS);
 
     // CREATE TWO unique PLAYERS
-    this->player1 = std::make_unique<chk::Player>(chk::PlayerType::PLAYER_1);
-    this->player2 = std::make_unique<chk::Player>(chk::PlayerType::PLAYER_2);
-    assert(!(*player1 == *player2));
+    this->playerRed = std::make_unique<chk::Player>(chk::PlayerType::PLAYER_RED);
+    this->playerBlack = std::make_unique<chk::Player>(chk::PlayerType::PLAYER_BLACK);
+    assert(!(*playerRed == *playerBlack));
 }
 
 /**
- * Create all pieces for both players and add them to pieceList, using stdlib random generator
+ * Create all pieces for both players and add them to pieceList, using std C++ random num generator
  * @param pieceList destination of created pieces
  */
-inline void LocalGameManager::createAllPieces(std::vector<chk::PiecePtr> &pieceList)
+inline void LocalGameManager::createAllPieces()
 {
     std::random_device randomDevice;
     std::mt19937 randEngine(randomDevice());
     std::uniform_int_distribution<short> dist(1, std::numeric_limits<short>::max());
+
+    // Reserve container for pieces on board
+    std::vector<chk::PiecePtr> pieceList;
+    pieceList.reserve(chk::NUM_PIECES);
+
     for (uint16_t row = 0; row < NUM_ROWS; row++)
     {
         for (uint16_t col = 0; col < NUM_COLS; col++)
@@ -56,14 +61,14 @@ inline void LocalGameManager::createAllPieces(std::vector<chk::PiecePtr> &pieceL
                 if (row < 3)
                 {
                     // Half Top cells, put BLACK piece
-                    auto kete = std::make_unique<chk::Piece>(circle, chk::PieceType::Black, dist(randEngine));
-                    pieceList.emplace_back(std::move_if_noexcept(kete));
+                    auto pb = std::make_unique<chk::Piece>(circle, chk::PieceType::Black, dist(randEngine));
+                    pieceList.emplace_back(std::move_if_noexcept(pb));
                 }
                 else if (row > 4)
                 {
                     // Half Bottom cells, put RED piece
-                    auto kete = std::make_unique<chk::Piece>(circle, chk::PieceType::Red, dist(randEngine));
-                    pieceList.emplace_back(std::move_if_noexcept(kete));
+                    auto ppr = std::make_unique<chk::Piece>(circle, chk::PieceType::Red, dist(randEngine));
+                    pieceList.emplace_back(std::move_if_noexcept(ppr));
                 }
             }
         }
@@ -74,13 +79,15 @@ inline void LocalGameManager::createAllPieces(std::vector<chk::PiecePtr> &pieceL
     {
         if (kete->getPieceType() == chk::PieceType::Red)
         {
-            this->player1->receivePiece(kete);
+            this->playerRed->receivePiece(kete);
         }
         else
         {
-            this->player2->receivePiece(kete);
+            this->playerBlack->receivePiece(kete);
         }
     }
+    //SAFE. It's now useless.
+    pieceList.clear();
 }
 
 /**
@@ -95,7 +102,7 @@ inline void LocalGameManager::drawBoard()
         window->draw(*cell);
     }
     // DRAW RED PIECES
-    for (const auto &[id, red_piece] : this->player1->getOwnPieces())
+    for (const auto &[id, red_piece] : this->playerRed->getOwnPieces())
     {
         if (this->isPlayerRedTurn() && red_piece->containsPoint(mousePos))
         {
@@ -108,7 +115,7 @@ inline void LocalGameManager::drawBoard()
         window->draw(*red_piece);
     }
     // DRAW BLACK PIECES
-    for (const auto &[id, black_piece] : this->player2->getOwnPieces())
+    for (const auto &[id, black_piece] : this->playerBlack->getOwnPieces())
     {
         if (!this->isPlayerRedTurn() && black_piece->containsPoint(mousePos))
         {
@@ -123,7 +130,7 @@ inline void LocalGameManager::drawBoard()
 }
 
 /**
- * This will be handling all events
+ * This will be handling all UI and mouse events
  * @param buffer stores the currently selected piece
  */
 inline void LocalGameManager::handleEvents(chk::CircularBuffer<short> &buffer)
@@ -147,13 +154,13 @@ inline void LocalGameManager::handleEvents(chk::CircularBuffer<short> &buffer)
                 // inner loop
                 if (cell->containsPoint(clickedPos) && cell->getIndex() != -1)
                 {
-                    const auto &hunter = this->isPlayerRedTurn() ? this->player1 : this->player2;
-                    const auto &prey = this->isPlayerRedTurn() ? this->player2 : this->player1;
+                    const auto &hunter = this->isPlayerRedTurn() ? this->playerRed : this->playerBlack;
+                    const auto &prey = this->isPlayerRedTurn() ? this->playerBlack : this->playerRed;
 
                     if (this->hasPendingCaptures())
                     {
-                        this->handleJumpPiece(hunter, prey, cell);
-                        this->updateMatchStatus(hunter, prey);
+                        GameManager::handleCapturePiece(hunter, prey, cell);
+                        GameManager::updateMatchStatus(hunter, prey);
                         buffer.clean();
                     }
                     else

@@ -6,13 +6,10 @@ CPMAddPackage(
     VERSION 11.4.5
     DOWNLOAD_EXTRACT_TIMESTAMP TRUE
     DOWNLOAD_ONLY ON
+    OPTIONS "USE_TLS TRUE" "USE_MBED_TLS TRUE" "USE_ZLIB TRUE"
 )
 
-SET(USE_TLS TRUE)
-SET(USE_MBED_TLS TRUE)
-SET(USE_ZLIB TRUE)
-
-if(ixwebsocket_ADDED)
+if(ixwebsocket_ADDED) 
     file(GLOB ixwebsocket_SOURCES ${ixwebsocket_SOURCE_DIR}/ixwebsocket/*.cpp)
     add_library(ixwebsocket STATIC ${ixwebsocket_SOURCES})
     target_include_directories(ixwebsocket PUBLIC ${ixwebsocket_SOURCE_DIR})

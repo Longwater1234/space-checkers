@@ -17,9 +17,9 @@ namespace chk
 constexpr auto ICON_PATH = "win-icon-16.png";
 constexpr auto FONT_PATH = "notosans-regular.ttf";
 
-enum class UserChoice
+enum class UserChoice : uint16_t
 {
-    LOCAL_PLAY = 98483, // playing offline
+    LOCAL_PLAY = 38483, // playing offline
     ONLINE_PLAY,        // playing online
 };
 
@@ -27,7 +27,6 @@ class MainMenu final
 {
   public:
     explicit MainMenu(sf::RenderWindow *windowPtr);
-
     chk::UserChoice runMainLoop();
 
   private:
@@ -67,12 +66,12 @@ inline MainMenu::MainMenu(sf::RenderWindow *windowPtr)
 inline void MainMenu::init()
 {
     // draw two rectangles
-    static sf::Vector2f sizeRec{277.0, 55.0};
+    sf::Vector2f sizeRec{277.0, 55.0};
     this->localBtn = sf::RectangleShape{sizeRec};
     this->onlineBtn = sf::RectangleShape{sizeRec};
     this->localBtn.setFillColor(sf::Color::Transparent);
     this->onlineBtn.setFillColor(sf::Color::Transparent);
-
+    // position them over menu text
     this->onlineBtn.setPosition(sf::Vector2f{154.0, 476.0});
     this->localBtn.setPosition(sf::Vector2f{154.0, 558.0});
 }

@@ -7,6 +7,7 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Window/Mouse.hpp>
 #include <cassert>
+#include <google/protobuf/stubs/common.h>
 #include <vector>
 
 #include "imgui-SFML.h"
@@ -14,6 +15,8 @@
 
 int main()
 {
+
+    GOOGLE_PROTOBUF_VERIFY_VERSION;
     auto window = sf::RenderWindow{sf::VideoMode{600, 700}, "SpaceCheckers", sf::Style::Titlebar | sf::Style::Close};
     window.setFramerateLimit(60);
     ImGui::SFML::Init(window, false);
@@ -49,30 +52,28 @@ int main()
     sf::Font font;
     if (!font.loadFromFile(chk::getResourcePath(chk::FONT_PATH)))
     {
-        perror("cannot find font file");
+        std::perror("cannot find font file");
         exit(EXIT_FAILURE);
     }
 
     manager->drawCheckerboard(font);
 
-    // NOW create all PIECES ON BOARD
-    std::vector<chk::PiecePtr> pieceVector;
-    pieceVector.reserve(chk::NUM_PIECES);
+    // create pieces give each player their own
+    manager->createAllPieces();
 
-    // create pieces with random ID and give each player their own
-    manager->createAllPieces(pieceVector);
-
-    /* we don't need this anymore */
-    pieceVector.clear();
-
-    // for storing currently clicked Piece
+    // Storing currently clicked Piece. (NOTE: using braces constructor)
     chk::CircularBuffer<short> circularBuffer{1};
 
     // THE STATUS TEXT
-    sf::Text txtPanel{"Welcome to Checkers", font, 16};
+    sf::Text txtPanel{"Space Checkers", font, 16};
     txtPanel.setFillColor(sf::Color::White);
-    txtPanel.setPosition(sf::Vector2f{0, 8.5 * chk::SIZE_CELL});
-    manager->updateMessage("Now playing! RED starts");
+    txtPanel.setPosition(sf::Vector2f{10.0, 8.5 * chk::SIZE_CELL});
+    manager->updateMessage("Welcome to Space Checkers");
+
+    if (userChoice == chk::UserChoice::LOCAL_PLAY)
+    {
+        manager->updateMessage("Now playing! It's RED's turn");
+    }
 
     // THE MAIN GAME LOOP
     sf::Clock deltaClock;
@@ -90,5 +91,6 @@ int main()
         window.display();
     }
     ImGui::SFML::Shutdown();
+    google::protobuf::ShutdownProtobufLibrary();
     return EXIT_SUCCESS;
 }

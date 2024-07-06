@@ -10,7 +10,7 @@
 namespace chk
 {
 
-// alias for unique pointer of player's Piece
+// alias for unique pointer of `Piece`
 using PiecePtr = std::unique_ptr<chk::Piece>;
 
 class Player final
@@ -22,12 +22,13 @@ class Player final
     void losePiece(const short &targetId);
     [[nodiscard]] const std::unordered_map<short, chk::PiecePtr> &getOwnPieces() const;
     void showForcedPieces(const std::set<short> &hunterPieces) const;
+    void emptyBasket();
     [[nodiscard]] size_t getPieceCount() const;
     [[nodiscard]] const std::string &getName() const;
     [[nodiscard]] PlayerType getPlayerType() const;
-    [[nodiscard]] bool hasThisPiece(const short &pieceId) const;
-    [[nodiscard]] bool movePiece(const short &pieceId, const sf::Vector2f &destPos) const;
-    [[nodiscard]] bool captureEnemyWith(const short &pieceId, const sf::Vector2f &destPos) const;
+    [[nodiscard]] bool hasThisPiece(const short pieceId) const;
+    [[nodiscard]] bool movePiece(const short pieceId, const sf::Vector2f &destPos) const;
+    [[nodiscard]] bool captureEnemyWith(const short pieceId, const sf::Vector2f &destPos) const;
     bool operator==(const Player &other) const;
 
   private:
@@ -39,7 +40,7 @@ class Player final
 
 inline Player::Player(PlayerType player_type)
 {
-    if (player_type == PlayerType::PLAYER_1)
+    if (player_type == PlayerType::PLAYER_RED)
     {
         this->name = "RED";
     }
@@ -84,6 +85,14 @@ inline void Player::showForcedPieces(const std::set<short> &hunterPieces) const
 }
 
 /**
+ * Remove all pieces from my basket
+ */
+inline void Player::emptyBasket()
+{
+    this->basket.clear();
+}
+
+/**
  * Get player type, RED or BLACK
  *
  *@return enum value
@@ -92,13 +101,13 @@ inline PlayerType Player::getPlayerType() const
 {
     if (this->name == "RED")
     {
-        return chk::PlayerType::PLAYER_1;
+        return chk::PlayerType::PLAYER_RED;
     }
-    return chk::PlayerType::PLAYER_2;
+    return chk::PlayerType::PLAYER_BLACK;
 }
 
 /**
- * get this player's name
+ * Get this player's name
  * @return either RED or BLACK
  */
 inline const std::string &Player::getName() const
@@ -120,14 +129,14 @@ inline const std::unordered_map<short, chk::PiecePtr> &Player::getOwnPieces() co
  * @param pieceId the pieceId
  * @return TRUE or FALSE
  */
-inline bool Player::hasThisPiece(const short &pieceId) const
+inline bool Player::hasThisPiece(const short pieceId) const
 {
     return this->basket.find(pieceId) != this->basket.end();
 }
 
 /**
  * \brief How many pieces this player currently have?
- * \return count
+ * \return total count
  */
 inline size_t Player::getPieceCount() const
 {
@@ -140,7 +149,7 @@ inline size_t Player::getPieceCount() const
  * @param destPos destination cell position
  * @return TRUE if successful, else FALSE
  */
-inline bool Player::movePiece(const short &pieceId, const sf::Vector2f &destPos) const
+inline bool Player::movePiece(const short pieceId, const sf::Vector2f &destPos) const
 {
     return this->basket.at(pieceId)->moveSimple(destPos);
 }
@@ -151,7 +160,7 @@ inline bool Player::movePiece(const short &pieceId, const sf::Vector2f &destPos)
  * \param destPos destination cell
  * \return TRUE if successful, else FALSE
  */
-inline bool Player::captureEnemyWith(const short &pieceId, const sf::Vector2f &destPos) const
+inline bool Player::captureEnemyWith(const short pieceId, const sf::Vector2f &destPos) const
 {
     return this->basket.at(pieceId)->moveCapture(destPos);
 }

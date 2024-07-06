@@ -1,0 +1,94 @@
+syntax = "proto3";
+package chk.payload;
+
+option go_package = "checkers-backend/game";
+
+message BasePayload {
+  // GUI display text from server to client
+  string notice = 2;
+
+  oneof inner {
+    WelcomePayload welcome = 3;
+    MovePayload move_payload = 4;
+    StartPayload start = 5;
+    ExitPayload exit_payload = 6;
+    CapturePayload capture_payload = 7;
+    WinLosePayload winlose_payload = 8;
+  }
+}
+
+enum TeamColor {
+  TEAM_UNSPECIFIED = 0;
+  TEAM_RED = 1;
+  TEAM_BLACK = 2;
+}
+
+message WelcomePayload {
+  // Color of this player pieces
+  TeamColor my_team = 1;
+  // in the form of X.Y.Z
+  string server_version = 2;
+}
+
+message StartPayload {
+  // Pieces for red player
+  repeated int32 pieces_red = 1;
+  // pieces for black player
+  repeated int32 pieces_black = 2;
+}
+
+message MovePayload {
+  // Represents destination cell
+  message DestCell {
+    int32 cell_index = 1;
+    float x = 2;
+    float y = 3;
+  }
+  // from which player
+  TeamColor from_team = 1;
+  // moving piece id
+  int32 piece_id = 2;
+  // older cell index for this pieceId
+  int32 source_cell = 3;
+  // destination cell
+  DestCell dest_cell = 4;
+}
+
+// whenever any of the players exits, or server terminates Match
+message ExitPayload {
+  // which player initiated exit (RED, BLACK, or unspecified)
+  TeamColor from_team = 1;
+}
+
+// when hunter player is capturing opponent's piece
+message CapturePayload {
+  // extra details about this capture
+  message TargetDetails {
+    /** ID of the piece that is to be captured */
+    int32 prey_piece_id = 1;
+    // the cell Index hosting this target piece
+    int32 prey_cell_idx = 2;
+    // source cell of hunter
+    int32 hunter_src_cell = 3;
+  }
+
+  // Destination of hunterPiece after capturing prey
+  message HunterDestCell {
+    int32 cell_index = 1;
+    float x = 2;
+    float y = 3;
+  }
+
+  // from which player
+  TeamColor from_team = 1;
+  // the attacking player's piece
+  int32 hunter_piece_id = 2;
+  TargetDetails details = 4;
+  HunterDestCell hunter_dest_cell = 5;
+}
+
+/** When one of player wins. Also, this ends the  match */
+message WinLosePayload {
+  //which player won
+  TeamColor winner = 1;
+}

@@ -1,12 +1,10 @@
 #pragma once
 #include "CircularBuffer.hpp"
-#include "payloads/ServerStructs.hpp"
+#include "payloads/base_payload.pb.hpp"
 #include <atomic>
-#include <iostream>
 #include <ixwebsocket/IXNetSystem.h>
 #include <ixwebsocket/IXWebSocket.h>
 #include <mutex>
-#include <simdjson.h>
 #include <spdlog/spdlog.h>
 #include <string>
 
@@ -16,34 +14,56 @@
 namespace chk
 {
 
-using onReadyCreatePieces = std::function<void(chk::payload::Welcome &)>; // callback after creating pieces
+// callback when connected to server success
+using onConnectedServer = std::function<void(const chk::payload::WelcomePayload &, std::string_view notice)>;
+// callback when both players joined match
+using onReadyStartGame = std::function<void(const chk::payload::StartPayload &, std::string_view notice)>;
+// when server kills our connection
+using onDeathCallback = std::function<void(std::string_view notice)>;
+// when opponent makes a simple move
+using onMovePieceCallback = std::function<void(const chk::payload::MovePayload &)>;
+// when opponent captures my piece
+using onCaptureCallback = std::function<void(const chk::payload::CapturePayload &)>;
+// when we got a winner or loser
+using onWinLoseCallback = std::function<void(std::string_view notice)>;
 
 /**
- * This will handle all websocket exchanges with Server
+ * This handles all websocket exchanges with Server
  */
 class WsClient final
 {
   public:
     WsClient();
     void runMainLoop();
-    void setOnReadyPiecesCallback(const onReadyCreatePieces &callback);
-    bool replyToServer(const simdjson::dom::object &payload);
+    void setOnReadyConnectedCallback(const onConnectedServer &callback);
+    void setOnReadyStartGameCallback(const onReadyStartGame &callback);
+    void setOnDeathCallback(const onDeathCallback &callback);
+    void setOnMovePieceCallback(const onMovePieceCallback &callback);
+    void setOnCapturePieceCallback(const onCaptureCallback &callback);
+    void setOnWinLoseCallback(const onWinLoseCallback &callback);
+    bool replyServerAsync(chk::payload::BasePayload *payload) const;
 
   private:
-    std::string final_address;                      // IP or URL of server
-    std::atomic_bool isDead{false};                 // if connection closed
-    std::atomic_bool isConnected{false};            // if done connected to server (else, show loading)
-    chk::CircularBuffer<std::string> msgBuffer{20}; // keep only recent 20 messages
-    mutable std::string errorMsg{};                 // for any websocket errors
-    std::atomic_bool conn_clicked = false;          // if 'connect' button clicked
-    std::deque<std::string> serverMessages;         // messages from backend server
+    std::string final_address;                     // IP or URL of server
+    std::atomic_bool isDead{false};                // if connection closed
+    std::atomic_bool isConnected{false};           // if done connected to server (else, show loading)
+    chk::CircularBuffer<std::string> msgBuffer{5}; // keep only recent 1 message
+    mutable std::string errorMsg{};                // for any websocket errors
+    std::atomic_bool conn_clicked = false;         // if 'connect' button clicked
+    mutable std::string protoBucket{};             // reusable buffer used for serializing payloads (as bytes)
 
-    onReadyCreatePieces _onReadyCreatePieces; // callback after creating pieces for both players
+    onConnectedServer _onReadyConnected;
+    onReadyStartGame _onReadyStartGame;
+    onDeathCallback _onDeathCallback;
+    onMovePieceCallback _onMovePieceCallback;
+    onCaptureCallback _onCaptureCallback;
+    onWinLoseCallback _onWinLoseCallback;
+
     std::mutex mut;
-    std::unique_ptr<ix::WebSocket> webSocketPtr = nullptr;
-    void showErrorPopup();
-    void showChatWindow();
-    void runServerLoop();
+    std::unique_ptr<ix::WebSocket> webSocketPtr = nullptr; // our Websocket object
+    void showErrorPopup();                                 // whenver there is an error (from server)
+    void showWinnerPopup(std::string_view notice) const;   // when server notifies about winner
+    void runGameLoop();
     static void showHint(const char *tip);
     void tryConnect(std::string_view address);
     void showConnectWindow();
@@ -52,12 +72,16 @@ class WsClient final
 
 inline chk::WsClient::WsClient()
 {
-    // Initialize WS
     ix::initNetSystem();
     // Our websocket object
     this->webSocketPtr = std::make_unique<ix::WebSocket>();
     // set inital connection timeout
     this->webSocketPtr->setHandshakeTimeout(10);
+    // once dead, DO NOT try reconnect
+    this->webSocketPtr->disableAutomaticReconnection();
+    // ping server every 20 seconds
+    this->webSocketPtr->setPingInterval(20);
+
     ix::SocketTLSOptions tlsOptions;
 #ifndef _WIN32
     // Currently system CAs are not supported on non-Windows platforms with mbedtls
@@ -90,14 +114,14 @@ inline void WsClient::showConnectWindow()
 {
     static bool is_secure = false;
     ImGui::SetNextWindowSize(ImVec2(sf::Vector2f(300.0, 300.0)));
-    static char inputUrl[256] = "";
+    static char inputUrl[256] = "127.0.0.1:9876/game";
     if (ImGui::Begin("Connect Window", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse))
     {
         ImGui::InputText("Server IP", inputUrl, IM_ARRAYSIZE(inputUrl), ImGuiInputTextFlags_CharsNoBlank);
         ImGui::SameLine();
         WsClient::showHint("eg: 127.0.0.1:8080 OR myserver.example.org");
         ImGui::Checkbox("Secure", &is_secure);
-        if (!std::string_view(inputUrl).empty() && ImGui::Button("Connect", ImVec2(100.0f, 0)))
+        if (!std::string_view(inputUrl).empty() && ImGui::Button("Connect", ImVec2{100.0f, 0}))
         {
             const char *suffix = is_secure ? "wss://" : "ws://";
             this->final_address = suffix + std::string(inputUrl);
@@ -117,6 +141,7 @@ inline void WsClient::resetAllStates()
     this->conn_clicked = false;
     this->isDead = false;
     this->errorMsg.clear();
+    this->webSocketPtr->stop();
 }
 
 /**
@@ -124,6 +149,7 @@ inline void WsClient::resetAllStates()
  */
 inline void WsClient::runMainLoop()
 {
+
     // clang-format off
     if (!isConnected) {
         if (!conn_clicked) {
@@ -134,11 +160,14 @@ inline void WsClient::runMainLoop()
     }
     // already connected
     else {
-        this->showChatWindow();
+        this->runGameLoop();
     }
-    // connection failure 🙁
+    // some error happened 🙁
     if (this->isDead) {
        this->showErrorPopup();
+       if (this->_onDeathCallback != nullptr) {
+        _onDeathCallback(this->errorMsg);
+       }
     }
     // clang-format on
 }
@@ -157,6 +186,7 @@ inline void WsClient::tryConnect(std::string_view address)
         ImGui::Text("Connecting to %s", this->final_address.c_str());
         ImGui::End();
     }
+
     // Setup a callback to be fired when an Async event is received
     this->webSocketPtr->setOnMessageCallback([this](const ix::WebSocketMessagePtr &msg) {
         if (msg->type == ix::WebSocketMessageType::Message)
@@ -168,6 +198,13 @@ inline void WsClient::tryConnect(std::string_view address)
         {
             spdlog::info("Connection established");
             this->isConnected = true;
+        }
+        else if (msg->type == ix::WebSocketMessageType::Close)
+        {
+            std::scoped_lock lg{this->mut};
+            this->errorMsg = "Error: disconnected from Server!";
+            spdlog::error(this->errorMsg);
+            this->isDead = true;
         }
         else if (msg->type == ix::WebSocketMessageType::Error)
         {
@@ -184,108 +221,88 @@ inline void WsClient::tryConnect(std::string_view address)
         this->webSocketPtr->start();
     }
 
-    // ping server every 50 seconds
-    this->webSocketPtr->setPingInterval(50);
-
     // Handle any connection error/timeout
     if (this->webSocketPtr->getReadyState() != ix::ReadyState::Open && this->isDead)
     {
         this->webSocketPtr->stop();
         return;
     }
-
-    // ----------->>>>> LISTEN for UI updates from GameManager, forward to server
-    // this->manager->setOnMoveSuccessCallback([this](const short &pieceId, const int &targetCell) {
-    //    // TODO: SERIALIZE TO JSON, and send it here
-    //    std::string pkg = fmt::format("I moved {} to cell index {}", pieceId, targetCell);
-    //    spdlog::info(pkg);
-    //    webSocket.send(pkg);
-    //});
-
-    //  this->showChatWindow();
 }
 
 /**
  * Set the callback to handle created pieces (from server)
  * @param callback - the callback function
  */
-inline void WsClient::setOnReadyPiecesCallback(const onReadyCreatePieces &callback)
+inline void WsClient::setOnReadyConnectedCallback(const onConnectedServer &callback)
 {
-    this->_onReadyCreatePieces = callback;
+    this->_onReadyConnected = callback;
 }
 
 /**
- * Send JSON response back to server
- * @param payload the request body
+ * Set the callback to handle starting game after signal from server
+ * @param callback the callback function
  */
-inline bool WsClient::replyToServer(const simdjson::dom::object &payload)
+inline void WsClient::setOnReadyStartGameCallback(const onReadyStartGame &callback)
 {
-    if (this->isDead)
+    this->_onReadyStartGame = callback;
+}
+
+/**
+ * Set the callback to handle connection failures or server kickouts
+ * @param callback the callback function
+ */
+inline void WsClient::setOnDeathCallback(const onDeathCallback &callback)
+{
+    this->_onDeathCallback = callback;
+}
+
+/**
+ * Set the callback for handling Opponent moving their piece
+ * @param callback the callback function
+ */
+inline void WsClient::setOnMovePieceCallback(const onMovePieceCallback &callback)
+{
+    this->_onMovePieceCallback = callback;
+}
+
+/**
+ * Set the callback for handling Opponent capturing my Piece
+ * @param callback the callback function
+ */
+inline void WsClient::setOnCapturePieceCallback(const onCaptureCallback &callback)
+{
+    this->_onCaptureCallback = callback;
+}
+
+/**
+ * Set the callback for handling Winner or Loser of match
+ * @param callback the callback function
+ */
+inline void WsClient::setOnWinLoseCallback(const onWinLoseCallback &callback)
+{
+    this->_onWinLoseCallback = callback;
+}
+
+/**
+ * Send Protobuf response back to server
+ * @param payload the request body
+ * @return TRUE if sent successfully, else FALSE
+ */
+inline bool WsClient::replyServerAsync(chk::payload::BasePayload *payload) const
+{
+    if (this->isDead || !this->isConnected)
     {
         return false;
     }
-    const auto &result = this->webSocketPtr->send(simdjson::to_string(payload));
+    payload->SerializeToString(&this->protoBucket);
+    const auto &result = this->webSocketPtr->sendBinary(this->protoBucket);
     return result.success;
-}
-
-/**
- * Show the chat window and handle sending messsages
- * @param webSocket The websocket pointer
- */
-inline void WsClient::showChatWindow()
-{
-    static bool chatWindow = true;
-    ImGui::SetNextWindowSize(ImVec2(sf::Vector2f{400.0, 400.0}));
-    if (chatWindow)
-    {
-        ImGui::Begin("Echo Chat", &chatWindow, ImGuiWindowFlags_NoResize);
-        if (!this->isConnected)
-        {
-            /* code */
-            ImGui::Text("Connecting to %s", this->final_address.c_str());
-            ImGui::End();
-            return;
-        }
-
-        ImGui::BeginChild("ChatMessages", ImVec2(300.0, 290.0), ImGuiChildFlags_None);
-        for (const auto &msg : this->msgBuffer.getAll())
-        {
-            if (!msg.empty())
-            {
-                ImGui::TextWrapped(u8"%s", msg.c_str());
-            }
-        }
-        ImGui::EndChild();
-
-        ImGui::SetCursorPos(ImVec2(sf::Vector2f{0, 350.0}));
-        ImGui::PushItemWidth(300);
-        static char msgpack[256] = "";
-        if (ImGui::InputTextWithHint(".", "Write message, press Enter", msgpack, IM_ARRAYSIZE(msgpack),
-                                     ImGuiInputTextFlags_EnterReturnsTrue))
-        {
-            if (!std::string_view(msgpack).empty())
-            {
-                std::scoped_lock<std::mutex> lg{this->mut};
-                this->msgBuffer.addItem("You: " + std::string(msgpack));
-                this->webSocketPtr->send(msgpack);
-                memset(msgpack, 0, sizeof(msgpack));
-            }
-        }
-        ImGui::PopItemWidth();
-        ImGui::End();
-    }
-    else
-    {
-        // IF THIS chat WINDOW IS CLOSED, SHUTDOWN socket
-        this->webSocketPtr->stop();
-        this->isDead = true;
-    }
 }
 
 /**
  * Exchange messages with the server and update the game accordingly. if any error happen, close connection
  */
-inline void WsClient::runServerLoop()
+inline void WsClient::runGameLoop()
 {
     if (!this->isConnected)
     {
@@ -298,46 +315,72 @@ inline void WsClient::runServerLoop()
         }
     }
 
-    static simdjson::dom::parser jparser;
-    try
+    for (const auto &msg : this->msgBuffer.getAll())
     {
-        for (const auto &msg : this->msgBuffer.getAll())
+        if (msg.empty())
         {
-            if (!msg.empty())
+            continue;
+        }
+        chk::payload::BasePayload basePayload;
+        if (!basePayload.ParseFromString(msg))
+        {
+            std::scoped_lock lg(this->mut);
+            this->errorMsg = "Profobuf: Could not parse payload";
+            this->isDead = true;
+            return;
+        }
+
+        // delete oldest message
+        std::scoped_lock lg(this->mut);
+        this->msgBuffer.removeFirst();
+
+        if (basePayload.has_welcome())
+        {
+            /* code */
+            chk::payload::WelcomePayload welcome = basePayload.welcome();
+            if (this->_onReadyConnected != nullptr)
             {
-                static simdjson::dom::object doc = jparser.parse(msg);
-                uint16_t rawMsgType = static_cast<uint16_t>(doc.at_key("messageType").get_int64());
-                chk::payload::MessageType msgType{rawMsgType};
-                if (msgType == chk::payload::MessageType::WELCOME)
-                {
-                    // CREATE A 'welcome' object
-                    chk::payload::Welcome welcome{};
-                    auto rawTeam = static_cast<uint16_t>(doc.at_key("myTeam").get_uint64());
-                    welcome.myTeam = chk::PlayerType{rawTeam};
-                    for (const auto &val : doc.at_key("piecesRed").get_array())
-                    {
-                        welcome.piecesRed.emplace_back(static_cast<int16_t>(val.get_int64()));
-                    }
-                    for (const auto &val : doc.at_key("piecesBlack").get_array())
-                    {
-                        welcome.piecesBlack.emplace_back(static_cast<int16_t>(val.get_int64()));
-                    }
-                    // invoke the callback
-                    if (this->_onReadyCreatePieces != nullptr)
-                    {
-                        this->_onReadyCreatePieces(welcome);
-                    }
-                }
-                std::scoped_lock lg(this->mut);
-                msgBuffer.clean();
+                this->_onReadyConnected(welcome, basePayload.notice());
             }
         }
-    }
-    catch (const simdjson::simdjson_error &ex)
-    {
-        std::scoped_lock lg(this->mut);
-        this->errorMsg = fmt::format("JSON ERROR: {}", ex.what());
-        this->isDead = true;
+        else if (basePayload.has_start())
+        {
+            chk::payload::StartPayload startPayload = basePayload.start();
+            if (this->_onReadyStartGame != nullptr)
+            {
+                this->_onReadyStartGame(startPayload, basePayload.notice());
+            }
+        }
+        else if (basePayload.has_exit_payload())
+        {
+            std::scoped_lock lg(this->mut);
+            this->errorMsg = basePayload.notice();
+            spdlog::error(basePayload.notice());
+            this->isDead = true;
+        }
+        else if (basePayload.has_move_payload())
+        {
+            if (this->_onMovePieceCallback != nullptr)
+            {
+                this->_onMovePieceCallback(basePayload.move_payload());
+            }
+        }
+        else if (basePayload.has_capture_payload())
+        {
+            if (this->_onCaptureCallback != nullptr)
+            {
+                this->_onCaptureCallback(basePayload.capture_payload());
+            }
+        }
+        else if (basePayload.has_winlose_payload())
+        {
+            if (this->_onWinLoseCallback != nullptr)
+            {
+                std::string_view fullNotice = basePayload.notice();
+                this->showWinnerPopup(fullNotice);
+                this->_onWinLoseCallback(fullNotice);
+            }
+        }
     }
 }
 
@@ -352,7 +395,7 @@ inline void WsClient::showErrorPopup()
     }
     // Always center this next dialog
     ImVec2 center = ImGui::GetMainViewport()->GetCenter();
-    ImGui::SetNextWindowPos(center, ImGuiCond_FirstUseEver, ImVec2(0.5, 0.5));
+    ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2(0.5, 0.5));
     ImGui::OpenPopup("Error", ImGuiPopupFlags_NoOpenOverExistingPopup);
     if (ImGui::BeginPopupModal("Error", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {
@@ -364,7 +407,28 @@ inline void WsClient::showErrorPopup()
             this->resetAllStates();
         }
         ImGui::EndPopup();
-    };
+    }
+}
+
+/**
+ * Show winner/loser popup window.
+ */
+inline void WsClient::showWinnerPopup(std::string_view notice) const
+{
+    // Always center this next dialog
+    ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+    ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2(0.5, 0.5));
+    ImGui::OpenPopup("GameOver", ImGuiPopupFlags_NoOpenOverExistingPopup);
+    if (ImGui::BeginPopupModal("GameOver", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        ImGui::Text("%s", notice.data());
+        ImGui::Separator();
+        if (ImGui::Button("OK", ImVec2(120, 0)))
+        {
+            ImGui::CloseCurrentPopup();
+        }
+        ImGui::EndPopup();
+    }
 }
 
 } // namespace chk

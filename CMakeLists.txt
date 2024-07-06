@@ -11,39 +11,38 @@ if(NOT APPLE)
   set(SFML_STATIC_LIBRARIES TRUE) 
 endif() 
 
-# Absolute path where you installed SFML ok
+# Absolute path where you installed SFML
 set(SFML_HOME "C:/SFML/SFML-2.6.1")
 
 file(GLOB_RECURSE GAME_SRC "src/*.cpp" "src/*.hpp")
 set(SFML_DIR ${SFML_HOME}/lib/cmake/SFML)
 
-find_package(SFML 2.6 REQUIRED COMPONENTS "graphics" "window" "system")
-find_package(OpenGL REQUIRED)
+find_package(SFML 2.6 REQUIRED COMPONENTS "graphics" "window" "system") 
 
-# download extra libs 
-add_subdirectory(dependencies)
+# download extra libs  
+add_subdirectory(dependencies)   
 
 if(WIN32)
   add_executable(SpaceCheckers ${GAME_SRC} ${CMAKE_SOURCE_DIR}/resources/win-icon.rc)
   target_link_libraries(SpaceCheckers PRIVATE sfml-main)
-elseif(APPLE)
+elseif(APPLE) 
   include(${CMAKE_SOURCE_DIR}/apple_cmake/MacBundle.cmake)
   find_library(FOUNDATION_FRAMEWORK Foundation)
   target_link_libraries(SpaceCheckers PRIVATE ${FOUNDATION_FRAMEWORK})
 else()
-  add_executable(SpaceCheckers ${GAME_SRC})   
-endif()
+  add_executable(SpaceCheckers ${GAME_SRC})    
+endif() 
 
-# link all required libraries
+# link all required libraries 
 target_link_libraries(SpaceCheckers PRIVATE sfml-graphics sfml-window sfml-system ImGui-SFML
-                        ixwebsocket spdlog::spdlog simdjson::simdjson)
+                        ixwebsocket spdlog::spdlog protobuf::libprotobuf)
 
 # include SFML headers
 include_directories(${SFML_HOME}/include)   
 
 # show warnings (depending on C++ compiler)
 if(MSVC)
-  target_compile_options(SpaceCheckers PRIVATE /W4)
+  target_compile_options(SpaceCheckers PRIVATE /W4 /sdl)
 else() 
   target_compile_options(SpaceCheckers PRIVATE -Wall)
 endif()

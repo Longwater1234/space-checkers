@@ -40,7 +40,7 @@ inline Cell::Cell(const int idx, const sf::RectangleShape &rect, const sf::Vecto
 
     sf::Text text;
     text.setFont(font);
-    text.setFillColor(sf::Color::White);
+    text.setFillColor(sf::Color{255, 255, 255, 100});
     text.setString(std::to_string(this->index));
     text.setPosition(pos);
     this->sfText = text;
@@ -97,6 +97,7 @@ inline int Cell::getIndex() const
 
 /**
  * Set whether this cell's row is even
+ * @param is_even TRUE or FALSE
  */
 inline void Cell::setEvenRow(const bool &is_even)
 {
