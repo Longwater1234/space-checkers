@@ -24,6 +24,8 @@ using onDeathCallback = std::function<void(std::string_view notice)>;
 using onMovePieceCallback = std::function<void(const chk::payload::MovePayload &)>;
 // when opponent captures my piece
 using onCaptureCallback = std::function<void(const chk::payload::CapturePayload &)>;
+// when we got a winner or loser
+using onWinLoseCallback = std::function<void(std::string_view notice)>;
 
 /**
  * This handles all websocket exchanges with Server
@@ -38,6 +40,7 @@ class WsClient final
     void setOnDeathCallback(const onDeathCallback &callback);
     void setOnMovePieceCallback(const onMovePieceCallback &callback);
     void setOnCapturePieceCallback(const onCaptureCallback &callback);
+    void setOnWinLoseCallback(const onWinLoseCallback &callback);
     bool replyServerAsync(chk::payload::BasePayload *payload) const;
 
   private:
@@ -47,17 +50,19 @@ class WsClient final
     chk::CircularBuffer<std::string> msgBuffer{5}; // keep only recent 1 message
     mutable std::string errorMsg{};                // for any websocket errors
     std::atomic_bool conn_clicked = false;         // if 'connect' button clicked
-    mutable std::string protoBucket{};             // reusable buffer used to serialize payloads
+    mutable std::string protoBucket{};             // reusable buffer used for serializing payloads (as bytes)
 
     onConnectedServer _onReadyConnected;
     onReadyStartGame _onReadyStartGame;
     onDeathCallback _onDeathCallback;
     onMovePieceCallback _onMovePieceCallback;
     onCaptureCallback _onCaptureCallback;
+    onWinLoseCallback _onWinLoseCallback;
 
     std::mutex mut;
     std::unique_ptr<ix::WebSocket> webSocketPtr = nullptr; // our Websocket object
-    void showErrorPopup();
+    void showErrorPopup();                                 // whenver there is an error (from server)
+    void showWinnerPopup(std::string_view notice) const;   // when server notifies about winner
     void runGameLoop();
     static void showHint(const char *tip);
     void tryConnect(std::string_view address);
@@ -196,7 +201,7 @@ inline void WsClient::tryConnect(std::string_view address)
         }
         else if (msg->type == ix::WebSocketMessageType::Close)
         {
-            // std::scoped_lock lg{this->mut};
+            std::scoped_lock lg{this->mut};
             this->errorMsg = "Error: disconnected from Server!";
             spdlog::error(this->errorMsg);
             this->isDead = true;
@@ -270,6 +275,15 @@ inline void WsClient::setOnCapturePieceCallback(const onCaptureCallback &callbac
 }
 
 /**
+ * Set the callback for handling Winner or Loser of match
+ * @param callback the callback function
+ */
+inline void WsClient::setOnWinLoseCallback(const onWinLoseCallback &callback)
+{
+    this->_onWinLoseCallback = callback;
+}
+
+/**
  * Send Protobuf response back to server
  * @param payload the request body
  * @return TRUE if sent successfully, else FALSE
@@ -315,6 +329,8 @@ inline void WsClient::runGameLoop()
             this->isDead = true;
             return;
         }
+
+        // delete oldest message
         std::scoped_lock lg(this->mut);
         this->msgBuffer.removeFirst();
 
@@ -356,6 +372,15 @@ inline void WsClient::runGameLoop()
                 this->_onCaptureCallback(basePayload.capture_payload());
             }
         }
+        else if (basePayload.has_winlose_payload())
+        {
+            if (this->_onWinLoseCallback != nullptr)
+            {
+                std::string_view fullNotice = basePayload.notice();
+                this->showWinnerPopup(fullNotice);
+                this->_onWinLoseCallback(fullNotice);
+            }
+        }
     }
 }
 
@@ -370,7 +395,7 @@ inline void WsClient::showErrorPopup()
     }
     // Always center this next dialog
     ImVec2 center = ImGui::GetMainViewport()->GetCenter();
-    ImGui::SetNextWindowPos(center, ImGuiCond_FirstUseEver, ImVec2(0.5, 0.5));
+    ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2(0.5, 0.5));
     ImGui::OpenPopup("Error", ImGuiPopupFlags_NoOpenOverExistingPopup);
     if (ImGui::BeginPopupModal("Error", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {
@@ -380,6 +405,27 @@ inline void WsClient::showErrorPopup()
         {
             ImGui::CloseCurrentPopup();
             this->resetAllStates();
+        }
+        ImGui::EndPopup();
+    }
+}
+
+/**
+ * Show winner/loser popup window.
+ */
+inline void WsClient::showWinnerPopup(std::string_view notice) const
+{
+    // Always center this next dialog
+    ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+    ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2(0.5, 0.5));
+    ImGui::OpenPopup("GameOver", ImGuiPopupFlags_NoOpenOverExistingPopup);
+    if (ImGui::BeginPopupModal("GameOver", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        ImGui::Text("%s", notice.data());
+        ImGui::Separator();
+        if (ImGui::Button("OK", ImVec2(120, 0)))
+        {
+            ImGui::CloseCurrentPopup();
         }
         ImGui::EndPopup();
     }

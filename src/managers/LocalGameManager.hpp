@@ -61,14 +61,14 @@ inline void LocalGameManager::createAllPieces()
                 if (row < 3)
                 {
                     // Half Top cells, put BLACK piece
-                    auto kete = std::make_unique<chk::Piece>(circle, chk::PieceType::Black, dist(randEngine));
-                    pieceList.emplace_back(std::move_if_noexcept(kete));
+                    auto pb = std::make_unique<chk::Piece>(circle, chk::PieceType::Black, dist(randEngine));
+                    pieceList.emplace_back(std::move_if_noexcept(pb));
                 }
                 else if (row > 4)
                 {
                     // Half Bottom cells, put RED piece
-                    auto kete = std::make_unique<chk::Piece>(circle, chk::PieceType::Red, dist(randEngine));
-                    pieceList.emplace_back(std::move_if_noexcept(kete));
+                    auto ppr = std::make_unique<chk::Piece>(circle, chk::PieceType::Red, dist(randEngine));
+                    pieceList.emplace_back(std::move_if_noexcept(ppr));
                 }
             }
         }
@@ -86,7 +86,7 @@ inline void LocalGameManager::createAllPieces()
             this->playerBlack->receivePiece(kete);
         }
     }
-    // we no longer need this
+    //SAFE. It's now useless.
     pieceList.clear();
 }
 

@@ -57,7 +57,7 @@ inline OnlineGameManager::OnlineGameManager(sf::RenderWindow *windowPtr)
     // set Listener for connection success
     this->wsClient->setOnReadyConnectedCallback(
         [this](const chk::payload::WelcomePayload &welcome, std::string_view notice) {
-            if (welcome.my_team() & TeamColor::TEAM_RED)
+            if (welcome.my_team() & chk::payload::TeamColor::TEAM_RED)
             {
                 this->myTeam = chk::PlayerType::PLAYER_RED;
                 this->isMyTurn = true;
@@ -104,17 +104,17 @@ inline void chk::OnlineGameManager::createAllPieces()
                     if (row < 3 && blackItr != payload.pieces_black().end())
                     {
                         // Half Top cells, put BLACK piece
-                        auto kete =
+                        auto pb =
                             std::make_unique<chk::Piece>(circle, chk::PieceType::Black, static_cast<short>(*blackItr));
-                        pieceList.emplace_back(std::move_if_noexcept(kete));
+                        pieceList.emplace_back(std::move_if_noexcept(pb));
                         ++blackItr;
                     }
                     else if (row > 4 && redItr != payload.pieces_red().end())
                     {
                         // Half Bottom cells, put RED piece
-                        auto kete =
+                        auto pr =
                             std::make_unique<chk::Piece>(circle, chk::PieceType::Red, static_cast<short>(*redItr));
-                        pieceList.emplace_back(std::move_if_noexcept(kete));
+                        pieceList.emplace_back(std::move_if_noexcept(pr));
                         ++redItr;
                     }
                 }
@@ -122,8 +122,7 @@ inline void chk::OnlineGameManager::createAllPieces()
         }
 
         // GIVE EACH PLAYER their own piece
-        this->matchCellsToPieces(pieceList);
-
+        GameManager::matchCellsToPieces(pieceList);
         for (auto &kete : pieceList)
         {
             if (kete->getPieceType() == chk::PieceType::Red)
@@ -135,7 +134,7 @@ inline void chk::OnlineGameManager::createAllPieces()
                 this->playerBlack->receivePiece(kete);
             }
         }
-        pieceList.clear();
+        pieceList.clear(); // safe! no longer used.
         this->startMoveListener();
         this->startCaptureListener();
         this->startDeathListener();
@@ -321,7 +320,7 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
         return;
     }
 
-    // Check for extra opportunities (for myself) NOW!
+    // Check for extra opportunities (for myself)!
     GameManager::identifyTargets(hunter);
     if (this->getForcedMoves().empty())
     {
@@ -376,7 +375,7 @@ inline void OnlineGameManager::handleCellTap(const chk::PlayerPtr &hunter, const
 }
 
 /**
- * This will be handling all UI events
+ * This will be handling all UI events.
  * @param circularBuffer stores the currently selected piece
  */
 inline void OnlineGameManager::handleEvents(chk::CircularBuffer<short> &circularBuffer)
@@ -488,7 +487,7 @@ inline void OnlineGameManager::startCaptureListener()
 }
 
 /**
- * Listening for killed connection from server
+ * Listening for killed connection & Winner notifications from server
  */
 inline void OnlineGameManager::startDeathListener()
 {
@@ -496,6 +495,11 @@ inline void OnlineGameManager::startDeathListener()
         this->updateMessage(notice);
         this->doCleanup();
     });
-}
 
+    this->wsClient->setOnWinLoseCallback([this](std::string_view notice) {
+        this->updateMessage(notice); 
+        this->isMyTurn = false;
+        this->gameReady = false;
+    });
+}
 } // namespace chk

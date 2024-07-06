@@ -1,4 +1,4 @@
--[ ] Dont allow immediate capture, if Hunter Piece just became King (wasnt king before capture)
+- [ ] Dont allow immediate capture, if Hunter Piece just became King (wasnt king before capture)
 
 ```cpp
 #include <iostream>
