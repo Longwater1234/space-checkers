@@ -333,7 +333,6 @@ inline void WsClient::runGameLoop()
         // delete oldest message
         std::scoped_lock lg(this->mut);
         this->msgBuffer.removeFirst();
-
         if (basePayload.has_welcome())
         {
             /* code */
@@ -353,7 +352,7 @@ inline void WsClient::runGameLoop()
         }
         else if (basePayload.has_exit_payload())
         {
-            std::scoped_lock lg(this->mut);
+            std::scoped_lock lg{this->mut};
             this->errorMsg = basePayload.notice();
             spdlog::error(basePayload.notice());
             this->isDead = true;
@@ -376,9 +375,8 @@ inline void WsClient::runGameLoop()
         {
             if (this->_onWinLoseCallback != nullptr)
             {
-                std::string_view fullNotice = basePayload.notice();
-                this->showWinnerPopup(fullNotice);
-                this->_onWinLoseCallback(fullNotice);
+                this->showWinnerPopup(basePayload.notice());
+                this->_onWinLoseCallback(basePayload.notice());
             }
         }
     }

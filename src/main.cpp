@@ -15,7 +15,6 @@
 
 int main()
 {
-
     GOOGLE_PROTOBUF_VERIFY_VERSION;
     auto window = sf::RenderWindow{sf::VideoMode{600, 700}, "SpaceCheckers", sf::Style::Titlebar | sf::Style::Close};
     window.setFramerateLimit(60);
