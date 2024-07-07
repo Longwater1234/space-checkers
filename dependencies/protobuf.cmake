@@ -7,11 +7,11 @@ CPMAddPackage(
   OPTIONS "ABSL_ENABLE_INSTALL ON" "ABSL_PROPAGATE_CXX_STD ON"
 ) 
 
-# Get protobuf 27.2
+# Get protobuf 27.1
 CPMAddPackage(
   NAME protobuf
-  URL  "https://github.com/protocolbuffers/protobuf/archive/refs/tags/v27.2.tar.gz"
-  VERSION 27.2
+  URL  "https://github.com/protocolbuffers/protobuf/archive/refs/tags/v27.1.tar.gz"
+  VERSION 27.1
   DOWNLOAD_EXTRACT_TIMESTAMP TRUE
   OPTIONS        "protobuf_BUILD_TESTS OFF" "protobuf_INSTALL OFF" "protobuf_BUILD_LIBPROTOC ON" 
   "protobuf_BUILD_PROTOC_BINARIES OFF" "protobuf_WITH_ZLIB ON" "protobuf_MSVC_STATIC_RUNTIME OFF"
