@@ -49,7 +49,7 @@ class WsClient final
     std::atomic_bool isConnected{false};           // if done connected to server (else, show loading)
     chk::CircularBuffer<std::string> msgBuffer{5}; // keep only recent 1 message
     mutable std::string errorMsg{};                // for any websocket errors
-    std::atomic_bool conn_clicked = false;         // if 'connect' button clicked
+    std::atomic_bool connClicked = false;          // if 'connect' button clicked
     mutable std::string protoBucket{};             // reusable buffer used for serializing payloads (as bytes)
 
     onConnectedServer _onReadyConnected;
@@ -125,7 +125,7 @@ inline void WsClient::showConnectWindow()
         {
             const char *suffix = is_secure ? "wss://" : "ws://";
             this->final_address = suffix + std::string(inputUrl);
-            this->conn_clicked = true;
+            this->connClicked = true;
             memset(inputUrl, 0, sizeof(inputUrl));
         }
         ImGui::End();
@@ -138,7 +138,7 @@ inline void WsClient::showConnectWindow()
 inline void WsClient::resetAllStates()
 {
     this->isConnected = false;
-    this->conn_clicked = false;
+    this->connClicked = false;
     this->isDead = false;
     this->errorMsg.clear();
     this->webSocketPtr->stop();
@@ -152,7 +152,7 @@ inline void WsClient::runMainLoop()
 
     // clang-format off
     if (!isConnected) {
-        if (!conn_clicked) {
+        if (!connClicked) {
            this->showConnectWindow();
         } else {
             this->tryConnect(final_address);
