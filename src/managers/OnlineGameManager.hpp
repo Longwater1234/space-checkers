@@ -202,7 +202,6 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
         spdlog::info("not successful move");
         return;
     }
-    spdlog::info("successful move");
     int sourceCellCopy = this->sourceCell.value();
     gameMap.erase(this->sourceCell.value());               // set old location empty!
     gameMap.emplace(destCell->getIndex(), currentPieceId); // fill in the new location
