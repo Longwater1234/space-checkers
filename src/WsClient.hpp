@@ -47,7 +47,7 @@ class WsClient final
     std::string final_address;                     // IP or URL of server
     std::atomic_bool isDead{false};                // if connection closed
     std::atomic_bool isConnected{false};           // if done connected to server (else, show loading)
-    chk::CircularBuffer<std::string> msgBuffer{5}; // keep only recent 1 message
+    chk::CircularBuffer<std::string> msgBuffer{1}; // keep only recent 1 message
     mutable std::string errorMsg{};                // for any websocket errors
     std::atomic_bool connClicked = false;          // if 'connect' button clicked
     mutable std::string protoBucket{};             // reusable buffer used for serializing payloads (as bytes)
@@ -330,9 +330,6 @@ inline void WsClient::runGameLoop()
             return;
         }
 
-        // delete oldest message
-        std::scoped_lock lg(this->mut);
-        this->msgBuffer.removeFirst();
         if (basePayload.has_welcome())
         {
             /* code */
@@ -379,6 +376,8 @@ inline void WsClient::runGameLoop()
                 this->_onWinLoseCallback(basePayload.notice());
             }
         }
+        std::scoped_lock lg(this->mut);
+        this->msgBuffer.clean();
     }
 }
 

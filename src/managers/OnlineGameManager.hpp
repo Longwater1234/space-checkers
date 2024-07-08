@@ -439,8 +439,8 @@ inline void OnlineGameManager::startMoveListener()
         }
         gameMap.erase(payload.source_cell());                                  // set old location empty!
         gameMap.emplace(payload.dest_cell().cell_index(), payload.piece_id()); // fill in the new location
-        std::scoped_lock lg(this->mut);                                        // lock mutex
-        GameManager::identifyTargets(myTeam);                                  // check for my opportunities
+        // std::scoped_lock lg(this->mut);                                        // lock mutex
+        GameManager::identifyTargets(myTeam); // check for my opportunities
         if (!this->getForcedMoves().empty())
         {
             spdlog::info("OPPONENT IS IN DANGER");
@@ -475,7 +475,7 @@ inline void OnlineGameManager::startCaptureListener()
         gameMap.emplace(payload.hunter_dest_cell().cell_index(), hunterPieceId); // fill in hunter new location
         myTeam->losePiece(payload.details().prey_piece_id());                    // I will lose 1 piece
 
-        std::scoped_lock lg(this->mut);      // lock mutex
+        // std::scoped_lock lg(this->mut);      // lock mutex
         GameManager::identifyTargets(other); // Check for extra opportunities NOW (for Enemy)
         if (this->getForcedMoves().empty())
         {
@@ -497,7 +497,7 @@ inline void OnlineGameManager::startDeathListener()
     });
 
     this->wsClient->setOnWinLoseCallback([this](std::string_view notice) {
-        this->updateMessage(notice); 
+        this->updateMessage(notice);
         this->isMyTurn = false;
         this->gameReady = false;
     });
