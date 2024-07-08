@@ -4,7 +4,7 @@ CPMAddPackage(
   URL  "https://github.com/abseil/abseil-cpp/archive/refs/tags/20240116.2.tar.gz"
   VERSION 20240116.2
   DOWNLOAD_EXTRACT_TIMESTAMP TRUE   
-  OPTIONS "ABSL_ENABLE_INSTALL ON"
+  OPTIONS "ABSL_ENABLE_INSTALL ON" "ABSL_PROPAGATE_CXX_STD ON"
 ) 
 
 # Get protobuf 27.1
