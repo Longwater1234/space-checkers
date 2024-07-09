@@ -231,9 +231,9 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
     movePayload->set_allocated_dest_cell(newDestCell);
 
     // finally, create Base request
-    chk::payload::BasePayload requestBody;
-    requestBody.set_allocated_move_payload(movePayload);
-    if (!this->wsClient->replyServerAsync(&requestBody))
+    auto *requestBody = new chk::payload::BasePayload();
+    requestBody->set_allocated_move_payload(movePayload);
+    if (!this->wsClient->replyServerAsync(requestBody))
     {
         spdlog::error("failed to send message to Server");
         return;
@@ -245,7 +245,7 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
 }
 
 /**
- * Perform capturing of "prey's" pieces by "hunter", then update gameMap, and notify Server
+ * Perform capturing of "prey's" pieces by me (the "hunter"), then update gameMap, and notify Server
  * @param hunter the attacking player
  * @param prey the defensive player
  * @param targetCell the destination of hunter
@@ -311,13 +311,14 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
     capturePayload->set_allocated_hunter_dest_cell(hunterDestCell);
 
     // finally create basePayload
-    chk::payload::BasePayload basePayload;
-    basePayload.set_allocated_capture_payload(capturePayload);
-    if (!this->wsClient->replyServerAsync(&basePayload))
+    auto *basePayload = new chk::payload::BasePayload();
+    basePayload->set_allocated_capture_payload(capturePayload);
+    if (!this->wsClient->replyServerAsync(basePayload))
     {
         spdlog::error("failed to send message to Server");
         return;
     }
+    delete basePayload;
 
     // Check for extra opportunities (for myself)!
     GameManager::identifyTargets(hunter);
