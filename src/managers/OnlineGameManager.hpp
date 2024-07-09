@@ -231,9 +231,9 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
     movePayload->set_allocated_dest_cell(newDestCell);
 
     // finally, create Base request
-    auto *requestBody = new chk::payload::BasePayload();
-    requestBody->set_allocated_move_payload(movePayload);
-    if (!this->wsClient->replyServerAsync(requestBody))
+    chk::payload::BasePayload requestBody;
+    requestBody.set_allocated_move_payload(movePayload);
+    if (!this->wsClient->replyServerAsync(&requestBody))
     {
         spdlog::error("failed to send message to Server");
         return;
@@ -311,9 +311,9 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
     capturePayload->set_allocated_hunter_dest_cell(hunterDestCell);
 
     // finally create basePayload
-    auto *basePayload = new chk::payload::BasePayload();
-    basePayload->set_allocated_capture_payload(capturePayload);
-    if (!this->wsClient->replyServerAsync(basePayload))
+    chk::payload::BasePayload basePayload;
+    basePayload.set_allocated_capture_payload(capturePayload);
+    if (!this->wsClient->replyServerAsync(&basePayload))
     {
         spdlog::error("failed to send message to Server");
         return;
