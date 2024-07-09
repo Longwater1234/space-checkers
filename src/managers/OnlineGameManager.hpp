@@ -318,7 +318,6 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
         spdlog::error("failed to send message to Server");
         return;
     }
-    delete basePayload;
 
     // Check for extra opportunities (for myself)!
     GameManager::identifyTargets(hunter);
