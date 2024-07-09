@@ -41,7 +41,7 @@ class WsClient final
     void setOnMovePieceCallback(const onMovePieceCallback &callback);
     void setOnCapturePieceCallback(const onCaptureCallback &callback);
     void setOnWinLoseCallback(const onWinLoseCallback &callback);
-    bool replyServerAsync(chk::payload::BasePayload *payload) const;
+    bool replyServerAsync(const chk::payload::BasePayload &payload) const;
 
   private:
     std::string final_address;                     // IP or URL of server
@@ -288,13 +288,13 @@ inline void WsClient::setOnWinLoseCallback(const onWinLoseCallback &callback)
  * @param payload the request body
  * @return TRUE if sent successfully, else FALSE
  */
-inline bool WsClient::replyServerAsync(chk::payload::BasePayload *payload) const
+inline bool WsClient::replyServerAsync(const chk::payload::BasePayload &payload) const
 {
     if (this->isDead || !this->isConnected)
     {
         return false;
     }
-    payload->SerializeToString(&this->protoBucket);
+    payload.SerializeToString(&this->protoBucket);
     const auto &result = this->webSocketPtr->sendBinary(this->protoBucket);
     return result.success;
 }
