@@ -294,9 +294,10 @@ inline bool WsClient::replyServerAsync(const chk::payload::BasePayload &payload)
     {
         return false;
     }
+    spdlog::info("SENDING {}", payload.ShortDebugString());
     payload.SerializeToString(&this->protoBucket);
     const auto &result = this->webSocketPtr->sendBinary(this->protoBucket);
-    spdlog::info("messageSent? {}", result.success);
+    //spdlog::info("messageSent? {}", result.success);
     return result.success;
 }
 
@@ -359,6 +360,7 @@ inline void WsClient::runGameLoop()
         {
             if (this->_onMovePieceCallback != nullptr)
             {
+                spdlog::warn("RECIEVE {}", basePayload.ShortDebugString());
                 this->_onMovePieceCallback(basePayload.move_payload());
             }
         }
@@ -366,6 +368,7 @@ inline void WsClient::runGameLoop()
         {
             if (this->_onCaptureCallback != nullptr)
             {
+                spdlog::warn("RECIEVE {}", basePayload.ShortDebugString());
                 this->_onCaptureCallback(basePayload.capture_payload());
             }
         }
