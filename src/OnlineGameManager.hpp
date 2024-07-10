@@ -233,7 +233,7 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
     // finally, create Base request
     chk::payload::BasePayload requestBody;
     requestBody.set_allocated_move_payload(movePayload);
-    if (!this->wsClient->replyServerAsync(&requestBody))
+    if (!this->wsClient->replyServerAsync(requestBody))
     {
         spdlog::error("failed to send message to Server");
         return;
@@ -313,7 +313,7 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
     // finally create basePayload
     chk::payload::BasePayload basePayload;
     basePayload.set_allocated_capture_payload(capturePayload);
-    if (!this->wsClient->replyServerAsync(&basePayload))
+    if (!this->wsClient->replyServerAsync(basePayload))
     {
         spdlog::error("failed to send message to Server");
         return;
