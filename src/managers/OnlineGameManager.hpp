@@ -432,9 +432,9 @@ inline void OnlineGameManager::startMoveListener()
 {
     this->wsClient->setOnMovePieceCallback([this](const chk::payload::MovePayload &payload) {
         // which color is the Opponent?
-        const chk::PlayerPtr &enemy = payload.from_team() & TeamColor::TEAM_RED ? this->playerRed : this->playerBlack;
+        const chk::PlayerPtr &enemy = payload.from_team() == TeamColor::TEAM_RED ? this->playerRed : this->playerBlack;
         // clang-format off
-        const chk::PlayerPtr &myTeam = enemy->getPlayerType() == PlayerType::PLAYER_RED ? this->playerBlack : this->playerRed; 
+        const chk::PlayerPtr &myTeam = enemy->getPlayerType() == PlayerType::PLAYER_RED ? this->playerBlack : this->playerRed;
         // clang-format on
         const auto targetPosition = sf::Vector2f{payload.dest_cell().x(), payload.dest_cell().y()};
         const bool success = enemy->movePiece(static_cast<short>(payload.piece_id()), targetPosition);
@@ -481,7 +481,8 @@ inline void OnlineGameManager::startCaptureListener()
         gameMap.erase(payload.details().hunter_src_cell());                      // set hunter's old location empty!
         gameMap.erase(payload.details().prey_cell_idx());                        // set my old location empty!
         gameMap.emplace(payload.hunter_dest_cell().cell_index(), hunterPieceId); // fill in hunter new location
-        myTeam->losePiece(payload.details().prey_piece_id());                    // I will lose 1 piece
+        short targetId = static_cast<short>(payload.details().prey_piece_id());  // cast to short
+        myTeam->losePiece(targetId);                                             // I will lose 1 piece
 
         // Check for extra opportunities NOW (for Enemy)
         GameManager::identifyTargets(other);

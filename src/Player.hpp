@@ -19,7 +19,7 @@ class Player final
     explicit Player(PlayerType player_type);
     Player() = delete;
     void receivePiece(PiecePtr &piecePtr);
-    void losePiece(const short &targetId);
+    void losePiece(const short targetId);
     [[nodiscard]] const std::unordered_map<short, chk::PiecePtr> &getOwnPieces() const;
     void showForcedPieces(const std::set<short> &hunterPieces) const;
     void emptyBasket();
@@ -63,7 +63,7 @@ inline void Player::receivePiece(chk::PiecePtr &piecePtr)
  * When a player's piece is captured, -1 from list
  * @param targetId  the captured piece Id
  */
-inline void Player::losePiece(const short &targetId)
+inline void Player::losePiece(const short targetId)
 {
     this->basket.erase(targetId);
 }
