@@ -437,13 +437,14 @@ inline void OnlineGameManager::startMoveListener()
         const chk::PlayerPtr &myTeam = enemy->getPlayerType() == PlayerType::PLAYER_RED ? this->playerBlack : this->playerRed;
         // clang-format on
         const auto targetPosition = sf::Vector2f{payload.dest_cell().x(), payload.dest_cell().y()};
-        const bool success = enemy->movePiece(static_cast<short>(payload.piece_id()), targetPosition);
+        short movingPieceId = static_cast<short>(payload.piece_id());
+        const bool success = enemy->movePiece(movingPieceId, targetPosition);
         if (!success)
         {
             return;
         }
-        gameMap.erase(payload.source_cell());                                  // set old location empty!
-        gameMap.emplace(payload.dest_cell().cell_index(), payload.piece_id()); // fill in the new location
+        gameMap.erase(payload.source_cell());                             // set old location empty!
+        gameMap.emplace(payload.dest_cell().cell_index(), movingPieceId); // fill in the new location
 
         // check for opportunities (for MYSELF)
         GameManager::identifyTargets(myTeam);

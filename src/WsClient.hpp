@@ -202,7 +202,7 @@ inline void WsClient::tryConnect(std::string_view address)
         else if (msg->type == ix::WebSocketMessageType::Close)
         {
             std::scoped_lock lg{this->mut};
-            this->errorMsg = "Error: disconnected from Server!";
+            this->errorMsg = "Error: disconnected from Server!" + msg->str;
             spdlog::error(this->errorMsg);
             this->isDead = true;
         }
@@ -374,6 +374,7 @@ inline void WsClient::runGameLoop()
             if (this->_onWinLoseCallback != nullptr)
             {
                 this->showWinnerPopup(basePayload.notice());
+                spdlog::info(basePayload.notice());
                 this->_onWinLoseCallback(basePayload.notice());
             }
         }
