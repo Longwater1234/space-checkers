@@ -50,7 +50,7 @@ class WsClient final
     chk::CircularBuffer<std::string> msgBuffer{1}; // keep only recent 1 message
     mutable std::string errorMsg{};                // for any websocket errors
     std::atomic_bool connClicked = false;          // if 'connect' button clicked
-    mutable std::string protoBucket{};             // reusable buffer used for serializing payloads (as bytes)
+    mutable std::string protoBucket{};             // reusable destination for serialized payloads (as bytes)
 
     onConnectedServer _onReadyConnected;
     onReadyStartGame _onReadyStartGame;
@@ -296,6 +296,7 @@ inline bool WsClient::replyServerAsync(const chk::payload::BasePayload &payload)
     }
     payload.SerializeToString(&this->protoBucket);
     const auto &result = this->webSocketPtr->sendBinary(this->protoBucket);
+    spdlog::info("messageSent? {}", result.success);
     return result.success;
 }
 

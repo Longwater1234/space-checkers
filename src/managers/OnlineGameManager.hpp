@@ -327,6 +327,10 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
         this->identifyTargets(prey);
         this->isMyTurn = !this->isMyTurn;
     }
+    else
+    {
+        spdlog::info("WE HAVE EXTRA TARGETS TO HUNT");
+    }
 }
 
 /**
@@ -429,7 +433,9 @@ inline void OnlineGameManager::startMoveListener()
     this->wsClient->setOnMovePieceCallback([this](const chk::payload::MovePayload &payload) {
         // which color is the Opponent?
         const chk::PlayerPtr &enemy = payload.from_team() & TeamColor::TEAM_RED ? this->playerRed : this->playerBlack;
-        const chk::PlayerPtr &myTeam = payload.from_team() & TeamColor::TEAM_RED ? this->playerBlack : this->playerRed;
+        // clang-format off
+        const chk::PlayerPtr &myTeam = enemy->getPlayerType() == PlayerType::PLAYER_RED ? this->playerBlack : this->playerRed; 
+        // clang-format on
         const auto targetPosition = sf::Vector2f{payload.dest_cell().x(), payload.dest_cell().y()};
         const bool success = enemy->movePiece(static_cast<short>(payload.piece_id()), targetPosition);
         if (!success)
@@ -438,8 +444,9 @@ inline void OnlineGameManager::startMoveListener()
         }
         gameMap.erase(payload.source_cell());                                  // set old location empty!
         gameMap.emplace(payload.dest_cell().cell_index(), payload.piece_id()); // fill in the new location
-        // std::scoped_lock lg(this->mut);                                        // lock mutex
-        GameManager::identifyTargets(myTeam); // check for my opportunities
+
+        // check for opportunities (for MYSELF)
+        GameManager::identifyTargets(myTeam);
         if (!this->getForcedMoves().empty())
         {
             spdlog::info("OPPONENT IS IN DANGER");
@@ -457,9 +464,11 @@ inline void OnlineGameManager::startMoveListener()
 inline void OnlineGameManager::startCaptureListener()
 {
     this->wsClient->setOnCapturePieceCallback([this](const chk::payload::CapturePayload &payload) {
-        // which color is the Opponent?
+        // which color is my Opponent?
         const chk::PlayerPtr &other = payload.from_team() & TeamColor::TEAM_RED ? this->playerRed : this->playerBlack;
-        const chk::PlayerPtr &myTeam = payload.from_team() & TeamColor::TEAM_RED ? this->playerBlack : this->playerRed;
+        // clang-format off
+        const chk::PlayerPtr &myTeam = other->getPlayerType() == PlayerType::PLAYER_RED ? this->playerBlack : this->playerRed;
+        // clang-format on
         const auto targetCell = sf::Vector2f{payload.hunter_dest_cell().x(), payload.hunter_dest_cell().y()};
         const auto hunterPieceId = static_cast<short>(payload.hunter_piece_id());
 
@@ -474,11 +483,11 @@ inline void OnlineGameManager::startCaptureListener()
         gameMap.emplace(payload.hunter_dest_cell().cell_index(), hunterPieceId); // fill in hunter new location
         myTeam->losePiece(payload.details().prey_piece_id());                    // I will lose 1 piece
 
-        // std::scoped_lock lg(this->mut);      // lock mutex
-        GameManager::identifyTargets(other); // Check for extra opportunities NOW (for Enemy)
+        // Check for extra opportunities NOW (for Enemy)
+        GameManager::identifyTargets(other);
         if (this->getForcedMoves().empty())
         {
-            // NO MORE JUMPS AVAILABLE. SWITCH TURNS to opponent
+            // NO MORE JUMPS AVAILABLE. SWITCH TURNS to myself.
             this->identifyTargets(myTeam);
             this->isMyTurn = !this->isMyTurn;
         }
