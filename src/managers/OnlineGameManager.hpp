@@ -288,28 +288,29 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
         }
     }
 
-    // prepare to send to server:
-    auto *capturePayload = new chk::payload::CapturePayload();
-    capturePayload->set_hunter_piece_id(copyHunterPiece);
-    capturePayload->set_from_team(TeamColor::TEAM_RED);
-    if (this->myTeam == chk::PlayerType::PLAYER_BLACK)
-    {
-        capturePayload->set_from_team(TeamColor::TEAM_BLACK);
-    }
     // prey details
     auto *details = new chk::payload::CapturePayload_TargetDetails();
     details->set_hunter_src_cell(copySrcCell);
     details->set_prey_cell_idx(copyPreyCell);
     details->set_prey_piece_id(copyPreyPieceId);
-    capturePayload->set_allocated_details(details);
 
     // hunter landing cell
     auto *hunterDestCell = new chk::payload::CapturePayload_HunterDestCell();
     hunterDestCell->set_cell_index(targetCell->getIndex());
     hunterDestCell->set_x(targetCell->getPos().x);
     hunterDestCell->set_y(targetCell->getPos().y);
-    capturePayload->set_allocated_hunter_dest_cell(hunterDestCell);
 
+    // prepare to send to server:
+    auto *capturePayload = new chk::payload::CapturePayload();
+    capturePayload->set_hunter_piece_id(copyHunterPiece);
+    capturePayload->set_allocated_details(details);
+    capturePayload->set_allocated_hunter_dest_cell(hunterDestCell);
+    capturePayload->set_from_team(TeamColor::TEAM_RED);
+    if (this->myTeam == chk::PlayerType::PLAYER_BLACK)
+    {
+        capturePayload->set_from_team(TeamColor::TEAM_BLACK);
+    }
+    
     // finally create basePayload
     chk::payload::BasePayload basePayload;
     basePayload.set_allocated_capture_payload(capturePayload);
