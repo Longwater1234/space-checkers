@@ -37,7 +37,6 @@ class OnlineGameManager final : public chk::GameManager
     std::unique_ptr<chk::WsClient> wsClient = nullptr;
     std::atomic_bool isMyTurn = false;
     std::atomic_bool gameReady = false;
-    std::mutex mut;
     void startMoveListener();
     void startCaptureListener();
     void startDeathListener();

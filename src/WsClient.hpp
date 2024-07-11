@@ -80,7 +80,7 @@ inline chk::WsClient::WsClient()
     // once dead, DO NOT try reconnect
     this->webSocketPtr->disableAutomaticReconnection();
     // ping server every 20 seconds
-    this->webSocketPtr->setPingInterval(20);
+    // this->webSocketPtr->setPingInterval(20);
 
     ix::SocketTLSOptions tlsOptions;
 #ifndef _WIN32
@@ -295,9 +295,8 @@ inline bool WsClient::replyServerAsync(const chk::payload::BasePayload &payload)
         return false;
     }
     spdlog::info("SENDING {}", payload.ShortDebugString());
-    payload.SerializeToString(&this->protoBucket);
-    const auto &result = this->webSocketPtr->sendBinary(this->protoBucket);
-    //spdlog::info("messageSent? {}", result.success);
+    // payload.SerializeToString(&this->protoBucket);
+    const auto &result = this->webSocketPtr->sendBinary(payload.SerializeAsString());
     return result.success;
 }
 
