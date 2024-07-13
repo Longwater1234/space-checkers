@@ -214,7 +214,7 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
     }
 
     // prepare to send to SERVER
-    auto *newDestCell = new chk::payload::MovePayload_DestCell();
+    auto *newDestCell = new chk::payload::MovePayload_Detination();
     newDestCell->set_cell_index(destCell->getIndex());
     newDestCell->set_x(destCell->getPos().x);
     newDestCell->set_y(destCell->getPos().y);
@@ -228,7 +228,7 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
     {
         movePayload->set_from_team(TeamColor::TEAM_BLACK);
     }
-    movePayload->set_allocated_dest_cell(newDestCell);
+    movePayload->set_allocated_destination(newDestCell);
 
     // finally, create Base request
     chk::payload::BasePayload requestBody;
@@ -295,7 +295,7 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
     details->set_prey_piece_id(copyPreyPieceId);
 
     // hunter landing cell
-    auto *hunterDestCell = new chk::payload::CapturePayload_HunterDestCell();
+    auto *hunterDestCell = new chk::payload::CapturePayload_HunterDestination();
     hunterDestCell->set_cell_index(targetCell->getIndex());
     hunterDestCell->set_x(targetCell->getPos().x);
     hunterDestCell->set_y(targetCell->getPos().y);
@@ -304,7 +304,7 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
     auto *capturePayload = new chk::payload::CapturePayload();
     capturePayload->set_hunter_piece_id(copyHunterPiece);
     capturePayload->set_allocated_details(details);
-    capturePayload->set_allocated_hunter_dest_cell(hunterDestCell);
+    capturePayload->set_allocated_destination(hunterDestCell);
     capturePayload->set_from_team(TeamColor::TEAM_RED);
     if (this->myTeam == chk::PlayerType::PLAYER_BLACK)
     {
@@ -437,7 +437,7 @@ inline void OnlineGameManager::startMoveListener()
         // clang-format off
         const chk::PlayerPtr &myTeam = enemy->getPlayerType() == PlayerType::PLAYER_RED ? this->playerBlack : this->playerRed;
         // clang-format on
-        const auto targetPosition = sf::Vector2f{payload.dest_cell().x(), payload.dest_cell().y()};
+        const auto targetPosition = sf::Vector2f{payload.destination().x(), payload.destination().y()};
         short movingPieceId = static_cast<short>(payload.piece_id());
         const bool success = enemy->movePiece(movingPieceId, targetPosition);
         if (!success)
@@ -445,7 +445,7 @@ inline void OnlineGameManager::startMoveListener()
             return;
         }
         gameMap.erase(payload.source_cell());                             // set old location empty!
-        gameMap.emplace(payload.dest_cell().cell_index(), movingPieceId); // fill in the new location
+        gameMap.emplace(payload.destination().cell_index(), movingPieceId); // fill in the new location
 
         // check for opportunities (for MYSELF)
         GameManager::identifyTargets(myTeam);
@@ -455,7 +455,7 @@ inline void OnlineGameManager::startMoveListener()
         }
 
         this->isMyTurn = !this->isMyTurn; // toggle player turns
-        this->updateMessage("Opponent moved to " + std::to_string(payload.dest_cell().cell_index()) +
+        this->updateMessage("Opponent moved to " + std::to_string(payload.destination().cell_index()) +
                             ". It's your turn.");
     });
 }
@@ -471,7 +471,7 @@ inline void OnlineGameManager::startCaptureListener()
         // clang-format off
         const chk::PlayerPtr &myTeam = other->getPlayerType() == PlayerType::PLAYER_RED ? this->playerBlack : this->playerRed;
         // clang-format on
-        const auto targetCell = sf::Vector2f{payload.hunter_dest_cell().x(), payload.hunter_dest_cell().y()};
+        const auto targetCell = sf::Vector2f{payload.destination().x(), payload.destination().y()};
         const auto hunterPieceId = static_cast<short>(payload.hunter_piece_id());
 
         if (!other->captureEnemyWith(hunterPieceId, targetCell))
@@ -482,7 +482,7 @@ inline void OnlineGameManager::startCaptureListener()
         this->updateMessage(other->getName() + " has captured your piece!");
         gameMap.erase(payload.details().hunter_src_cell());                      // set hunter's old location empty!
         gameMap.erase(payload.details().prey_cell_idx());                        // set my old location empty!
-        gameMap.emplace(payload.hunter_dest_cell().cell_index(), hunterPieceId); // fill in hunter new location
+        gameMap.emplace(payload.destination().cell_index(), hunterPieceId); // fill in hunter new location
         short targetId = static_cast<short>(payload.details().prey_piece_id());  // cast to short
         myTeam->losePiece(targetId);                                             // I will lose 1 piece
 
