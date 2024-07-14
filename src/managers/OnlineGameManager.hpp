@@ -57,7 +57,7 @@ inline OnlineGameManager::OnlineGameManager(sf::RenderWindow *windowPtr)
     // set Listener for connection success
     this->wsClient->setOnReadyConnectedCallback(
         [this](const chk::payload::WelcomePayload &welcome, std::string_view notice) {
-            if (welcome.my_team() & chk::payload::TeamColor::TEAM_RED)
+            if (welcome.my_team() == chk::payload::TeamColor::TEAM_RED)
             {
                 this->myTeam = chk::PlayerType::PLAYER_RED;
                 this->isMyTurn = true;
