@@ -433,8 +433,8 @@ inline void OnlineGameManager::startMoveListener()
 {
     this->wsClient->setOnMovePieceCallback([this](const chk::payload::MovePayload &payload) {
         // which color is the Opponent?
-        const chk::PlayerPtr &enemy = payload.from_team() == TeamColor::TEAM_RED ? this->playerRed : this->playerBlack;
         // clang-format off
+        const chk::PlayerPtr &enemy = payload.from_team() == TeamColor::TEAM_RED ? this->playerRed : this->playerBlack;
         const chk::PlayerPtr &myTeam = enemy->getPlayerType() == PlayerType::PLAYER_RED ? this->playerBlack : this->playerRed;
         // clang-format on
         const auto targetPosition = sf::Vector2f{payload.destination().x(), payload.destination().y()};
@@ -467,8 +467,8 @@ inline void OnlineGameManager::startCaptureListener()
 {
     this->wsClient->setOnCapturePieceCallback([this](const chk::payload::CapturePayload &payload) {
         // which color is my Opponent?
-        const chk::PlayerPtr &other = payload.from_team() & TeamColor::TEAM_RED ? this->playerRed : this->playerBlack;
         // clang-format off
+        const chk::PlayerPtr &other = payload.from_team() == TeamColor::TEAM_RED ? this->playerRed : this->playerBlack;
         const chk::PlayerPtr &myTeam = other->getPlayerType() == PlayerType::PLAYER_RED ? this->playerBlack : this->playerRed;
         // clang-format on
         const auto targetCell = sf::Vector2f{payload.destination().x(), payload.destination().y()};
