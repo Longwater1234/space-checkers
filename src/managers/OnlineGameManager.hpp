@@ -310,7 +310,7 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
     {
         capturePayload->set_from_team(TeamColor::TEAM_BLACK);
     }
-    
+
     // finally create basePayload
     chk::payload::BasePayload basePayload;
     basePayload.set_allocated_capture_payload(capturePayload);
@@ -444,7 +444,7 @@ inline void OnlineGameManager::startMoveListener()
         {
             return;
         }
-        gameMap.erase(payload.source_cell());                             // set old location empty!
+        gameMap.erase(payload.source_cell());                               // set old location empty!
         gameMap.emplace(payload.destination().cell_index(), movingPieceId); // fill in the new location
 
         // check for opportunities (for MYSELF)
@@ -480,11 +480,11 @@ inline void OnlineGameManager::startCaptureListener()
         }
 
         this->updateMessage(other->getName() + " has captured your piece!");
-        gameMap.erase(payload.details().hunter_src_cell());                      // set hunter's old location empty!
-        gameMap.erase(payload.details().prey_cell_idx());                        // set my old location empty!
-        gameMap.emplace(payload.destination().cell_index(), hunterPieceId); // fill in hunter new location
-        short targetId = static_cast<short>(payload.details().prey_piece_id());  // cast to short
-        myTeam->losePiece(targetId);                                             // I will lose 1 piece
+        gameMap.erase(payload.details().hunter_src_cell());                     // set hunter's old location empty!
+        gameMap.erase(payload.details().prey_cell_idx());                       // set my old location empty!
+        gameMap.emplace(payload.destination().cell_index(), hunterPieceId);     // fill in hunter new location
+        short targetId = static_cast<short>(payload.details().prey_piece_id()); // cast to short
+        myTeam->losePiece(targetId);                                            // I will lose 1 piece
 
         // Check for extra opportunities NOW (for Enemy)
         GameManager::identifyTargets(other);

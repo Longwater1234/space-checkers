@@ -357,9 +357,9 @@ bool GameManager::boardContainsCell(const int &cell_idx) const
 }
 
 /**
- * \brief Whether the given cell index is NOT on any edge of board
- * \param cell_idx cell index
- * \return TRUE if NOT on edges, else FALSE
+ * Whether the given cell index is NOT on any edge of board
+ * @param cell_idx cell index
+ * @return TRUE if NOT on edges, else FALSE
  */
 bool GameManager::awayFromEdge(const int &cell_idx) const
 {
