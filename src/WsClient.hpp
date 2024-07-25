@@ -41,16 +41,16 @@ class WsClient final
     void setOnMovePieceCallback(const onMovePieceCallback &callback);
     void setOnCapturePieceCallback(const onCaptureCallback &callback);
     void setOnWinLoseCallback(const onWinLoseCallback &callback);
-    bool replyServerAsync(chk::payload::BasePayload *payload) const;
+    bool replyServerAsync(const chk::payload::BasePayload &payload) const;
 
   private:
     std::string final_address;                     // IP or URL of server
     std::atomic_bool isDead{false};                // if connection closed
     std::atomic_bool isConnected{false};           // if done connected to server (else, show loading)
-    chk::CircularBuffer<std::string> msgBuffer{5}; // keep only recent 1 message
+    chk::CircularBuffer<std::string> msgBuffer{1}; // keep only recent 1 message
     mutable std::string errorMsg{};                // for any websocket errors
-    std::atomic_bool conn_clicked = false;         // if 'connect' button clicked
-    mutable std::string protoBucket{};             // reusable buffer used for serializing payloads (as bytes)
+    std::atomic_bool connClicked = false;          // if 'connect' button clicked
+    mutable std::string protoBucket{};             // reusable destination for serialized payloads (as bytes)
 
     onConnectedServer _onReadyConnected;
     onReadyStartGame _onReadyStartGame;
@@ -80,7 +80,7 @@ inline chk::WsClient::WsClient()
     // once dead, DO NOT try reconnect
     this->webSocketPtr->disableAutomaticReconnection();
     // ping server every 20 seconds
-    this->webSocketPtr->setPingInterval(20);
+    // this->webSocketPtr->setPingInterval(20);
 
     ix::SocketTLSOptions tlsOptions;
 #ifndef _WIN32
@@ -125,7 +125,7 @@ inline void WsClient::showConnectWindow()
         {
             const char *suffix = is_secure ? "wss://" : "ws://";
             this->final_address = suffix + std::string(inputUrl);
-            this->conn_clicked = true;
+            this->connClicked = true;
             memset(inputUrl, 0, sizeof(inputUrl));
         }
         ImGui::End();
@@ -138,7 +138,7 @@ inline void WsClient::showConnectWindow()
 inline void WsClient::resetAllStates()
 {
     this->isConnected = false;
-    this->conn_clicked = false;
+    this->connClicked = false;
     this->isDead = false;
     this->errorMsg.clear();
     this->webSocketPtr->stop();
@@ -152,7 +152,7 @@ inline void WsClient::runMainLoop()
 
     // clang-format off
     if (!isConnected) {
-        if (!conn_clicked) {
+        if (!connClicked) {
            this->showConnectWindow();
         } else {
             this->tryConnect(final_address);
@@ -202,7 +202,7 @@ inline void WsClient::tryConnect(std::string_view address)
         else if (msg->type == ix::WebSocketMessageType::Close)
         {
             std::scoped_lock lg{this->mut};
-            this->errorMsg = "Error: disconnected from Server!";
+            this->errorMsg = "Error: disconnected from Server!" + msg->str;
             spdlog::error(this->errorMsg);
             this->isDead = true;
         }
@@ -288,14 +288,15 @@ inline void WsClient::setOnWinLoseCallback(const onWinLoseCallback &callback)
  * @param payload the request body
  * @return TRUE if sent successfully, else FALSE
  */
-inline bool WsClient::replyServerAsync(chk::payload::BasePayload *payload) const
+inline bool WsClient::replyServerAsync(const chk::payload::BasePayload &payload) const
 {
     if (this->isDead || !this->isConnected)
     {
         return false;
     }
-    payload->SerializeToString(&this->protoBucket);
-    const auto &result = this->webSocketPtr->sendBinary(this->protoBucket);
+    spdlog::info("SENDING {}", payload.ShortDebugString());
+    // payload.SerializeToString(&this->protoBucket);
+    const auto &result = this->webSocketPtr->sendBinary(payload.SerializeAsString());
     return result.success;
 }
 
@@ -330,9 +331,6 @@ inline void WsClient::runGameLoop()
             return;
         }
 
-        // delete oldest message
-        std::scoped_lock lg(this->mut);
-        this->msgBuffer.removeFirst();
         if (basePayload.has_welcome())
         {
             /* code */
@@ -361,6 +359,7 @@ inline void WsClient::runGameLoop()
         {
             if (this->_onMovePieceCallback != nullptr)
             {
+                spdlog::warn("RECIEVE {}", basePayload.ShortDebugString());
                 this->_onMovePieceCallback(basePayload.move_payload());
             }
         }
@@ -368,6 +367,7 @@ inline void WsClient::runGameLoop()
         {
             if (this->_onCaptureCallback != nullptr)
             {
+                spdlog::warn("RECIEVE {}", basePayload.ShortDebugString());
                 this->_onCaptureCallback(basePayload.capture_payload());
             }
         }
@@ -376,9 +376,12 @@ inline void WsClient::runGameLoop()
             if (this->_onWinLoseCallback != nullptr)
             {
                 this->showWinnerPopup(basePayload.notice());
+                spdlog::info(basePayload.notice());
                 this->_onWinLoseCallback(basePayload.notice());
             }
         }
+        std::scoped_lock lg(this->mut);
+        this->msgBuffer.clean();
     }
 }
 

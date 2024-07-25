@@ -257,7 +257,7 @@ void GameManager::updateMatchStatus(const chk::PlayerPtr &p1, const chk::PlayerP
     {
         this->gameOver = true;
         const std::string &winnerName = p1Count > p2Count ? p1->getName() : p2->getName();
-        this->updateMessage("GAME OVER! " + winnerName + " won!");
+        this->updateMessage("GAME OVER! " + winnerName + " wins!");
     }
 }
 
@@ -357,9 +357,9 @@ bool GameManager::boardContainsCell(const int &cell_idx) const
 }
 
 /**
- * \brief Whether the given cell index is NOT on any edge of board
- * \param cell_idx cell index
- * \return TRUE if NOT on edges, else FALSE
+ * Whether the given cell index is NOT on any edge of board
+ * @param cell_idx cell index
+ * @return TRUE if NOT on edges, else FALSE
  */
 bool GameManager::awayFromEdge(const int &cell_idx) const
 {

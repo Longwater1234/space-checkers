@@ -73,7 +73,7 @@ inline void LocalGameManager::createAllPieces()
             }
         }
     }
-    this->matchCellsToPieces(pieceList);
+    GameManager::matchCellsToPieces(pieceList);
     // GIVE EACH PLAYER their own piece
     for (auto &kete : pieceList)
     {
@@ -86,7 +86,7 @@ inline void LocalGameManager::createAllPieces()
             this->playerBlack->receivePiece(kete);
         }
     }
-    //SAFE. It's now useless.
+    // SAFE. It's now useless.
     pieceList.clear();
 }
 
