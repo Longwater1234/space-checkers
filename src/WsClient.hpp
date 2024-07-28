@@ -28,8 +28,6 @@ using onCaptureCallback = std::function<void(const chk::payload::CapturePayload 
 // when we got a winner or loser
 using onWinLoseCallback = std::function<void(std::string_view notice)>;
 
-constexpr std::array serverList = {"checkers-backend-705n.onrender.com/game"};
-
 /**
  * This handles all websocket exchanges with Server
  */
@@ -72,6 +70,7 @@ class WsClient final
     void showConnectWindow();
     void showPublicServerWindow();
     void resetAllStates();
+    const std::array<const char *, 1> serverList = {"checkers-backend-705n.onrender.com/game"};
 };
 
 inline chk::WsClient::WsClient()
@@ -121,7 +120,7 @@ inline void WsClient::showConnectWindow()
 
     if (showPublic)
     {
-         // =================== PUBLIC SERVERS ===============================
+        // =================== PUBLIC SERVERS ===============================
         ImGui::SetNextWindowSize(ImVec2(sf::Vector2f(300.0, 300.0)));
         if (ImGui::Begin("Public Servers", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse))
         {
@@ -131,11 +130,10 @@ inline void WsClient::showConnectWindow()
             if (ImGui::Button("Connect", ImVec2{100.0f, 0}))
             {
                 const char *suffix = "wss://";
-                ImGui::Text(serverList.at(item_current));
-                // this->final_address = suffix + std::string(items[item_current]);
-                // this->connClicked = true;
+                this->final_address = suffix + std::string(serverList.at(item_current));
+                this->connClicked = true;
             }
-            if (ImGui::Button("Enter Private Server", ImVec2{150.0f, 0}))
+            if (ImGui::Button("My Private Server >", ImVec2{150.0f, 0}))
             {
                 showPublic = false;
             }
@@ -160,7 +158,7 @@ inline void WsClient::showConnectWindow()
             this->connClicked = true;
             memset(inputUrl, 0, sizeof(inputUrl));
         }
-        if (ImGui::Button("Show Public Servers", ImVec2{150.0f, 0}))
+        if (ImGui::Button("< Go Back", ImVec2{100.0f, 0}))
         {
             showPublic = true;
         }
