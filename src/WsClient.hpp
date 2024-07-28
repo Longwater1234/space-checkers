@@ -1,6 +1,7 @@
 #pragma once
 #include "CircularBuffer.hpp"
 #include "payloads/base_payload.pb.hpp"
+#include <array>
 #include <atomic>
 #include <ixwebsocket/IXNetSystem.h>
 #include <ixwebsocket/IXWebSocket.h>
@@ -26,6 +27,8 @@ using onMovePieceCallback = std::function<void(const chk::payload::MovePayload &
 using onCaptureCallback = std::function<void(const chk::payload::CapturePayload &)>;
 // when we got a winner or loser
 using onWinLoseCallback = std::function<void(std::string_view notice)>;
+
+constexpr std::array serverList = {"checkers-backend-705n.onrender.com/game"};
 
 /**
  * This handles all websocket exchanges with Server
@@ -62,11 +65,12 @@ class WsClient final
     std::mutex mut;
     std::unique_ptr<ix::WebSocket> webSocketPtr = nullptr; // our Websocket object
     void showErrorPopup();                                 // whenver there is an error (from server)
-    void showWinnerPopup(std::string_view notice) const;   // when server notifies about winner
+    void showWinnerPopup(std::string_view notice);         // when server notifies about winner
     void runGameLoop();
     static void showHint(const char *tip);
     void tryConnect(std::string_view address);
     void showConnectWindow();
+    void showPublicServerWindow();
     void resetAllStates();
 };
 
@@ -107,15 +111,43 @@ inline void WsClient::showHint(const char *tip)
 }
 
 /**
- * Show the imgui connection window, for server address
+ * Show the imgui connection window, for private server address input
  * @return TRUE if CONNECT button is clicked, else FALSE
  */
 inline void WsClient::showConnectWindow()
 {
     static bool is_secure = false;
+    static bool showPublic = true;
+
+    if (showPublic)
+    {
+         // =================== PUBLIC SERVERS ===============================
+        ImGui::SetNextWindowSize(ImVec2(sf::Vector2f(300.0, 300.0)));
+        if (ImGui::Begin("Public Servers", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse))
+        {
+            const char *locations[] = {"Franfurt - Germany"};
+            static int item_current = 0;
+            ImGui::ListBox("Select One", &item_current, locations, IM_ARRAYSIZE(locations), 4);
+            if (ImGui::Button("Connect", ImVec2{100.0f, 0}))
+            {
+                const char *suffix = "wss://";
+                ImGui::Text(serverList.at(item_current));
+                // this->final_address = suffix + std::string(items[item_current]);
+                // this->connClicked = true;
+            }
+            if (ImGui::Button("Enter Private Server", ImVec2{180.0f, 0}))
+            {
+                showPublic = false;
+            }
+            ImGui::End();
+        }
+        return;
+    }
+
+    // =================== PRIVATE SERVERS ===============================
     ImGui::SetNextWindowSize(ImVec2(sf::Vector2f(300.0, 300.0)));
     static char inputUrl[256] = "127.0.0.1:9876/game";
-    if (ImGui::Begin("Connect Window", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse))
+    if (ImGui::Begin("Private Server", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse))
     {
         ImGui::InputText("Server IP", inputUrl, IM_ARRAYSIZE(inputUrl), ImGuiInputTextFlags_CharsNoBlank);
         ImGui::SameLine();
@@ -127,6 +159,33 @@ inline void WsClient::showConnectWindow()
             this->final_address = suffix + std::string(inputUrl);
             this->connClicked = true;
             memset(inputUrl, 0, sizeof(inputUrl));
+        }
+        if (ImGui::Button("Show Public Servers", ImVec2{150.0f, 0}))
+        {
+            showPublic = true;
+        }
+        ImGui::End();
+    }
+}
+
+/**
+ * Show list of public game servers, using imgui ListBox
+ */
+inline void WsClient::showPublicServerWindow()
+{
+    ImGui::SetNextWindowSize(ImVec2(sf::Vector2f(300.0, 300.0)));
+    if (ImGui::Begin("Public Servers", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse))
+    {
+        const char *locations[] = {"Franfurt - Germany"};
+        static int item_current = 0;
+        ImGui::ListBox("Select One", &item_current, locations, IM_ARRAYSIZE(locations), 4);
+
+        if (ImGui::Button("Connect", ImVec2{100.0f, 0}))
+        {
+            const char *suffix = "wss://";
+            ImGui::Text(serverList.at(item_current));
+            // this->final_address = suffix + std::string(items[item_current]);
+            // this->connClicked = true;
         }
         ImGui::End();
     }
@@ -414,7 +473,7 @@ inline void WsClient::showErrorPopup()
 /**
  * Show winner/loser popup window.
  */
-inline void WsClient::showWinnerPopup(std::string_view notice) const
+inline void WsClient::showWinnerPopup(std::string_view notice)
 {
     // Always center this next dialog
     ImVec2 center = ImGui::GetMainViewport()->GetCenter();
@@ -427,6 +486,7 @@ inline void WsClient::showWinnerPopup(std::string_view notice) const
         if (ImGui::Button("OK", ImVec2(120, 0)))
         {
             ImGui::CloseCurrentPopup();
+            this->resetAllStates();
         }
         ImGui::EndPopup();
     }
