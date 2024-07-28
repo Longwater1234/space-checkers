@@ -171,22 +171,23 @@ inline void WsClient::showConnectWindow()
  */
 inline void WsClient::showPublicServerWindow()
 {
-    ImGui::SetNextWindowSize(ImVec2(sf::Vector2f(300.0, 300.0)));
-    if (ImGui::Begin("Public Servers", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse))
-    {
-        const char *locations[] = {"Franfurt - Germany"};
-        static int item_current = 0;
-        ImGui::ListBox("Select One", &item_current, locations, IM_ARRAYSIZE(locations), 4);
-
-        if (ImGui::Button("Connect", ImVec2{100.0f, 0}))
-        {
-            const char *suffix = "wss://";
-            ImGui::Text(serverList.at(item_current));
-            // this->final_address = suffix + std::string(items[item_current]);
-            // this->connClicked = true;
-        }
-        ImGui::End();
-    }
+    //{
+    //    ImGui::SetNextWindowSize(ImVec2(sf::Vector2f(300.0, 300.0)));
+    //    if (ImGui::Begin("Public Servers", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse))
+    //    {
+    //        const char *locations[] = {"Franfurt - Germany"};
+    //        static int item_current = 0;
+    //        ImGui::ListBox("Select One", &item_current, locations, IM_ARRAYSIZE(locations), 4);
+    //
+    //        if (ImGui::Button("Connect", ImVec2{100.0f, 0}))
+    //        {
+    //            const char *suffix = "wss://";
+    //            ImGui::Text(serverList.at(item_current));
+    //            // this->final_address = suffix + std::string(items[item_current]);
+    //            // this->connClicked = true;
+    //        }
+    //        ImGui::End();
+    //    }
 }
 
 /**
@@ -240,7 +241,8 @@ inline void WsClient::tryConnect(std::string_view address)
     {
         ImGui::SetNextWindowSize(ImVec2(sf::Vector2f{400.0, 100.0}));
         ImGui::Begin("Loading", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
-        ImGui::Text("Connecting to %s", this->final_address.c_str());
+        // ImGui::Text("Connecting to %s", this->final_address.c_str());
+        ImGui::Text("Connecting to online server");
         ImGui::End();
     }
 
