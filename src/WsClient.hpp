@@ -135,7 +135,7 @@ inline void WsClient::showConnectWindow()
                 // this->final_address = suffix + std::string(items[item_current]);
                 // this->connClicked = true;
             }
-            if (ImGui::Button("Enter Private Server", ImVec2{180.0f, 0}))
+            if (ImGui::Button("Enter Private Server", ImVec2{150.0f, 0}))
             {
                 showPublic = false;
             }
