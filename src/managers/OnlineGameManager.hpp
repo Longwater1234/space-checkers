@@ -199,7 +199,6 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
     const bool success = player->movePiece(currentPieceId, destCell->getPos());
     if (!success)
     {
-        spdlog::info("not successful move");
         return;
     }
     int sourceCellCopy = this->sourceCell.value();

@@ -1,4 +1,4 @@
-#include "CircularBuffer.hpp"
+﻿#include "CircularBuffer.hpp"
 #include "MainMenu.hpp"
 #include "ResourcePath.hpp"
 #include "managers/LocalGameManager.hpp"

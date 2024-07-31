@@ -124,7 +124,7 @@ inline void WsClient::showConnectWindow()
         ImGui::SetNextWindowSize(ImVec2(sf::Vector2f(300.0, 300.0)));
         if (ImGui::Begin("Public Servers", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse))
         {
-            const char *locations[] = {"Franfurt - Germany"};
+            const char *locations[] = {"Frankfurt - Germany"};
             static int item_current = 0;
             ImGui::ListBox("Select One", &item_current, locations, IM_ARRAYSIZE(locations), 4);
             if (ImGui::Button("Connect", ImVec2{100.0f, 0}))
