@@ -89,7 +89,7 @@ class GameManager
     [[nodiscard]] const bool &isGameOver() const;
     void setSourceCell(int src_cell);
     void doCleanup();
-    void identifyTargets(const chk::PlayerPtr &hunter);
+    void identifyTargets(const chk::PlayerPtr &hunter, bool onlySingle =false);
     virtual void handleMovePiece(const chk::PlayerPtr &player, const chk::PlayerPtr &opponent, const Block &destCell,
                                  const short &currentPieceId);
     virtual void handleCapturePiece(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,

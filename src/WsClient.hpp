@@ -84,7 +84,6 @@ inline chk::WsClient::WsClient()
     this->webSocketPtr->disableAutomaticReconnection();
     // ping server every 20 seconds
     // this->webSocketPtr->setPingInterval(20);
-
     ix::SocketTLSOptions tlsOptions;
 #ifndef _WIN32
     // Currently system CAs are not supported on non-Windows platforms with mbedtls

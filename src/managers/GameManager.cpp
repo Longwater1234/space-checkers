@@ -233,7 +233,7 @@ void GameManager::matchCellsToPieces(const std::vector<chk::PiecePtr> &pieceList
     {
         for (const auto &cell : this->blockList)
         {
-            if (cell->getIndex() != -1 && cell->containsOrigin(piece->getPosition()))
+            if (cell->getIndex() != -1 && cell->isAtPosition(piece->getPosition()))
             {
                 this->gameMap.emplace(cell->getIndex(), piece->getId());
             }
@@ -371,10 +371,11 @@ bool GameManager::awayFromEdge(const int &cell_idx) const
 }
 
 /**
- * Collect all possible next "forced captures" for this hunter. Loop entire board once.
+ * Collect all possible next "forced captures" for this hunter.
  * @param hunter Current player
+ * @param onlySingle if set TRUE, only check around SINGLE cell. Else, loop ENTIRE board
  */
-void GameManager::identifyTargets(const PlayerPtr &hunter)
+void GameManager::identifyTargets(const PlayerPtr &hunter, bool onlySingle = false)
 {
     this->forcedMoves.clear();
     for (const auto &cell_ptr : this->blockList)

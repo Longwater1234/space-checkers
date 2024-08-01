@@ -208,8 +208,8 @@ inline bool Piece::moveSimple(const sf::Vector2f &destPos)
         return false;
     }
 
-    this->myCircle.setPosition(destPos.x, destPos.y);
-    this->setPosition(myCircle.getPosition());
+    this->move(sf::Vector2f{deltaX, deltaY});
+    this->myCircle.setPosition(this->getPosition());
     if ((this->pieceType == PieceType::Red && destPos.y == 0) ||
         (this->pieceType == PieceType::Black && destPos.y == 7 * chk::SIZE_CELL))
     {
@@ -241,8 +241,8 @@ inline bool Piece::moveCapture(const sf::Vector2f &destPos)
         return false;
     }
 
-    this->myCircle.setPosition(destPos.x, destPos.y);
-    this->setPosition(myCircle.getPosition());
+    this->move(sf::Vector2f{deltaX, deltaY});
+    this->myCircle.setPosition(this->getPosition());
     if ((this->pieceType == PieceType::Red && destPos.y == 0) ||
         (this->pieceType == PieceType::Black && destPos.y == 7 * chk::SIZE_CELL))
     {
