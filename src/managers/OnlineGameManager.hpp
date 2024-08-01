@@ -320,7 +320,7 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
     }
 
     // Check for extra opportunities (for myself)!
-    GameManager::identifyTargets(hunter);
+    GameManager::identifyTargets(hunter, targetCell.get());
     if (this->getForcedMoves().empty())
     {
         // NO MORE JUMPS AVAILABLE. SWITCH TURNS to opponent

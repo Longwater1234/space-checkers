@@ -25,7 +25,7 @@ class Cell final : public sf::Drawable
 
   private:
     sf::RectangleShape rec;
-    int index; // Darker cells have index in range [1..32]. Lighter cells are all -1
+    int index; // Darker cells have index in range [1~32]. Lighter cells are all -1
     bool isEvenRow = false;
     sf::Vector2f cell_pos;
     sf::Text sfText;
