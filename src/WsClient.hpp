@@ -28,6 +28,9 @@ using onCaptureCallback = std::function<void(const chk::payload::CapturePayload 
 // when we got a winner or loser
 using onWinLoseCallback = std::function<void(std::string_view notice)>;
 
+// Game server list
+constexpr std::array serverList = {"wss://checkers-backend-705n.onrender.com/game", "ws://47.121.206.10/game"};
+
 /**
  * This handles all websocket exchanges with Server
  */
@@ -70,7 +73,6 @@ class WsClient final
     void showConnectWindow();
     void showPublicServerWindow();
     void resetAllStates();
-    const std::array<const char *, 1> serverList = {"checkers-backend-705n.onrender.com/game"};
 };
 
 inline chk::WsClient::WsClient()
@@ -123,13 +125,13 @@ inline void WsClient::showConnectWindow()
         ImGui::SetNextWindowSize(ImVec2(sf::Vector2f(300.0, 300.0)));
         if (ImGui::Begin("Public Servers", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse))
         {
-            const char *locations[] = {"Frankfurt - Germany"};
+            const char *locations[] = {"Frankfurt - Germany", "Heyuan - China"};
             static int item_current = 0;
             ImGui::ListBox("Select One", &item_current, locations, IM_ARRAYSIZE(locations), 4);
             if (ImGui::Button("Connect", ImVec2{100.0f, 0}))
             {
-                const char *suffix = "wss://";
-                this->final_address = suffix + std::string(serverList.at(item_current));
+                // const char *suffix = "wss://";
+                this->final_address = serverList.at(item_current);
                 this->connClicked = true;
             }
             if (ImGui::Button("My Private Server >", ImVec2{150.0f, 0}))
