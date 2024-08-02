@@ -5,6 +5,7 @@ include(zlib.cmake)
 include(mbedtls.cmake)
 include(ixwebsocket.cmake)
 include(spdlog.cmake)
+include(simdjson.cmake)
 include(protobuf.cmake)
 
 # GET ImGui 1.90.8
