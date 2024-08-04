@@ -4,9 +4,11 @@
 #include "payloads/base_payload.pb.hpp"
 #include <array>
 #include <atomic>
+#include <ixwebsocket/IXHttpClient.h>
 #include <ixwebsocket/IXNetSystem.h>
 #include <ixwebsocket/IXWebSocket.h>
 #include <mutex>
+#include <simdjson.h>
 #include <spdlog/spdlog.h>
 #include <string>
 
@@ -74,6 +76,7 @@ class WsClient final
     void tryConnect(std::string_view address);
     void showConnectWindow();
     void showPublicServerWindow(bool &showPublic);
+    void prefetchPublicServers();
     void resetAllStates();
 };
 
@@ -86,14 +89,16 @@ inline chk::WsClient::WsClient()
     this->webSocketPtr->setHandshakeTimeout(10);
     // once dead, DO NOT try reconnect
     this->webSocketPtr->disableAutomaticReconnection();
-    // ping server every 20 seconds
-    // this->webSocketPtr->setPingInterval(20);
+    // ping server every 30 seconds
+    this->webSocketPtr->setPingInterval(30);
     ix::SocketTLSOptions tlsOptions;
 #ifndef _WIN32
     // Currently system CAs are not supported on non-Windows platforms with mbedtls
     tlsOptions.caFile = "NONE";
 #endif // _WIN32
     this->webSocketPtr->setTLSOptions(tlsOptions);
+    // prefetch for public server list
+    this->prefetchPublicServers();
 }
 
 /**
@@ -176,6 +181,52 @@ inline void WsClient::showPublicServerWindow(bool &showPublic)
         }
         ImGui::End();
     }
+}
+
+/**
+ * Fetch public servers JSON list from central storage (updated regularly)
+ */
+inline void WsClient::prefetchPublicServers()
+{
+    static bool is_async = true;
+    static ix::HttpClient httpClient(is_async);
+    const char *url = "https://d1txhef4jwuosv.cloudfront.net/server_locations.json";
+    auto args = httpClient.createRequest(url, ix::HttpClient::kGet);
+
+    httpClient.performRequest(args, [this](const ix::HttpResponsePtr &response) {
+        int statusCode = response->statusCode; // acess results
+        if (statusCode != 200)
+        {
+            spdlog::error("http request failed. Reason {}", response->errorMsg);
+            std::scoped_lock lg(this->mut);
+            this->errorMsg = response->errorMsg;
+            this->isDead = true;
+            return;
+        }
+
+        spdlog::info(response->body);
+        simdjson::dom::parser jsonParser;
+        try
+        {
+            simdjson::dom::array jsonArray = jsonParser.parse(response->body);
+            this->serverLocations.clear();
+            for (const simdjson::dom::object &elem : jsonArray)
+            {
+                chk::ServerLocation location;
+                location.name = elem.at_key("name").get_c_str();
+                location.address = elem.at_key("address").get_c_str();
+                this->serverLocations.emplace_back(location);
+            }
+        }
+        catch (const simdjson::simdjson_error &ex)
+        {
+            std::scoped_lock lg(this->mut);
+            this->errorMsg = ex.what();
+            this->isDead = true;
+        }
+
+        // response->body is empty if onChunkCallback was used
+    });
 }
 
 /**
