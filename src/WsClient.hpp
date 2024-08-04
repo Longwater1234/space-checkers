@@ -1,5 +1,6 @@
 #pragma once
 #include "CircularBuffer.hpp"
+#include "ServerLocation.hpp"
 #include "payloads/base_payload.pb.hpp"
 #include <array>
 #include <atomic>
@@ -48,13 +49,14 @@ class WsClient final
     bool replyServerAsync(const chk::payload::BasePayload &payload) const;
 
   private:
-    std::string final_address;                     // IP or URL of server
-    std::atomic_bool isDead{false};                // if connection closed
-    std::atomic_bool isConnected{false};           // if done connected to server (else, show loading)
-    chk::CircularBuffer<std::string> msgBuffer{1}; // keep only recent 1 message
-    mutable std::string errorMsg{};                // for any websocket errors
-    std::atomic_bool connClicked = false;          // if 'connect' button clicked
-    mutable std::string protoBucket{};             // reusable destination for serialized payloads (as bytes)
+    std::string final_address;                        // IP or URL of private server (input by User)
+    std::atomic_bool isDead{false};                   // if connection closed
+    std::atomic_bool isConnected{false};              // if done connected to server (else, show loading)
+    chk::CircularBuffer<std::string> msgBuffer{1};    // keep only recent 1 message
+    mutable std::string errorMsg{};                   // for any websocket errors
+    std::atomic_bool connClicked = false;             // if 'connect' button clicked
+    mutable std::string protoBucket{};                // reusable destination for serialized payloads (as bytes)
+    std::vector<chk::ServerLocation> serverLocations; // list of available servers (dyamically fetched)
 
     onConnectedServer _onReadyConnected;
     onReadyStartGame _onReadyStartGame;
@@ -71,7 +73,7 @@ class WsClient final
     static void showHint(const char *tip);
     void tryConnect(std::string_view address);
     void showConnectWindow();
-    void showPublicServerWindow();
+    void showPublicServerWindow(bool &showPublic);
     void resetAllStates();
 };
 
@@ -121,25 +123,7 @@ inline void WsClient::showConnectWindow()
 
     if (showPublic)
     {
-        // =================== PUBLIC SERVERS ===============================
-        ImGui::SetNextWindowSize(ImVec2(sf::Vector2f(300.0, 300.0)));
-        if (ImGui::Begin("Public Servers", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse))
-        {
-            const char *locations[] = {"Frankfurt - Germany", "Heyuan - China"};
-            static int item_current = 0;
-            ImGui::ListBox("Select One", &item_current, locations, IM_ARRAYSIZE(locations), 4);
-            if (ImGui::Button("Connect", ImVec2{100.0f, 0}))
-            {
-                // const char *suffix = "wss://";
-                this->final_address = serverList.at(item_current);
-                this->connClicked = true;
-            }
-            if (ImGui::Button("My Private Server >", ImVec2{150.0f, 0}))
-            {
-                showPublic = false;
-            }
-            ImGui::End();
-        }
+        this->showPublicServerWindow(showPublic);
         return;
     }
 
@@ -169,26 +153,29 @@ inline void WsClient::showConnectWindow()
 
 /**
  * Show list of public game servers, using imgui ListBox
+ * @param showPublic switch for showing/hiding this window
  */
-inline void WsClient::showPublicServerWindow()
+inline void WsClient::showPublicServerWindow(bool &showPublic)
 {
-    //{
-    //    ImGui::SetNextWindowSize(ImVec2(sf::Vector2f(300.0, 300.0)));
-    //    if (ImGui::Begin("Public Servers", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse))
-    //    {
-    //        const char *locations[] = {"Franfurt - Germany"};
-    //        static int item_current = 0;
-    //        ImGui::ListBox("Select One", &item_current, locations, IM_ARRAYSIZE(locations), 4);
-    //
-    //        if (ImGui::Button("Connect", ImVec2{100.0f, 0}))
-    //        {
-    //            const char *suffix = "wss://";
-    //            ImGui::Text(serverList.at(item_current));
-    //            // this->final_address = suffix + std::string(items[item_current]);
-    //            // this->connClicked = true;
-    //        }
-    //        ImGui::End();
-    //    }
+    // =================== PUBLIC SERVERS ===============================
+    ImGui::SetNextWindowSize(ImVec2(sf::Vector2f(300.0, 300.0)));
+    if (ImGui::Begin("Public Servers", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse))
+    {
+        const char *locations[] = {"Frankfurt - Germany", "Heyuan - China"};
+        static int item_current = 0;
+        ImGui::ListBox("Select One", &item_current, locations, IM_ARRAYSIZE(locations), 4);
+        if (ImGui::Button("Connect", ImVec2{100.0f, 0}))
+        {
+            // const char *suffix = "wss://";
+            this->final_address = serverList.at(item_current);
+            this->connClicked = true;
+        }
+        if (ImGui::Button("My Private Server >", ImVec2{150.0f, 0}))
+        {
+            showPublic = false;
+        }
+        ImGui::End();
+    }
 }
 
 /**
