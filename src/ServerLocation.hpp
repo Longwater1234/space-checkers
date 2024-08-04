@@ -3,7 +3,9 @@
 #include <string>
 namespace chk
 {
-
+/**
+ * For storing public servers
+ */
 struct ServerLocation
 {
     std::string name{};

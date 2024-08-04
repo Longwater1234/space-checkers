@@ -2,9 +2,7 @@
 #include "CircularBuffer.hpp"
 #include "ServerLocation.hpp"
 #include "payloads/base_payload.pb.hpp"
-#include <array>
 #include <atomic>
-#include <future>
 #include <ixwebsocket/IXHttpClient.h>
 #include <ixwebsocket/IXNetSystem.h>
 #include <ixwebsocket/IXWebSocket.h>
@@ -31,9 +29,6 @@ using onMovePieceCallback = std::function<void(const chk::payload::MovePayload &
 using onCaptureCallback = std::function<void(const chk::payload::CapturePayload &)>;
 // when we got a winner or loser
 using onWinLoseCallback = std::function<void(std::string_view notice)>;
-
-// Game server list
-constexpr std::array serverList = {"wss://checkers-backend-705n.onrender.com/game", "ws://47.121.206.10/game"};
 
 /**
  * This handles all websocket exchanges with Server
@@ -180,9 +175,7 @@ inline void WsClient::showPublicServerWindow(bool &showPublic)
 
                 // Set the initial focus
                 if (is_selected)
-                {
                     ImGui::SetItemDefaultFocus();
-                }
             }
             ImGui::EndListBox();
         }
@@ -200,7 +193,8 @@ inline void WsClient::showPublicServerWindow(bool &showPublic)
 }
 
 /**
- * Fetch public servers JSON list from central storage (updated regularly)
+ * Fetch public servers JSON list from central storage (which is updated regularly)
+ * @see https://machinezone.github.io/IXWebSocket/usage/#http-client-api
  */
 inline void WsClient::prefetchPublicServers()
 {
@@ -208,10 +202,9 @@ inline void WsClient::prefetchPublicServers()
     const char *url = "https://d1txhef4jwuosv.cloudfront.net/ws_server_locations.json";
     auto args = httpClient.createRequest(url, ix::HttpClient::kGet);
 
-    ix::HttpResponsePtr response = httpClient.get(url, args); // blocking call (async has bugs)
+    ix::HttpResponsePtr response = httpClient.get(url, args); // blocking call (Async is buggy!)
 
     int statusCode = response->statusCode;
-    spdlog::info(response->description);
     if (statusCode != 200)
     {
         spdlog::error("http request failed. Reason {}", response->errorMsg);
@@ -229,7 +222,7 @@ inline void WsClient::prefetchPublicServers()
         std::scoped_lock lg(this->mut);
         for (const simdjson::dom::object &elem : jsonArray)
         {
-            chk::ServerLocation location;
+            chk::ServerLocation location{};
             location.name = elem.at_key("name").get_c_str();
             location.address = elem.at_key("address").get_c_str();
             this->publicServers.emplace_back(location);
