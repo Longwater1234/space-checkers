@@ -119,7 +119,7 @@ inline void WsClient::showHint(const char *tip)
 inline void WsClient::showConnectWindow()
 {
     static bool is_secure = false;
-    static bool showPublic = false;
+    static bool showPublic = true;
 
     if (showPublic)
     {
