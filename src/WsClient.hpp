@@ -212,7 +212,7 @@ inline void WsClient::prefetchPublicServers()
             this->serverLocations.clear();
             for (const simdjson::dom::object &elem : jsonArray)
             {
-                chk::ServerLocation location;
+                chk::ServerLocation location{};
                 location.name = elem.at_key("name").get_c_str();
                 location.address = elem.at_key("address").get_c_str();
                 this->serverLocations.emplace_back(location);

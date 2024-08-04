@@ -1,12 +1,12 @@
 #pragma once
-#include <string>
+// Created by Davis on 2024-08-04
 namespace chk
 {
 
 struct ServerLocation
 {
-    std::string name{};
-    std::string address{};
+    const char *name;
+    const char *address;
 };
 
 } // namespace chk
