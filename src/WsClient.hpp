@@ -52,14 +52,14 @@ class WsClient final
     bool replyServerAsync(const chk::payload::BasePayload &payload) const;
 
   private:
-    std::string final_address;                        // IP or URL of private server (input by User)
-    std::atomic_bool isDead{false};                   // if connection closed
-    std::atomic_bool isConnected{false};              // if done connected to server (else, show loading)
-    chk::CircularBuffer<std::string> msgBuffer{1};    // keep only recent 1 message
-    mutable std::string errorMsg{};                   // for any websocket errors
-    std::atomic_bool connClicked = false;             // if 'connect' button clicked
-    mutable std::string protoBucket{};                // reusable destination for serialized payloads (as bytes)
-    std::vector<chk::ServerLocation> serverLocations; // list of public servers (fetched from CDN)
+    std::string final_address;                      // IP or URL of private server (input by User)
+    std::atomic_bool isDead{false};                 // if connection closed
+    std::atomic_bool isConnected{false};            // if done connected to server (else, show loading)
+    chk::CircularBuffer<std::string> msgBuffer{1};  // keep only recent 1 message
+    mutable std::string errorMsg{};                 // for any websocket errors
+    std::atomic_bool connClicked = false;           // if 'connect' button clicked
+    mutable std::string protoBucket{};              // reusable destination for serialized payloads (as bytes)
+    std::vector<chk::ServerLocation> publicServers; // list of public servers (fetched from CDN)
 
     onConnectedServer _onReadyConnected;
     onReadyStartGame _onReadyStartGame;
@@ -170,10 +170,10 @@ inline void WsClient::showPublicServerWindow(bool &showPublic)
         static int current_idx = 0;
         if (ImGui::BeginListBox("Select One"))
         {
-            for (int i = 0; i < serverLocations.size(); i++)
+            for (int i = 0; i < publicServers.size(); i++)
             {
                 const bool is_selected = (i == current_idx);
-                if (ImGui::Selectable(serverLocations.at(i).name.c_str(), is_selected))
+                if (ImGui::Selectable(publicServers.at(i).name.c_str(), is_selected))
                 {
                     current_idx = i;
                 }
@@ -188,7 +188,7 @@ inline void WsClient::showPublicServerWindow(bool &showPublic)
         }
         if (ImGui::Button("Connect", ImVec2{100.0f, 0}))
         {
-            this->final_address = serverLocations.at(current_idx).address;
+            this->final_address = publicServers.at(current_idx).address;
             this->connClicked = true;
         }
         if (ImGui::Button("My Private Server >", ImVec2{150.0f, 0}))
@@ -232,7 +232,7 @@ inline void WsClient::prefetchPublicServers()
             chk::ServerLocation location;
             location.name = elem.at_key("name").get_c_str();
             location.address = elem.at_key("address").get_c_str();
-            this->serverLocations.emplace_back(location);
+            this->publicServers.emplace_back(location);
         }
     }
     catch (const simdjson::simdjson_error &ex)
