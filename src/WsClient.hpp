@@ -167,24 +167,22 @@ inline void WsClient::showPublicServerWindow(bool &showPublic)
     ImGui::SetNextWindowSize(ImVec2(sf::Vector2f(300.0, 300.0)));
     if (ImGui::Begin("Public Servers", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse))
     {
-        // const char *locations[] = {"Frankfurt - Germany", "Heyuan - China"};
-        static int current_idx = 0; // Here we store our selection data as an index.
+        static int current_idx = 0;
         if (ImGui::BeginListBox("Select One"))
         {
-            int i = 0;
-            for (const auto &item : this->serverLocations)
+            for (int i = 0; i < serverLocations.size(); i++)
             {
-                const bool is_selected = item.is_current;
-                if (ImGui::Selectable(item.name, item.is_current))
+                const bool is_selected = (i == current_idx);
+                if (ImGui::Selectable(serverLocations.at(i).name.c_str(), is_selected))
                 {
                     current_idx = i;
                 }
 
-                // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+                // Set the initial focus
                 if (is_selected)
+                {
                     ImGui::SetItemDefaultFocus();
-
-                i++;
+                }
             }
             ImGui::EndListBox();
         }
@@ -206,27 +204,24 @@ inline void WsClient::showPublicServerWindow(bool &showPublic)
  */
 inline void WsClient::prefetchPublicServers()
 {
-    bool is_async = true;
     ix::HttpClient httpClient;
     const char *url = "https://d1txhef4jwuosv.cloudfront.net/ws_server_locations.json";
     auto args = httpClient.createRequest(url, ix::HttpClient::kGet);
-    args->connectTimeout = 10; // seconds
 
-    ix::HttpResponsePtr response = httpClient.get(url, args); //blocking
+    ix::HttpResponsePtr response = httpClient.get(url, args); // blocking call (async has bugs)
 
-    // httpClient.performRequest(args, [this](const ix::HttpResponsePtr &response) {
     int statusCode = response->statusCode;
     spdlog::info(response->description);
     if (statusCode != 200)
     {
         spdlog::error("http request failed. Reason {}", response->errorMsg);
-        // std::scoped_lock lg(this->mut);
+        std::scoped_lock lg(this->mut);
         this->errorMsg = response->errorMsg;
         this->isDead = true;
         return;
     }
 
-    spdlog::info("hello {}", response->body);
+    spdlog::info("response {}", response->body);
     simdjson::dom::parser jsonParser;
     try
     {
@@ -234,7 +229,6 @@ inline void WsClient::prefetchPublicServers()
         std::scoped_lock lg(this->mut);
         for (const simdjson::dom::object &elem : jsonArray)
         {
-
             chk::ServerLocation location;
             location.name = elem.at_key("name").get_c_str();
             location.address = elem.at_key("address").get_c_str();
@@ -247,7 +241,7 @@ inline void WsClient::prefetchPublicServers()
         this->errorMsg = ex.what();
         this->isDead = true;
     }
-    //  });
+    //   });
 }
 
 /**

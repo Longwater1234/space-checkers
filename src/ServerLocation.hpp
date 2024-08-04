@@ -1,13 +1,13 @@
 #pragma once
 // Created by Davis on 2024-08-04
+#include <string>
 namespace chk
 {
 
 struct ServerLocation
 {
-    const char* name;
-    const char* address;
-    bool is_current = false;
+    std::string name{};
+    std::string address{};
 };
 
 } // namespace chk
