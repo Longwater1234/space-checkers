@@ -115,7 +115,6 @@ inline void WsClient::showHint(const char *tip)
 
 /**
  * Show the imgui connection window, for private server address input
- * @return TRUE if CONNECT button is clicked, else FALSE
  */
 inline void WsClient::showConnectWindow()
 {
