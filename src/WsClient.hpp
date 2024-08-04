@@ -4,6 +4,7 @@
 #include "payloads/base_payload.pb.hpp"
 #include <array>
 #include <atomic>
+#include <future>
 #include <ixwebsocket/IXHttpClient.h>
 #include <ixwebsocket/IXNetSystem.h>
 #include <ixwebsocket/IXWebSocket.h>
@@ -58,7 +59,7 @@ class WsClient final
     mutable std::string errorMsg{};                   // for any websocket errors
     std::atomic_bool connClicked = false;             // if 'connect' button clicked
     mutable std::string protoBucket{};                // reusable destination for serialized payloads (as bytes)
-    std::vector<chk::ServerLocation> serverLocations; // list of available servers (dyamically fetched)
+    std::vector<chk::ServerLocation> serverLocations; // list of public servers (fetched from CDN)
 
     onConnectedServer _onReadyConnected;
     onReadyStartGame _onReadyStartGame;
@@ -124,7 +125,7 @@ inline void WsClient::showHint(const char *tip)
 inline void WsClient::showConnectWindow()
 {
     static bool is_secure = false;
-    static bool showPublic = true;
+    static bool showPublic = false;
 
     if (showPublic)
     {
@@ -166,13 +167,30 @@ inline void WsClient::showPublicServerWindow(bool &showPublic)
     ImGui::SetNextWindowSize(ImVec2(sf::Vector2f(300.0, 300.0)));
     if (ImGui::Begin("Public Servers", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse))
     {
-        const char *locations[] = {"Frankfurt - Germany", "Heyuan - China"};
-        static int item_current = 0;
-        ImGui::ListBox("Select One", &item_current, locations, IM_ARRAYSIZE(locations), 4);
+        // const char *locations[] = {"Frankfurt - Germany", "Heyuan - China"};
+        static int current_idx = 0; // Here we store our selection data as an index.
+        if (ImGui::BeginListBox("Select One"))
+        {
+            int i = 0;
+            for (const auto &item : this->serverLocations)
+            {
+                const bool is_selected = item.is_current;
+                if (ImGui::Selectable(item.name, item.is_current))
+                {
+                    current_idx = i;
+                }
+
+                // Set the initial focus when opening the combo (scrolling + keyboard navigation focus)
+                if (is_selected)
+                    ImGui::SetItemDefaultFocus();
+
+                i++;
+            }
+            ImGui::EndListBox();
+        }
         if (ImGui::Button("Connect", ImVec2{100.0f, 0}))
         {
-            // const char *suffix = "wss://";
-            this->final_address = serverList.at(item_current);
+            this->final_address = serverLocations.at(current_idx).address;
             this->connClicked = true;
         }
         if (ImGui::Button("My Private Server >", ImVec2{150.0f, 0}))
@@ -188,45 +206,48 @@ inline void WsClient::showPublicServerWindow(bool &showPublic)
  */
 inline void WsClient::prefetchPublicServers()
 {
-    static bool is_async = true;
-    static ix::HttpClient httpClient(is_async);
-    const char *url = "https://d1txhef4jwuosv.cloudfront.net/server_locations.json";
+    bool is_async = true;
+    ix::HttpClient httpClient;
+    const char *url = "https://d1txhef4jwuosv.cloudfront.net/ws_server_locations.json";
     auto args = httpClient.createRequest(url, ix::HttpClient::kGet);
+    args->connectTimeout = 10; // seconds
 
-    httpClient.performRequest(args, [this](const ix::HttpResponsePtr &response) {
-        int statusCode = response->statusCode; // acess results
-        if (statusCode != 200)
-        {
-            spdlog::error("http request failed. Reason {}", response->errorMsg);
-            std::scoped_lock lg(this->mut);
-            this->errorMsg = response->errorMsg;
-            this->isDead = true;
-            return;
-        }
+    ix::HttpResponsePtr response = httpClient.get(url, args); //blocking
 
-        spdlog::info(response->body);
-        simdjson::dom::parser jsonParser;
-        try
-        {
-            simdjson::dom::array jsonArray = jsonParser.parse(response->body);
-            this->serverLocations.clear();
-            for (const simdjson::dom::object &elem : jsonArray)
-            {
-                chk::ServerLocation location{};
-                location.name = elem.at_key("name").get_c_str();
-                location.address = elem.at_key("address").get_c_str();
-                this->serverLocations.emplace_back(location);
-            }
-        }
-        catch (const simdjson::simdjson_error &ex)
-        {
-            std::scoped_lock lg(this->mut);
-            this->errorMsg = ex.what();
-            this->isDead = true;
-        }
+    // httpClient.performRequest(args, [this](const ix::HttpResponsePtr &response) {
+    int statusCode = response->statusCode;
+    spdlog::info(response->description);
+    if (statusCode != 200)
+    {
+        spdlog::error("http request failed. Reason {}", response->errorMsg);
+        // std::scoped_lock lg(this->mut);
+        this->errorMsg = response->errorMsg;
+        this->isDead = true;
+        return;
+    }
 
-        // response->body is empty if onChunkCallback was used
-    });
+    spdlog::info("hello {}", response->body);
+    simdjson::dom::parser jsonParser;
+    try
+    {
+        simdjson::dom::array jsonArray = jsonParser.parse(response->body);
+        std::scoped_lock lg(this->mut);
+        for (const simdjson::dom::object &elem : jsonArray)
+        {
+
+            chk::ServerLocation location;
+            location.name = elem.at_key("name").get_c_str();
+            location.address = elem.at_key("address").get_c_str();
+            this->serverLocations.emplace_back(location);
+        }
+    }
+    catch (const simdjson::simdjson_error &ex)
+    {
+        std::scoped_lock lg(this->mut);
+        this->errorMsg = ex.what();
+        this->isDead = true;
+    }
+    //  });
 }
 
 /**

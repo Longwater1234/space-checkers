@@ -5,8 +5,9 @@ namespace chk
 
 struct ServerLocation
 {
-    const char *name;
-    const char *address;
+    const char* name;
+    const char* address;
+    bool is_current = false;
 };
 
 } // namespace chk
