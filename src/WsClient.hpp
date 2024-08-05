@@ -44,7 +44,7 @@ class WsClient final
     void setOnMovePieceCallback(const onMovePieceCallback &callback);
     void setOnCapturePieceCallback(const onCaptureCallback &callback);
     void setOnWinLoseCallback(const onWinLoseCallback &callback);
-    bool replyServerAsync(const chk::payload::BasePayload &payload) const;
+    bool replyServer(const chk::payload::BasePayload &payload) const;
 
   private:
     std::string final_address;                      // IP or URL of private server (input by User)
@@ -398,7 +398,7 @@ inline void WsClient::setOnWinLoseCallback(const onWinLoseCallback &callback)
  * @param payload the request body
  * @return TRUE if sent successfully, else FALSE
  */
-inline bool WsClient::replyServerAsync(const chk::payload::BasePayload &payload) const
+inline bool WsClient::replyServer(const chk::payload::BasePayload &payload) const
 {
     if (this->isDead || !this->isConnected)
     {
