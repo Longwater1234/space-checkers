@@ -183,6 +183,11 @@ inline void WsClient::showPublicServerWindow(bool &showPublic)
             this->final_address = publicServers.at(current_idx).address;
             this->connClicked = true;
         }
+        ImGui::SameLine();
+        if (ImGui::Button("Refresh", ImVec2{90.0f, 0}))
+        {
+            this->prefetchPublicServers();
+        }
         if (ImGui::Button("My Private Server >", ImVec2{150.0f, 0}))
         {
             showPublic = false;
@@ -207,7 +212,7 @@ inline void WsClient::prefetchPublicServers()
     if (statusCode != 200)
     {
         spdlog::error("http request failed. Reason {}", response->errorMsg);
-        //std::scoped_lock lg(this->mut);
+        // std::scoped_lock lg(this->mut);
         this->errorMsg = response->errorMsg;
         this->isDead = true;
         return;
@@ -218,7 +223,7 @@ inline void WsClient::prefetchPublicServers()
     try
     {
         simdjson::dom::array jsonArray = jsonParser.parse(response->body);
-        //std::scoped_lock lg(this->mut);
+        // std::scoped_lock lg(this->mut);
         for (const simdjson::dom::object &elem : jsonArray)
         {
             chk::ServerLocation location{};
