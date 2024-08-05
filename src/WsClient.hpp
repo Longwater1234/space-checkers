@@ -178,12 +178,12 @@ inline void WsClient::showPublicServerWindow(bool &showPublic)
             }
             ImGui::EndListBox();
         }
-        if (ImGui::Button("Connect", ImVec2{100.0f, 0}))
+        if (!publicServers.empty() && ImGui::Button("Connect", ImVec2{100.0f, 0}))
         {
             this->final_address = publicServers.at(current_idx).address;
             this->connClicked = true;
         }
-        ImGui::SameLine();
+        publicServers.empty() ? ImGui::NewLine() : ImGui::SameLine();
         if (ImGui::Button("Refresh", ImVec2{90.0f, 0}))
         {
             this->prefetchPublicServers();
@@ -202,43 +202,44 @@ inline void WsClient::showPublicServerWindow(bool &showPublic)
  */
 inline void WsClient::prefetchPublicServers()
 {
-    ix::HttpClient httpClient;
+    ix::HttpClient httpClient{true};
     const char *url = "https://d1txhef4jwuosv.cloudfront.net/ws_server_locations.json";
     auto args = httpClient.createRequest(url, ix::HttpClient::kGet);
 
-    ix::HttpResponsePtr response = httpClient.get(url, args); // blocking call (Async is buggy!)
+    //   ix::HttpResponsePtr response = httpClient.get(url, args); // blocking call (Async is buggy!)
 
-    int statusCode = response->statusCode;
-    if (statusCode != 200)
-    {
-        spdlog::error("http request failed. Reason {}", response->errorMsg);
-        // std::scoped_lock lg(this->mut);
-        this->errorMsg = response->errorMsg;
-        this->isDead = true;
-        return;
-    }
-
-    spdlog::info("response {}", response->body);
-    simdjson::dom::parser jsonParser;
-    try
-    {
-        simdjson::dom::array jsonArray = jsonParser.parse(response->body);
-        // std::scoped_lock lg(this->mut);
-        for (const simdjson::dom::object &elem : jsonArray)
+    httpClient.performRequest(args, [this](const ix::HttpResponsePtr &response) {
+        int statusCode = response->statusCode;
+        if (statusCode != 200)
         {
-            chk::ServerLocation location{};
-            location.name = elem.at_key("name").get_c_str();
-            location.address = elem.at_key("address").get_c_str();
-            this->publicServers.emplace_back(location);
+            spdlog::error("http request failed. Reason {}", response->errorMsg);
+            std::scoped_lock lg(this->mut);
+            this->errorMsg = response->errorMsg;
+            this->isDead = true;
+            return;
         }
-    }
-    catch (const simdjson::simdjson_error &ex)
-    {
-        std::scoped_lock lg(this->mut);
-        this->errorMsg = ex.what();
-        this->isDead = true;
-    }
-    //   });
+
+        spdlog::info("response {}", response->body);
+        simdjson::dom::parser jsonParser;
+        try
+        {
+            simdjson::dom::array jsonArray = jsonParser.parse(response->body);
+            std::scoped_lock lg(this->mut);
+            for (const simdjson::dom::object &elem : jsonArray)
+            {
+                chk::ServerLocation location{};
+                location.name = elem.at_key("name").get_c_str();
+                location.address = elem.at_key("address").get_c_str();
+                this->publicServers.emplace_back(location);
+            }
+        }
+        catch (const simdjson::simdjson_error &ex)
+        {
+            std::scoped_lock lg(this->mut);
+            this->errorMsg = ex.what();
+            this->isDead = true;
+        }
+    });
 }
 
 /**
