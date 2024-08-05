@@ -53,7 +53,6 @@ class WsClient final
     chk::CircularBuffer<std::string> msgBuffer{1};  // keep only recent 1 message
     mutable std::string errorMsg{};                 // for any websocket errors
     std::atomic_bool connClicked = false;           // if 'connect' button clicked
-    mutable std::string protoBucket{};              // reusable destination for serialized payloads (as bytes)
     std::vector<chk::ServerLocation> publicServers; // list of public servers (fetched from CDN)
 
     onConnectedServer _onReadyConnected;
@@ -202,10 +201,10 @@ inline void WsClient::showPublicServerWindow(bool &showPublic)
  */
 inline void WsClient::prefetchPublicServers()
 {
-    ix::HttpClient httpClient{true};
+    ix::HttpClient httpClient;
     const char *url = "https://d1txhef4jwuosv.cloudfront.net/ws_server_locations.json";
     auto args = httpClient.createRequest(url, ix::HttpClient::kGet);
-    
+
     ix::HttpResponsePtr response = httpClient.get(url, args); // blocking call (Async is buggy!)
 
     // httpClient.performRequest(args, [this](const ix::HttpResponsePtr &response) {
@@ -406,7 +405,6 @@ inline bool WsClient::replyServerAsync(const chk::payload::BasePayload &payload)
         return false;
     }
     spdlog::info("SENDING {}", payload.ShortDebugString());
-    // payload.SerializeToString(&this->protoBucket);
     const auto &result = this->webSocketPtr->sendBinary(payload.SerializeAsString());
     return result.success;
 }
