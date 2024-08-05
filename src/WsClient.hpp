@@ -205,41 +205,41 @@ inline void WsClient::prefetchPublicServers()
     ix::HttpClient httpClient{true};
     const char *url = "https://d1txhef4jwuosv.cloudfront.net/ws_server_locations.json";
     auto args = httpClient.createRequest(url, ix::HttpClient::kGet);
+    
+    ix::HttpResponsePtr response = httpClient.get(url, args); // blocking call (Async is buggy!)
 
-    //   ix::HttpResponsePtr response = httpClient.get(url, args); // blocking call (Async is buggy!)
+    // httpClient.performRequest(args, [this](const ix::HttpResponsePtr &response) {
+    int statusCode = response->statusCode;
+    if (statusCode != 200)
+    {
+        spdlog::error("http request failed. Reason {}", response->errorMsg);
+        // std::scoped_lock lg(this->mut);
+        this->errorMsg = response->errorMsg;
+        this->isDead = true;
+        return;
+    }
 
-    httpClient.performRequest(args, [this](const ix::HttpResponsePtr &response) {
-        int statusCode = response->statusCode;
-        if (statusCode != 200)
+    spdlog::info("response {}", response->body);
+    simdjson::dom::parser jsonParser;
+    try
+    {
+        simdjson::dom::array jsonArray = jsonParser.parse(response->body);
+        // std::scoped_lock lg(this->mut);
+        for (const simdjson::dom::object &elem : jsonArray)
         {
-            spdlog::error("http request failed. Reason {}", response->errorMsg);
-            std::scoped_lock lg(this->mut);
-            this->errorMsg = response->errorMsg;
-            this->isDead = true;
-            return;
+            chk::ServerLocation location{};
+            location.name = elem.at_key("name").get_c_str();
+            location.address = elem.at_key("address").get_c_str();
+            this->publicServers.emplace_back(location);
         }
-
-        spdlog::info("response {}", response->body);
-        simdjson::dom::parser jsonParser;
-        try
-        {
-            simdjson::dom::array jsonArray = jsonParser.parse(response->body);
-            std::scoped_lock lg(this->mut);
-            for (const simdjson::dom::object &elem : jsonArray)
-            {
-                chk::ServerLocation location{};
-                location.name = elem.at_key("name").get_c_str();
-                location.address = elem.at_key("address").get_c_str();
-                this->publicServers.emplace_back(location);
-            }
-        }
-        catch (const simdjson::simdjson_error &ex)
-        {
-            std::scoped_lock lg(this->mut);
-            this->errorMsg = ex.what();
-            this->isDead = true;
-        }
-    });
+    }
+    catch (const simdjson::simdjson_error &ex)
+    {
+        std::scoped_lock lg(this->mut);
+        this->errorMsg = ex.what();
+        this->isDead = true;
+    }
+    // });
 }
 
 /**
