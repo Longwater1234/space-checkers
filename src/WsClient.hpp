@@ -224,6 +224,7 @@ inline void WsClient::prefetchPublicServers()
     {
         simdjson::dom::array jsonArray = jsonParser.parse(response->body);
         // std::scoped_lock lg(this->mut);
+        this->publicServers.clear();
         for (const simdjson::dom::object &elem : jsonArray)
         {
             chk::ServerLocation location{};

@@ -31,7 +31,7 @@ elseif(APPLE)
   target_link_libraries(SpaceCheckers PRIVATE ${FOUNDATION_FRAMEWORK})
 else()
   add_executable(SpaceCheckers ${GAME_SRC})    
-endif() 
+endif()  
 
 # link all required libraries 
 target_link_libraries(SpaceCheckers PRIVATE sfml-graphics sfml-window sfml-system ImGui-SFML
