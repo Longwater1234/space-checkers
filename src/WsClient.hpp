@@ -3,7 +3,8 @@
 #include "ServerLocation.hpp"
 #include "payloads/base_payload.pb.hpp"
 #include <atomic>
-#include <ixwebsocket/IXHttpClient.h>
+#include <cstdlib>
+#include <filesystem>
 #include <ixwebsocket/IXNetSystem.h>
 #include <ixwebsocket/IXWebSocket.h>
 #include <mutex>
@@ -197,32 +198,29 @@ inline void WsClient::showPublicServerWindow(bool &showPublic)
 
 /**
  * Fetch public servers JSON list from central storage (which is updated regularly)
- * @see https://machinezone.github.io/IXWebSocket/usage/#http-client-api
  */
 inline void WsClient::prefetchPublicServers()
 {
-    ix::HttpClient httpClient;
-    const char *url = "https://d1txhef4jwuosv.cloudfront.net/ws_server_locations.json";
-    auto args = httpClient.createRequest(url, ix::HttpClient::kGet);
+    const std::string url = "https://d1txhef4jwuosv.cloudfront.net/ws_server_locations.json";
+    std::filesystem::path tempFile = std::filesystem::temp_directory_path() / "json_result.txt";
+    const std::string tempFileStr = tempFile.u8string();
 
-    ix::HttpResponsePtr response = httpClient.get(url, args); // blocking call (Async is buggy!)
+    // CURL is available on all 3 desktop OS (Windows 10+, MacOS, Linux)
+    const std::string commandStr = fmt::format("curl -fsSL {} -o {}", url, tempFileStr);
 
-    // httpClient.performRequest(args, [this](const ix::HttpResponsePtr &response) {
-    int statusCode = response->statusCode;
-    if (statusCode != 200)
+    if (std::system(commandStr.c_str()))
     {
-        spdlog::error("http request failed. Reason {}", response->errorMsg);
-        // std::scoped_lock lg(this->mut);
-        this->errorMsg = response->errorMsg;
+        // comand failed. exit value != 0
         this->isDead = true;
+        this->errorMsg = "failed to fetch public server list";
         return;
     }
 
-    spdlog::info("response {}", response->body);
+
     simdjson::dom::parser jsonParser;
     try
     {
-        simdjson::dom::array jsonArray = jsonParser.parse(response->body);
+        simdjson::dom::array jsonArray = jsonParser.load(tempFileStr);
         // std::scoped_lock lg(this->mut);
         this->publicServers.clear();
         for (const simdjson::dom::object &elem : jsonArray)
