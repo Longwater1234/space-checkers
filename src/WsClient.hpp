@@ -5,6 +5,7 @@
 #include <atomic>
 #include <cstdlib>
 #include <filesystem>
+#include <ixwebsocket/IXHttpClient.h>
 #include <ixwebsocket/IXNetSystem.h>
 #include <ixwebsocket/IXWebSocket.h>
 #include <mutex>
@@ -205,9 +206,28 @@ inline void WsClient::prefetchPublicServers()
     std::filesystem::path tempFile = std::filesystem::temp_directory_path() / "json_result.txt";
     const std::string tempFileStr = tempFile.u8string();
 
-    // CURL is available on all 3 desktop OS (Windows 10+, MacOS, Linux)
-    const std::string commandStr = fmt::format("curl -fsSL {} -o {}", url, tempFileStr);
+#ifdef WIN32
+    ix::HttpClient httpClient;
+    auto args = httpClient.createRequest(url, ix::HttpClient::kGet);
+    ix::HttpResponsePtr response = httpClient.get(url, args); // blocking call (Async DOES not work!)
 
+    std::FILE *ff{};
+    fopen_s(&ff, tempFileStr.c_str(), "w");
+    int statusCode = response->statusCode;
+    if (statusCode != 200 || ff == nullptr)
+    {
+        spdlog::error("http request failed. Reason {}", response->errorMsg);
+        // std::scoped_lock lg(this->mut);
+        this->errorMsg = response->errorMsg;
+        this->isDead = true;
+        return;
+    }
+    fputs(response->body.c_str(), ff);
+    fclose(ff);
+
+#else
+    // CURL is available on Unix OS (MacOS, Linux)
+    const std::string commandStr = fmt::format("curl -fsSL {} -o {}", url, tempFileStr);
     if (std::system(commandStr.c_str()))
     {
         // comand failed. exit value != 0
@@ -215,7 +235,7 @@ inline void WsClient::prefetchPublicServers()
         this->errorMsg = "failed to fetch public server list";
         return;
     }
-
+#endif // WIN32
 
     simdjson::dom::parser jsonParser;
     try
