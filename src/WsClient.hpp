@@ -5,6 +5,7 @@
 #include <atomic>
 #include <cstdlib>
 #include <filesystem>
+#include <fstream>
 #include <ixwebsocket/IXHttpClient.h>
 #include <ixwebsocket/IXNetSystem.h>
 #include <ixwebsocket/IXWebSocket.h>
@@ -209,24 +210,22 @@ inline void WsClient::prefetchPublicServers()
 #ifdef WIN32
     ix::HttpClient httpClient;
     auto args = httpClient.createRequest(url, ix::HttpClient::kGet);
-    ix::HttpResponsePtr response = httpClient.get(url, args); // blocking call (Async DOES not work!)
+    ix::HttpResponsePtr response = httpClient.get(url, args); // blocking call (Async is buggy!)
 
-    std::FILE *ff{};
-    fopen_s(&ff, tempFileStr.c_str(), "w");
+    std::ofstream fos{tempFile};
     int statusCode = response->statusCode;
-    if (statusCode != 200 || ff == nullptr)
+    if (statusCode != 200 || fos.bad())
     {
         spdlog::error("http request failed. Reason {}", response->errorMsg);
-        // std::scoped_lock lg(this->mut);
         this->errorMsg = response->errorMsg;
         this->isDead = true;
         return;
     }
-    fputs(response->body.c_str(), ff);
-    fclose(ff);
+    fos << response->body;
+    fos.close();
 
 #else
-    // CURL is available on Unix OS (MacOS, Linux)
+    // lets use system CURL, since ix::HttpClient doesnt work on Unix!
     const std::string commandStr = fmt::format("curl -fsSL {} -o {}", url, tempFileStr);
     if (std::system(commandStr.c_str()))
     {
@@ -241,7 +240,6 @@ inline void WsClient::prefetchPublicServers()
     try
     {
         simdjson::dom::array jsonArray = jsonParser.load(tempFileStr);
-        // std::scoped_lock lg(this->mut);
         this->publicServers.clear();
         for (const simdjson::dom::object &elem : jsonArray)
         {
@@ -257,7 +255,6 @@ inline void WsClient::prefetchPublicServers()
         this->errorMsg = ex.what();
         this->isDead = true;
     }
-    // });
 }
 
 /**
