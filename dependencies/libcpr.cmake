@@ -1,0 +1,14 @@
+# add libcpr v1.10.5
+
+SET(SSL_OPTION "CPR_FORCE_OPENSSL_BACKEND TRUE")
+if(WIN32)
+ SET(SSL_OPTION "PR_FORCE_WINSSL_BACKEND TRUE")
+endif()
+
+CPMAddPackage(
+    NAME cpr
+    URL    "https://github.com/libcpr/cpr/archive/refs/tags/1.10.5.tar.gz"
+    VERSION 1.10.5
+    DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+    OPTIONS "BUILD_SHARED_LIBS FALSE" ${SSL_OPTION}   
+)

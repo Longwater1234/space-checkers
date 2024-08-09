@@ -19,7 +19,7 @@ set(SFML_DIR ${SFML_HOME}/lib/cmake/SFML)
 
 find_package(SFML 2.6 REQUIRED COMPONENTS "graphics" "window" "system") 
 
-# download extra libs  
+# download extra libs   
 add_subdirectory(dependencies)   
 
 if(WIN32)
@@ -35,7 +35,7 @@ endif()
 
 # link all required libraries 
 target_link_libraries(SpaceCheckers PRIVATE sfml-graphics sfml-window sfml-system ImGui-SFML
-                        ixwebsocket spdlog::spdlog protobuf::libprotobuf simdjson::simdjson)
+                        ixwebsocket spdlog::spdlog protobuf::libprotobuf simdjson::simdjson cpr::cpr)
 
 # include SFML headers
 include_directories(${SFML_HOME}/include)    

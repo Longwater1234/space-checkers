@@ -226,7 +226,7 @@ inline void WsClient::prefetchPublicServers()
     fclose(ff);
 
 #else
-    // CURL is available on Unix OS (MacOS, Linux)
+    // CURL is available on Unix OS (MacOS, Linux). ixHttpClient doesnt work on Unix!
     const std::string commandStr = fmt::format("curl -fsSL {} -o {}", url, tempFileStr);
     if (std::system(commandStr.c_str()))
     {
