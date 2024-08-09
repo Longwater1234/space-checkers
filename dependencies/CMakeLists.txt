@@ -7,14 +7,13 @@ include(ixwebsocket.cmake)
 include(spdlog.cmake)
 include(simdjson.cmake)
 include(protobuf.cmake)
-include(libcpr.cmake)
 
 # GET ImGui 1.90.8
 CPMAddPackage(
   NAME imgui
-  URL "https://github.com/ocornut/imgui/archive/refs/tags/v1.90.8.tar.gz" 
+  URL "https://github.com/ocornut/imgui/archive/refs/tags/v1.90.8.tar.gz"
   VERSION		1.90.8
-  DOWNLOAD_EXTRACT_TIMESTAMP TRUE  
+  DOWNLOAD_EXTRACT_TIMESTAMP TRUE 
 ) 
 
 if(imgui_ADDED)
@@ -24,14 +23,14 @@ if(imgui_ADDED)
 	${IMGUI_INCLUDE_DIR}/imgui.cpp 
 	${IMGUI_INCLUDE_DIR}/imgui_draw.cpp
 	${IMGUI_INCLUDE_DIR}/imgui_tables.cpp
-	${IMGUI_INCLUDE_DIR}/imgui_widgets.cpp 
+	${IMGUI_INCLUDE_DIR}/imgui_widgets.cpp
 	${IMGUI_INCLUDE_DIR}/misc/cpp/imgui_stdlib.cpp
   )
   include_directories(${imgui_SOURCE_DIR})
-endif() 
- 
+endif()
 
-# GET ImGui-SFML 2.6 
+
+# GET ImGui-SFML 2.6
 CPMAddPackage(
   NAME imgui-sfml
   URL "https://github.com/SFML/imgui-sfml/archive/refs/tags/v2.6.tar.gz"
