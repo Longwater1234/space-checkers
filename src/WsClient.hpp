@@ -246,7 +246,7 @@ inline void WsClient::prefetchPublicServers()
             chk::ServerLocation location{};
             location.name = elem.at_key("name").get_c_str();
             location.address = elem.at_key("address").get_c_str();
-            this->publicServers.emplace_back(location);
+            this->publicServers.emplace_back(std::move_if_noexcept(location));
         }
     }
     catch (const simdjson::simdjson_error &ex)
