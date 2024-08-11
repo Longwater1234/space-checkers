@@ -1,11 +1,11 @@
-# space-checkers
+# space - checkers
 
-Online Multiplayer Checkers game in C++ built with SFML 2.6 and ixWebsockets. With very minimal dependencies (no BOOST lib), and
-a simple build process. All dependencies are auto-downloaded and built for you using **CPM.cmake** (see folder `dependencies`). The only dependency you need
+Online Multiplayer Checkers game in C++ built with SFML 2.6 and ixWebsockets. With very minimal dependencies (no Boost required), and
+a simple build process. All dependencies are auto-downloaded and built for you using **CPM.cmake** (thin wrapper around CMake FetchContent). The only dependency you need
 pre-installed on your OS is SFML 2.6.
 
-
 ### Main Libraries Used
+
 - SFML 2.6.1
 - imGui-SFML
 - ixWebsockets
@@ -29,9 +29,11 @@ pre-installed on your OS is SFML 2.6.
 
 - XCode latest from AppStore (with MacOS SDK)
 - Apple Developer tools. After Xcode is installed, run this in your Terminal:
+
 ```bash
   sudo xcode-select --install
 ```
+
 - Please install SFML 2.6 as **Frameworks** as shown in [official macOS guide](https://www.sfml-dev.org/tutorials/2.6/start-osx.php).
 
 ### For Linux
