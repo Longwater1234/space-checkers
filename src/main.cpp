@@ -81,7 +81,8 @@ int main()
     manager->updateMessage("Welcome to Space Checkers");
     if (userChoice == chk::UserChoice::LOCAL_PLAY)
     {
-        manager->updateMessage(u8"你好。 Now playing! It's RED's turn");
+        // manager->updateMessage(u8"你好。 Now playing! It's RED's turn");
+        manager->updateMessage(u8"游戏开始了。轮到RED球员了");
     }
 
     std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;

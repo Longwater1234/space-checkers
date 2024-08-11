@@ -110,8 +110,8 @@ void GameManager::handleMovePiece(const chk::PlayerPtr &player, const chk::Playe
         spdlog::info(player->getName() + " IS IN DANGER ");
     }
     this->playerRedTurn = !this->playerRedTurn; // toggle player turns
-    this->updateMessage(player->getName() + " has moved to " + std::to_string(destCell->getIndex()) + ". It's " +
-                        opponent->getName() + "'s turn.");
+    this->updateMessage(player->getName() + " 搬到 " + std::to_string(destCell->getIndex()) + ". 现在轮到 " +
+                        opponent->getName() + "了.");
 }
 
 /**
@@ -139,7 +139,7 @@ void GameManager::handleCapturePiece(const chk::PlayerPtr &hunter, const chk::Pl
             {
                 return;
             }
-            this->updateMessage(hunter->getName() + " has captured " + prey->getName() + "'s piece!");
+            this->updateMessage(hunter->getName() + " 抓住了 " + prey->getName() + "的棋子!");
             gameMap.erase(this->sourceCell.value());                // set hunter's old location empty!
             gameMap.erase(target.preyCellIdx);                      // set Prey's old location empty!
             gameMap.emplace(targetCell->getIndex(), hunterPieceId); // fill in hunter new location
@@ -159,7 +159,7 @@ void GameManager::handleCapturePiece(const chk::PlayerPtr &hunter, const chk::Pl
     else
     {
         spdlog::info(prey->getName() + " IS IN DANGER");
-        this->updateMessage(prey->getName() + " IS IN DANGER");
+        this->updateMessage(prey->getName() + " 有危险");
     }
 }
 
@@ -257,7 +257,7 @@ void GameManager::updateMatchStatus(const chk::PlayerPtr &p1, const chk::PlayerP
     {
         this->gameOver = true;
         const std::string &winnerName = p1Count > p2Count ? p1->getName() : p2->getName();
-        this->updateMessage("GAME OVER! " + winnerName + " wins!");
+        this->updateMessage(u8"游戏结束了! " + winnerName + " 赢了!");
     }
 }
 
@@ -324,7 +324,7 @@ void chk::GameManager::showForcedMoves(const chk::PlayerPtr &player, const chk::
             pieceSet.insert(hunter_piece);
         }
         player->showForcedPieces(pieceSet);
-        this->updateMessage(player->getName() + " must capture piece!");
+        this->updateMessage(player->getName() + " 必须抓住那块!");
     }
     else
     {
