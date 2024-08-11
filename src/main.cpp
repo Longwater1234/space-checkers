@@ -6,10 +6,10 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Window/Mouse.hpp>
 #include <cassert>
-#include <google/protobuf/stubs/common.h>
-#include <vector>
 #include <codecvt>
+#include <google/protobuf/stubs/common.h>
 #include <locale>
+#include <vector>
 
 #include "imgui-SFML.h"
 #include "imgui.h"
