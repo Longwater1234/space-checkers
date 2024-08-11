@@ -17,7 +17,7 @@ class Cell final : public sf::Drawable
     explicit Cell(int idx, const sf::RectangleShape &rec, const sf::Vector2f &pos, const sf::Font &font);
     Cell() = delete;
     bool containsPoint(const sf::Vector2i &pos) const;
-    bool containsOrigin(const sf::Vector2f &pos) const;
+    bool isAtPosition(const sf::Vector2f &pos) const;
     const sf::Vector2f &getPos() const;
     int getIndex() const;
     void setEvenRow(const bool &is_even);
@@ -25,7 +25,7 @@ class Cell final : public sf::Drawable
 
   private:
     sf::RectangleShape rec;
-    int index; // Darker cells have index in range [1..32]. Lighter cells are all -1
+    int index; // Darker cells have index in range [1~32]. Lighter cells are all -1
     bool isEvenRow = false;
     sf::Vector2f cell_pos;
     sf::Text sfText;
@@ -67,7 +67,7 @@ inline bool Cell::getIsEvenRow() const
 }
 
 /**
- * Check whether mouse cursor is within this Cell
+ * Check whether mouse cursor is anywhere within this Cell region
  * @param pos position x,y (int) relative to main Window
  * @return TRUE or FALSE
  */
@@ -77,11 +77,11 @@ inline bool Cell::containsPoint(const sf::Vector2i &pos) const
 }
 
 /**
- * Check whether given object's center position is within this Cell
+ * Check whether given object's position is EQUAL to this Cell's position
  * @param pos position x,y (float) relative to main window
  * @return TRUE or FALSE
  */
-inline bool Cell::containsOrigin(const sf::Vector2f &pos) const
+inline bool Cell::isAtPosition(const sf::Vector2f &pos) const
 {
     return this->cell_pos.x == pos.x && this->cell_pos.y == pos.y;
 }

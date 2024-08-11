@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
 
-project("SpaceCheckers" VERSION 1.0 
+project("SpaceCheckers" VERSION 1.0.4 
  HOMEPAGE_URL "https://github.com/Longwater1234/space-checkers")
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -31,20 +31,20 @@ elseif(APPLE)
   target_link_libraries(SpaceCheckers PRIVATE ${FOUNDATION_FRAMEWORK})
 else()
   add_executable(SpaceCheckers ${GAME_SRC})    
-endif() 
+endif()  
 
 # link all required libraries 
 target_link_libraries(SpaceCheckers PRIVATE sfml-graphics sfml-window sfml-system ImGui-SFML
-                        ixwebsocket spdlog::spdlog protobuf::libprotobuf)
+                        ixwebsocket spdlog::spdlog protobuf::libprotobuf simdjson::simdjson)
 
 # include SFML headers
-include_directories(${SFML_HOME}/include)   
+include_directories(${SFML_HOME}/include)    
 
 # show warnings (depending on C++ compiler)
 if(MSVC)
   target_compile_options(SpaceCheckers PRIVATE /W4 /sdl)
-else() 
-  target_compile_options(SpaceCheckers PRIVATE -Wall)
+else()  
+  target_compile_options(SpaceCheckers PRIVATE -Wall) 
 endif()
 
 # COPY resources folder to destination

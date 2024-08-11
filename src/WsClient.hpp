@@ -1,10 +1,16 @@
 #pragma once
 #include "CircularBuffer.hpp"
+#include "ServerLocation.hpp"
 #include "payloads/base_payload.pb.hpp"
 #include <atomic>
+#include <cstdlib>
+#include <filesystem>
+#include <fstream>
+#include <ixwebsocket/IXHttpClient.h>
 #include <ixwebsocket/IXNetSystem.h>
 #include <ixwebsocket/IXWebSocket.h>
 #include <mutex>
+#include <simdjson.h>
 #include <spdlog/spdlog.h>
 #include <string>
 
@@ -41,16 +47,16 @@ class WsClient final
     void setOnMovePieceCallback(const onMovePieceCallback &callback);
     void setOnCapturePieceCallback(const onCaptureCallback &callback);
     void setOnWinLoseCallback(const onWinLoseCallback &callback);
-    bool replyServerAsync(const chk::payload::BasePayload &payload) const;
+    bool replyServer(const chk::payload::BasePayload &payload) const;
 
   private:
-    std::string final_address;                     // IP or URL of server
-    std::atomic_bool isDead{false};                // if connection closed
-    std::atomic_bool isConnected{false};           // if done connected to server (else, show loading)
-    chk::CircularBuffer<std::string> msgBuffer{1}; // keep only recent 1 message
-    mutable std::string errorMsg{};                // for any websocket errors
-    std::atomic_bool connClicked = false;          // if 'connect' button clicked
-    mutable std::string protoBucket{};             // reusable destination for serialized payloads (as bytes)
+    std::string final_address;                      // IP or URL of private server (input by User)
+    std::atomic_bool isDead{false};                 // if connection closed
+    std::atomic_bool isConnected{false};            // if done connected to server (else, show loading)
+    chk::CircularBuffer<std::string> msgBuffer{1};  // keep only recent 1 message
+    mutable std::string errorMsg{};                 // for any websocket errors
+    std::atomic_bool connClicked = false;           // if 'connect' button clicked
+    std::vector<chk::ServerLocation> publicServers; // list of public servers (fetched from CDN)
 
     onConnectedServer _onReadyConnected;
     onReadyStartGame _onReadyStartGame;
@@ -62,11 +68,13 @@ class WsClient final
     std::mutex mut;
     std::unique_ptr<ix::WebSocket> webSocketPtr = nullptr; // our Websocket object
     void showErrorPopup();                                 // whenver there is an error (from server)
-    void showWinnerPopup(std::string_view notice) const;   // when server notifies about winner
+    void showWinnerPopup(std::string_view notice);         // when server notifies about winner
     void runGameLoop();
     static void showHint(const char *tip);
     void tryConnect(std::string_view address);
     void showConnectWindow();
+    void showPublicServerWindow(bool &showPublic);
+    void prefetchPublicServers();
     void resetAllStates();
 };
 
@@ -79,15 +87,16 @@ inline chk::WsClient::WsClient()
     this->webSocketPtr->setHandshakeTimeout(10);
     // once dead, DO NOT try reconnect
     this->webSocketPtr->disableAutomaticReconnection();
-    // ping server every 20 seconds
-    // this->webSocketPtr->setPingInterval(20);
-
+    // ping server every 30 seconds
+    this->webSocketPtr->setPingInterval(30);
     ix::SocketTLSOptions tlsOptions;
 #ifndef _WIN32
     // Currently system CAs are not supported on non-Windows platforms with mbedtls
     tlsOptions.caFile = "NONE";
 #endif // _WIN32
     this->webSocketPtr->setTLSOptions(tlsOptions);
+    // prefetch for public server list
+    this->prefetchPublicServers();
 }
 
 /**
@@ -107,15 +116,23 @@ inline void WsClient::showHint(const char *tip)
 }
 
 /**
- * Show the imgui connection window, for server address
- * @return TRUE if CONNECT button is clicked, else FALSE
+ * Show the imgui connection window, for private server address input
  */
 inline void WsClient::showConnectWindow()
 {
     static bool is_secure = false;
+    static bool showPublic = true;
+
+    if (showPublic)
+    {
+        this->showPublicServerWindow(showPublic);
+        return;
+    }
+
+    // =================== PRIVATE SERVERS ===============================
     ImGui::SetNextWindowSize(ImVec2(sf::Vector2f(300.0, 300.0)));
     static char inputUrl[256] = "127.0.0.1:9876/game";
-    if (ImGui::Begin("Connect Window", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse))
+    if (ImGui::Begin("Private Server", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse))
     {
         ImGui::InputText("Server IP", inputUrl, IM_ARRAYSIZE(inputUrl), ImGuiInputTextFlags_CharsNoBlank);
         ImGui::SameLine();
@@ -128,7 +145,115 @@ inline void WsClient::showConnectWindow()
             this->connClicked = true;
             memset(inputUrl, 0, sizeof(inputUrl));
         }
+        if (ImGui::Button("< Go Back", ImVec2{100.0f, 0}))
+        {
+            showPublic = true;
+        }
         ImGui::End();
+    }
+}
+
+/**
+ * Show list of public game servers, using imgui ListBox
+ * @param showPublic switch for showing/hiding this window
+ */
+inline void WsClient::showPublicServerWindow(bool &showPublic)
+{
+    // =================== PUBLIC SERVERS ===============================
+    ImGui::SetNextWindowSize(ImVec2(sf::Vector2f(300.0, 300.0)));
+    if (ImGui::Begin("Public Servers", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse))
+    {
+        static int current_idx = 0;
+        if (ImGui::BeginListBox("Select One"))
+        {
+            for (int i = 0; i < publicServers.size(); i++)
+            {
+                const bool is_selected = (i == current_idx);
+                if (ImGui::Selectable(publicServers.at(i).name.c_str(), is_selected))
+                {
+                    current_idx = i;
+                }
+
+                // Set the initial focus
+                if (is_selected)
+                    ImGui::SetItemDefaultFocus();
+            }
+            ImGui::EndListBox();
+        }
+        if (!publicServers.empty() && ImGui::Button("Connect", ImVec2{100.0f, 0}))
+        {
+            this->final_address = publicServers.at(current_idx).address;
+            this->connClicked = true;
+        }
+        publicServers.empty() ? ImGui::NewLine() : ImGui::SameLine();
+        if (ImGui::Button("Refresh", ImVec2{90.0f, 0}))
+        {
+            this->prefetchPublicServers();
+        }
+        if (ImGui::Button("My Private Server >", ImVec2{150.0f, 0}))
+        {
+            showPublic = false;
+        }
+        ImGui::End();
+    }
+}
+
+/**
+ * Fetch public servers JSON list from central storage (which is updated regularly)
+ */
+inline void WsClient::prefetchPublicServers()
+{
+    const std::string url = "https://d1txhef4jwuosv.cloudfront.net/ws_server_locations.json";
+    std::filesystem::path tempFile = std::filesystem::temp_directory_path() / "json_result.txt";
+    const std::string tempFileStr = tempFile.u8string();
+
+#ifdef WIN32
+    ix::HttpClient httpClient;
+    auto args = httpClient.createRequest(url, ix::HttpClient::kGet);
+    ix::HttpResponsePtr response = httpClient.get(url, args); // blocking call (Async is buggy!)
+
+    std::ofstream fos{tempFile};
+    int statusCode = response->statusCode;
+    if (statusCode != 200 || fos.bad())
+    {
+        spdlog::error("http request failed. Reason {}", response->errorMsg);
+        this->errorMsg = response->errorMsg;
+        this->isDead = true;
+        return;
+    }
+    fos << response->body;
+    fos.close();
+
+#else
+    // lets use system CURL, since ix::HttpClient doesnt work on Unix!
+    const std::string commandStr = fmt::format("curl -fsSL {} -o {}", url, tempFileStr);
+    if (std::system(commandStr.c_str()))
+    {
+        // comand failed. exit value != 0
+        this->isDead = true;
+        this->errorMsg = "failed to fetch public server list";
+        return;
+    }
+#endif // WIN32
+
+    simdjson::dom::parser jsonParser;
+    try
+    {
+        simdjson::dom::array jsonArray = jsonParser.load(tempFileStr);
+        this->publicServers.clear();
+        for (const simdjson::dom::object &elem : jsonArray)
+        {
+            chk::ServerLocation location{};
+            location.name = elem.at_key("name").get_c_str();
+            location.address = elem.at_key("address").get_c_str();
+            this->publicServers.emplace_back(std::move_if_noexcept(location));
+        }
+    }
+    catch (const simdjson::simdjson_error &ex)
+    {
+        std::scoped_lock lg(this->mut);
+        this->errorMsg = ex.what();
+        this->isDead = true;
     }
 }
 
@@ -183,7 +308,8 @@ inline void WsClient::tryConnect(std::string_view address)
     {
         ImGui::SetNextWindowSize(ImVec2(sf::Vector2f{400.0, 100.0}));
         ImGui::Begin("Loading", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
-        ImGui::Text("Connecting to %s", this->final_address.c_str());
+        // ImGui::Text("Connecting to %s", this->final_address.c_str());
+        ImGui::Text("Connecting to online server");
         ImGui::End();
     }
 
@@ -288,14 +414,13 @@ inline void WsClient::setOnWinLoseCallback(const onWinLoseCallback &callback)
  * @param payload the request body
  * @return TRUE if sent successfully, else FALSE
  */
-inline bool WsClient::replyServerAsync(const chk::payload::BasePayload &payload) const
+inline bool WsClient::replyServer(const chk::payload::BasePayload &payload) const
 {
     if (this->isDead || !this->isConnected)
     {
         return false;
     }
     spdlog::info("SENDING {}", payload.ShortDebugString());
-    // payload.SerializeToString(&this->protoBucket);
     const auto &result = this->webSocketPtr->sendBinary(payload.SerializeAsString());
     return result.success;
 }
@@ -414,7 +539,7 @@ inline void WsClient::showErrorPopup()
 /**
  * Show winner/loser popup window.
  */
-inline void WsClient::showWinnerPopup(std::string_view notice) const
+inline void WsClient::showWinnerPopup(std::string_view notice)
 {
     // Always center this next dialog
     ImVec2 center = ImGui::GetMainViewport()->GetCenter();
@@ -427,6 +552,7 @@ inline void WsClient::showWinnerPopup(std::string_view notice) const
         if (ImGui::Button("OK", ImVec2(120, 0)))
         {
             ImGui::CloseCurrentPopup();
+            this->resetAllStates();
         }
         ImGui::EndPopup();
     }

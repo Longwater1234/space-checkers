@@ -199,7 +199,6 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
     const bool success = player->movePiece(currentPieceId, destCell->getPos());
     if (!success)
     {
-        spdlog::info("not successful move");
         return;
     }
     int sourceCellCopy = this->sourceCell.value();
@@ -233,7 +232,7 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
     // finally, create Base request
     chk::payload::BasePayload requestBody;
     requestBody.set_allocated_move_payload(movePayload);
-    if (!this->wsClient->replyServerAsync(requestBody))
+    if (!this->wsClient->replyServer(requestBody))
     {
         spdlog::error("failed to send message to Server");
         return;
@@ -314,14 +313,14 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
     // finally create basePayload
     chk::payload::BasePayload basePayload;
     basePayload.set_allocated_capture_payload(capturePayload);
-    if (!this->wsClient->replyServerAsync(basePayload))
+    if (!this->wsClient->replyServer(basePayload))
     {
         spdlog::error("failed to send message to Server");
         return;
     }
 
     // Check for extra opportunities (for myself)!
-    GameManager::identifyTargets(hunter);
+    GameManager::identifyTargets(hunter, targetCell.get());
     if (this->getForcedMoves().empty())
     {
         // NO MORE JUMPS AVAILABLE. SWITCH TURNS to opponent

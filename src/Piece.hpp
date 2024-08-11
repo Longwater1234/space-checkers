@@ -19,7 +19,7 @@ constexpr auto BLACK_KING = "black_king.png";
 constexpr auto RED_NORMAL = "red_normal.png";
 constexpr auto RED_KING = "red_king.png";
 constexpr auto SIZE_CELL = 75.0f; // length of square cell
-constexpr auto NUM_PIECES = 24;
+constexpr uint16_t NUM_PIECES{24};
 
 class Piece final : public sf::Drawable, public sf::Transformable
 {
@@ -92,7 +92,8 @@ inline const PieceType &Piece::getPieceType() const
 }
 
 /**
- * Set this piece as King. Will also change its texture
+ *
+ * Crown this piece as King. Will also change its texture
  */
 inline void Piece::activateKing()
 {
@@ -117,7 +118,7 @@ inline void Piece::activateKing()
 }
 
 /**
- * get whether this piece is king
+ * Determines whether this piece is King
  * @return TRUE or FALSE
  */
 inline bool Piece::getIsKing() const
@@ -126,8 +127,8 @@ inline bool Piece::getIsKing() const
 }
 
 /**
- * Check whether mouse cursor is currently over this piece
- * @param pos Mouse position relative to main Window
+ * Check whether mouse cursor position is anywhere over this Piece
+ * @param pos position relative to main Window
  * @return TRUE or FALSE
  */
 inline bool Piece::containsPoint(const sf::Vector2i &pos) const
@@ -208,8 +209,8 @@ inline bool Piece::moveSimple(const sf::Vector2f &destPos)
         return false;
     }
 
-    this->myCircle.setPosition(destPos.x, destPos.y);
-    this->setPosition(myCircle.getPosition());
+    this->move(sf::Vector2f{deltaX, deltaY});
+    this->myCircle.setPosition(this->getPosition());
     if ((this->pieceType == PieceType::Red && destPos.y == 0) ||
         (this->pieceType == PieceType::Black && destPos.y == 7 * chk::SIZE_CELL))
     {
@@ -241,8 +242,8 @@ inline bool Piece::moveCapture(const sf::Vector2f &destPos)
         return false;
     }
 
-    this->myCircle.setPosition(destPos.x, destPos.y);
-    this->setPosition(myCircle.getPosition());
+    this->move(sf::Vector2f{deltaX, deltaY});
+    this->myCircle.setPosition(this->getPosition());
     if ((this->pieceType == PieceType::Red && destPos.y == 0) ||
         (this->pieceType == PieceType::Black && destPos.y == 7 * chk::SIZE_CELL))
     {

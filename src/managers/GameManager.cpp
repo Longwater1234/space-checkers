@@ -149,7 +149,7 @@ void GameManager::handleCapturePiece(const chk::PlayerPtr &hunter, const chk::Pl
         }
     }
     // FIXME do not RUN this next line if this "hunter" piece just became KING!
-    this->identifyTargets(hunter); // Check for extra opportunities NOW!
+    this->identifyTargets(hunter, targetCell.get()); // Check for extra opportunities NOW!
     if (this->forcedMoves.empty())
     {
         // NO MORE JUMPS AVAILABLE. SWITCH TURNS to opponent
@@ -233,7 +233,7 @@ void GameManager::matchCellsToPieces(const std::vector<chk::PiecePtr> &pieceList
     {
         for (const auto &cell : this->blockList)
         {
-            if (cell->getIndex() != -1 && cell->containsOrigin(piece->getPosition()))
+            if (cell->getIndex() != -1 && cell->isAtPosition(piece->getPosition()))
             {
                 this->gameMap.emplace(cell->getIndex(), piece->getId());
             }
@@ -371,27 +371,50 @@ bool GameManager::awayFromEdge(const int &cell_idx) const
 }
 
 /**
- * Collect all possible next "forced captures" for this hunter. Loop entire board once.
+ * Collect all possible next "forced captures" for this hunter.
  * @param hunter Current player
+ * @param singleCell if not NULL, only check around this cell. Else, loop ENTIRE board
  */
-void GameManager::identifyTargets(const PlayerPtr &hunter)
+void GameManager::identifyTargets(const PlayerPtr &hunter, chk::Cell *singleCell)
 {
     this->forcedMoves.clear();
-    for (const auto &cell_ptr : this->blockList)
+    if (singleCell != nullptr)
     {
-        const short pieceId = this->getPieceFromCell(cell_ptr->getIndex());
-        if (gameMap.find(cell_ptr->getIndex()) == gameMap.end() || !hunter->hasThisPiece(pieceId))
+        // JUST CHECK SINGLE CELL
+        const short pieceId = this->getPieceFromCell(singleCell->getIndex());
+        if (gameMap.find(singleCell->getIndex()) == gameMap.end() || !hunter->hasThisPiece(pieceId))
         {
-            // this CELL is not usable, OR piece not OWNED by hunter
-            continue;
+            // this CELL is not usable
+            return;
         }
-        this->collectFrontLHS(hunter, cell_ptr);
-        this->collectFrontRHS(hunter, cell_ptr);
+        this->collectFrontLHS(hunter, singleCell);
+        this->collectFrontRHS(hunter, singleCell);
         const auto &piecePtr = hunter->getOwnPieces().at(pieceId);
         if (piecePtr->getIsKing())
         {
-            this->collectBehindLHS(hunter, cell_ptr);
-            this->collectBehindRHS(hunter, cell_ptr);
+            this->collectBehindLHS(hunter, singleCell);
+            this->collectBehindRHS(hunter, singleCell);
+        }
+    }
+    else
+    {
+        // LOOP ENTIRE BOARD
+        for (const auto &cell_ptr : this->blockList)
+        {
+            const short pieceId = this->getPieceFromCell(cell_ptr->getIndex());
+            if (gameMap.find(cell_ptr->getIndex()) == gameMap.end() || !hunter->hasThisPiece(pieceId))
+            {
+                // this CELL is not usable, OR piece not OWNED by hunter
+                continue;
+            }
+            this->collectFrontLHS(hunter, cell_ptr.get());
+            this->collectFrontRHS(hunter, cell_ptr.get());
+            const auto &piecePtr = hunter->getOwnPieces().at(pieceId);
+            if (piecePtr->getIsKing())
+            {
+                this->collectBehindLHS(hunter, cell_ptr.get());
+                this->collectBehindRHS(hunter, cell_ptr.get());
+            }
         }
     }
 }
@@ -401,7 +424,7 @@ void GameManager::identifyTargets(const PlayerPtr &hunter)
  * @param hunter  player whose turn is next
  * @param cell_ptr current cell of hunter
  */
-void GameManager::collectFrontLHS(const chk::PlayerPtr &hunter, const Block &cell_ptr)
+void GameManager::collectFrontLHS(const chk::PlayerPtr &hunter, chk::Cell *cell_ptr)
 {
     if (hunter->getPlayerType() == PlayerType::PLAYER_RED && cell_ptr->getPos().x == 0)
     {
@@ -460,7 +483,7 @@ void GameManager::collectFrontLHS(const chk::PlayerPtr &hunter, const Block &cel
  * @param hunter player whose turn is next
  * @param cell_ptr current cell of hunter
  */
-void GameManager::collectFrontRHS(const chk::PlayerPtr &hunter, const Block &cell_ptr)
+void GameManager::collectFrontRHS(const chk::PlayerPtr &hunter, chk::Cell *cell_ptr)
 {
     if (hunter->getPlayerType() == PlayerType::PLAYER_RED && cell_ptr->getPos().x >= 7 * chk::SIZE_CELL)
     {
@@ -517,7 +540,7 @@ void GameManager::collectFrontRHS(const chk::PlayerPtr &hunter, const Block &cel
  * @param hunter  player whose turn is next (MUST be King)
  * @param cell_ptr current cell of hunter
  */
-void GameManager::collectBehindRHS(const PlayerPtr &hunter, const Block &cell_ptr)
+void GameManager::collectBehindRHS(const PlayerPtr &hunter, chk::Cell *cell_ptr)
 {
     if (hunter->getPlayerType() == PlayerType::PLAYER_RED && cell_ptr->getPos().x >= 7 * chk::SIZE_CELL)
     {
@@ -547,7 +570,7 @@ void GameManager::collectBehindRHS(const PlayerPtr &hunter, const Block &cell_pt
         return;
     }
 
-    const short pieceId_NW = this->getPieceFromCell(cellAheadIdx); // North west (hunter King reverse dir)
+    const short pieceId_NW = this->getPieceFromCell(cellAheadIdx); // North west (of hunter, reverse dir)
     hasEnemyAhead = pieceId_NW != -1 && !hunter->hasThisPiece(pieceId_NW);
 
     int cellBehindEnemy = cell_ptr->getIndex() - (deltaBehindEnemy * mSign) - (deltaForward * mSign);
@@ -574,7 +597,7 @@ void GameManager::collectBehindRHS(const PlayerPtr &hunter, const Block &cell_pt
  * @param hunter  player whose turn is next
  * @param cell_ptr current cell of hunter
  */
-void GameManager::collectBehindLHS(const PlayerPtr &hunter, const Block &cell_ptr)
+void GameManager::collectBehindLHS(const PlayerPtr &hunter, chk::Cell *cell_ptr)
 {
     if (hunter->getPlayerType() == PlayerType::PLAYER_RED && cell_ptr->getPos().x == 0)
     {
@@ -602,7 +625,7 @@ void GameManager::collectBehindLHS(const PlayerPtr &hunter, const Block &cell_pt
     {
         return;
     }
-    const short pieceId_NE = this->getPieceFromCell(cellAheadIdx); // North east (hunter King reverse dir)
+    const short pieceId_NE = this->getPieceFromCell(cellAheadIdx); // North east (of hunter, reverse dir)
     hasEnemyAhead = pieceId_NE != -1 && !hunter->hasThisPiece(pieceId_NE);
 
     int cellBehindEnemy = cell_ptr->getIndex() - (deltaBehindEnemy * mSign) - (deltaForward * mSign);

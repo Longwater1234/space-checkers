@@ -5,8 +5,10 @@
 #include "Piece.hpp"
 #include "ResourcePath.hpp"
 #include <SFML/Graphics/Color.hpp>
+#include <SFML/Graphics/Font.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
+#include <SFML/Graphics/Text.hpp>
 #include <SFML/Graphics/Texture.hpp>
 #include <SFML/Window/Event.hpp>
 #include <SFML/Window/Mouse.hpp>
@@ -36,6 +38,8 @@ class MainMenu final
     sf::RectangleShape mainFrame;
     sf::RectangleShape localBtn;
     sf::RectangleShape onlineBtn;
+    sf::Font font;
+    sf::Text versionTxt;
     sf::Color DARK_BROWN = sf::Color{82, 55, 27};
     void handleEvents(chk::UserChoice &result);
 };
@@ -44,7 +48,7 @@ inline MainMenu::MainMenu(sf::RenderWindow *windowPtr)
 {
     this->window = windowPtr;
     this->mainFrame = sf::RectangleShape(sf::Vector2f(600, 700));
-    if (!this->mainImage.loadFromFile(chk::getResourcePath("main_menu.png")))
+    if (!this->mainImage.loadFromFile(chk::getResourcePath("main_menu_en.png")))
     {
         perror("cannot find home image");
         exit(EXIT_FAILURE);
