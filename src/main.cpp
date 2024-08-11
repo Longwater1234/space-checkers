@@ -80,14 +80,12 @@ int main()
     txtPanel.setFillColor(sf::Color::White);
     txtPanel.setPosition(sf::Vector2f{10.0, 8.5 * chk::SIZE_CELL});
     manager->updateMessage("Welcome to Space Checkers");
-    const std::string mama = u8"我爱你我喜欢你的";
     if (userChoice == chk::UserChoice::LOCAL_PLAY)
     {
-        // manager->updateMessage("Now playing! It's RED's turn");
-        manager->updateMessage(mama);
+        manager->updateMessage(u8"你好。 Now playing! It's RED's turn");
     }
 
-    std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
+    std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
 
     // THE MAIN GAME LOOP
     sf::Clock deltaClock;
