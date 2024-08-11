@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
 
-project("SpaceCheckers" VERSION 1.0.4 
+project("SpaceCheckers" VERSION 1.0.5 
  HOMEPAGE_URL "https://github.com/Longwater1234/space-checkers")
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -42,7 +42,8 @@ include_directories(${SFML_HOME}/include)
 
 # show warnings (depending on C++ compiler)
 if(MSVC)
-  target_compile_options(SpaceCheckers PRIVATE /W4 /sdl)
+  target_compile_definitions(SpaceCheckers PRIVATE _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING)
+  target_compile_options(SpaceCheckers PRIVATE /W4 /sdl )
 else()  
   target_compile_options(SpaceCheckers PRIVATE -Wall) 
 endif()
