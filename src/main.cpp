@@ -3,12 +3,13 @@
 #include "ResourcePath.hpp"
 #include "managers/LocalGameManager.hpp"
 #include "managers/OnlineGameManager.hpp"
-
 #include <SFML/Graphics.hpp>
 #include <SFML/Window/Mouse.hpp>
 #include <cassert>
 #include <google/protobuf/stubs/common.h>
 #include <vector>
+#include <codecvt>
+#include <locale>
 
 #include "imgui-SFML.h"
 #include "imgui.h"
@@ -17,20 +18,24 @@
 constexpr auto CHINESE_FONT = "C:/Windows/Fonts/ARIALUNI.ttf";
 #elif __APPLE__
 constexpr auto CHINESE_FONT = "/System/Library/Fonts/PingFang.ttc";
+#else
+const std::string CHINESE_FONT = chk::getResourcePath(chk::FONT_PATH);
 #endif
+
+#define Widen(x) L#x
 
 int main()
 {
     GOOGLE_PROTOBUF_VERIFY_VERSION;
     auto window = sf::RenderWindow{sf::VideoMode{600, 700}, "SpaceCheckers", sf::Style::Titlebar | sf::Style::Close};
     window.setFramerateLimit(60);
+
     ImGui::SFML::Init(window, false);
     std::unique_ptr<chk::GameManager> manager = nullptr;
 
     // SHOW MAIN MENU
     chk::MainMenu homeMenu(&window);
     const auto userChoice = homeMenu.runMainLoop();
-    std::cout << CHINESE_FONT << std::endl;
     if (userChoice == chk::UserChoice::ONLINE_PLAY)
     {
         manager = std::make_unique<chk::OnlineGameManager>(&window);
@@ -56,7 +61,7 @@ int main()
 
     // LOAD FONT for SFML
     sf::Font font;
-    if (!font.loadFromFile(chk::getResourcePath(chk::FONT_PATH)))
+    if (!font.loadFromFile(CHINESE_FONT))
     {
         std::perror("cannot find font file");
         exit(EXIT_FAILURE);
@@ -75,11 +80,14 @@ int main()
     txtPanel.setFillColor(sf::Color::White);
     txtPanel.setPosition(sf::Vector2f{10.0, 8.5 * chk::SIZE_CELL});
     manager->updateMessage("Welcome to Space Checkers");
-
+    const std::string mama = u8"我爱你我喜欢你的";
     if (userChoice == chk::UserChoice::LOCAL_PLAY)
     {
-        manager->updateMessage("Now playing! It's RED's turn");
+        // manager->updateMessage("Now playing! It's RED's turn");
+        manager->updateMessage(mama);
     }
+
+    std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
 
     // THE MAIN GAME LOOP
     sf::Clock deltaClock;
@@ -91,7 +99,7 @@ int main()
         window.clear();
         manager->drawBoard();
 
-        txtPanel.setString(manager->getCurrentMsg());
+        txtPanel.setString(converter.from_bytes(manager->getCurrentMsg()));
         window.draw(txtPanel);
         ImGui::SFML::Render(window);
         window.display();
