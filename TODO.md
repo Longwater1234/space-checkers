@@ -38,10 +38,18 @@ int main() {
 
 ### Standard CJK font paths
 
-- Windows: `C:/Windows/Fonts/ARIALUNI.TTF.ttf`
+- Windows: `C:/Windows/Fonts/ARIALUNI.ttf`
 - MacOS: `/System/Library/Fonts/PingFang.ttc`
 - How to load cjk font in imgui
 
 ```cpp
-ImFont* font = io.Fonts->AddFontFromFileTTF("/path/to/font.ext", 18.0f, nullptr, io.Fonts->GetGlyphRangesChineseFull());
+#ifdef WIN32
+constexpr auto CHINESE_FONT = "C:/Windows/Fonts/ARIALUNI.ttf";
+#elseif __APPLE__
+constexpr auto CHINESE_FONT = "/System/Library/Fonts/PingFang.ttc";
+#endif
+
+ImFont* font = io.Fonts->AddFontFromFileTTF(CHINESE_FONT, 18.0f, nullptr, io.Fonts->GetGlyphRangesChineseFull());
 ```
+
+

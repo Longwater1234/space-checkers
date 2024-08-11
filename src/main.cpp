@@ -13,6 +13,12 @@
 #include "imgui-SFML.h"
 #include "imgui.h"
 
+#if defined(_WIN32)
+constexpr auto CHINESE_FONT = "C:/Windows/Fonts/ARIALUNI.ttf";
+#elif __APPLE__
+constexpr auto CHINESE_FONT = "/System/Library/Fonts/PingFang.ttc";
+#endif
+
 int main()
 {
     GOOGLE_PROTOBUF_VERIFY_VERSION;
@@ -24,6 +30,7 @@ int main()
     // SHOW MAIN MENU
     chk::MainMenu homeMenu(&window);
     const auto userChoice = homeMenu.runMainLoop();
+    std::cout << CHINESE_FONT << std::endl;
     if (userChoice == chk::UserChoice::ONLINE_PLAY)
     {
         manager = std::make_unique<chk::OnlineGameManager>(&window);

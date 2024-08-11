@@ -19,7 +19,7 @@ using namespace chk;
  * Atomically update main UI message
  * @param msg the message content
  */
-void GameManager::updateMessage(const std::string_view msg)
+void GameManager::updateMessage(std::string_view msg)
 {
     std::scoped_lock<std::mutex> lg(my_mutex);
     this->currentMsg = msg;
