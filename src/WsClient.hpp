@@ -186,7 +186,7 @@ inline void WsClient::showPublicServerWindow(bool &showPublic)
             this->connClicked = true;
         }
         publicServers.empty() ? ImGui::NewLine() : ImGui::SameLine();
-        if (ImGui::Button("Refresh", ImVec2{90.0f, 0}))
+        if (ImGui::Button("重新", ImVec2{90.0f, 0}))
         {
             this->prefetchPublicServers();
         }

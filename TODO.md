@@ -52,14 +52,3 @@ constexpr auto CHINESE_FONT = "/System/Library/Fonts/PingFang.ttc";
 ImFont* font = io.Fonts->AddFontFromFileTTF(CHINESE_FONT, 18.0f, nullptr, io.Fonts->GetGlyphRangesChineseFull());
 ```
 
-i am writing a game using SFML 2.6. i want to support 
-displaying Asian characters. Sfml sf::Text::setString( ) support 
-Asian characters with proper display only if used with wide string
-literal as such: setString(L"你好"). but my string parameter is
-coming from a function call gameManager->getCurrentMsg() which returns std::string (utf8). 
-how do i convert the returned message to widestring literal? 
-
- sfText.setString(gameManager->getCurrentMsg());
- window.draw(sfText);
-
-

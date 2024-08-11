@@ -48,7 +48,7 @@ inline MainMenu::MainMenu(sf::RenderWindow *windowPtr)
 {
     this->window = windowPtr;
     this->mainFrame = sf::RectangleShape(sf::Vector2f(600, 700));
-    if (!this->mainImage.loadFromFile(chk::getResourcePath("main_menu_en.png")))
+    if (!this->mainImage.loadFromFile(chk::getResourcePath("main_menu_cn.png")))
     {
         perror("cannot find home image");
         exit(EXIT_FAILURE);

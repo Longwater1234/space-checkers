@@ -47,7 +47,8 @@ int main()
     // LOAD FONT for IMGUI
     ImGuiIO &io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-    ImFont *imfont = io.Fonts->AddFontFromFileTTF(chk::getResourcePath(chk::FONT_PATH).c_str(), 16);
+    // ImFont *imfont = io.Fonts->AddFontFromFileTTF(chk::getResourcePath(chk::FONT_PATH).c_str(), 16);
+    ImFont *imfont = io.Fonts->AddFontFromFileTTF(CHINESE_FONT, 16.0f, nullptr, io.Fonts->GetGlyphRangesChineseFull());
     IM_ASSERT(imfont != nullptr);
     ImGui::SFML::UpdateFontTexture();
 
