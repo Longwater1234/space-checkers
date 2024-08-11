@@ -71,7 +71,7 @@ inline OnlineGameManager::OnlineGameManager(sf::RenderWindow *windowPtr)
                 spdlog::info("I AM PLAYER BLACK");
                 this->updateMessage(u8"你将扮演 BLACK (黑色)跳棋");
             }
-           // this->updateMessage(notice);
+            // this->updateMessage(notice);
         });
 }
 
@@ -244,8 +244,7 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
     // this->updateMessage("You have moved to " + std::to_string(destCell->getIndex()) + ". It's " + opponent->getName()
     // +
     //                     "'s turn.");
-    this->updateMessage("你已经搬到 " + std::to_string(destCell->getIndex()) + ". 轮到 " + opponent->getName() +
-                        " 了");
+    this->updateMessage("你已经搬到 " + std::to_string(destCell->getIndex()) + ". 轮到 " + opponent->getName() + " 了");
 }
 
 /**

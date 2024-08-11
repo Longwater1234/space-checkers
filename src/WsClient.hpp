@@ -134,18 +134,18 @@ inline void WsClient::showConnectWindow()
     static char inputUrl[256] = "127.0.0.1:9876/game";
     if (ImGui::Begin("Private Server", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse))
     {
-        ImGui::InputText("Server IP", inputUrl, IM_ARRAYSIZE(inputUrl), ImGuiInputTextFlags_CharsNoBlank);
+        ImGui::InputText(u8"服务器地址", inputUrl, IM_ARRAYSIZE(inputUrl), ImGuiInputTextFlags_CharsNoBlank);
         ImGui::SameLine();
         WsClient::showHint("eg: 127.0.0.1:8080 OR myserver.example.org");
-        ImGui::Checkbox("Secure", &is_secure);
-        if (!std::string_view(inputUrl).empty() && ImGui::Button("Connect", ImVec2{100.0f, 0}))
+        ImGui::Checkbox(u8"安全网络", &is_secure);
+        if (!std::string_view(inputUrl).empty() && ImGui::Button("立即连接", ImVec2{100.0f, 0}))
         {
             const char *suffix = is_secure ? "wss://" : "ws://";
             this->final_address = suffix + std::string(inputUrl);
             this->connClicked = true;
             memset(inputUrl, 0, sizeof(inputUrl));
         }
-        if (ImGui::Button("< Go Back", ImVec2{100.0f, 0}))
+        if (ImGui::Button("< 返回", ImVec2{100.0f, 0}))
         {
             showPublic = true;
         }
@@ -164,7 +164,7 @@ inline void WsClient::showPublicServerWindow(bool &showPublic)
     if (ImGui::Begin("Public Servers", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse))
     {
         static int current_idx = 0;
-        if (ImGui::BeginListBox("Select One"))
+        if (ImGui::BeginListBox("选择一个"))
         {
             for (int i = 0; i < publicServers.size(); i++)
             {
@@ -180,7 +180,7 @@ inline void WsClient::showPublicServerWindow(bool &showPublic)
             }
             ImGui::EndListBox();
         }
-        if (!publicServers.empty() && ImGui::Button("Connect", ImVec2{100.0f, 0}))
+        if (!publicServers.empty() && ImGui::Button("立即连接", ImVec2{100.0f, 0}))
         {
             this->final_address = publicServers.at(current_idx).address;
             this->connClicked = true;
@@ -190,7 +190,7 @@ inline void WsClient::showPublicServerWindow(bool &showPublic)
         {
             this->prefetchPublicServers();
         }
-        if (ImGui::Button("My Private Server >", ImVec2{150.0f, 0}))
+        if (ImGui::Button("专用服务器 >", ImVec2{150.0f, 0}))
         {
             showPublic = false;
         }
@@ -231,7 +231,8 @@ inline void WsClient::prefetchPublicServers()
     {
         // comand failed. exit value != 0
         this->isDead = true;
-        this->errorMsg = "failed to fetch public server list";
+        // this->errorMsg = u8"failed to fetch public server list";
+        this->errorMsg = u8"无法获取公共服务器列表!";
         return;
     }
 #endif // WIN32
@@ -308,8 +309,8 @@ inline void WsClient::tryConnect(std::string_view address)
     {
         ImGui::SetNextWindowSize(ImVec2(sf::Vector2f{400.0, 100.0}));
         ImGui::Begin("Loading", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
-        // ImGui::Text("Connecting to %s", this->final_address.c_str());
-        ImGui::Text("Connecting to online server");
+        // ImGui::Text("Connecting to online server");
+        ImGui::Text("当前正在连接。。。");
         ImGui::End();
     }
 
@@ -328,14 +329,14 @@ inline void WsClient::tryConnect(std::string_view address)
         else if (msg->type == ix::WebSocketMessageType::Close)
         {
             std::scoped_lock lg{this->mut};
-            this->errorMsg = "Error: disconnected from Server!" + msg->str;
+            this->errorMsg = "Error: 已与服务器断开连接!" + msg->str;
             spdlog::error(this->errorMsg);
             this->isDead = true;
         }
         else if (msg->type == ix::WebSocketMessageType::Error)
         {
             std::scoped_lock lg{this->mut};
-            this->errorMsg = "Connection error: " + msg->errorInfo.reason;
+            this->errorMsg = "连接错误: " + msg->errorInfo.reason;
             spdlog::error(this->errorMsg);
             this->isDead = true;
         }
@@ -432,13 +433,7 @@ inline void WsClient::runGameLoop()
 {
     if (!this->isConnected)
     {
-        if (ImGui::Begin("Loading", nullptr, ImGuiWindowFlags_NoResize))
-        {
-            /* code */
-            ImGui::TextWrapped("Connecting to %s", this->final_address.c_str());
-            ImGui::End();
-            return;
-        }
+        return;
     }
 
     for (const auto &msg : this->msgBuffer.getAll())
@@ -451,7 +446,7 @@ inline void WsClient::runGameLoop()
         if (!basePayload.ParseFromString(msg))
         {
             std::scoped_lock lg(this->mut);
-            this->errorMsg = "Profobuf: Could not parse payload";
+            this->errorMsg = "Profobuf: 无法解析响应数据";
             this->isDead = true;
             return;
         }
