@@ -62,14 +62,16 @@ inline OnlineGameManager::OnlineGameManager(sf::RenderWindow *windowPtr)
                 this->myTeam = chk::PlayerType::PLAYER_RED;
                 this->isMyTurn = true;
                 spdlog::info("I AM PLAYER RED");
+                this->updateMessage(u8"你将扮演 RED(红色)跳棋");
             }
             else
             {
                 this->myTeam = chk::PlayerType::PLAYER_BLACK;
                 this->isMyTurn = false;
                 spdlog::info("I AM PLAYER BLACK");
+                this->updateMessage(u8"你将扮演 BLACK (黑色)跳棋");
             }
-            this->updateMessage(notice);
+           // this->updateMessage(notice);
         });
 }
 
@@ -239,8 +241,11 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
     }
 
     this->isMyTurn = !this->isMyTurn; // toggle player turns
-    this->updateMessage("You have moved to " + std::to_string(destCell->getIndex()) + ". It's " + opponent->getName() +
-                        "'s turn.");
+    // this->updateMessage("You have moved to " + std::to_string(destCell->getIndex()) + ". It's " + opponent->getName()
+    // +
+    //                     "'s turn.");
+    this->updateMessage("你已经搬到 " + std::to_string(destCell->getIndex()) + ". 轮到 " + opponent->getName() +
+                        " 了");
 }
 
 /**
@@ -272,7 +277,8 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
             {
                 return;
             }
-            this->updateMessage("You have captured " + prey->getName() + "'s piece!");
+            // this->updateMessage("You have captured " + prey->getName() + "'s piece!");
+            this->updateMessage("你拍到了 " + prey->getName() + "格子碎片!");
             copySrcCell = this->sourceCell.value();
             gameMap.erase(this->sourceCell.value());                // set hunter's old location empty!
             gameMap.erase(target.preyCellIdx);                      // set Prey's old location empty!
@@ -454,8 +460,10 @@ inline void OnlineGameManager::startMoveListener()
         }
 
         this->isMyTurn = !this->isMyTurn; // toggle player turns
-        this->updateMessage("Opponent moved to " + std::to_string(payload.destination().cell_index()) +
-                            ". It's your turn.");
+        // this->updateMessage("Opponent moved to " + std::to_string(payload.destination().cell_index()) +
+        //                     ". It's your turn.");
+        this->updateMessage("你的对手已经转向 " + std::to_string(payload.destination().cell_index()) +
+                            ". 现在轮到你了.");
     });
 }
 
@@ -478,7 +486,8 @@ inline void OnlineGameManager::startCaptureListener()
             return;
         }
 
-        this->updateMessage(other->getName() + " has captured your piece!");
+        // this->updateMessage(other->getName() + " has captured your piece!");
+        this->updateMessage(other->getName() + " 已经抓住了你的棋子!");
         gameMap.erase(payload.details().hunter_src_cell());                     // set hunter's old location empty!
         gameMap.erase(payload.details().prey_cell_idx());                       // set my old location empty!
         gameMap.emplace(payload.destination().cell_index(), hunterPieceId);     // fill in hunter new location
