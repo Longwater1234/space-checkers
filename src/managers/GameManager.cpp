@@ -149,7 +149,7 @@ void GameManager::handleCapturePiece(const chk::PlayerPtr &hunter, const chk::Pl
         }
     }
     // FIXME do not RUN this next line if this "hunter" piece just became KING!
-    this->identifyTargets(hunter, targetCell.get()); // Check for extra opportunities NOW!
+    this->identifyTargets(hunter, targetCell.get()); // Check for extra opportunities NOW! (single Cell)
     if (this->forcedMoves.empty())
     {
         // NO MORE JUMPS AVAILABLE. SWITCH TURNS to opponent

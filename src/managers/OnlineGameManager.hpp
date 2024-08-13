@@ -205,7 +205,7 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
     gameMap.erase(this->sourceCell.value());               // set old location empty!
     gameMap.emplace(destCell->getIndex(), currentPieceId); // fill in the new location
     this->sourceCell = std::nullopt;                       // reset source cell
-    this->identifyTargets(opponent);                       // check  opportunities for Opponent
+    chk::GameManager::identifyTargets(opponent);           // check  opportunities for Opponent
 
     if (!this->getForcedMoves().empty())
     {
@@ -324,7 +324,7 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
     if (this->getForcedMoves().empty())
     {
         // NO MORE JUMPS AVAILABLE. SWITCH TURNS to opponent
-        this->identifyTargets(prey);
+        chk::GameManager::identifyTargets(prey);
         this->isMyTurn = !this->isMyTurn;
     }
     else
@@ -470,10 +470,10 @@ inline void OnlineGameManager::startCaptureListener()
         const chk::PlayerPtr &other = payload.from_team() == TeamColor::TEAM_RED ? this->playerRed : this->playerBlack;
         const chk::PlayerPtr &myTeam = other->getPlayerType() == PlayerType::PLAYER_RED ? this->playerBlack : this->playerRed;
         // clang-format on
-        const auto targetCell = sf::Vector2f{payload.destination().x(), payload.destination().y()};
+        const auto destPos = sf::Vector2f{payload.destination().x(), payload.destination().y()};
         const auto hunterPieceId = static_cast<short>(payload.hunter_piece_id());
 
-        if (!other->captureEnemyWith(hunterPieceId, targetCell))
+        if (!other->captureEnemyWith(hunterPieceId, destPos))
         {
             return;
         }
@@ -482,15 +482,24 @@ inline void OnlineGameManager::startCaptureListener()
         gameMap.erase(payload.details().hunter_src_cell());                     // set hunter's old location empty!
         gameMap.erase(payload.details().prey_cell_idx());                       // set my old location empty!
         gameMap.emplace(payload.destination().cell_index(), hunterPieceId);     // fill in hunter new location
-        short targetId = static_cast<short>(payload.details().prey_piece_id()); // cast to short
+        short targetId = static_cast<short>(payload.details().prey_piece_id()); // cast to int16_t
         myTeam->losePiece(targetId);                                            // I will lose 1 piece
 
-        // Check for extra opportunities NOW (for Enemy)
-        GameManager::identifyTargets(other);
+        // Check for extra opportunities NOW (for Enemy), single cell
+        const int destCellIdx = payload.destination().cell_index();
+        const auto it = std::find_if(blockList.begin(), blockList.end(), [&destCellIdx](const chk::Block &cell) {
+            return cell->getIndex() == destCellIdx;
+        });
+        if (it != this->blockList.end())
+        {
+            chk::Block &cellPtr = *it;
+            GameManager::identifyTargets(other, cellPtr.get());
+        }
+
         if (this->getForcedMoves().empty())
         {
             // NO MORE JUMPS AVAILABLE. SWITCH TURNS to myself.
-            this->identifyTargets(myTeam);
+            chk::GameManager::identifyTargets(myTeam);
             this->isMyTurn = !this->isMyTurn;
         }
     });
