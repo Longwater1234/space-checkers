@@ -203,43 +203,30 @@ inline void WsClient::showPublicServerWindow(bool &showPublic)
  */
 inline void WsClient::prefetchPublicServers()
 {
-    const std::string url = "https://d1txhef4jwuosv.cloudfront.net/ws_server_locations.json";
+    const std::string cloudfront = "https://d1txhef4jwuosv.cloudfront.net/ws_server_locations.json";
     std::filesystem::path tempFile = std::filesystem::temp_directory_path() / "json_result.txt";
     const std::string tempFileStr = tempFile.u8string();
 
-#ifdef WIN32
-    // ix::HttpClient httpClient;
-    // auto args = httpClient.createRequest(url, ix::HttpClient::kGet);
-    // ix::HttpResponsePtr response = httpClient.get(url, args); // blocking call (Async is buggy!)
-
-    cpr::Response response = cpr::Get(cpr::Url{"http://www.httpbin.org/get"},
-                                      cpr::WriteCallback([&](std::string data, intptr_t userdata) { return true; }));
-
-    spdlog::info("response {}", response.text);
-    std::ofstream fos{tempFile};
-    int statusCode = response.status_code;
-    if (statusCode != 200 || fos.bad())
+    cpr::AsyncResponse fr = cpr::GetAsync(cpr::Url{cloudfront});
+    // Sometime later
+    if (fr.wait_for(std::chrono::milliseconds(2000)) == std::future_status::ready)
     {
-        spdlog::error("http request failed. Reason {}", response.error.message);
-        this->errorMsg = response.error.message;
-        this->isDead = true;
-        return;
+        cpr::Response response = fr.get();
+        spdlog::info("response {}", response.text);
+        std::ofstream fos{tempFile};
+        int statusCode = response.status_code;
+        if (statusCode != 200 || fos.bad())
+        {
+            spdlog::error("http request failed. Reason {}", response.error.message);
+            this->errorMsg = response.error.message;
+            this->isDead = true;
+            return;
+        }
+        fos << response.text;
+        fos.close();
     }
-    fos << response.text;
-    fos.close();
 
-#else
-    // lets use system CURL, since ix::HttpClient doesnt work on Unix!
-    const std::string commandStr = fmt::format("curl -fsSL {} -o {}", url, tempFileStr);
-    if (std::system(commandStr.c_str()))
-    {
-        // comand failed. exit value != 0
-        this->isDead = true;
-        this->errorMsg = "failed to fetch public server list";
-        return;
-    }
-#endif // WIN32
-
+    // Parse the JSON response 
     simdjson::dom::parser jsonParser;
     try
     {
