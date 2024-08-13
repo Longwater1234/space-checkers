@@ -214,7 +214,7 @@ inline void WsClient::prefetchPublicServers()
         cpr::Response response = fr.get();
         spdlog::info("response {}", response.text);
         std::ofstream fos{tempFile};
-        int statusCode = response.status_code;
+        long statusCode = response.status_code;
         if (statusCode != 200 || fos.bad())
         {
             spdlog::error("http request failed. Reason {}", response.error.message);
