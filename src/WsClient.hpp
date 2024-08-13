@@ -3,10 +3,10 @@
 #include "ServerLocation.hpp"
 #include "payloads/base_payload.pb.hpp"
 #include <atomic>
+#include <cpr/cpr.h>
 #include <cstdlib>
 #include <filesystem>
 #include <fstream>
-#include <ixwebsocket/IXHttpClient.h>
 #include <ixwebsocket/IXNetSystem.h>
 #include <ixwebsocket/IXWebSocket.h>
 #include <mutex>
@@ -88,7 +88,7 @@ inline chk::WsClient::WsClient()
     // once dead, DO NOT try reconnect
     this->webSocketPtr->disableAutomaticReconnection();
     // ping server every 30 seconds
-    //this->webSocketPtr->setPingInterval(30); // TOXIC ping!
+    // this->webSocketPtr->setPingInterval(30); // TOXIC ping!
     ix::SocketTLSOptions tlsOptions;
 #ifndef _WIN32
     // Currently system CAs are not supported on non-Windows platforms with mbedtls
@@ -208,20 +208,24 @@ inline void WsClient::prefetchPublicServers()
     const std::string tempFileStr = tempFile.u8string();
 
 #ifdef WIN32
-    ix::HttpClient httpClient;
-    auto args = httpClient.createRequest(url, ix::HttpClient::kGet);
-    ix::HttpResponsePtr response = httpClient.get(url, args); // blocking call (Async is buggy!)
+    // ix::HttpClient httpClient;
+    // auto args = httpClient.createRequest(url, ix::HttpClient::kGet);
+    // ix::HttpResponsePtr response = httpClient.get(url, args); // blocking call (Async is buggy!)
 
+    cpr::Response response = cpr::Get(cpr::Url{"http://www.httpbin.org/get"},
+                                      cpr::WriteCallback([&](std::string data, intptr_t userdata) { return true; }));
+
+    spdlog::info("response {}", response.text);
     std::ofstream fos{tempFile};
-    int statusCode = response->statusCode;
+    int statusCode = response.status_code;
     if (statusCode != 200 || fos.bad())
     {
-        spdlog::error("http request failed. Reason {}", response->errorMsg);
-        this->errorMsg = response->errorMsg;
+        spdlog::error("http request failed. Reason {}", response.error.message);
+        this->errorMsg = response.error.message;
         this->isDead = true;
         return;
     }
-    fos << response->body;
+    fos << response.text;
     fos.close();
 
 #else
