@@ -83,7 +83,7 @@ class GameManager
     chk::PlayerPtr playerBlack = nullptr;
 
     [[nodiscard]] const bool &isPlayerRedTurn() const;
-    [[nodiscard]] short getPieceFromCell(int cell_idx);
+    [[nodiscard]] short getPieceFromCell(int cell_idx) const;
     [[nodiscard]] const std::vector<chk::Block> &getBlockList() const;
     [[nodiscard]] bool hasPendingCaptures() const;
     [[nodiscard]] const bool &isGameOver() const;

@@ -65,7 +65,7 @@ class WsClient final
     std::mutex mut;
     std::unique_ptr<ix::WebSocket> webSocketPtr = nullptr; // our Websocket object
     void showErrorPopup();                                 // whenver there is an error (from server)
-    void showWinnerPopup(std::string_view notice);         // when server notifies about winner
+    void showWinnerPopup(const std::string &notice);       // when server notifies about winner
     void runGameLoop();
     static void showHint(const char *tip);
     void tryConnect(std::string_view address);
@@ -526,7 +526,7 @@ inline void WsClient::showErrorPopup()
 /**
  * Show winner/loser popup window.
  */
-inline void WsClient::showWinnerPopup(std::string_view notice)
+inline void WsClient::showWinnerPopup(const std::string &notice)
 {
     // Always center this next dialog
     ImVec2 center = ImGui::GetMainViewport()->GetCenter();
@@ -534,7 +534,7 @@ inline void WsClient::showWinnerPopup(std::string_view notice)
     ImGui::OpenPopup("GameOver", ImGuiPopupFlags_NoOpenOverExistingPopup);
     if (ImGui::BeginPopupModal("GameOver", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {
-        ImGui::Text("%s", notice.data());
+        ImGui::Text(u8"%s", notice.c_str());
         ImGui::Separator();
         if (ImGui::Button("OK", ImVec2(120, 0)))
         {

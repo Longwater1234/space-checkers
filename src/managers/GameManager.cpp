@@ -194,14 +194,20 @@ void chk::GameManager::doCleanup()
 }
 
 /**
- * Whether the current player is holding own hunting Piece, AND
+ * Whether the current player is currently holding own hunting Piece, AND
  * forcedMoves is not empty
  *
  *@return TRUE or FALSE
  */
 bool GameManager::hasPendingCaptures() const
 {
-    return this->sourceCell.has_value() && !forcedMoves.empty();
+    if (!this->sourceCell.has_value())
+    {
+        return false;
+    }
+    int sourceCell = this->sourceCell.value();
+    const short pieceId = this->getPieceFromCell(sourceCell);
+    return pieceId != -1 && !forcedMoves.empty() && (forcedMoves.find(pieceId) != forcedMoves.end());
 }
 
 /**
@@ -210,7 +216,7 @@ bool GameManager::hasPendingCaptures() const
  * @param cell_idx the clicked cell
  * @return positive number or -1 if not found
  */
-short GameManager::getPieceFromCell(int cell_idx)
+short GameManager::getPieceFromCell(int cell_idx) const
 {
     if (this->gameMap.find(cell_idx) != gameMap.end())
     {
