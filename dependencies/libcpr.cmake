@@ -1,15 +1,12 @@
-# add libcpr v1.10.5
+# add libcpr (HTTP Client) v1.10.5
 
-
+SET(SSL_OPTION "CPR_FORCE_OPENSSL_BACKEND TRUE")
 if(WIN32)
    SET(SSL_OPTION "CPR_FORCE_WINSSL_BACKEND TRUE")
 elseif(APPLE)
-   SET(SSL_OPTION "CPR_FORCE_DARWINSSL_BACKEND")
-else()
-   SET(SSL_OPTION "CPR_FORCE_OPENSSL_BACKEND TRUE")
+   SET(SSL_OPTION "CPR_FORCE_DARWINSSL_BACKEND TRUE")
 endif()
- 
-set("CURL_USE_ZLIB" TRUE)
+
 CPMAddPackage(
     NAME cpr
     URL    "https://github.com/libcpr/cpr/archive/refs/tags/1.10.5.tar.gz"
