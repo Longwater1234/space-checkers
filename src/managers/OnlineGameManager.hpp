@@ -405,7 +405,7 @@ inline void OnlineGameManager::handleEvents(chk::CircularBuffer<short> &circular
                     const auto &mine = myTeam == chk::PlayerType::PLAYER_RED ? this->playerRed : this->playerBlack;
                     const auto &opponent = myTeam == chk::PlayerType::PLAYER_RED ? this->playerBlack : this->playerRed;
 
-                    if (this->hasPendingCaptures(circularBuffer.getTop()))
+                    if (this->hasPendingCaptures(circularBuffer))
                     {
                         this->handleCapturePiece(mine, opponent, cell);
                         GameManager::updateMatchStatus(mine, opponent);
