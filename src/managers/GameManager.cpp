@@ -307,7 +307,7 @@ void chk::GameManager::handleCellTap(const chk::PlayerPtr &hunter, const chk::Pl
                 return;
             }
             // ELSE IF FORCEDMOVES.HAS(movablePieceId), THEN HANDLE CAPTURE ,
-            else if (this->hasPendingCaptures())
+            else if (forcedMoves.find(movablePieceId) != forcedMoves.end())
             {
                 /* code */
                 GameManager::handleCapturePiece(hunter, prey, cell);
