@@ -197,17 +197,17 @@ void chk::GameManager::doCleanup()
  * Whether the current player is currently holding own hunting Piece, AND
  * forcedMoves is not empty AND buffer is not empty
  *
- *@param buffer keeps currently selected piece
+ *@param currentPieceId selected piece
  *@return TRUE or FALSE
  */
-bool GameManager::hasPendingCaptures(chk::CircularBuffer<short> &buffer)
+bool GameManager::hasPendingCaptures(short currentPieceId)
 {
-    if (buffer.isEmpty())
+    if (!this->sourceCell.has_value() || currentPieceId == -1)
     {
         return false;
     }
-    const short pieceId = buffer.getTop();
-    return pieceId != -1 && !forcedMoves.empty() && (forcedMoves.find(pieceId) != forcedMoves.end());
+    // const short pieceId = buffer.getTop();
+    return !forcedMoves.empty() && (forcedMoves.find(currentPieceId) != forcedMoves.end());
 }
 
 /**

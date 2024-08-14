@@ -85,8 +85,8 @@ class GameManager
     [[nodiscard]] const bool &isPlayerRedTurn() const;
     [[nodiscard]] short getPieceFromCell(int cell_idx) const;
     [[nodiscard]] const std::vector<chk::Block> &getBlockList() const;
-    [[nodiscard]] bool hasPendingCaptures(chk::CircularBuffer<short> &buffer);
-    [[nodiscard]] const bool &isGameOver() const;
+    [[nodiscard]] bool hasPendingCaptures(short currentPieceId = -1);
+    [[nodiscard]] const bool &isGameOver() const; 
     void setSourceCell(int src_cell);
     void doCleanup();
     void identifyTargets(const chk::PlayerPtr &hunter, chk::Cell *singleCell = nullptr);
