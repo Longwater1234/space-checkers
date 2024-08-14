@@ -100,6 +100,7 @@ void GameManager::handleMovePiece(const chk::PlayerPtr &player, const chk::Playe
     {
         return;
     }
+    spdlog::warn("I FUCKING MOVED piece {}  to cell {}", currentPieceId, destCell->getIndex());
     gameMap.erase(this->sourceCell.value());               // set old location empty!
     gameMap.emplace(destCell->getIndex(), currentPieceId); // fill in the new location
     this->sourceCell = std::nullopt;                       // reset source cell
@@ -318,7 +319,7 @@ void chk::GameManager::handleCellTap(const chk::PlayerPtr &hunter, const chk::Pl
             {
                 // it's a SIMPLE MOVE
                 this->handleMovePiece(hunter, prey, cell, movablePieceId);
-                buffer.clean();
+                // buffer.clean();
             }
         }
     }
