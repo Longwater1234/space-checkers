@@ -17,7 +17,7 @@ class OnlineGameManager final : public chk::GameManager
   public:
     explicit OnlineGameManager(sf::RenderWindow *windowPtr);
     OnlineGameManager() = delete;
-   
+
     // Inherited via GameManager
     void createAllPieces() override;
     void handleEvents(chk::CircularBuffer<short> &circularBuffer) override;
@@ -350,7 +350,8 @@ inline void OnlineGameManager::handleCellTap(const chk::PlayerPtr &hunter, const
     if (pieceId != -1)
     {
         // YES, it has one! CHECK IF THERE IS ANY PENDING "forced jumps"
-        if (!this->getForcedMoves().empty())
+        const bool notContainKey = this->getForcedMoves().find(pieceId) == this->getForcedMoves().end();
+        if (!this->getForcedMoves().empty() && notContainKey)
         {
             this->showForcedMoves(hunter, cell);
             return;
@@ -369,8 +370,20 @@ inline void OnlineGameManager::handleCellTap(const chk::PlayerPtr &hunter, const
             {
                 return;
             }
-            this->handleMovePiece(hunter, prey, cell, movablePieceId);
-            buffer.clean();
+            // ELSE IF FORCEDMOVES.HAS(movablePieceId), THEN HANDLE CAPTURE ,
+            else if (this->hasPendingCaptures())
+            {
+                /* code */
+                GameManager::handleCapturePiece(hunter, prey, cell);
+                GameManager::updateMatchStatus(hunter, prey);
+                buffer.clean();
+            }
+            else
+            {
+                // it's a SIMPLE MOVE
+                this->handleMovePiece(hunter, prey, cell, movablePieceId);
+                buffer.clean();
+            }
         }
     }
 }
@@ -405,16 +418,16 @@ inline void OnlineGameManager::handleEvents(chk::CircularBuffer<short> &circular
                     const auto &mine = myTeam == chk::PlayerType::PLAYER_RED ? this->playerRed : this->playerBlack;
                     const auto &opponent = myTeam == chk::PlayerType::PLAYER_RED ? this->playerBlack : this->playerRed;
 
-                    if (this->hasPendingCaptures())
-                    {
-                        this->handleCapturePiece(mine, opponent, cell);
-                        GameManager::updateMatchStatus(mine, opponent);
-                        circularBuffer.clean();
-                    }
-                    else
-                    {
-                        this->handleCellTap(mine, opponent, circularBuffer, cell);
-                    }
+                    // if (this->hasPendingCaptures())
+                    // {
+                    //     this->handleCapturePiece(mine, opponent, cell);
+                    //     GameManager::updateMatchStatus(mine, opponent);
+                    //     circularBuffer.clean();
+                    // }
+                    // else
+                    // {
+                    this->handleCellTap(mine, opponent, circularBuffer, cell);
+                    // }
                     // END inner loop
                     break;
                 }

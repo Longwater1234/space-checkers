@@ -206,8 +206,8 @@ bool GameManager::hasPendingCaptures() const
         return false;
     }
     int sourceCell = this->sourceCell.value();
-    const short pieceId = this->getPieceFromCell(sourceCell);
-    return pieceId != -1 && !forcedMoves.empty() && (forcedMoves.find(pieceId) != forcedMoves.end());
+    const short hunterId = this->getPieceFromCell(sourceCell); // hunter pieceId
+    return hunterId != -1 && !forcedMoves.empty() && (forcedMoves.find(hunterId) != forcedMoves.end());
 }
 
 /**
@@ -286,19 +286,19 @@ void chk::GameManager::handleCellTap(const chk::PlayerPtr &hunter, const chk::Pl
     const short pieceId = this->getPieceFromCell(cell->getIndex());
     if (pieceId != -1)
     {
-        // YES, it has one! CHECK IF THERE IS ANY PENDING "forced jumps"
-        if (!this->getForcedMoves().empty())
+        // YES, it has one! CHECK IF THERE IS ANY PENDING "forced captures"
+        if (!this->getForcedMoves().empty() && this->forcedMoves.find(pieceId) == forcedMoves.end())
         {
             this->showForcedMoves(hunter, cell);
             return;
         }
-        // OTHERWISE, store it in buffer (for a simple move next)!
+        // OTHERWISE, store it in buffer (for a SIMPLE/CAPTURE move next)!
         buffer.addItem(pieceId);
         this->setSourceCell(cell->getIndex());
     }
     else
     {
-        // Cell is Empty! Let's move a piece (from buffer) here!
+        // Cell is Empty! Let's judge if this is SIMPLE move or ATTACK move
         if (!buffer.isEmpty())
         {
             const short movablePieceId = buffer.getTop();
@@ -306,8 +306,20 @@ void chk::GameManager::handleCellTap(const chk::PlayerPtr &hunter, const chk::Pl
             {
                 return;
             }
-            this->handleMovePiece(hunter, prey, cell, movablePieceId);
-            buffer.clean();
+            // ELSE IF FORCEDMOVES.HAS(movablePieceId), THEN HANDLE CAPTURE ,
+            else if (this->hasPendingCaptures())
+            {
+                /* code */
+                GameManager::handleCapturePiece(hunter, prey, cell);
+                GameManager::updateMatchStatus(hunter, prey);
+                buffer.clean();
+            }
+            else
+            {
+                // it's a SIMPLE MOVE
+                this->handleMovePiece(hunter, prey, cell, movablePieceId);
+                buffer.clean();
+            }
         }
     }
 }

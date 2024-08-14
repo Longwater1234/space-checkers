@@ -210,7 +210,7 @@ inline void WsClient::prefetchPublicServers()
     if (fr.wait_for(std::chrono::milliseconds(2000)) == std::future_status::ready)
     {
         cpr::Response response = fr.get();
-        //spdlog::info("response {}", response.text);
+        // spdlog::info("response {}", response.text);
         long statusCode = response.status_code;
         if (statusCode != 200)
         {
