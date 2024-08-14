@@ -3,10 +3,7 @@
 #include "ServerLocation.hpp"
 #include "payloads/base_payload.pb.hpp"
 #include <atomic>
-#include <cstdlib>
-#include <filesystem>
-#include <fstream>
-#include <ixwebsocket/IXHttpClient.h>
+#include <cpr/cpr.h>
 #include <ixwebsocket/IXNetSystem.h>
 #include <ixwebsocket/IXWebSocket.h>
 #include <mutex>
@@ -88,7 +85,7 @@ inline chk::WsClient::WsClient()
     // once dead, DO NOT try reconnect
     this->webSocketPtr->disableAutomaticReconnection();
     // ping server every 30 seconds
-    this->webSocketPtr->setPingInterval(30);
+    // this->webSocketPtr->setPingInterval(30); // TOXIC ping!
     ix::SocketTLSOptions tlsOptions;
 #ifndef _WIN32
     // Currently system CAs are not supported on non-Windows platforms with mbedtls
@@ -200,46 +197,36 @@ inline void WsClient::showPublicServerWindow(bool &showPublic)
 
 /**
  * Fetch public servers JSON list from central storage (which is updated regularly)
+ * @see libcpr docs: https://docs.libcpr.org/advanced-usage.html
  */
 inline void WsClient::prefetchPublicServers()
 {
-    const std::string url = "https://d1txhef4jwuosv.cloudfront.net/ws_server_locations.json";
-    std::filesystem::path tempFile = std::filesystem::temp_directory_path() / "json_result.txt";
-    const std::string tempFileStr = tempFile.u8string();
+    const std::string cloudfront = "https://d1txhef4jwuosv.cloudfront.net/ws_server_locations.json";
+    // std::filesystem::path tempFile = std::filesystem::temp_directory_path() / "json_result.txt";
+    // const std::string tempFileStr = tempFile.u8string();
 
-#ifdef WIN32
-    ix::HttpClient httpClient;
-    auto args = httpClient.createRequest(url, ix::HttpClient::kGet);
-    ix::HttpResponsePtr response = httpClient.get(url, args); // blocking call (Async is buggy!)
-
-    std::ofstream fos{tempFile};
-    int statusCode = response->statusCode;
-    if (statusCode != 200 || fos.bad())
+    cpr::AsyncResponse fr = cpr::GetAsync(cpr::Url{cloudfront});
+    std::string responseBody{};
+    if (fr.wait_for(std::chrono::milliseconds(2000)) == std::future_status::ready)
     {
-        spdlog::error("http request failed. Reason {}", response->errorMsg);
-        this->errorMsg = response->errorMsg;
-        this->isDead = true;
-        return;
+        cpr::Response response = fr.get();
+        spdlog::info("response {}", response.text);
+        long statusCode = response.status_code;
+        if (statusCode != 200)
+        {
+            spdlog::error("http request failed. Reason {}", response.error.message);
+            this->errorMsg = response.error.message;
+            this->isDead = true;
+            return;
+        }
+        responseBody = response.text;
     }
-    fos << response->body;
-    fos.close();
 
-#else
-    // lets use system CURL, since ix::HttpClient doesnt work on Unix!
-    const std::string commandStr = fmt::format("curl -fsSL {} -o {}", url, tempFileStr);
-    if (std::system(commandStr.c_str()))
-    {
-        // comand failed. exit value != 0
-        this->isDead = true;
-        this->errorMsg = "failed to fetch public server list";
-        return;
-    }
-#endif // WIN32
-
+    // Parse the JSON response
     simdjson::dom::parser jsonParser;
     try
     {
-        simdjson::dom::array jsonArray = jsonParser.load(tempFileStr);
+        simdjson::dom::array jsonArray = jsonParser.parse(simdjson::padded_string(responseBody));
         this->publicServers.clear();
         for (const simdjson::dom::object &elem : jsonArray)
         {
