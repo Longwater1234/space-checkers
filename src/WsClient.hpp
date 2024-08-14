@@ -4,9 +4,6 @@
 #include "payloads/base_payload.pb.hpp"
 #include <atomic>
 #include <cpr/cpr.h>
-#include <cstdlib>
-#include <filesystem>
-#include <fstream>
 #include <ixwebsocket/IXNetSystem.h>
 #include <ixwebsocket/IXWebSocket.h>
 #include <mutex>
@@ -200,37 +197,36 @@ inline void WsClient::showPublicServerWindow(bool &showPublic)
 
 /**
  * Fetch public servers JSON list from central storage (which is updated regularly)
+ * @see libcpr docs: https://docs.libcpr.org/advanced-usage.html
  */
 inline void WsClient::prefetchPublicServers()
 {
     const std::string cloudfront = "https://d1txhef4jwuosv.cloudfront.net/ws_server_locations.json";
-    std::filesystem::path tempFile = std::filesystem::temp_directory_path() / "json_result.txt";
-    const std::string tempFileStr = tempFile.u8string();
+    // std::filesystem::path tempFile = std::filesystem::temp_directory_path() / "json_result.txt";
+    // const std::string tempFileStr = tempFile.u8string();
 
     cpr::AsyncResponse fr = cpr::GetAsync(cpr::Url{cloudfront});
-    // Sometime later
+    std::string responseBody{};
     if (fr.wait_for(std::chrono::milliseconds(2000)) == std::future_status::ready)
     {
         cpr::Response response = fr.get();
         spdlog::info("response {}", response.text);
-        std::ofstream fos{tempFile};
         long statusCode = response.status_code;
-        if (statusCode != 200 || fos.bad())
+        if (statusCode != 200)
         {
             spdlog::error("http request failed. Reason {}", response.error.message);
             this->errorMsg = response.error.message;
             this->isDead = true;
             return;
         }
-        fos << response.text;
-        fos.close();
+        responseBody = response.text;
     }
 
-    // Parse the JSON response 
+    // Parse the JSON response
     simdjson::dom::parser jsonParser;
     try
     {
-        simdjson::dom::array jsonArray = jsonParser.load(tempFileStr);
+        simdjson::dom::array jsonArray = jsonParser.parse(simdjson::padded_string(responseBody));
         this->publicServers.clear();
         for (const simdjson::dom::object &elem : jsonArray)
         {
