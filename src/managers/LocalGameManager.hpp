@@ -12,7 +12,7 @@ class LocalGameManager final : public chk::GameManager
   public:
     explicit LocalGameManager(sf::RenderWindow *windowPtr);
     LocalGameManager() = delete;
-
+    
     // Inherited via GameManager
     void createAllPieces() override;
     void drawBoard() override;
@@ -157,7 +157,7 @@ inline void LocalGameManager::handleEvents(chk::CircularBuffer<short> &buffer)
                     const auto &hunter = this->isPlayerRedTurn() ? this->playerRed : this->playerBlack;
                     const auto &prey = this->isPlayerRedTurn() ? this->playerBlack : this->playerRed;
 
-                    if (this->hasPendingCaptures(buffer))
+                    if (this->hasPendingCaptures())
                     {
                         GameManager::handleCapturePiece(hunter, prey, cell);
                         GameManager::updateMatchStatus(hunter, prey);

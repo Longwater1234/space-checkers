@@ -17,7 +17,7 @@ class OnlineGameManager final : public chk::GameManager
   public:
     explicit OnlineGameManager(sf::RenderWindow *windowPtr);
     OnlineGameManager() = delete;
-
+   
     // Inherited via GameManager
     void createAllPieces() override;
     void handleEvents(chk::CircularBuffer<short> &circularBuffer) override;
@@ -405,7 +405,7 @@ inline void OnlineGameManager::handleEvents(chk::CircularBuffer<short> &circular
                     const auto &mine = myTeam == chk::PlayerType::PLAYER_RED ? this->playerRed : this->playerBlack;
                     const auto &opponent = myTeam == chk::PlayerType::PLAYER_RED ? this->playerBlack : this->playerRed;
 
-                    if (this->hasPendingCaptures(circularBuffer))
+                    if (this->hasPendingCaptures())
                     {
                         this->handleCapturePiece(mine, opponent, cell);
                         GameManager::updateMatchStatus(mine, opponent);
