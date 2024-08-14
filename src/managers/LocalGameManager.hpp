@@ -12,9 +12,9 @@ class LocalGameManager final : public chk::GameManager
   public:
     explicit LocalGameManager(sf::RenderWindow *windowPtr);
     LocalGameManager() = delete;
-    void createAllPieces() override;
-
+    
     // Inherited via GameManager
+    void createAllPieces() override;
     void drawBoard() override;
     void handleEvents(chk::CircularBuffer<short> &buffer) override;
 };

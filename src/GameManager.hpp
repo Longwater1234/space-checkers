@@ -58,7 +58,7 @@ class GameManager
     bool gameOver = false;
     // mutex for atomic updates
     std::mutex my_mutex;
-    // collection of my next targets (Map<HunterPieceID, CaptureTarget>)
+    // collection of Player's next targets (Map<HunterPieceID, CaptureTarget>)
     std::unordered_map<short, chk::CaptureTarget> forcedMoves{};
 
     [[nodiscard]] bool boardContainsCell(const int &cell_idx) const;

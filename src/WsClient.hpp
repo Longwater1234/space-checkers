@@ -530,8 +530,8 @@ inline void WsClient::showWinnerPopup(const std::string &notice)
 {
     // Always center this next dialog
     ImVec2 center = ImGui::GetMainViewport()->GetCenter();
-    ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2(0.5, 0.5));
-    ImGui::OpenPopup("GameOver", ImGuiPopupFlags_NoOpenOverExistingPopup);
+    ImGui::SetNextWindowPos(center, ImGuiCond_FirstUseEver, ImVec2(0.5, 0.5));
+    ImGui::OpenPopup("GameOver", ImGuiPopupFlags_AnyPopupLevel);
     if (ImGui::BeginPopupModal("GameOver", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {
         ImGui::Text(u8"%s", notice.c_str());

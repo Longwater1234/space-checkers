@@ -17,9 +17,9 @@ class OnlineGameManager final : public chk::GameManager
   public:
     explicit OnlineGameManager(sf::RenderWindow *windowPtr);
     OnlineGameManager() = delete;
-    void createAllPieces() override;
-
+   
     // Inherited via GameManager
+    void createAllPieces() override;
     void handleEvents(chk::CircularBuffer<short> &circularBuffer) override;
     void drawBoard() override;
 
@@ -201,7 +201,7 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
     {
         return;
     }
-    int sourceCellCopy = this->sourceCell.value();
+    int copySrcCell = this->sourceCell.value();
     gameMap.erase(this->sourceCell.value());               // set old location empty!
     gameMap.emplace(destCell->getIndex(), currentPieceId); // fill in the new location
     this->sourceCell = std::nullopt;                       // reset source cell
@@ -220,7 +220,7 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
 
     // create Movepayload Protobuf
     auto *movePayload = new chk::payload::MovePayload();
-    movePayload->set_source_cell(sourceCellCopy);
+    movePayload->set_source_cell(copySrcCell);
     movePayload->set_piece_id(currentPieceId);
     movePayload->set_from_team(TeamColor::TEAM_RED);
     if (this->myTeam == chk::PlayerType::PLAYER_BLACK)
@@ -252,9 +252,7 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
 inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,
                                                   const chk::Block &targetCell)
 {
-    // using namespace chk::payload;
-    // call base method
-    if (!this->isMyTurn || this->getPieceFromCell(targetCell->getIndex()) != -1)
+    if (!this->isMyTurn || GameManager::getPieceFromCell(targetCell->getIndex()) != -1)
     {
         // STOP if not my turn OR there's already a Piece on target cell
         return;

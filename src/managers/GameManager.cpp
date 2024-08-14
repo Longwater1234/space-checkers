@@ -323,7 +323,7 @@ void chk::GameManager::showForcedMoves(const chk::PlayerPtr &player, const chk::
     const short pieceId = this->getPieceFromCell(cell->getIndex());
     if (moves.find(pieceId) == moves.end())
     {
-        // FORCE PLAYER TO DO JUMP, don't proceed until done!
+        // FORCE PLAYER TO CAPTURE opponent, don't proceed until done!
         std::set<short> pieceSet;
         for (const auto &[hunter_piece, captureTarget] : moves)
         {
