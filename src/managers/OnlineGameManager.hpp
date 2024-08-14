@@ -374,8 +374,8 @@ inline void OnlineGameManager::handleCellTap(const chk::PlayerPtr &hunter, const
             else if (this->hasPendingCaptures())
             {
                 /* code */
-                GameManager::handleCapturePiece(hunter, prey, cell);
-                GameManager::updateMatchStatus(hunter, prey);
+                this->handleCapturePiece(hunter, prey, cell);
+                this->updateMatchStatus(hunter, prey);
                 buffer.clean();
             }
             else

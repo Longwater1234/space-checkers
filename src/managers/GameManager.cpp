@@ -310,8 +310,8 @@ void chk::GameManager::handleCellTap(const chk::PlayerPtr &hunter, const chk::Pl
             else if (forcedMoves.find(movablePieceId) != forcedMoves.end())
             {
                 /* code */
-                GameManager::handleCapturePiece(hunter, prey, cell);
-                GameManager::updateMatchStatus(hunter, prey);
+                this->handleCapturePiece(hunter, prey, cell);
+                this->updateMatchStatus(hunter, prey);
                 buffer.clean();
             }
             else
