@@ -132,6 +132,7 @@ void GameManager::handleCapturePiece(const chk::PlayerPtr &hunter, const chk::Pl
         return;
     }
 
+    bool isCaptured = false; // outside guard to verify Capture success
     for (const auto &[hunterPieceId, target] : this->forcedMoves)
     {
         if (target.hunterNextCell == targetCell->getIndex())
@@ -140,6 +141,7 @@ void GameManager::handleCapturePiece(const chk::PlayerPtr &hunter, const chk::Pl
             {
                 return;
             }
+            isCaptured = true;
             this->updateMessage(hunter->getName() + " has captured " + prey->getName() + "'s piece!");
             gameMap.erase(this->sourceCell.value());                // set hunter's old location empty!
             gameMap.erase(target.preyCellIdx);                      // set Prey's old location empty!
@@ -148,6 +150,10 @@ void GameManager::handleCapturePiece(const chk::PlayerPtr &hunter, const chk::Pl
             this->sourceCell = std::nullopt;                        // reset source cell
             break;
         }
+    }
+    if (!isCaptured)
+    {
+        return;
     }
     // FIXME do not RUN this next line if this "hunter" piece just became KING!
     this->identifyTargets(hunter, targetCell.get()); // Check for extra opportunities NOW! (single Cell)
@@ -302,6 +308,7 @@ void chk::GameManager::handleCellTap(const chk::PlayerPtr &hunter, const chk::Pl
         // Cell is Empty! Let's judge if this is SIMPLE move or ATTACK move
         if (!buffer.isEmpty())
         {
+            // DONT FUCKING REPEAT YOURSELF
             const short movablePieceId = buffer.getTop();
             if (!hunter->hasThisPiece(movablePieceId))
             {
@@ -319,7 +326,7 @@ void chk::GameManager::handleCellTap(const chk::PlayerPtr &hunter, const chk::Pl
             {
                 // it's a SIMPLE MOVE
                 this->handleMovePiece(hunter, prey, cell, movablePieceId);
-                // buffer.clean();
+                buffer.clean();
             }
         }
     }
