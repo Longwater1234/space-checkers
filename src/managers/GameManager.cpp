@@ -308,16 +308,14 @@ void chk::GameManager::handleCellTap(const chk::PlayerPtr &hunter, const chk::Pl
         // Cell is Empty! Let's judge if this is SIMPLE move or ATTACK move
         if (!buffer.isEmpty())
         {
-            // DONT FUCKING REPEAT YOURSELF
             const short movablePieceId = buffer.getTop();
             if (!hunter->hasThisPiece(movablePieceId))
             {
                 return;
             }
-            // ELSE IF FORCEDMOVES.HAS(movablePieceId), THEN HANDLE CAPTURE ,
             else if (forcedMoves.find(movablePieceId) != forcedMoves.end())
             {
-                /* code */
+                // it's an ATTACK move
                 this->handleCapturePiece(hunter, prey, cell);
                 this->updateMatchStatus(hunter, prey);
                 buffer.clean();
