@@ -65,7 +65,7 @@ class WsClient final
     std::mutex mut;
     std::unique_ptr<ix::WebSocket> webSocketPtr = nullptr; // our Websocket object
     void showErrorPopup();                                 // whenver there is an error (from server)
-    void showWinnerPopup(std::string_view notice);         // when server notifies about winner
+    void showWinnerPopup(const std::string &notice);       // when server notifies about winner
     void runGameLoop();
     static void showHint(const char *tip);
     void tryConnect(std::string_view address);
@@ -202,15 +202,13 @@ inline void WsClient::showPublicServerWindow(bool &showPublic)
 inline void WsClient::prefetchPublicServers()
 {
     const std::string cloudfront = "https://d1txhef4jwuosv.cloudfront.net/ws_server_locations.json";
-    // std::filesystem::path tempFile = std::filesystem::temp_directory_path() / "json_result.txt";
-    // const std::string tempFileStr = tempFile.u8string();
 
     cpr::AsyncResponse fr = cpr::GetAsync(cpr::Url{cloudfront});
     std::string responseBody{};
     if (fr.wait_for(std::chrono::milliseconds(2000)) == std::future_status::ready)
     {
         cpr::Response response = fr.get();
-        spdlog::info("response {}", response.text);
+        // spdlog::info("response {}", response.text);
         long statusCode = response.status_code;
         if (statusCode != 200)
         {
@@ -295,7 +293,6 @@ inline void WsClient::tryConnect(std::string_view address)
     {
         ImGui::SetNextWindowSize(ImVec2(sf::Vector2f{400.0, 100.0}));
         ImGui::Begin("Loading", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
-        // ImGui::Text("Connecting to %s", this->final_address.c_str());
         ImGui::Text("Connecting to online server");
         ImGui::End();
     }
@@ -526,15 +523,15 @@ inline void WsClient::showErrorPopup()
 /**
  * Show winner/loser popup window.
  */
-inline void WsClient::showWinnerPopup(std::string_view notice)
+inline void WsClient::showWinnerPopup(const std::string &notice)
 {
     // Always center this next dialog
     ImVec2 center = ImGui::GetMainViewport()->GetCenter();
-    ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2(0.5, 0.5));
-    ImGui::OpenPopup("GameOver", ImGuiPopupFlags_NoOpenOverExistingPopup);
+    ImGui::SetNextWindowPos(center, ImGuiCond_FirstUseEver, ImVec2(0.5, 0.5));
+    ImGui::OpenPopup("GameOver", ImGuiPopupFlags_AnyPopupLevel);
     if (ImGui::BeginPopupModal("GameOver", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {
-        ImGui::Text("%s", notice.data());
+        ImGui::Text(u8"%s", notice.c_str());
         ImGui::Separator();
         if (ImGui::Button("OK", ImVec2(120, 0)))
         {

@@ -196,7 +196,7 @@ inline bool Piece::moveSimple(const sf::Vector2f &destPos)
     const float deltaX = destPos.x - this->getPosition().x;
     const float deltaY = destPos.y - this->getPosition().y;
 
-    if (std::abs(deltaX) > chk::SIZE_CELL || std::abs(deltaY) > chk::SIZE_CELL)
+    if (std::abs(deltaX) != chk::SIZE_CELL || std::abs(deltaY) != chk::SIZE_CELL)
     {
         return false;
     }

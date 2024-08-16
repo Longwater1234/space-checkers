@@ -3,7 +3,7 @@
 namespace chk
 {
 /**
- * Keeps details about the Piece which must be captured next
+ * Keeps details about the Piece which MUST be captured next
  */
 struct CaptureTarget
 {

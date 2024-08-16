@@ -58,7 +58,7 @@ class GameManager
     bool gameOver = false;
     // mutex for atomic updates
     std::mutex my_mutex;
-    // collection of my next targets (Map<HunterPieceID, CaptureTarget>)
+    // collection of Player's next targets (Map<HunterPieceID, CaptureTarget>)
     std::unordered_map<short, chk::CaptureTarget> forcedMoves{};
 
     [[nodiscard]] bool boardContainsCell(const int &cell_idx) const;
@@ -83,9 +83,9 @@ class GameManager
     chk::PlayerPtr playerBlack = nullptr;
 
     [[nodiscard]] const bool &isPlayerRedTurn() const;
-    [[nodiscard]] short getPieceFromCell(int cell_idx);
+    [[nodiscard]] short getPieceFromCell(int cell_idx) const;
     [[nodiscard]] const std::vector<chk::Block> &getBlockList() const;
-    [[nodiscard]] bool hasPendingCaptures() const;
+    [[nodiscard]] bool isHunterActive() const;
     [[nodiscard]] const bool &isGameOver() const;
     void setSourceCell(int src_cell);
     void doCleanup();

@@ -131,6 +131,7 @@ void GameManager::handleCapturePiece(const chk::PlayerPtr &hunter, const chk::Pl
         return;
     }
 
+    bool isCaptured = false; // outside guard to verify if Capture completed
     for (const auto &[hunterPieceId, target] : this->forcedMoves)
     {
         if (target.hunterNextCell == targetCell->getIndex())
@@ -139,6 +140,7 @@ void GameManager::handleCapturePiece(const chk::PlayerPtr &hunter, const chk::Pl
             {
                 return;
             }
+            isCaptured = true;
             this->updateMessage(hunter->getName() + " has captured " + prey->getName() + "'s piece!");
             gameMap.erase(this->sourceCell.value());                // set hunter's old location empty!
             gameMap.erase(target.preyCellIdx);                      // set Prey's old location empty!
@@ -147,6 +149,10 @@ void GameManager::handleCapturePiece(const chk::PlayerPtr &hunter, const chk::Pl
             this->sourceCell = std::nullopt;                        // reset source cell
             break;
         }
+    }
+    if (!isCaptured)
+    {
+        return;
     }
     // FIXME do not RUN this next line if this "hunter" piece just became KING!
     this->identifyTargets(hunter, targetCell.get()); // Check for extra opportunities NOW! (single Cell)
@@ -194,14 +200,19 @@ void chk::GameManager::doCleanup()
 }
 
 /**
- * Whether the current player is holding own hunting Piece, AND
- * forcedMoves is not empty
+ * Returns TRUE only if the current player is holding own hunting Piece, AND
+ * forcedMoves is NOT empty
  *
  *@return TRUE or FALSE
  */
-bool GameManager::hasPendingCaptures() const
+bool GameManager::isHunterActive() const
 {
-    return this->sourceCell.has_value() && !forcedMoves.empty();
+    if (!this->sourceCell.has_value())
+    {
+        return false;
+    }
+    const short hunterId = this->getPieceFromCell(this->sourceCell.value()); // hunter pieceId
+    return hunterId != -1 && (forcedMoves.find(hunterId) != forcedMoves.end());
 }
 
 /**
@@ -210,7 +221,7 @@ bool GameManager::hasPendingCaptures() const
  * @param cell_idx the clicked cell
  * @return positive number or -1 if not found
  */
-short GameManager::getPieceFromCell(int cell_idx)
+short GameManager::getPieceFromCell(int cell_idx) const
 {
     if (this->gameMap.find(cell_idx) != gameMap.end())
     {
@@ -275,24 +286,23 @@ void chk::GameManager::handleCellTap(const chk::PlayerPtr &hunter, const chk::Pl
     {
         return;
     }
-
     // CHECK IF this cell has a Piece
     const short pieceId = this->getPieceFromCell(cell->getIndex());
     if (pieceId != -1)
     {
-        // YES, it has one! CHECK IF THERE IS ANY PENDING "forced jumps"
-        if (!this->getForcedMoves().empty())
+        // YES, it has one! CHECK IF THERE IS ANY PENDING "forced captures"
+        if (!this->getForcedMoves().empty() && this->forcedMoves.find(pieceId) == forcedMoves.end())
         {
             this->showForcedMoves(hunter, cell);
             return;
         }
-        // OTHERWISE, store it in buffer (for a simple move next)!
+        // OTHERWISE, store it in buffer (for a SIMPLE/CAPTURE move next)!
         buffer.addItem(pieceId);
         this->setSourceCell(cell->getIndex());
     }
     else
     {
-        // Cell is Empty! Let's move a piece (from buffer) here!
+        // Cell is Empty! Let's judge if this is SIMPLE move or ATTACK move
         if (!buffer.isEmpty())
         {
             const short movablePieceId = buffer.getTop();
@@ -300,8 +310,19 @@ void chk::GameManager::handleCellTap(const chk::PlayerPtr &hunter, const chk::Pl
             {
                 return;
             }
-            this->handleMovePiece(hunter, prey, cell, movablePieceId);
-            buffer.clean();
+            else if (isHunterActive())
+            {
+                // it's an ATTACK move
+                this->handleCapturePiece(hunter, prey, cell);
+                this->updateMatchStatus(hunter, prey);
+                buffer.clean();
+            }
+            else
+            {
+                // it's a SIMPLE MOVE
+                this->handleMovePiece(hunter, prey, cell, movablePieceId);
+                buffer.clean();
+            }
         }
     }
 }
@@ -317,7 +338,7 @@ void chk::GameManager::showForcedMoves(const chk::PlayerPtr &player, const chk::
     const short pieceId = this->getPieceFromCell(cell->getIndex());
     if (moves.find(pieceId) == moves.end())
     {
-        // FORCE PLAYER TO DO JUMP, don't proceed until done!
+        // FORCE PLAYER TO CAPTURE opponent, don't proceed until done!
         std::set<short> pieceSet;
         for (const auto &[hunter_piece, captureTarget] : moves)
         {
@@ -373,7 +394,7 @@ bool GameManager::awayFromEdge(const int &cell_idx) const
 /**
  * Collect all possible next "forced captures" for this hunter.
  * @param hunter Current player
- * @param singleCell if not NULL, only check around this cell. Else, loop ENTIRE board
+ * @param singleCell if not NULL, only check around this cell. Otherwise, loop ENTIRE board
  */
 void GameManager::identifyTargets(const PlayerPtr &hunter, chk::Cell *singleCell)
 {
