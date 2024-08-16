@@ -202,8 +202,6 @@ inline void WsClient::showPublicServerWindow(bool &showPublic)
 inline void WsClient::prefetchPublicServers()
 {
     const std::string cloudfront = "https://d1txhef4jwuosv.cloudfront.net/ws_server_locations.json";
-    // std::filesystem::path tempFile = std::filesystem::temp_directory_path() / "json_result.txt";
-    // const std::string tempFileStr = tempFile.u8string();
 
     cpr::AsyncResponse fr = cpr::GetAsync(cpr::Url{cloudfront});
     std::string responseBody{};
@@ -295,7 +293,6 @@ inline void WsClient::tryConnect(std::string_view address)
     {
         ImGui::SetNextWindowSize(ImVec2(sf::Vector2f{400.0, 100.0}));
         ImGui::Begin("Loading", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
-        // ImGui::Text("Connecting to %s", this->final_address.c_str());
         ImGui::Text("Connecting to online server");
         ImGui::End();
     }
