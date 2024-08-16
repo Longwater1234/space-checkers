@@ -324,6 +324,7 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
     }
 
     // Check for extra opportunities (for myself)!
+    // TODO fixXME, if i just became king, (wasn't king before) DONT run this next line
     GameManager::identifyTargets(hunter, targetCell.get());
     if (this->getForcedMoves().empty())
     {
@@ -419,9 +420,10 @@ inline void OnlineGameManager::handleEvents(chk::CircularBuffer<short> &buffer)
             {
                 if (cell->containsPoint(clickedPos) && cell->getIndex() != -1)
                 {
-                    const auto &hunter = this->isPlayerRedTurn() ? this->playerRed : this->playerBlack;
-                    const auto &prey = this->isPlayerRedTurn() ? this->playerBlack : this->playerRed;
-                    this->handleCellTap(hunter, prey, buffer, cell);
+                    // Me
+                    const auto &mine = myTeam == chk::PlayerType::PLAYER_RED ? this->playerRed : this->playerBlack;
+                    const auto &opponent = myTeam == chk::PlayerType::PLAYER_RED ? this->playerBlack : this->playerRed;
+                    this->handleCellTap(mine, opponent, buffer, cell);
                     break;
                 }
             }
