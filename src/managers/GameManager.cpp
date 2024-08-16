@@ -131,7 +131,7 @@ void GameManager::handleCapturePiece(const chk::PlayerPtr &hunter, const chk::Pl
         return;
     }
 
-    bool isCaptured = false; // guard to verify if Capture completed
+    bool isCaptured = false; // outside guard to verify if Capture completed
     for (const auto &[hunterPieceId, target] : this->forcedMoves)
     {
         if (target.hunterNextCell == targetCell->getIndex())
@@ -287,7 +287,6 @@ void chk::GameManager::handleCellTap(const chk::PlayerPtr &hunter, const chk::Pl
     {
         return;
     }
-
     // CHECK IF this cell has a Piece
     const short pieceId = this->getPieceFromCell(cell->getIndex());
     if (pieceId != -1)
@@ -304,8 +303,7 @@ void chk::GameManager::handleCellTap(const chk::PlayerPtr &hunter, const chk::Pl
     }
     else
     {
-        // Cell is Empty!
-        // Let's judge if this is SIMPLE move or ATTACK move
+        // Cell is Empty! Let's judge if this is SIMPLE move or ATTACK move
         if (!buffer.isEmpty())
         {
             const short movablePieceId = buffer.getTop();

@@ -262,6 +262,8 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
     int copySrcCell = 0;     // hunter src cell
     int copyPreyPieceId = 0;
     int copyPreyCell = 0;
+
+    bool isCaptured = false; // outside guard to verify if Capture completed
     for (const auto &[hunterPieceId, target] : this->getForcedMoves())
     {
         if (target.hunterNextCell == targetCell->getIndex())
@@ -270,6 +272,7 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
             {
                 return;
             }
+            isCaptured = true;
             this->updateMessage("You have captured " + prey->getName() + "'s piece!");
             copySrcCell = this->sourceCell.value();
             gameMap.erase(this->sourceCell.value());                // set hunter's old location empty!
@@ -284,7 +287,10 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
             break;
         }
     }
-
+    if (!isCaptured)
+    {
+        return;
+    }
     // prey details
     auto *details = new chk::payload::CapturePayload_TargetDetails();
     details->set_hunter_src_cell(copySrcCell);
@@ -362,7 +368,7 @@ inline void OnlineGameManager::handleCellTap(const chk::PlayerPtr &hunter, const
     }
     else
     {
-        // Cell is Empty! Let's move a piece (from buffer) here!
+        // Cell is Empty! Let's judge if this is SIMPLE move or ATTACK move
         if (!buffer.isEmpty())
         {
             const short movablePieceId = buffer.getTop();
@@ -370,10 +376,9 @@ inline void OnlineGameManager::handleCellTap(const chk::PlayerPtr &hunter, const
             {
                 return;
             }
-            // ELSE IF FORCEDMOVES.HAS(movablePieceId), THEN HANDLE CAPTURE ,
             else if (this->isHunterActive())
             {
-                /* code */
+                // it's an ATTACK move
                 this->handleCapturePiece(hunter, prey, cell);
                 this->updateMatchStatus(hunter, prey);
                 buffer.clean();
@@ -392,7 +397,7 @@ inline void OnlineGameManager::handleCellTap(const chk::PlayerPtr &hunter, const
  * This will be handling all UI events.
  * @param circularBuffer stores the currently selected piece
  */
-inline void OnlineGameManager::handleEvents(chk::CircularBuffer<short> &circularBuffer)
+inline void OnlineGameManager::handleEvents(chk::CircularBuffer<short> &buffer)
 {
     for (auto event = sf::Event{}; window->pollEvent(event);)
     {
@@ -414,21 +419,9 @@ inline void OnlineGameManager::handleEvents(chk::CircularBuffer<short> &circular
             {
                 if (cell->containsPoint(clickedPos) && cell->getIndex() != -1)
                 {
-                    // Me
-                    const auto &mine = myTeam == chk::PlayerType::PLAYER_RED ? this->playerRed : this->playerBlack;
-                    const auto &opponent = myTeam == chk::PlayerType::PLAYER_RED ? this->playerBlack : this->playerRed;
-
-                    // if (this->hasPendingCaptures())
-                    // {
-                    //     this->handleCapturePiece(mine, opponent, cell);
-                    //     GameManager::updateMatchStatus(mine, opponent);
-                    //     circularBuffer.clean();
-                    // }
-                    // else
-                    // {
-                    this->handleCellTap(mine, opponent, circularBuffer, cell);
-                    // }
-                    // END inner loop
+                    const auto &hunter = this->isPlayerRedTurn() ? this->playerRed : this->playerBlack;
+                    const auto &prey = this->isPlayerRedTurn() ? this->playerBlack : this->playerRed;
+                    this->handleCellTap(hunter, prey, buffer, cell);
                     break;
                 }
             }
