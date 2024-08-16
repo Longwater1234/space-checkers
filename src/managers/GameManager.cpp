@@ -211,8 +211,7 @@ bool GameManager::isHunterActive() const
     {
         return false;
     }
-    int sourceCell = this->sourceCell.value();
-    const short hunterId = this->getPieceFromCell(sourceCell); // hunter pieceId
+    const short hunterId = this->getPieceFromCell(this->sourceCell.value()); // hunter pieceId
     return hunterId != -1 && (forcedMoves.find(hunterId) != forcedMoves.end());
 }
 
