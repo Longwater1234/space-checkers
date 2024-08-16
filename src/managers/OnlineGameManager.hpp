@@ -371,7 +371,7 @@ inline void OnlineGameManager::handleCellTap(const chk::PlayerPtr &hunter, const
                 return;
             }
             // ELSE IF FORCEDMOVES.HAS(movablePieceId), THEN HANDLE CAPTURE ,
-            else if (this->hasPendingCaptures())
+            else if (this->isHunterActive())
             {
                 /* code */
                 this->handleCapturePiece(hunter, prey, cell);

@@ -100,7 +100,6 @@ void GameManager::handleMovePiece(const chk::PlayerPtr &player, const chk::Playe
     {
         return;
     }
-    spdlog::warn("I FUCKING MOVED piece {}  to cell {}", currentPieceId, destCell->getIndex());
     gameMap.erase(this->sourceCell.value());               // set old location empty!
     gameMap.emplace(destCell->getIndex(), currentPieceId); // fill in the new location
     this->sourceCell = std::nullopt;                       // reset source cell
@@ -132,7 +131,7 @@ void GameManager::handleCapturePiece(const chk::PlayerPtr &hunter, const chk::Pl
         return;
     }
 
-    bool isCaptured = false; // outside guard to verify Capture success
+    bool isCaptured = false; // guard to verify if Capture completed
     for (const auto &[hunterPieceId, target] : this->forcedMoves)
     {
         if (target.hunterNextCell == targetCell->getIndex())
@@ -201,12 +200,12 @@ void chk::GameManager::doCleanup()
 }
 
 /**
- * Whether the current player is currently holding own hunting Piece, AND
- * forcedMoves is not empty
+ * Returns TRUE only if the current player is holding own hunting Piece, AND
+ * forcedMoves is NOT empty
  *
  *@return TRUE or FALSE
  */
-bool GameManager::hasPendingCaptures() const
+bool GameManager::isHunterActive() const
 {
     if (!this->sourceCell.has_value())
     {
@@ -214,7 +213,7 @@ bool GameManager::hasPendingCaptures() const
     }
     int sourceCell = this->sourceCell.value();
     const short hunterId = this->getPieceFromCell(sourceCell); // hunter pieceId
-    return hunterId != -1 && !forcedMoves.empty() && (forcedMoves.find(hunterId) != forcedMoves.end());
+    return hunterId != -1 && (forcedMoves.find(hunterId) != forcedMoves.end());
 }
 
 /**
@@ -305,7 +304,8 @@ void chk::GameManager::handleCellTap(const chk::PlayerPtr &hunter, const chk::Pl
     }
     else
     {
-        // Cell is Empty! Let's judge if this is SIMPLE move or ATTACK move
+        // Cell is Empty!
+        // Let's judge if this is SIMPLE move or ATTACK move
         if (!buffer.isEmpty())
         {
             const short movablePieceId = buffer.getTop();
@@ -313,7 +313,7 @@ void chk::GameManager::handleCellTap(const chk::PlayerPtr &hunter, const chk::Pl
             {
                 return;
             }
-            else if (forcedMoves.find(movablePieceId) != forcedMoves.end())
+            else if (isHunterActive())
             {
                 // it's an ATTACK move
                 this->handleCapturePiece(hunter, prey, cell);
@@ -397,7 +397,7 @@ bool GameManager::awayFromEdge(const int &cell_idx) const
 /**
  * Collect all possible next "forced captures" for this hunter.
  * @param hunter Current player
- * @param singleCell if not NULL, only check around this cell. Else, loop ENTIRE board
+ * @param singleCell if not NULL, only check around this cell. Otherwise, loop ENTIRE board
  */
 void GameManager::identifyTargets(const PlayerPtr &hunter, chk::Cell *singleCell)
 {

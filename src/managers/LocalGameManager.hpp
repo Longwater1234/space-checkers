@@ -156,19 +156,8 @@ inline void LocalGameManager::handleEvents(chk::CircularBuffer<short> &buffer)
                 {
                     const auto &hunter = this->isPlayerRedTurn() ? this->playerRed : this->playerBlack;
                     const auto &prey = this->isPlayerRedTurn() ? this->playerBlack : this->playerRed;
-
-                    // if (this->hasPendingCaptures())
-                    // {
-                    //     GameManager::handleCapturePiece(hunter, prey, cell);
-                    //     GameManager::updateMatchStatus(hunter, prey);
-                    //     buffer.clean();
-                    // }
-                    // else
-                    // {
                     GameManager::handleCellTap(hunter, prey, buffer, cell);
-                    // }
                     break;
-                    // END inner loop
                 }
             }
         }
