@@ -203,11 +203,11 @@ inline void WsClient::prefetchPublicServers()
 {
     const std::string cloudfront = "https://d1txhef4jwuosv.cloudfront.net/ws_server_locations.json";
 
-    cpr::AsyncResponse fr = cpr::GetAsync(cpr::Url{cloudfront});
+    cpr::AsyncResponse promise = cpr::GetAsync(cpr::Url{cloudfront});
     std::string responseBody{};
-    if (fr.wait_for(std::chrono::milliseconds(2000)) == std::future_status::ready)
+    if (promise.wait_for(std::chrono::milliseconds(2000)) == std::future_status::ready)
     {
-        cpr::Response response = fr.get();
+        cpr::Response response = promise.get();
         // spdlog::info("response {}", response.text);
         long statusCode = response.status_code;
         if (statusCode != 200)
@@ -236,7 +236,6 @@ inline void WsClient::prefetchPublicServers()
     }
     catch (const simdjson::simdjson_error &ex)
     {
-        std::scoped_lock lg(this->mut);
         this->errorMsg = ex.what();
         this->isDead = true;
     }
