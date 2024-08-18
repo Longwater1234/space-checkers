@@ -491,7 +491,7 @@ void GameManager::collectFrontLHS(const chk::PlayerPtr &hunter, const chk::Block
 
     if (hasEnemyAhead && enemyOpenBehind)
     {
-        CaptureTarget cf;
+        chk::CaptureTarget cf;
         cf.preyPieceId = pieceId_NW;
         cf.preyCellIdx = cellAheadIdx;
         cf.hunterNextCell = cellBehindEnemy;
@@ -548,7 +548,7 @@ void GameManager::collectFrontRHS(const chk::PlayerPtr &hunter, const chk::Block
 
     if (hasEnemyAhead && enemyOpenBehind)
     {
-        CaptureTarget cf;
+        chk::CaptureTarget cf;
         cf.preyPieceId = pieceId_NE;
         cf.preyCellIdx = cellAheadIdx;
         cf.hunterNextCell = cellBehindEnemy;
@@ -605,7 +605,7 @@ void GameManager::collectBehindRHS(const PlayerPtr &hunter, const chk::Block &ce
 
     if (hasEnemyAhead && enemyOpenBehind)
     {
-        CaptureTarget cf;
+        chk::CaptureTarget cf;
         cf.preyPieceId = pieceId_NW;
         cf.preyCellIdx = cellAheadIdx;
         cf.hunterNextCell = cellBehindEnemy;
@@ -660,7 +660,7 @@ void GameManager::collectBehindLHS(const PlayerPtr &hunter, const chk::Block &ce
 
     if (hasEnemyAhead && enemyOpenBehind)
     {
-        CaptureTarget cf;
+        chk::CaptureTarget cf;
         cf.preyPieceId = pieceId_NE;
         cf.preyCellIdx = cellAheadIdx;
         cf.hunterNextCell = cellBehindEnemy;
