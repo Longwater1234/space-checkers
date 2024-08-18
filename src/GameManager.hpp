@@ -63,10 +63,10 @@ class GameManager
 
     [[nodiscard]] bool boardContainsCell(const int &cell_idx) const;
     [[nodiscard]] bool awayFromEdge(const int &cell_idx) const;
-    void collectFrontRHS(const chk::PlayerPtr &hunter, chk::Cell *cell_ptr);
-    void collectFrontLHS(const chk::PlayerPtr &hunter, chk::Cell *cell_ptr);
-    void collectBehindRHS(const chk::PlayerPtr &hunter, chk::Cell *cell_ptr);
-    void collectBehindLHS(const chk::PlayerPtr &hunter, chk::Cell *cell_ptr);
+    void collectFrontRHS(const chk::PlayerPtr &hunter, const chk::Block &cell_ptr);
+    void collectFrontLHS(const chk::PlayerPtr &hunter, const chk::Block &cell_ptr);
+    void collectBehindRHS(const chk::PlayerPtr &hunter, const chk::Block &cell_ptr);
+    void collectBehindLHS(const chk::PlayerPtr &hunter, const chk::Block &cell_ptr);
 
   protected:
     // map of cell_index -> piece_id
@@ -89,7 +89,7 @@ class GameManager
     [[nodiscard]] const bool &isGameOver() const;
     void setSourceCell(int src_cell);
     void doCleanup();
-    void identifyTargets(const chk::PlayerPtr &hunter, chk::Cell *singleCell = nullptr);
+    void identifyTargets(const chk::PlayerPtr &hunter, const chk::Block &singleCell = nullptr);
     virtual void handleMovePiece(const chk::PlayerPtr &player, const chk::PlayerPtr &opponent, const Block &destCell,
                                  const short &currentPieceId);
     virtual void handleCapturePiece(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,

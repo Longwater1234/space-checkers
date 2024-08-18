@@ -325,7 +325,7 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
 
     // Check for extra opportunities (for myself)!
     // TODO fixXME, if i just became king, (wasn't king before) DONT run this next line
-    GameManager::identifyTargets(hunter, targetCell.get());
+    GameManager::identifyTargets(hunter, targetCell);
     if (this->getForcedMoves().empty())
     {
         // NO MORE JUMPS AVAILABLE. SWITCH TURNS to opponent
@@ -498,8 +498,7 @@ inline void OnlineGameManager::startCaptureListener()
         });
         if (it != this->blockList.end())
         {
-            chk::Block &cellPtr = *it;
-            GameManager::identifyTargets(other, cellPtr.get());
+            GameManager::identifyTargets(other, *it);
         }
 
         if (this->getForcedMoves().empty())
