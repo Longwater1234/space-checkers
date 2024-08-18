@@ -208,7 +208,6 @@ inline void WsClient::prefetchPublicServers()
     if (promise.wait_for(std::chrono::milliseconds(2000)) == std::future_status::ready)
     {
         cpr::Response response = promise.get();
-        // spdlog::info("response {}", response.text);
         long statusCode = response.status_code;
         if (statusCode != 200)
         {

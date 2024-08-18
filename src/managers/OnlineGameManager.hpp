@@ -186,6 +186,43 @@ inline void OnlineGameManager::drawBoard()
 }
 
 /**
+ * This will be handling all UI events.
+ * @param circularBuffer stores the currently selected piece
+ */
+inline void OnlineGameManager::handleEvents(chk::CircularBuffer<short> &buffer)
+{
+    for (auto event = sf::Event{}; window->pollEvent(event);)
+    {
+        ImGui::SFML::ProcessEvent(*this->window, event);
+        if (event.type == sf::Event::Closed)
+        {
+            window->close();
+        }
+        if (event.type == sf::Event::MouseButtonPressed && sf::Mouse::isButtonPressed(sf::Mouse::Left))
+        {
+            const auto clickedPos = sf::Mouse::getPosition(*window);
+            /* Check window bounds */
+            if (clickedPos.y > chk::SIZE_CELL * 8)
+            {
+                continue;
+            }
+            // START inner loop:
+            for (auto &cell : this->getBlockList())
+            {
+                if (cell->containsPoint(clickedPos) && cell->getIndex() != -1)
+                {
+                    // Me
+                    const auto &mine = myTeam == chk::PlayerType::PLAYER_RED ? this->playerRed : this->playerBlack;
+                    const auto &opponent = myTeam == chk::PlayerType::PLAYER_RED ? this->playerBlack : this->playerRed;
+                    this->handleCellTap(mine, opponent, buffer, cell);
+                    break;
+                }
+            }
+        }
+    }
+}
+
+/**
  * Move the selected piece to clicked cell, then update the gameMap and notify Server
  * @param player current player
  * @param opponent opposing player
@@ -357,8 +394,8 @@ inline void OnlineGameManager::handleCellTap(const chk::PlayerPtr &hunter, const
     if (pieceId != -1)
     {
         // YES, it has one! CHECK IF THERE IS ANY PENDING "forced jumps"
-        const bool notContainKey = this->getForcedMoves().find(pieceId) == this->getForcedMoves().end();
-        if (!this->getForcedMoves().empty() && notContainKey)
+        const bool notFound = this->getForcedMoves().find(pieceId) == this->getForcedMoves().end();
+        if (!this->getForcedMoves().empty() && notFound)
         {
             this->showForcedMoves(hunter, cell);
             return;
@@ -381,7 +418,7 @@ inline void OnlineGameManager::handleCellTap(const chk::PlayerPtr &hunter, const
             {
                 // it's an ATTACK move
                 this->handleCapturePiece(hunter, prey, cell);
-                this->updateMatchStatus(hunter, prey);
+                GameManager::updateMatchStatus(hunter, prey);
                 buffer.clean();
             }
             else
@@ -389,43 +426,6 @@ inline void OnlineGameManager::handleCellTap(const chk::PlayerPtr &hunter, const
                 // it's a SIMPLE MOVE
                 this->handleMovePiece(hunter, prey, cell, movablePieceId);
                 buffer.clean();
-            }
-        }
-    }
-}
-
-/**
- * This will be handling all UI events.
- * @param circularBuffer stores the currently selected piece
- */
-inline void OnlineGameManager::handleEvents(chk::CircularBuffer<short> &buffer)
-{
-    for (auto event = sf::Event{}; window->pollEvent(event);)
-    {
-        ImGui::SFML::ProcessEvent(*this->window, event);
-        if (event.type == sf::Event::Closed)
-        {
-            window->close();
-        }
-        if (event.type == sf::Event::MouseButtonPressed && sf::Mouse::isButtonPressed(sf::Mouse::Left))
-        {
-            const auto clickedPos = sf::Mouse::getPosition(*window);
-            /* Check window bounds */
-            if (clickedPos.y > chk::SIZE_CELL * 8)
-            {
-                continue;
-            }
-            // START inner loop:
-            for (auto &cell : this->getBlockList())
-            {
-                if (cell->containsPoint(clickedPos) && cell->getIndex() != -1)
-                {
-                    // Me
-                    const auto &mine = myTeam == chk::PlayerType::PLAYER_RED ? this->playerRed : this->playerBlack;
-                    const auto &opponent = myTeam == chk::PlayerType::PLAYER_RED ? this->playerBlack : this->playerRed;
-                    this->handleCellTap(mine, opponent, buffer, cell);
-                    break;
-                }
             }
         }
     }

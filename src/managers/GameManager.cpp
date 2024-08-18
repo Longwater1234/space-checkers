@@ -271,6 +271,11 @@ void GameManager::updateMatchStatus(const chk::PlayerPtr &p1, const chk::PlayerP
         const std::string &winnerName = p1Count > p2Count ? p1->getName() : p2->getName();
         this->updateMessage("GAME OVER! " + winnerName + " wins!");
     }
+    else if (p2Count == 1)
+    {
+
+        // TODO check if p2 has nowhere to go, END game too!
+    }
 }
 
 /**

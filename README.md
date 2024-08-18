@@ -10,7 +10,8 @@ pre-installed on your OS is SFML 2.6.
 - imGui-SFML
 - ixWebsockets
 - spdlog
-- Google Protobuf 27.2 (must match `protoc` version)
+- Google Protobuf 27.2
+- simdjson
 
 ## Requirements for Building
 
