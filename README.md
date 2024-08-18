@@ -43,38 +43,5 @@ pre-installed on your OS is SFML 2.6.
 
 ## Building Instructions
 
-Here is the summary for all 3 major desktop platforms.
+Please see [BUILDING.md](BUILDING.md) for every major destkop OS.
 
-### On Windows
-
-- Open this folder directly in Visual Studio 2019 IDE or newer. (with C++ Workload installed)
-- Select build mode "x64 Release" from top toolbar.
-- Click the menu "Build" > "Build All". That's it. Your game will be in new folder `out/build/x64Release/` inside project directory.
-
-### On MacOS
-
-- Using Cmake GUI or `cmake` CLI, generate new **XCode** project.
-- For example, when using cmake on Terminal, run this command:
-
-```bash
-mkdir build
-cd build
-cmake . . -G "XCode" -DCMAKE_BUILD_TYPE="Release"
-```
-
-- Open the generated `.xcodeproj` inside XCode.
-- From top toolbar, click "Product" > "Build".
-
-### On Linux
-
-- You may use Cmake GUI to generate Unix Makefiles. Then run `make build`.
-- Alternatively, open terminal at this project directory, run these commands:
-
-```bash
-mkdir build
-cd build
-cmake . . -G "Unix Makefiles" -DCMAKE_BUILD_TYPE="Release"
-cmake --build ./
-```
-
-- Your game will be built and found in `build/Release/` directory
