@@ -50,9 +50,9 @@ const std::vector<chk::Block> &GameManager::getBlockList() const
 void GameManager::drawCheckerboard(const sf::Font &font)
 {
     int counter = 32;
-    for (uint16_t row = 0; row < NUM_ROWS; row++)
+    for (uint16_t row = 0; row < NUM_ROWS; ++row)
     {
-        for (uint16_t col = 0; col < NUM_COLS; col++)
+        for (uint16_t col = 0; col < NUM_COLS; ++col)
         {
             if ((row + col) % 2 == 0)
             {
@@ -212,8 +212,8 @@ bool GameManager::isHunterActive() const
     {
         return false;
     }
-    const short hunterId = this->getPieceFromCell(this->sourceCell.value()); // hunter pieceId
-    return hunterId != -1 && (forcedMoves.find(hunterId) != forcedMoves.end());
+    const short pieceId = this->getPieceFromCell(this->sourceCell.value()); // hunter pieceId
+    return pieceId != -1 && (forcedMoves.find(pieceId) != forcedMoves.end());
 }
 
 /**
@@ -252,7 +252,7 @@ void GameManager::matchCellsToPieces(const std::vector<chk::PiecePtr> &pieceList
         }
     }
     this->alreadyCached = true;
-    spdlog::info("gamMap size " + std::to_string(gameMap.size()));
+    spdlog::info("gamMap size {}", std::to_string(gameMap.size()));
 }
 
 /**
@@ -270,11 +270,6 @@ void GameManager::updateMatchStatus(const chk::PlayerPtr &p1, const chk::PlayerP
         this->gameOver = true;
         const std::string &winnerName = p1Count > p2Count ? p1->getName() : p2->getName();
         this->updateMessage("GAME OVER! " + winnerName + " wins!");
-    }
-    else if (p2Count == 1)
-    {
-
-        // TODO check if p2 has nowhere to go, END game too!
     }
 }
 
@@ -336,7 +331,7 @@ void chk::GameManager::handleCellTap(const chk::PlayerPtr &hunter, const chk::Pl
 /**
  * When player is forced to capture opponent's piece, highlight their hunter pieces with GREEN.
  * @param player current player
- * @param cell selected cell
+ * @param cell selected destination cell
  */
 void chk::GameManager::showForcedMoves(const chk::PlayerPtr &player, const chk::Block &cell)
 {
@@ -348,7 +343,7 @@ void chk::GameManager::showForcedMoves(const chk::PlayerPtr &player, const chk::
         std::set<short> pieceSet;
         for (const auto &[hunter_piece, captureTarget] : moves)
         {
-            pieceSet.insert(hunter_piece);
+            pieceSet.emplace(hunter_piece);
         }
         player->showForcedPieces(pieceSet);
         this->updateMessage(player->getName() + " must capture piece!");

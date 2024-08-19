@@ -393,9 +393,9 @@ inline void OnlineGameManager::handleCellTap(const chk::PlayerPtr &hunter, const
     const short pieceId = this->getPieceFromCell(cell->getIndex());
     if (pieceId != -1)
     {
-        // YES, it has one! CHECK IF THERE IS ANY PENDING "forced jumps"
-        const bool notFound = this->getForcedMoves().find(pieceId) == this->getForcedMoves().end();
-        if (!this->getForcedMoves().empty() && notFound)
+        // YES, it has one! CHECK IF THERE IS ANY PENDING "forced captures"
+        const bool notSelected = this->getForcedMoves().find(pieceId) == this->getForcedMoves().end();
+        if (!this->getForcedMoves().empty() && notSelected)
         {
             this->showForcedMoves(hunter, cell);
             return;
@@ -485,11 +485,11 @@ inline void OnlineGameManager::startCaptureListener()
         }
 
         this->updateMessage(other->getName() + " has captured your piece!");
-        gameMap.erase(payload.details().hunter_src_cell());                     // set hunter's old location empty!
-        gameMap.erase(payload.details().prey_cell_idx());                       // set my old location empty!
-        gameMap.emplace(payload.destination().cell_index(), hunterPieceId);     // fill in hunter new location
-        short targetId = static_cast<short>(payload.details().prey_piece_id()); // cast to int16_t
-        myTeam->losePiece(targetId);                                            // I will lose 1 piece
+        gameMap.erase(payload.details().hunter_src_cell());                 // set hunter's old location empty!
+        gameMap.erase(payload.details().prey_cell_idx());                   // set my old location empty!
+        gameMap.emplace(payload.destination().cell_index(), hunterPieceId); // fill in hunter new location
+        const short targetId = static_cast<short>(payload.details().prey_piece_id()); // cast to int16_t
+        myTeam->losePiece(targetId);                                                  // I will lose 1 piece
 
         // Check for extra opportunities NOW (for Enemy), single cell
         const int destCellIdx = payload.destination().cell_index();

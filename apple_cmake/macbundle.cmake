@@ -24,7 +24,7 @@ set_target_properties(
              XCODE_ATTRIBUTE_LD_RUNPATH_SEARCH_PATHS "@executable_path/../Frameworks"
              MACOSX_BUNDLE_BUNDLE_NAME "${CMAKE_PROJECT_NAME}"
              MACOSX_BUNDLE_GUI_IDENTIFIER "com.davistiba.${CMAKE_PROJECT_NAME}"
-             MACOSX_BUNDLE_COPYRIGHT "(c) 2023, Davis Tibbz"
+             MACOSX_BUNDLE_COPYRIGHT "(c) 2024, Davis Tibbz"
              MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
              MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION}
              RESOURCE "${my_images}")
