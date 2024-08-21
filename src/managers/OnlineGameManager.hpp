@@ -314,7 +314,7 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
                 return;
             }
             isCaptured = true;
-            this->updateMessage("You have captured " + prey->getName() + "'s piece!");
+            this->updateMessage("你抢了 " + prey->getName() + "的棋子!");
             copySrcCell = this->sourceCell.value();
             gameMap.erase(this->sourceCell.value());                // set hunter's old location empty!
             gameMap.erase(target.preyCellIdx);                      // set Prey's old location empty!

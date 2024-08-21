@@ -291,7 +291,7 @@ inline void WsClient::tryConnect(std::string_view address)
     {
         ImGui::SetNextWindowSize(ImVec2(sf::Vector2f{400.0, 100.0}));
         ImGui::Begin("Loading", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
-        ImGui::Text("Connecting to online server");
+        ImGui::Text(u8"正在连接到联机服务器。。。");
         ImGui::End();
     }
 
