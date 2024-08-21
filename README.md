@@ -1,16 +1,17 @@
-# space-checkers
+# space - checkers
 
-Online Multiplayer Checkers game in C++ built with SFML 2.6 and ixWebsockets. With very minimal dependencies (no BOOST lib), and
-a simple build process. All dependencies are auto-downloaded and built for you using **CPM.cmake** (see folder `dependencies`). The only dependency you need
+Online Multiplayer Checkers game in C++ built with SFML 2.6 and ixWebsockets. With very minimal dependencies (no Boost required), and
+a simple build process. All dependencies are auto-downloaded and built for you using **CPM.cmake** (thin wrapper around CMake FetchContent). The only dependency you need
 pre-installed on your OS is SFML 2.6.
 
-
 ### Main Libraries Used
+
 - SFML 2.6.1
 - imGui-SFML
 - ixWebsockets
 - spdlog
-- Google Protobuf 27.2 (must match `protoc` version)
+- Google Protobuf 27.2
+- simdjson
 
 ## Requirements for Building
 
@@ -29,9 +30,11 @@ pre-installed on your OS is SFML 2.6.
 
 - XCode latest from AppStore (with MacOS SDK)
 - Apple Developer tools. After Xcode is installed, run this in your Terminal:
+
 ```bash
   sudo xcode-select --install
 ```
+
 - Please install SFML 2.6 as **Frameworks** as shown in [official macOS guide](https://www.sfml-dev.org/tutorials/2.6/start-osx.php).
 
 ### For Linux
@@ -41,38 +44,5 @@ pre-installed on your OS is SFML 2.6.
 
 ## Building Instructions
 
-Here is the summary for all 3 major desktop platforms.
+Please see [BUILDING.md](BUILDING.md) for every major destkop OS.
 
-### On Windows
-
-- Open this folder directly in Visual Studio 2019 IDE or newer. (with C++ Workload installed)
-- Select build mode "x64 Release" from top toolbar.
-- Click the menu "Build" > "Build All". That's it. Your game will be in new folder `out/build/x64Release/` inside project directory.
-
-### On MacOS
-
-- Using Cmake GUI or `cmake` CLI, generate new **XCode** project.
-- For example, when using cmake on Terminal, run this command:
-
-```bash
-mkdir build
-cd build
-cmake . . -G "XCode" -DCMAKE_BUILD_TYPE="Release"
-```
-
-- Open the generated `.xcodeproj` inside XCode.
-- From top toolbar, click "Product" > "Build".
-
-### On Linux
-
-- You may use Cmake GUI to generate Unix Makefiles. Then run `make build`.
-- Alternatively, open terminal at this project directory, run these commands:
-
-```bash
-mkdir build
-cd build
-cmake . . -G "Unix Makefiles" -DCMAKE_BUILD_TYPE="Release"
-cmake --build ./
-```
-
-- Your game will be built and found in `build/Release/` directory

@@ -3,10 +3,7 @@
 #include "ServerLocation.hpp"
 #include "payloads/base_payload.pb.hpp"
 #include <atomic>
-#include <cstdlib>
-#include <filesystem>
-#include <fstream>
-#include <ixwebsocket/IXHttpClient.h>
+#include <cpr/cpr.h>
 #include <ixwebsocket/IXNetSystem.h>
 #include <ixwebsocket/IXWebSocket.h>
 #include <mutex>
@@ -88,7 +85,7 @@ inline chk::WsClient::WsClient()
     // once dead, DO NOT try reconnect
     this->webSocketPtr->disableAutomaticReconnection();
     // ping server every 30 seconds
-    this->webSocketPtr->setPingInterval(30);
+    // this->webSocketPtr->setPingInterval(30); // TOXIC ping!
     ix::SocketTLSOptions tlsOptions;
 #ifndef _WIN32
     // Currently system CAs are not supported on non-Windows platforms with mbedtls
@@ -200,47 +197,33 @@ inline void WsClient::showPublicServerWindow(bool &showPublic)
 
 /**
  * Fetch public servers JSON list from central storage (which is updated regularly)
+ * @see libcpr docs: https://docs.libcpr.org/advanced-usage.html
  */
 inline void WsClient::prefetchPublicServers()
 {
-    const std::string url = "https://d1txhef4jwuosv.cloudfront.net/ws_server_locations.json";
-    std::filesystem::path tempFile = std::filesystem::temp_directory_path() / "json_result.txt";
-    const std::string tempFileStr = tempFile.u8string();
+    const std::string cloudfront = "https://d1txhef4jwuosv.cloudfront.net/ws_server_locations.json";
 
-#ifdef WIN32
-    ix::HttpClient httpClient;
-    auto args = httpClient.createRequest(url, ix::HttpClient::kGet);
-    ix::HttpResponsePtr response = httpClient.get(url, args); // blocking call (Async is buggy!)
-
-    std::ofstream fos{tempFile};
-    int statusCode = response->statusCode;
-    if (statusCode != 200 || fos.bad())
+    cpr::AsyncResponse promise = cpr::GetAsync(cpr::Url{cloudfront});
+    std::string responseBody{};
+    if (promise.wait_for(std::chrono::milliseconds(2000)) == std::future_status::ready)
     {
-        spdlog::error("http request failed. Reason {}", response->errorMsg);
-        this->errorMsg = response->errorMsg;
-        this->isDead = true;
-        return;
+        cpr::Response response = promise.get();
+        long statusCode = response.status_code;
+        if (statusCode != 200)
+        {
+            spdlog::error("http request failed. Reason {}", response.error.message);
+            this->errorMsg = response.error.message;
+            this->isDead = true;
+            return;
+        }
+        responseBody = response.text;
     }
-    fos << response->body;
-    fos.close();
 
-#else
-    // lets use system CURL, since ix::HttpClient doesnt work on Unix!
-    const std::string commandStr = fmt::format("curl -fsSL {} -o {}", url, tempFileStr);
-    if (std::system(commandStr.c_str()))
-    {
-        // comand failed. exit value != 0
-        this->isDead = true;
-        // this->errorMsg = u8"failed to fetch public server list";
-        this->errorMsg = u8"无法获取公共服务器列表!";
-        return;
-    }
-#endif // WIN32
-
+    // Parse the JSON response
     simdjson::dom::parser jsonParser;
     try
     {
-        simdjson::dom::array jsonArray = jsonParser.load(tempFileStr);
+        simdjson::dom::array jsonArray = jsonParser.parse(simdjson::padded_string(responseBody));
         this->publicServers.clear();
         for (const simdjson::dom::object &elem : jsonArray)
         {
@@ -252,7 +235,6 @@ inline void WsClient::prefetchPublicServers()
     }
     catch (const simdjson::simdjson_error &ex)
     {
-        std::scoped_lock lg(this->mut);
         this->errorMsg = ex.what();
         this->isDead = true;
     }
@@ -309,8 +291,7 @@ inline void WsClient::tryConnect(std::string_view address)
     {
         ImGui::SetNextWindowSize(ImVec2(sf::Vector2f{400.0, 100.0}));
         ImGui::Begin("Loading", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
-        // ImGui::Text("Connecting to online server");
-        ImGui::Text("当前正在连接。。。");
+        ImGui::Text("Connecting to online server");
         ImGui::End();
     }
 
@@ -495,9 +476,10 @@ inline void WsClient::runGameLoop()
         {
             if (this->_onWinLoseCallback != nullptr)
             {
-                this->showWinnerPopup(basePayload.notice());
                 spdlog::info(basePayload.notice());
                 this->_onWinLoseCallback(basePayload.notice());
+                this->showWinnerPopup(basePayload.notice());
+                break;
             }
         }
         std::scoped_lock lg(this->mut);
@@ -539,10 +521,10 @@ inline void WsClient::showWinnerPopup(std::string_view notice)
     // Always center this next dialog
     ImVec2 center = ImGui::GetMainViewport()->GetCenter();
     ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2(0.5, 0.5));
-    ImGui::OpenPopup("GameOver", ImGuiPopupFlags_NoOpenOverExistingPopup);
+    ImGui::OpenPopup("GameOver", ImGuiPopupFlags_AnyPopupLevel);
     if (ImGui::BeginPopupModal("GameOver", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {
-        ImGui::Text("%s", notice.data());
+        ImGui::Text(u8"%s", notice.data());
         ImGui::Separator();
         if (ImGui::Button("OK", ImVec2(120, 0)))
         {

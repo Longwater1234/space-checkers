@@ -58,15 +58,15 @@ class GameManager
     bool gameOver = false;
     // mutex for atomic updates
     std::mutex my_mutex;
-    // collection of my next targets (Map<HunterPieceID, CaptureTarget>)
+    // collection of Player's next targets (Map<HunterPieceID, CaptureTarget>)
     std::unordered_map<short, chk::CaptureTarget> forcedMoves{};
 
     [[nodiscard]] bool boardContainsCell(const int &cell_idx) const;
     [[nodiscard]] bool awayFromEdge(const int &cell_idx) const;
-    void collectFrontRHS(const chk::PlayerPtr &hunter, chk::Cell *cell_ptr);
-    void collectFrontLHS(const chk::PlayerPtr &hunter, chk::Cell *cell_ptr);
-    void collectBehindRHS(const chk::PlayerPtr &hunter, chk::Cell *cell_ptr);
-    void collectBehindLHS(const chk::PlayerPtr &hunter, chk::Cell *cell_ptr);
+    void collectFrontRHS(const chk::PlayerPtr &hunter, const chk::Block &cell_ptr);
+    void collectFrontLHS(const chk::PlayerPtr &hunter, const chk::Block &cell_ptr);
+    void collectBehindRHS(const chk::PlayerPtr &hunter, const chk::Block &cell_ptr);
+    void collectBehindLHS(const chk::PlayerPtr &hunter, const chk::Block &cell_ptr);
 
   protected:
     // map of cell_index -> piece_id
@@ -83,13 +83,13 @@ class GameManager
     chk::PlayerPtr playerBlack = nullptr;
 
     [[nodiscard]] const bool &isPlayerRedTurn() const;
-    [[nodiscard]] short getPieceFromCell(int cell_idx);
+    [[nodiscard]] short getPieceFromCell(int cell_idx) const;
     [[nodiscard]] const std::vector<chk::Block> &getBlockList() const;
-    [[nodiscard]] bool hasPendingCaptures() const;
+    [[nodiscard]] bool isHunterActive() const;
     [[nodiscard]] const bool &isGameOver() const;
     void setSourceCell(int src_cell);
     void doCleanup();
-    void identifyTargets(const chk::PlayerPtr &hunter, chk::Cell *singleCell = nullptr);
+    void identifyTargets(const chk::PlayerPtr &hunter, const chk::Block &singleCell = nullptr);
     virtual void handleMovePiece(const chk::PlayerPtr &player, const chk::PlayerPtr &opponent, const Block &destCell,
                                  const short &currentPieceId);
     virtual void handleCapturePiece(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,
