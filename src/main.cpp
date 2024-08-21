@@ -14,7 +14,7 @@
 #include "imgui.h"
 
 #if defined(_WIN32)
-constexpr auto CHINESE_FONT = "C:/Windows/Fonts/ARIALUNI.ttf";
+constexpr auto CHINESE_FONT = "C:/Windows/Fonts/msyh.ttc";
 #elif __APPLE__
 constexpr auto CHINESE_FONT = "/System/Library/Fonts/PingFang.ttc";
 #else
