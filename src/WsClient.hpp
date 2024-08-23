@@ -65,7 +65,7 @@ class WsClient final
     std::mutex mut;
     std::unique_ptr<ix::WebSocket> webSocketPtr = nullptr; // our Websocket object
     void showErrorPopup();                                 // whenver there is an error (from server)
-    void showWinnerPopup(const std::string &notice);       // when server notifies about winner
+    void showWinnerPopup(std::string_view notice);         // when server notifies about winner
     void runGameLoop();
     static void showHint(const char *tip);
     void tryConnect(std::string_view address);
@@ -203,12 +203,11 @@ inline void WsClient::prefetchPublicServers()
 {
     const std::string cloudfront = "https://d1txhef4jwuosv.cloudfront.net/ws_server_locations.json";
 
-    cpr::AsyncResponse fr = cpr::GetAsync(cpr::Url{cloudfront});
+    cpr::AsyncResponse promise = cpr::GetAsync(cpr::Url{cloudfront});
     std::string responseBody{};
-    if (fr.wait_for(std::chrono::milliseconds(2000)) == std::future_status::ready)
+    if (promise.wait_for(std::chrono::milliseconds(2000)) == std::future_status::ready)
     {
-        cpr::Response response = fr.get();
-        // spdlog::info("response {}", response.text);
+        cpr::Response response = promise.get();
         long statusCode = response.status_code;
         if (statusCode != 200)
         {
@@ -236,7 +235,6 @@ inline void WsClient::prefetchPublicServers()
     }
     catch (const simdjson::simdjson_error &ex)
     {
-        std::scoped_lock lg(this->mut);
         this->errorMsg = ex.what();
         this->isDead = true;
     }
@@ -484,9 +482,10 @@ inline void WsClient::runGameLoop()
         {
             if (this->_onWinLoseCallback != nullptr)
             {
-                this->showWinnerPopup(basePayload.notice());
                 spdlog::info(basePayload.notice());
                 this->_onWinLoseCallback(basePayload.notice());
+                this->showWinnerPopup(basePayload.notice());
+                break;
             }
         }
         std::scoped_lock lg(this->mut);
@@ -523,15 +522,15 @@ inline void WsClient::showErrorPopup()
 /**
  * Show winner/loser popup window.
  */
-inline void WsClient::showWinnerPopup(const std::string &notice)
+inline void WsClient::showWinnerPopup(std::string_view notice)
 {
     // Always center this next dialog
     ImVec2 center = ImGui::GetMainViewport()->GetCenter();
-    ImGui::SetNextWindowPos(center, ImGuiCond_FirstUseEver, ImVec2(0.5, 0.5));
+    ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2(0.5, 0.5));
     ImGui::OpenPopup("GameOver", ImGuiPopupFlags_AnyPopupLevel);
     if (ImGui::BeginPopupModal("GameOver", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {
-        ImGui::Text(u8"%s", notice.c_str());
+        ImGui::Text(u8"%s", notice.data());
         ImGui::Separator();
         if (ImGui::Button("OK", ImVec2(120, 0)))
         {

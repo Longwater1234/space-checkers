@@ -55,6 +55,7 @@ int main()
         exit(EXIT_FAILURE);
     }
 
+    // create all cells
     manager->drawCheckerboard(font);
 
     // create pieces give each player their own
