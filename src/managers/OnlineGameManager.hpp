@@ -389,6 +389,9 @@ inline void OnlineGameManager::handleCellTap(const chk::PlayerPtr &hunter, const
     {
         return;
     }
+    std::cout << "gameReady" << std::boolalpha << this->gameReady << std::endl;
+    std::cout << "isMyturn" << std::boolalpha << this->isMyTurn << std::endl;
+
     // CHECK IF this cell has a Piece
     const short pieceId = this->getPieceFromCell(cell->getIndex());
     if (pieceId != -1)

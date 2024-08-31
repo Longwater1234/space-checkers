@@ -3,7 +3,7 @@
 //
 #pragma once
 #include "Piece.hpp"
-#include "ResourcePath.hpp"
+#include "utils/ResourcePath.hpp"
 #include <SFML/Graphics/Color.hpp>
 #include <SFML/Graphics/Font.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>

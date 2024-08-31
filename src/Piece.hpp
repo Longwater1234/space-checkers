@@ -1,5 +1,5 @@
 #pragma once
-#include "ResourcePath.hpp"
+#include "utils/ResourcePath.hpp"
 #include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Graphics/RenderStates.hpp>
