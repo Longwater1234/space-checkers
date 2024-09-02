@@ -4,6 +4,7 @@
 #include "payloads/base_payload.pb.hpp"
 #include <atomic>
 #include <cpr/cpr.h>
+#include <future>
 #include <ixwebsocket/IXNetSystem.h>
 #include <ixwebsocket/IXWebSocket.h>
 #include <mutex>
@@ -85,7 +86,7 @@ inline chk::WsClient::WsClient()
     // once dead, DO NOT try reconnect
     this->webSocketPtr->disableAutomaticReconnection();
     // ping server every 30 seconds
-    // this->webSocketPtr->setPingInterval(30); // TOXIC ping!
+    // this->webSocketPtr->setPingInterval(30);
     ix::SocketTLSOptions tlsOptions;
 #ifndef _WIN32
     // Currently system CAs are not supported on non-Windows platforms with mbedtls
@@ -93,7 +94,7 @@ inline chk::WsClient::WsClient()
 #endif // _WIN32
     this->webSocketPtr->setTLSOptions(tlsOptions);
     // prefetch for public server list
-    this->prefetchPublicServers();
+    std::async([this]() { this->prefetchPublicServers(); });
 }
 
 /**
@@ -482,7 +483,6 @@ inline void WsClient::runGameLoop()
         {
             if (this->_onWinLoseCallback != nullptr)
             {
-                spdlog::info(basePayload.notice());
                 this->_onWinLoseCallback(basePayload.notice());
                 this->showWinnerPopup(basePayload.notice());
                 break;

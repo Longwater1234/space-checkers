@@ -236,6 +236,7 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
     const bool success = player->movePiece(currentPieceId, destCell->getPos());
     if (!success)
     {
+        std::cout << "move not success " << std::endl;
         return;
     }
     int copySrcCell = this->sourceCell.value();
@@ -389,8 +390,6 @@ inline void OnlineGameManager::handleCellTap(const chk::PlayerPtr &hunter, const
     {
         return;
     }
-    std::cout << "gameReady" << std::boolalpha << this->gameReady << std::endl;
-    std::cout << "isMyturn" << std::boolalpha << this->isMyTurn << std::endl;
 
     // CHECK IF this cell has a Piece
     const short pieceId = this->getPieceFromCell(cell->getIndex());
