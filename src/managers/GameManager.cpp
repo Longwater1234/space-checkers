@@ -189,7 +189,7 @@ void GameManager::setSourceCell(int src_cell)
 }
 
 /**
- * If match is interrupted, clear all: pieces for both players, gameMap, and the Board
+ * If match is interrupted, or game is over, reset all states
  */
 void chk::GameManager::doCleanup()
 {
@@ -198,6 +198,7 @@ void chk::GameManager::doCleanup()
     this->playerRed->emptyBasket();
     this->playerBlack->emptyBasket();
     this->gameOver = true;
+    this->alreadyCached = false;
 }
 
 /**
