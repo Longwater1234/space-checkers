@@ -247,7 +247,7 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
 
     if (!this->getForcedMoves().empty())
     {
-        spdlog::info("YOU ARE IN DANGER ");
+        spdlog::warn("YOU ARE IN DANGER ");
     }
 
     // prepare to send to SERVER
@@ -267,7 +267,7 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
     }
     movePayload->set_allocated_destination(newDestCell);
 
-    // finally, create Base request
+    // finally, create BasePayload
     chk::payload::BasePayload requestBody;
     requestBody.set_allocated_move_payload(movePayload);
     if (!this->wsClient->replyServer(requestBody))
@@ -352,7 +352,7 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
         capturePayload->set_from_team(TeamColor::TEAM_BLACK);
     }
 
-    // finally create basePayload
+    // finally, create BasePayload
     chk::payload::BasePayload basePayload;
     basePayload.set_allocated_capture_payload(capturePayload);
     if (!this->wsClient->replyServer(basePayload))

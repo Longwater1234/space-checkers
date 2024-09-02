@@ -18,6 +18,8 @@ class Player final
   public:
     explicit Player(PlayerType player_type);
     Player() = delete;
+    Player(const Player &) = delete;
+    Player &operator=(const Player &) = delete;
     void receivePiece(PiecePtr &piecePtr);
     void losePiece(const short targetId);
     [[nodiscard]] const std::unordered_map<short, chk::PiecePtr> &getOwnPieces() const;
