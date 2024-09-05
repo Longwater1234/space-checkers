@@ -16,11 +16,13 @@ class Cell final : public sf::Drawable
   public:
     explicit Cell(int idx, const sf::RectangleShape &rec, const sf::Vector2f &pos, const sf::Font &font);
     Cell() = delete;
+    Cell &operator=(const Cell &) = delete;
+    Cell(const Cell &) = delete;
     bool containsPoint(const sf::Vector2i &pos) const;
     bool isAtPosition(const sf::Vector2f &pos) const;
     const sf::Vector2f &getPos() const;
     int getIndex() const;
-    void setEvenRow(const bool &is_even);
+    void setEvenRow(bool is_even);
     bool getIsEvenRow() const;
 
   private:
@@ -99,7 +101,7 @@ inline int Cell::getIndex() const
  * Set whether this cell's row is even
  * @param is_even TRUE or FALSE
  */
-inline void Cell::setEvenRow(const bool &is_even)
+inline void Cell::setEvenRow(bool is_even)
 {
     this->isEvenRow = is_even;
 }
