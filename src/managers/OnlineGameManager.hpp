@@ -310,7 +310,7 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
             {
                 return;
             }
-            isCaptured = true;
+            isCaptured = true; // verified
             this->updateMessage("You have captured " + prey->getName() + "'s piece!");
             copySrcCell = this->sourceCell.value();
             gameMap.erase(this->sourceCell.value());                // set hunter's old location empty!
@@ -318,7 +318,7 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
             gameMap.emplace(targetCell->getIndex(), hunterPieceId); // fill in hunter new location
             prey->losePiece(target.preyPieceId);                    // the defending player loses 1 piece
             this->sourceCell = std::nullopt;                        // reset source cell
-            // create copies for sending to server
+            // SET VALUES TO copies
             copyHunterPiece = hunterPieceId;
             copyPreyPieceId = target.preyPieceId;
             copyPreyCell = target.preyCellIdx;
@@ -352,7 +352,7 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
         capturePayload->set_from_team(TeamColor::TEAM_BLACK);
     }
 
-    // finally, create BasePayload
+    // ATTACH all children to parent
     chk::payload::BasePayload basePayload;
     basePayload.set_allocated_capture_payload(capturePayload);
     if (!this->wsClient->replyServer(basePayload))
@@ -362,7 +362,7 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
     }
 
     // Check for extra opportunities (for myself)!
-    // TODO fixXME, if i just became king, (wasn't king before) DONT run this next line
+    // TODO fixXME, if i just became king, ( AND wasn't king before) DONT run this next line
     GameManager::identifyTargets(hunter, targetCell);
     if (this->getForcedMoves().empty())
     {
@@ -418,7 +418,7 @@ inline void OnlineGameManager::handleCellTap(const chk::PlayerPtr &hunter, const
             }
             else if (this->isHunterActive())
             {
-                // it's an ATTACK move
+                // it's an ATTACK
                 this->handleCapturePiece(hunter, prey, cell);
                 GameManager::updateMatchStatus(hunter, prey);
                 buffer.clean();
@@ -473,7 +473,6 @@ inline void OnlineGameManager::startMoveListener()
 inline void OnlineGameManager::startCaptureListener()
 {
     this->wsClient->setOnCapturePieceCallback([this](const chk::payload::CapturePayload &payload) {
-        // which color is my Opponent?
         // clang-format off
         const chk::PlayerPtr &other = payload.from_team() == TeamColor::TEAM_RED ? this->playerRed : this->playerBlack;
         const chk::PlayerPtr &myTeam = other->getPlayerType() == PlayerType::PLAYER_RED ? this->playerBlack : this->playerRed;
@@ -513,7 +512,7 @@ inline void OnlineGameManager::startCaptureListener()
 }
 
 /**
- * Listening for killed connection & Winner notifications from server
+ * Listening for killed connections & Winner notifications from server
  */
 inline void OnlineGameManager::startDeathListener()
 {
