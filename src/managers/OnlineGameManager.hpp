@@ -439,13 +439,13 @@ inline void OnlineGameManager::handleCellTap(const chk::PlayerPtr &hunter, const
 inline void OnlineGameManager::startMoveListener()
 {
     this->wsClient->setOnMovePieceCallback([this](const chk::payload::MovePayload &payload) {
-        // which color is the Opponent?
+        // which color is my Opponent?
         // clang-format off
         const chk::PlayerPtr &enemy = payload.from_team() == TeamColor::TEAM_RED ? this->playerRed : this->playerBlack;
         const chk::PlayerPtr &myTeam = enemy->getPlayerType() == PlayerType::PLAYER_RED ? this->playerBlack : this->playerRed;
         // clang-format on
         const auto targetPosition = sf::Vector2f{payload.destination().x(), payload.destination().y()};
-        short movingPieceId = static_cast<short>(payload.piece_id());
+        const short movingPieceId = static_cast<short>(payload.piece_id());
         const bool success = enemy->movePiece(movingPieceId, targetPosition);
         if (!success)
         {
@@ -486,11 +486,11 @@ inline void OnlineGameManager::startCaptureListener()
         }
 
         this->updateMessage(other->getName() + " has captured your piece!");
-        gameMap.erase(payload.details().hunter_src_cell());                 // set hunter's old location empty!
-        gameMap.erase(payload.details().prey_cell_idx());                   // set my old location empty!
-        gameMap.emplace(payload.destination().cell_index(), hunterPieceId); // fill in hunter new location
-        const short targetId = static_cast<short>(payload.details().prey_piece_id()); // cast to int16_t
-        myTeam->losePiece(targetId);                                                  // I will lose 1 piece
+        gameMap.erase(payload.details().hunter_src_cell());                     // set hunter's old location empty!
+        gameMap.erase(payload.details().prey_cell_idx());                       // set my old location empty!
+        gameMap.emplace(payload.destination().cell_index(), hunterPieceId);     // fill in hunter new location
+        short targetId = static_cast<short>(payload.details().prey_piece_id()); // cast to int16_t
+        myTeam->losePiece(targetId);                                            // I will lose 1 piece
 
         // Check for extra opportunities NOW (for Enemy), single cell
         const int destCellIdx = payload.destination().cell_index();

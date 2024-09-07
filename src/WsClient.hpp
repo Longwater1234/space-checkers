@@ -94,7 +94,7 @@ inline chk::WsClient::WsClient()
 #endif // _WIN32
     this->webSocketPtr->setTLSOptions(tlsOptions);
     // prefetch for public server list
-    std::async([this]() { this->prefetchPublicServers(); });
+    std::async(std::launch::async, [this]() { this->prefetchPublicServers(); });
 }
 
 /**
@@ -118,8 +118,8 @@ inline void WsClient::showHint(const char *tip)
  */
 inline void WsClient::showConnectWindow()
 {
-    static bool is_secure = false;
-    static bool showPublic = true;
+    static bool is_secure = false; // switch to use SSL (for PRIVATE servers only)
+    static bool showPublic = true; // whether to show public server list
 
     if (showPublic)
     {
@@ -198,7 +198,7 @@ inline void WsClient::showPublicServerWindow(bool &showPublic)
 
 /**
  * Fetch public servers JSON list from central storage (which is updated regularly)
- * @see libcpr docs: https://docs.libcpr.org/advanced-usage.html
+ * @see libcpr official docs: https://docs.libcpr.org/advanced-usage.html
  */
 inline void WsClient::prefetchPublicServers()
 {
@@ -273,10 +273,10 @@ inline void WsClient::runMainLoop()
     }
     // some error happened 🙁
     if (this->isDead) {
-       this->showErrorPopup();
        if (this->_onDeathCallback != nullptr) {
         _onDeathCallback(this->errorMsg);
        }
+        this->showErrorPopup();
     }
     // clang-format on
 }
