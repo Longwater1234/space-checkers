@@ -300,12 +300,17 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
     int copySrcCell = 0;     // hunter src cell
     int copyPreyPieceId = 0;
     int copyPreyCell = 0;
+    // track changes for hunter Piece (crown state)
+    bool isKingBefore = false;
+    bool isKingNow = false;
 
-    bool isCaptured = false; // outside guard to verify if Capture completed
+    bool isCaptured = false; // external guard to verify if Capture completed
+
     for (const auto &[hunterPieceId, target] : this->getForcedMoves())
     {
         if (target.hunterNextCell == targetCell->getIndex())
         {
+            isKingBefore = hunter->getOwnPieces().at(hunterPieceId)->getIsKing();
             if (!hunter->captureEnemyWith(hunterPieceId, targetCell->getPos()))
             {
                 return;
@@ -313,12 +318,12 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
             isCaptured = true; // verified
             this->updateMessage("You have captured " + prey->getName() + "'s piece!");
             copySrcCell = this->sourceCell.value();
-            gameMap.erase(this->sourceCell.value());                // set hunter's old location empty!
-            gameMap.erase(target.preyCellIdx);                      // set Prey's old location empty!
-            gameMap.emplace(targetCell->getIndex(), hunterPieceId); // fill in hunter new location
-            prey->losePiece(target.preyPieceId);                    // the defending player loses 1 piece
-            this->sourceCell = std::nullopt;                        // reset source cell
-            // SET VALUES TO copies
+            gameMap.erase(this->sourceCell.value());                           // set hunter's old location empty!
+            gameMap.erase(target.preyCellIdx);                                 // set Prey's old location empty!
+            gameMap.emplace(targetCell->getIndex(), hunterPieceId);            // fill in hunter new location
+            prey->losePiece(target.preyPieceId);                               // the defending player loses 1 piece
+            this->sourceCell = std::nullopt;                                   // reset source cell
+            isKingNow = hunter->getOwnPieces().at(hunterPieceId)->getIsKing(); // track changes for hunter piece
             copyHunterPiece = hunterPieceId;
             copyPreyPieceId = target.preyPieceId;
             copyPreyCell = target.preyCellIdx;
@@ -352,7 +357,7 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
         capturePayload->set_from_team(TeamColor::TEAM_BLACK);
     }
 
-    // ATTACH all children to parent
+    // ATTACH all children to root
     chk::payload::BasePayload basePayload;
     basePayload.set_allocated_capture_payload(capturePayload);
     if (!this->wsClient->replyServer(basePayload))
@@ -361,9 +366,12 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
         return;
     }
 
-    // Check for extra opportunities (for myself)!
-    // TODO fixXME, if i just became king, ( AND wasn't king before) DONT run this next line
-    GameManager::identifyTargets(hunter, targetCell);
+    // Check for extra opportunities (for myself, single cell)! Skip if I just became King recently.
+    if (!(isKingBefore ^ isKingNow))
+    {
+        GameManager::identifyTargets(hunter, targetCell);
+    }
+
     if (this->getForcedMoves().empty())
     {
         // NO MORE JUMPS AVAILABLE. SWITCH TURNS to opponent
@@ -425,7 +433,7 @@ inline void OnlineGameManager::handleCellTap(const chk::PlayerPtr &hunter, const
             }
             else
             {
-                // it's a SIMPLE MOVE
+                // it's a SIMPLE move
                 this->handleMovePiece(hunter, prey, cell, movablePieceId);
                 buffer.clean();
             }
@@ -473,33 +481,38 @@ inline void OnlineGameManager::startMoveListener()
 inline void OnlineGameManager::startCaptureListener()
 {
     this->wsClient->setOnCapturePieceCallback([this](const chk::payload::CapturePayload &payload) {
+        bool isKingBefore = false;
+        bool isKingNow = false;
         // clang-format off
-        const chk::PlayerPtr &other = payload.from_team() == TeamColor::TEAM_RED ? this->playerRed : this->playerBlack;
-        const chk::PlayerPtr &myTeam = other->getPlayerType() == PlayerType::PLAYER_RED ? this->playerBlack : this->playerRed;
+        const chk::PlayerPtr &opponent = payload.from_team() == TeamColor::TEAM_RED ? this->playerRed : this->playerBlack;
+        const chk::PlayerPtr &myTeam = opponent->getPlayerType() == PlayerType::PLAYER_RED ? this->playerBlack : this->playerRed;
         // clang-format on
         const auto destPos = sf::Vector2f{payload.destination().x(), payload.destination().y()};
         const auto hunterPieceId = static_cast<short>(payload.hunter_piece_id());
 
-        if (!other->captureEnemyWith(hunterPieceId, destPos))
+        isKingBefore = opponent->getOwnPieces().at(hunterPieceId)->getIsKing();
+        if (!opponent->captureEnemyWith(hunterPieceId, destPos))
         {
             return;
         }
 
-        this->updateMessage(other->getName() + " has captured your piece!");
+        this->updateMessage(opponent->getName() + " has captured your piece!");
+        isKingNow = opponent->getOwnPieces().at(hunterPieceId)->getIsKing();    // track changes for hunter piece
         gameMap.erase(payload.details().hunter_src_cell());                     // set hunter's old location empty!
         gameMap.erase(payload.details().prey_cell_idx());                       // set my old location empty!
         gameMap.emplace(payload.destination().cell_index(), hunterPieceId);     // fill in hunter new location
         short targetId = static_cast<short>(payload.details().prey_piece_id()); // cast to int16_t
         myTeam->losePiece(targetId);                                            // I will lose 1 piece
 
-        // Check for extra opportunities NOW (for Enemy), single cell
         const int destCellIdx = payload.destination().cell_index();
         const auto it = std::find_if(blockList.begin(), blockList.end(), [&destCellIdx](const chk::Block &cell) {
             return cell->getIndex() == destCellIdx;
         });
-        if (it != this->blockList.end())
+
+        // Check for extra opportunities NOW (for Enemy), only if they did NOT just become King
+        if (it != this->blockList.end() && !(isKingBefore ^ isKingNow))
         {
-            GameManager::identifyTargets(other, *it);
+            GameManager::identifyTargets(opponent, *it);
         }
 
         if (this->getForcedMoves().empty())
