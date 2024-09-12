@@ -4,7 +4,6 @@
 #include "payloads/base_payload.pb.hpp"
 #include <atomic>
 #include <cpr/cpr.h>
-#include <future>
 #include <ixwebsocket/IXNetSystem.h>
 #include <ixwebsocket/IXWebSocket.h>
 #include <mutex>
@@ -31,8 +30,8 @@ using onCaptureCallback = std::function<void(const chk::payload::CapturePayload 
 // when we got a winner or loser
 using onWinLoseCallback = std::function<void(std::string_view notice)>;
 
-constexpr auto cloudfront = "https://d1txhef4jwuosv.cloudfront.net/ws_server_locations.json";
-
+// constexpr auto cloudfront = "https://d1txhef4jwuosv.cloudfront.net/ws_server_locations.json";
+constexpr auto cloudfront = "https://httpbin.org/delay/5";
 /**
  * This handles all websocket exchanges with Server
  */
@@ -74,8 +73,8 @@ class WsClient final
     void tryConnect(std::string_view address);
     void showConnectWindow();
     void showPublicServerWindow(bool &showPublic);
-    void prefetchPublicServers();
-    void parseServerList(const cpr::Response &);
+    void asyncFetchPublicServers();
+    void parseServerList(const cpr::Response &response);
     void resetAllStates();
 };
 
@@ -97,8 +96,7 @@ inline chk::WsClient::WsClient()
 #endif // _WIN32
     this->webSocketPtr->setTLSOptions(tlsOptions);
     // prefetch for public server list
-    // std::async(std::launch::async, [this]() { this->prefetchPublicServers(); });
-    this->prefetchPublicServers();
+    this->asyncFetchPublicServers();
 }
 
 /**
@@ -190,7 +188,7 @@ inline void WsClient::showPublicServerWindow(bool &showPublic)
         publicServers.empty() ? ImGui::NewLine() : ImGui::SameLine();
         if (ImGui::Button("Refresh", ImVec2{90.0f, 0}))
         {
-            this->prefetchPublicServers();
+            this->asyncFetchPublicServers();
         }
         if (ImGui::Button("My Private Server >", ImVec2{150.0f, 0}))
         {
@@ -201,15 +199,13 @@ inline void WsClient::showPublicServerWindow(bool &showPublic)
 }
 
 /**
- * Fetch public servers JSON list from central storage (which is updated regularly)
+ * Fetch async public servers JSON updated list from central cloud storage
  * @see libcpr official docs: https://docs.libcpr.org/advanced-usage.html
  */
-inline void WsClient::prefetchPublicServers()
+inline void WsClient::asyncFetchPublicServers()
 {
-    cpr::GetCallback(
-        [this](cpr::Response r) { this->parseServerList(r);
-        },
-        cpr::Url{chk::cloudfront}, cpr::Timeout{2000});
+    cpr::GetCallback([this](cpr::Response r) { this->parseServerList(r); }, cpr::Url{chk::cloudfront},
+                     cpr::Timeout{2000});
 }
 
 /**
