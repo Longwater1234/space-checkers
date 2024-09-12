@@ -31,6 +31,8 @@ using onCaptureCallback = std::function<void(const chk::payload::CapturePayload 
 // when we got a winner or loser
 using onWinLoseCallback = std::function<void(std::string_view notice)>;
 
+constexpr auto cloudfront = "https://d1txhef4jwuosv.cloudfront.net/ws_server_locations.json";
+
 /**
  * This handles all websocket exchanges with Server
  */
@@ -73,6 +75,7 @@ class WsClient final
     void showConnectWindow();
     void showPublicServerWindow(bool &showPublic);
     void prefetchPublicServers();
+    void parseServerList(const cpr::Response &);
     void resetAllStates();
 };
 
@@ -94,7 +97,8 @@ inline chk::WsClient::WsClient()
 #endif // _WIN32
     this->webSocketPtr->setTLSOptions(tlsOptions);
     // prefetch for public server list
-    std::async(std::launch::async, [this]() { this->prefetchPublicServers(); });
+    // std::async(std::launch::async, [this]() { this->prefetchPublicServers(); });
+    this->prefetchPublicServers();
 }
 
 /**
@@ -202,23 +206,28 @@ inline void WsClient::showPublicServerWindow(bool &showPublic)
  */
 inline void WsClient::prefetchPublicServers()
 {
-    const std::string cloudfront = "https://d1txhef4jwuosv.cloudfront.net/ws_server_locations.json";
+    cpr::GetCallback(
+        [this](cpr::Response r) { this->parseServerList(r);
+        },
+        cpr::Url{chk::cloudfront}, cpr::Timeout{2000});
+}
 
-    cpr::AsyncResponse promise = cpr::GetAsync(cpr::Url{cloudfront}, cpr::Timeout{2500});
+/**
+ * Parse the response of public server list and display them
+ * @param response From the public request
+ */
+inline void WsClient::parseServerList(const cpr::Response &response)
+{
     std::string responseBody{};
-    if (promise.wait_for(std::chrono::milliseconds(2000)) == std::future_status::ready)
+    long statusCode = response.status_code;
+    if (statusCode != 200)
     {
-        cpr::Response response = promise.get();
-        long statusCode = response.status_code;
-        if (statusCode != 200)
-        {
-            spdlog::error("http request failed. Reason {}", response.error.message);
-            this->errorMsg = response.error.message;
-            this->isDead = true;
-            return;
-        }
-        responseBody = response.text;
+        spdlog::error("http request failed. Reason {}", response.error.message);
+        this->errorMsg = response.error.message;
+        this->isDead = true;
+        return;
     }
+    responseBody = response.text;
 
     // Parse the JSON response
     simdjson::dom::parser jsonParser;
