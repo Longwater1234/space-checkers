@@ -39,6 +39,8 @@ class WsClient final
 {
   public:
     WsClient();
+    WsClient(const WsClient &) = delete;
+    WsClient &operator=(const WsClient &) = delete;
     void runMainLoop();
     void setOnReadyConnectedCallback(const onConnectedServer &callback);
     void setOnReadyStartGameCallback(const onReadyStartGame &callback);
