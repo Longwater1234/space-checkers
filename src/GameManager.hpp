@@ -61,15 +61,15 @@ class GameManager
     // collection of Player's next targets (Map<HunterPieceID, CaptureTarget>)
     std::unordered_map<short, chk::CaptureTarget> forcedMoves{};
 
-    [[nodiscard]] bool boardContainsCell(const int &cell_idx) const;
-    [[nodiscard]] bool awayFromEdge(const int &cell_idx) const;
+    [[nodiscard]] bool boardContainsCell(const int cell_idx) const;
+    [[nodiscard]] bool awayFromEdge(const int cell_idx) const;
     void collectFrontRHS(const chk::PlayerPtr &hunter, const chk::Block &cell_ptr);
     void collectFrontLHS(const chk::PlayerPtr &hunter, const chk::Block &cell_ptr);
     void collectBehindRHS(const chk::PlayerPtr &hunter, const chk::Block &cell_ptr);
     void collectBehindLHS(const chk::PlayerPtr &hunter, const chk::Block &cell_ptr);
 
   protected:
-    // map of cell_index -> piece_id
+    // gameBoard: map of cell_index -> piece_id
     std::map<int, short> gameMap;
     // main window
     sf::RenderWindow *window = nullptr;
@@ -83,7 +83,7 @@ class GameManager
     chk::PlayerPtr playerBlack = nullptr;
 
     [[nodiscard]] const bool &isPlayerRedTurn() const;
-    [[nodiscard]] short getPieceFromCell(int cell_idx) const;
+    [[nodiscard]] short getPieceFromCell(const int cell_idx) const;
     [[nodiscard]] const std::vector<chk::Block> &getBlockList() const;
     [[nodiscard]] bool isHunterActive() const;
     [[nodiscard]] const bool &isGameOver() const;

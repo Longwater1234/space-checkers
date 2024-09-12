@@ -30,6 +30,8 @@ using onCaptureCallback = std::function<void(const chk::payload::CapturePayload 
 // when we got a winner or loser
 using onWinLoseCallback = std::function<void(std::string_view notice)>;
 
+constexpr auto cloudfront = "https://d1txhef4jwuosv.cloudfront.net/ws_server_locations.json";
+
 /**
  * This handles all websocket exchanges with Server
  */
@@ -37,6 +39,8 @@ class WsClient final
 {
   public:
     WsClient();
+    WsClient(const WsClient &) = delete;
+    WsClient &operator=(const WsClient &) = delete;
     void runMainLoop();
     void setOnReadyConnectedCallback(const onConnectedServer &callback);
     void setOnReadyStartGameCallback(const onReadyStartGame &callback);
@@ -71,7 +75,8 @@ class WsClient final
     void tryConnect(std::string_view address);
     void showConnectWindow();
     void showPublicServerWindow(bool &showPublic);
-    void prefetchPublicServers();
+    void asyncFetchPublicServers();
+    void parseServerList(const cpr::Response &response);
     void resetAllStates();
 };
 
@@ -85,7 +90,7 @@ inline chk::WsClient::WsClient()
     // once dead, DO NOT try reconnect
     this->webSocketPtr->disableAutomaticReconnection();
     // ping server every 30 seconds
-    // this->webSocketPtr->setPingInterval(30); // TOXIC ping!
+    this->webSocketPtr->setPingInterval(30);
     ix::SocketTLSOptions tlsOptions;
 #ifndef _WIN32
     // Currently system CAs are not supported on non-Windows platforms with mbedtls
@@ -93,7 +98,7 @@ inline chk::WsClient::WsClient()
 #endif // _WIN32
     this->webSocketPtr->setTLSOptions(tlsOptions);
     // prefetch for public server list
-    this->prefetchPublicServers();
+    this->asyncFetchPublicServers();
 }
 
 /**
@@ -117,8 +122,8 @@ inline void WsClient::showHint(const char *tip)
  */
 inline void WsClient::showConnectWindow()
 {
-    static bool is_secure = false;
-    static bool showPublic = true;
+    static bool is_secure = false; // switch to use SSL (for PRIVATE servers only)
+    static bool showPublic = true; // whether to show public server list
 
     if (showPublic)
     {
@@ -185,7 +190,7 @@ inline void WsClient::showPublicServerWindow(bool &showPublic)
         publicServers.empty() ? ImGui::NewLine() : ImGui::SameLine();
         if (ImGui::Button("Refresh", ImVec2{90.0f, 0}))
         {
-            this->prefetchPublicServers();
+            this->asyncFetchPublicServers();
         }
         if (ImGui::Button("My Private Server >", ImVec2{150.0f, 0}))
         {
@@ -196,28 +201,31 @@ inline void WsClient::showPublicServerWindow(bool &showPublic)
 }
 
 /**
- * Fetch public servers JSON list from central storage (which is updated regularly)
- * @see libcpr docs: https://docs.libcpr.org/advanced-usage.html
+ * Fetch async public servers JSON updated list from central cloud storage
+ * @see libcpr official docs: https://docs.libcpr.org/advanced-usage.html
  */
-inline void WsClient::prefetchPublicServers()
+inline void WsClient::asyncFetchPublicServers()
 {
-    const std::string cloudfront = "https://d1txhef4jwuosv.cloudfront.net/ws_server_locations.json";
+    cpr::GetCallback([this](cpr::Response r) { this->parseServerList(r); }, cpr::Url{chk::cloudfront},
+                     cpr::Timeout{2000});
+}
 
-    cpr::AsyncResponse promise = cpr::GetAsync(cpr::Url{cloudfront});
+/**
+ * Parse the response of public server list and display them
+ * @param response From the public request
+ */
+inline void WsClient::parseServerList(const cpr::Response &response)
+{
     std::string responseBody{};
-    if (promise.wait_for(std::chrono::milliseconds(2000)) == std::future_status::ready)
+    long statusCode = response.status_code;
+    if (statusCode != 200)
     {
-        cpr::Response response = promise.get();
-        long statusCode = response.status_code;
-        if (statusCode != 200)
-        {
-            spdlog::error("http request failed. Reason {}", response.error.message);
-            this->errorMsg = response.error.message;
-            this->isDead = true;
-            return;
-        }
-        responseBody = response.text;
+        spdlog::error("http request failed. Reason {}", response.error.message);
+        this->errorMsg = response.error.message;
+        this->isDead = true;
+        return;
     }
+    responseBody = response.text;
 
     // Parse the JSON response
     simdjson::dom::parser jsonParser;
@@ -272,10 +280,10 @@ inline void WsClient::runMainLoop()
     }
     // some error happened 🙁
     if (this->isDead) {
-       this->showErrorPopup();
        if (this->_onDeathCallback != nullptr) {
         _onDeathCallback(this->errorMsg);
        }
+        this->showErrorPopup();
     }
     // clang-format on
 }
@@ -482,7 +490,6 @@ inline void WsClient::runGameLoop()
         {
             if (this->_onWinLoseCallback != nullptr)
             {
-                spdlog::info(basePayload.notice());
                 this->_onWinLoseCallback(basePayload.notice());
                 this->showWinnerPopup(basePayload.notice());
                 break;

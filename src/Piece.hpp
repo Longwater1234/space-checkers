@@ -1,5 +1,5 @@
 #pragma once
-#include "ResourcePath.hpp"
+#include "utils/ResourcePath.hpp"
 #include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Graphics/RenderStates.hpp>
@@ -27,6 +27,8 @@ class Piece final : public sf::Drawable, public sf::Transformable
   public:
     Piece(const sf::CircleShape &circle, const PieceType &pType, short id);
     Piece() = delete;
+    Piece(const Piece &) = delete;
+    Piece &operator=(const Piece &) = delete;
     [[nodiscard]] const PieceType &getPieceType() const;
     void activateKing();
     bool getIsKing() const;

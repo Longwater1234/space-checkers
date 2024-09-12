@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
 
-project("SpaceCheckers" VERSION 1.0.5
+project("SpaceCheckers" VERSION 1.0.6
  HOMEPAGE_URL "https://github.com/Longwater1234/space-checkers")
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -14,7 +14,7 @@ endif()
 # Absolute path where you installed SFML
 set(SFML_HOME "C:/SFML/SFML-2.6.1")
 
-file(GLOB_RECURSE GAME_SRC "src/*.cpp" "src/*.hpp")
+file(GLOB_RECURSE GAME_SRC "src/*.cpp" "src/*.hpp")  
 set(SFML_DIR ${SFML_HOME}/lib/cmake/SFML) 
 
 find_package(SFML 2.6 REQUIRED COMPONENTS "graphics" "window" "system")
@@ -29,9 +29,9 @@ elseif(APPLE)
   include(${CMAKE_SOURCE_DIR}/apple_cmake/macbundle.cmake)
   find_library(FOUNDATION_FRAMEWORK Foundation)
   target_link_libraries(SpaceCheckers PRIVATE ${FOUNDATION_FRAMEWORK})
-else()
+else() 
   add_executable(SpaceCheckers ${GAME_SRC})    
-endif()  
+endif()   
 
 # link all required libraries 
 target_link_libraries(SpaceCheckers PRIVATE sfml-graphics sfml-window sfml-system ImGui-SFML
