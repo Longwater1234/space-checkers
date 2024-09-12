@@ -223,7 +223,7 @@ bool GameManager::isHunterActive() const
  * @param cell_idx the clicked cell
  * @return positive number or -1 if not found
  */
-short GameManager::getPieceFromCell(int cell_idx) const
+short GameManager::getPieceFromCell(const int cell_idx) const
 {
     if (this->gameMap.find(cell_idx) != gameMap.end())
     {
@@ -370,7 +370,7 @@ const bool &GameManager::isGameOver() const
  * @param cell_idx Cell index
  * @return TRUE if cell on board, else FALSE
  */
-bool GameManager::boardContainsCell(const int &cell_idx) const
+bool GameManager::boardContainsCell(const int cell_idx) const
 {
     const auto it = std::find_if(blockList.begin(), blockList.end(), [&cell_idx](const chk::Block &cell) {
         return cell->getIndex() == cell_idx && cell->getPos().x >= 0 && cell->getPos().x <= 7 * chk::SIZE_CELL &&
@@ -384,7 +384,7 @@ bool GameManager::boardContainsCell(const int &cell_idx) const
  * @param cell_idx cell index
  * @return TRUE if NOT on edges, else FALSE
  */
-bool GameManager::awayFromEdge(const int &cell_idx) const
+bool GameManager::awayFromEdge(const int cell_idx) const
 {
     const auto it = std::find_if(blockList.begin(), blockList.end(), [&cell_idx](const chk::Block &cell) {
         return cell->getIndex() == cell_idx && cell->getPos().x > 0 && cell->getPos().x < 7 * chk::SIZE_CELL &&

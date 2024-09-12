@@ -204,7 +204,7 @@ inline void WsClient::prefetchPublicServers()
 {
     const std::string cloudfront = "https://d1txhef4jwuosv.cloudfront.net/ws_server_locations.json";
 
-    cpr::AsyncResponse promise = cpr::GetAsync(cpr::Url{cloudfront});
+    cpr::AsyncResponse promise = cpr::GetAsync(cpr::Url{cloudfront}, cpr::Timeout{2500});
     std::string responseBody{};
     if (promise.wait_for(std::chrono::milliseconds(2000)) == std::future_status::ready)
     {
