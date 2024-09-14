@@ -78,7 +78,7 @@ inline void MainMenu::init()
     // position them over menu text
     this->onlineBtn.setPosition(sf::Vector2f{154.0, 476.0});
     this->localBtn.setPosition(sf::Vector2f{154.0, 558.0});
-    // add version text
+    // create version text
     if (this->font.loadFromFile(chk::getResourcePath(chk::FONT_PATH)))
     {
         this->versionTxt.setFont(this->font);
