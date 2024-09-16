@@ -250,7 +250,7 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
         spdlog::warn("YOU ARE IN DANGER ");
     }
 
-    // prepare to send to SERVER 
+    // prepare to send to SERVER
     // (must use raw ptr for embedded protobuf)
     auto *newDestCell = new chk::payload::MovePayload_Detination();
     newDestCell->set_cell_index(destCell->getIndex());
@@ -404,14 +404,15 @@ inline void OnlineGameManager::handleCellTap(const chk::PlayerPtr &hunter, const
     const short pieceId = this->getPieceFromCell(cell->getIndex());
     if (pieceId != -1)
     {
-        // YES, it has one! CHECK IF THERE IS ANY PENDING "forced captures"
+        // YES, it has one! VERIFY IF THERE IS ANY PENDING "forced captures" AND
+        // if hunter piece not selected.
         const bool notSelected = this->getForcedMoves().find(pieceId) == this->getForcedMoves().end();
         if (!this->getForcedMoves().empty() && notSelected)
         {
             this->showForcedMoves(hunter, cell);
             return;
         }
-        // OTHERWISE, store it in buffer (for a simple move next)!
+        // OTHERWISE, store it in buffer (for a simple move, next turn)
         buffer.addItem(pieceId);
         this->setSourceCell(cell->getIndex());
     }
@@ -511,7 +512,8 @@ inline void OnlineGameManager::startCaptureListener()
         });
 
         // Check for extra opportunities NOW (for Enemy), only if they did NOT just become King
-        if (it != this->blockList.end() && !(isKingBefore ^ isKingNow))
+        this->forcedMoves.clear();
+        if ((isKingBefore == isKingNow) && it != this->blockList.end())
         {
             GameManager::identifyTargets(opponent, *it);
         }
