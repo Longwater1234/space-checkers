@@ -409,7 +409,7 @@ inline bool WsClient::replyServer(const chk::payload::BasePayload &payload) cons
     {
         return false;
     }
-#if defined(_DEBUG) || defined(DEBUG)
+#ifdef _DEBUG
     spdlog::info("SENDING {}", payload.ShortDebugString());
 #endif // DEBUG
 
