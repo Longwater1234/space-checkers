@@ -51,4 +51,3 @@ constexpr auto CHINESE_FONT = "/System/Library/Fonts/PingFang.ttc";
 
 ImFont* font = io.Fonts->AddFontFromFileTTF(CHINESE_FONT, 18.0f, nullptr, io.Fonts->GetGlyphRangesChineseFull());
 ```
-
