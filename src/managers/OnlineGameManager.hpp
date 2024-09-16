@@ -250,7 +250,8 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
         spdlog::warn("YOU ARE IN DANGER ");
     }
 
-    // prepare to send to SERVER
+    // prepare to send to SERVER 
+    // (must use raw ptr for embedded protobuf)
     auto *newDestCell = new chk::payload::MovePayload_Detination();
     newDestCell->set_cell_index(destCell->getIndex());
     newDestCell->set_x(destCell->getPos().x);
@@ -333,7 +334,7 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
     {
         return;
     }
-    // prey details
+    // prey details (must use raw pointers for embedded protobuf)
     auto *details = new chk::payload::CapturePayload_TargetDetails();
     details->set_hunter_src_cell(copySrcCell);
     details->set_prey_cell_idx(copyPreyCell);

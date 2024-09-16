@@ -213,7 +213,7 @@ inline void WsClient::asyncFetchPublicServers()
 
 /**
  * Parse the response of public server list and display them
- * @param response From the public request
+ * @param response From the previous request
  */
 inline void WsClient::parseServerList(const cpr::Response &response)
 {
@@ -232,6 +232,7 @@ inline void WsClient::parseServerList(const cpr::Response &response)
     {
         simdjson::dom::array jsonArray = jsonParser.parse(simdjson::padded_string_view(response.text));
         this->publicServers.clear();
+        this->publicServers.reserve(jsonArray.size());
         for (const simdjson::dom::object &elem : jsonArray)
         {
             chk::ServerLocation location{};

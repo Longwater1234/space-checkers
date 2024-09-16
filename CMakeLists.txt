@@ -23,7 +23,7 @@ find_package(SFML 2.6 REQUIRED COMPONENTS "graphics" "window" "system")
 add_subdirectory(dependencies)   
 
 if(WIN32)
-  add_executable(SpaceCheckers WIN32 ${GAME_SRC} ${CMAKE_SOURCE_DIR}/resources/win-icon.rc)
+  add_executable(SpaceCheckers ${GAME_SRC} ${CMAKE_SOURCE_DIR}/resources/win-icon.rc)
   target_link_libraries(SpaceCheckers PRIVATE sfml-main)
 elseif(APPLE) 
   include(${CMAKE_SOURCE_DIR}/cmake/macbundle.cmake)
