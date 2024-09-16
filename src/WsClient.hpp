@@ -410,7 +410,7 @@ inline bool WsClient::replyServer(const chk::payload::BasePayload &payload) cons
     {
         return false;
     }
-#if defined(_DEBUG) || defined(DEBUG)
+#ifdef _DEBUG
     spdlog::info("SENDING {}", payload.ShortDebugString());
 #endif // DEBUG
 
@@ -494,9 +494,9 @@ inline void WsClient::runGameLoop()
         {
             if (this->_onWinLoseCallback != nullptr)
             {
-                this->_onWinLoseCallback(basePayload.notice());
                 this->showWinnerPopup(basePayload.notice());
-                break;
+                this->_onWinLoseCallback(basePayload.notice());
+                // break;
             }
         }
     }
