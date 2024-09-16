@@ -22,8 +22,6 @@ constexpr auto CHINESE_FONT = "/System/Library/Fonts/PingFang.ttc";
 const std::string CHINESE_FONT = chk::getResourcePath(chk::FONT_PATH);
 #endif
 
-#define Widen(x) L#x
-
 int main()
 {
     GOOGLE_PROTOBUF_VERIFY_VERSION;
