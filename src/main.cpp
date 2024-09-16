@@ -1,8 +1,9 @@
 ﻿#include "CircularBuffer.hpp"
 #include "MainMenu.hpp"
-#include "ResourcePath.hpp"
 #include "managers/LocalGameManager.hpp"
 #include "managers/OnlineGameManager.hpp"
+#include "utils/ResourcePath.hpp"
+
 #include <SFML/Graphics.hpp>
 #include <SFML/Window/Mouse.hpp>
 #include <cassert>

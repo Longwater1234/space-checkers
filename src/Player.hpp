@@ -12,12 +12,15 @@ namespace chk
 
 // alias for unique pointer of `Piece`
 using PiecePtr = std::unique_ptr<chk::Piece>;
+constexpr auto BLACK_NAME = "BLACK";
 
 class Player final
 {
   public:
     explicit Player(PlayerType player_type);
     Player() = delete;
+    Player(const Player &) = delete;
+    Player &operator=(const Player &) = delete;
     void receivePiece(PiecePtr &piecePtr);
     void losePiece(const short targetId);
     [[nodiscard]] const std::unordered_map<short, chk::PiecePtr> &getOwnPieces() const;
@@ -34,7 +37,7 @@ class Player final
   private:
     // name of this player (RED or BLACK)
     std::string name;
-    // my pieceId -> its Pointer
+    // hashmap of my PieceId -> its Pointer
     std::unordered_map<short, chk::PiecePtr> basket;
 };
 
