@@ -130,6 +130,8 @@ void GameManager::handleCapturePiece(const chk::PlayerPtr &hunter, const chk::Pl
         // STOP if game over OR there's already a Piece on target cell
         return;
     }
+    bool isKingBefore = false;
+    bool isKingNow = false;
 
     bool isCaptured = false; // outside guard to verify if Capture completed
     for (const auto &[hunterPieceId, target] : this->forcedMoves)
@@ -142,11 +144,12 @@ void GameManager::handleCapturePiece(const chk::PlayerPtr &hunter, const chk::Pl
             }
             isCaptured = true;
             this->updateMessage(hunter->getName() + " has captured " + prey->getName() + "'s piece!");
-            gameMap.erase(this->sourceCell.value());                // set hunter's old location empty!
-            gameMap.erase(target.preyCellIdx);                      // set Prey's old location empty!
-            gameMap.emplace(targetCell->getIndex(), hunterPieceId); // fill in hunter new location
-            prey->losePiece(target.preyPieceId);                    // the defending player loses 1 piece
-            this->sourceCell = std::nullopt;                        // reset source cell
+            gameMap.erase(this->sourceCell.value());                           // set hunter's old location empty!
+            gameMap.erase(target.preyCellIdx);                                 // set Prey's old location empty!
+            gameMap.emplace(targetCell->getIndex(), hunterPieceId);            // fill in hunter new location
+            prey->losePiece(target.preyPieceId);                               // the defending player loses 1 piece
+            this->sourceCell = std::nullopt;                                   // reset source cell
+            isKingNow = hunter->getOwnPieces().at(hunterPieceId)->getIsKing(); // track changes for hunter piece
             break;
         }
     }
@@ -154,9 +157,13 @@ void GameManager::handleCapturePiece(const chk::PlayerPtr &hunter, const chk::Pl
     {
         return;
     }
-    // FIXME do not RUN this next line if this "hunter" piece just became KING!
-    // Check for extra opportunities NOW! (single Cell)
-    this->identifyTargets(hunter, targetCell);
+    this->forcedMoves.clear();
+    //  Check for extra opportunities (only if hunter has NOT just became KING)
+    if (isKingBefore == isKingNow)
+    {
+        GameManager::identifyTargets(hunter, targetCell);
+    }
+
     if (this->forcedMoves.empty())
     {
         // NO MORE JUMPS AVAILABLE. SWITCH TURNS to opponent

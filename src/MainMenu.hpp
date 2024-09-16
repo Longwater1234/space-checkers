@@ -18,6 +18,7 @@ namespace chk
 {
 constexpr auto ICON_PATH = "win-icon-16.png";
 constexpr auto FONT_PATH = "notosans-regular.ttf";
+constexpr auto APP_VERSION = "v1.0.7";
 
 enum class UserChoice : uint16_t
 {
@@ -84,7 +85,7 @@ inline void MainMenu::init()
         this->versionTxt.setFont(this->font);
         this->versionTxt.setCharacterSize(20);
         this->versionTxt.setFillColor(this->DARK_BROWN);
-        this->versionTxt.setString("v1.0.6");
+        this->versionTxt.setString(chk::APP_VERSION);
         this->versionTxt.setPosition(sf::Vector2f{420.0, 410.0});
     }
 }

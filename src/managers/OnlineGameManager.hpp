@@ -300,7 +300,6 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
     int copySrcCell = 0;     // hunter src cell
     int copyPreyPieceId = 0;
     int copyPreyCell = 0;
-    // track changes for hunter Piece (crown state)
     bool isKingBefore = false;
     bool isKingNow = false;
 
@@ -367,7 +366,8 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
     }
 
     // Check for extra opportunities (for myself, single cell)! Skip if I just became King recently.
-    if (!(isKingBefore ^ isKingNow))
+    this->forcedMoves.clear();
+    if (isKingBefore == isKingNow)
     {
         GameManager::identifyTargets(hunter, targetCell);
     }

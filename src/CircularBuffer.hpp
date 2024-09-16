@@ -3,8 +3,8 @@
 //
 
 #pragma once
-#include <deque>
 #include <cstdint>
+#include <deque>
 
 namespace chk
 {
