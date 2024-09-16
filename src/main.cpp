@@ -19,6 +19,7 @@ int main()
     auto window = sf::RenderWindow{sf::VideoMode{600, 700}, "SpaceCheckers", sf::Style::Titlebar | sf::Style::Close};
     window.setFramerateLimit(60);
     ImGui::SFML::Init(window, false);
+    // ImGui::StyleColorsLight(); //<-- light color theme
     std::unique_ptr<chk::GameManager> manager = nullptr;
 
     // SHOW MAIN MENU

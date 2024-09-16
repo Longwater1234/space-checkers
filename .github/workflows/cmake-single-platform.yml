@@ -28,7 +28,7 @@ jobs:
         shell: cmd
         run: |
           mkdir "C:/SFML" && curl -fsSL "https://www.sfml-dev.org/files/${{ env.SFML_WIN_ZIP }}" -o "C:/SFML/${{ env.SFML_WIN_ZIP }}"
-          tar -xvf "C:/SFML/${{ env.SFML_WIN_ZIP }}" -C "C:/SFML/"
+          tar -xvf "C:/SFML/${{env.SFML_WIN_ZIP}}" -C "C:/SFML/"
 
       - name: Configure CMake
         # Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
