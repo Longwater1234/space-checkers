@@ -4,6 +4,7 @@
 
 #pragma once
 #include <deque>
+#include <cstdint>
 
 namespace chk
 {
@@ -24,7 +25,7 @@ template <typename T> class CircularBuffer
     CircularBuffer(CircularBuffer &&other) = delete;
     CircularBuffer(CircularBuffer &other) = delete;
     void addItem(const T &item);
-    T &getTop();
+    T &getTop() noexcept;
     void removeFirst();
     [[nodiscard]] bool isEmpty() const;
     const std::deque<T> &getAll() const;
@@ -67,7 +68,7 @@ template <typename T> inline const std::deque<T> &CircularBuffer<T>::getAll() co
  * @tparam T any type
  * @return The first element in queue
  */
-template <typename T> T &CircularBuffer<T>::getTop()
+template <typename T> T &CircularBuffer<T>::getTop() noexcept
 {
     return m_deque.front();
 }

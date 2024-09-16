@@ -54,8 +54,9 @@ class WsClient final
     std::string final_address;                      // IP or URL of private server (input by User)
     std::atomic_bool isDead{false};                 // if connection closed
     std::atomic_bool isConnected{false};            // if done connected to server (else, show loading)
-    chk::CircularBuffer<std::string> msgBuffer{1};  // keep only recent 1 message
+    chk::CircularBuffer<std::string> msgBuffer{1};  // keep only recent 1 incoming message
     mutable std::string errorMsg{};                 // for any websocket errors
+    mutable std::string protoBucket{};              // reusable container to store OUTGOING protobuf
     std::atomic_bool connClicked = false;           // if 'connect' button clicked
     std::vector<chk::ServerLocation> publicServers; // list of public servers (fetched from CDN)
 
@@ -216,8 +217,7 @@ inline void WsClient::asyncFetchPublicServers()
  */
 inline void WsClient::parseServerList(const cpr::Response &response)
 {
-    std::string responseBody{};
-    long statusCode = response.status_code;
+    const long statusCode = response.status_code;
     if (statusCode != 200)
     {
         spdlog::error("http request failed. Reason {}", response.error.message);
@@ -225,13 +225,12 @@ inline void WsClient::parseServerList(const cpr::Response &response)
         this->isDead = true;
         return;
     }
-    responseBody = response.text;
 
     // Parse the JSON response
     simdjson::dom::parser jsonParser;
     try
     {
-        simdjson::dom::array jsonArray = jsonParser.parse(simdjson::padded_string(responseBody));
+        simdjson::dom::array jsonArray = jsonParser.parse(simdjson::padded_string_view(response.text));
         this->publicServers.clear();
         for (const simdjson::dom::object &elem : jsonArray)
         {
@@ -410,8 +409,12 @@ inline bool WsClient::replyServer(const chk::payload::BasePayload &payload) cons
     {
         return false;
     }
+#if defined(_DEBUG) || defined(DEBUG)
     spdlog::info("SENDING {}", payload.ShortDebugString());
-    const auto &result = this->webSocketPtr->sendBinary(payload.SerializeAsString());
+#endif // DEBUG
+
+    payload.SerializeToString(&this->protoBucket);
+    const auto &result = this->webSocketPtr->sendBinary(this->protoBucket);
     return result.success;
 }
 
@@ -489,9 +492,10 @@ inline void WsClient::runGameLoop()
                 break;
             }
         }
-        std::scoped_lock lg(this->mut);
-        this->msgBuffer.clean();
     }
+    // outside cleanup
+    std::scoped_lock lg(this->mut);
+    this->msgBuffer.clean();
 }
 
 /**

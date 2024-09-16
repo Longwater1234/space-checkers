@@ -31,6 +31,7 @@ int main()
     window.setFramerateLimit(60);
 
     ImGui::SFML::Init(window, false);
+    // ImGui::StyleColorsLight(); //<-- light color theme
     std::unique_ptr<chk::GameManager> manager = nullptr;
 
     // SHOW MAIN MENU

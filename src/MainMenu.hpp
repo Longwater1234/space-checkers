@@ -78,6 +78,15 @@ inline void MainMenu::init()
     // position them over menu text
     this->onlineBtn.setPosition(sf::Vector2f{154.0, 476.0});
     this->localBtn.setPosition(sf::Vector2f{154.0, 558.0});
+    // create version text
+    if (this->font.loadFromFile(chk::getResourcePath(chk::FONT_PATH)))
+    {
+        this->versionTxt.setFont(this->font);
+        this->versionTxt.setCharacterSize(20);
+        this->versionTxt.setFillColor(this->DARK_BROWN);
+        this->versionTxt.setString("v1.0.6");
+        this->versionTxt.setPosition(sf::Vector2f{420.0, 410.0});
+    }
 }
 
 /**
@@ -151,6 +160,7 @@ inline chk::UserChoice MainMenu::runMainLoop()
         window->draw(mainFrame);
         window->draw(localBtn);
         window->draw(onlineBtn);
+        window->draw(versionTxt);
         window->display();
     }
 

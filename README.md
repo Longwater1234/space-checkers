@@ -15,13 +15,13 @@ pre-installed on your OS is SFML 2.6.
 
 ## Requirements for Building
 
-- C++17 (or newer) build tools.
+- C++17 (or newer) compiler.
 - Pre-built [SFML 2.6.x](https://www.sfml-dev.org/download/sfml/2.6.1/) binaries. (Must match your Compiler and OS)
 - [CMake 3.20+](https://cmake.org/download/) or newer (GUI recommended)
 
 ### For Windows
 
-- At least Windows 10
+- At least Windows 10 64-bit
 - MS Visual Studio 2019 or newer (NOT vscode), with default "**Desktop C++ Development**" bundle.
 - Please download "Visual C++ 64bit" edition of SFML; ignore others.
 - Move your unzipped `SFML-2.6.x` folder to its own home, example: `C:/SFML/SFML-2.6.1`.
@@ -29,7 +29,7 @@ pre-installed on your OS is SFML 2.6.
 
 ### For MacOS
 
-- XCode latest from AppStore (with MacOS SDK)
+- XCode 13 or newer from AppStore (with MacOS SDK)
 - Apple Developer tools. After Xcode is installed, run this in your Terminal:
 
 ```bash
