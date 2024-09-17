@@ -410,7 +410,7 @@ inline bool WsClient::replyServer(const chk::payload::BasePayload &payload) cons
     {
         return false;
     }
-#ifdef _DEBUG
+#ifndef NDEBUG
     spdlog::info("SENDING {}", payload.ShortDebugString());
 #endif // DEBUG
 
@@ -487,7 +487,7 @@ inline void WsClient::runGameLoop()
         {
             if (this->_onCaptureCallback != nullptr)
             {
-#ifdef _DEBUG
+#ifndef NDEBUG
                 spdlog::warn("RECIEVE {}", basePayload.ShortDebugString());
 #endif // DEBUG
                 this->_onCaptureCallback(basePayload.capture_payload());
