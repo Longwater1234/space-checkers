@@ -202,13 +202,13 @@ inline void WsClient::showPublicServerWindow(bool &showPublic)
 }
 
 /**
- * Fetch async public servers JSON updated list from central cloud storage
+ * Fetch updated public servers JSON list from central cloud storage (Timeout 5000ms)
  * @see libcpr official docs: https://docs.libcpr.org/advanced-usage.html
  */
 inline void WsClient::asyncFetchPublicServers()
 {
     cpr::GetCallback([this](cpr::Response r) { this->parseServerList(r); }, cpr::Url{chk::cloudfront},
-                     cpr::Timeout{2000});
+                     cpr::Timeout{5000});
 }
 
 /**
@@ -434,7 +434,7 @@ inline void WsClient::runGameLoop()
             return;
         }
     }
-    // Mama:
+    static bool hasWinner = false;
     for (const auto &msg : this->msgBuffer.getAll())
     {
         if (msg.empty())
@@ -471,8 +471,9 @@ inline void WsClient::runGameLoop()
         {
             std::scoped_lock lg{this->mut};
             this->errorMsg = basePayload.notice();
-            spdlog::error(basePayload.notice());
             this->isDead = true;
+            hasWinner = false;
+            spdlog::error(basePayload.notice());
         }
         else if (basePayload.has_move_payload())
         {
@@ -497,13 +498,17 @@ inline void WsClient::runGameLoop()
             if (this->_onWinLoseCallback != nullptr)
             {
                 this->_onWinLoseCallback(basePayload.notice());
-                this->showWinnerPopup("notice.data()");
+                this->showWinnerPopup(basePayload.notice());
+                hasWinner = true;
             }
         }
     }
-    // outside cleanup
-    std::scoped_lock lg(this->mut);
-    this->msgBuffer.clean();
+    // clang-format off
+    if(!hasWinner) {
+        std::scoped_lock lg(this->mut);
+        this->msgBuffer.clean();
+    }
+    // clang-format on
 }
 
 /**
@@ -540,14 +545,15 @@ inline void WsClient::showWinnerPopup(const std::string &notice)
     // Always center this next dialog
     ImVec2 center = ImGui::GetMainViewport()->GetCenter();
     ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2(0.5, 0.5));
-    ImGui::OpenPopup("GameOver###", ImGuiPopupFlags_NoOpenOverExistingPopup);
-    if (ImGui::BeginPopupModal("GameOver###", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+    ImGui::OpenPopup("GameOver", ImGuiPopupFlags_NoOpenOverExistingPopup);
+    if (ImGui::BeginPopupModal("GameOver", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {
         ImGui::Text(u8"%s", notice.c_str());
         ImGui::Separator();
         if (ImGui::Button("OK", ImVec2(120, 0)))
         {
             ImGui::CloseCurrentPopup();
+            this->resetAllStates();
         }
         ImGui::EndPopup();
     }

@@ -544,5 +544,4 @@ inline void OnlineGameManager::startDeathListener()
     });
 }
 
-
 } // namespace chk
