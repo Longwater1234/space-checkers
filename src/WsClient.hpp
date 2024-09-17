@@ -74,6 +74,7 @@ class WsClient final
     static void showHint(const char *tip);
     void tryConnect(std::string_view address);
     void showConnectWindow();
+    void showWinnerPopup(const std::string &notice);
     void showPublicServerWindow(bool &showPublic);
     void asyncFetchPublicServers();
     void parseServerList(const cpr::Response &response);
@@ -485,7 +486,9 @@ inline void WsClient::runGameLoop()
         {
             if (this->_onCaptureCallback != nullptr)
             {
+#ifdef _DEBUG
                 spdlog::warn("RECIEVE {}", basePayload.ShortDebugString());
+#endif // DEBUG
                 this->_onCaptureCallback(basePayload.capture_payload());
             }
         }
@@ -494,6 +497,7 @@ inline void WsClient::runGameLoop()
             if (this->_onWinLoseCallback != nullptr)
             {
                 this->_onWinLoseCallback(basePayload.notice());
+                this->showWinnerPopup("notice.data()");
             }
         }
     }
@@ -523,6 +527,27 @@ inline void WsClient::showErrorPopup()
         {
             ImGui::CloseCurrentPopup();
             this->resetAllStates();
+        }
+        ImGui::EndPopup();
+    }
+}
+
+/**
+ * Show winner/loser popup window.
+ */
+inline void WsClient::showWinnerPopup(const std::string &notice)
+{
+    // Always center this next dialog
+    ImVec2 center = ImGui::GetMainViewport()->GetCenter();
+    ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2(0.5, 0.5));
+    ImGui::OpenPopup("GameOver###", ImGuiPopupFlags_NoOpenOverExistingPopup);
+    if (ImGui::BeginPopupModal("GameOver###", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        ImGui::Text(u8"%s", notice.c_str());
+        ImGui::Separator();
+        if (ImGui::Button("OK", ImVec2(120, 0)))
+        {
+            ImGui::CloseCurrentPopup();
         }
         ImGui::EndPopup();
     }

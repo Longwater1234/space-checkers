@@ -3,7 +3,6 @@
 #include "../WsClient.hpp"
 #include "../payloads/base_payload.pb.hpp"
 #include "imgui-SFML.h"
-#include <atomic>
 
 namespace chk
 {
@@ -37,8 +36,6 @@ class OnlineGameManager final : public chk::GameManager
     std::unique_ptr<chk::WsClient> wsClient = nullptr;
     std::atomic_bool isMyTurn = false;
     std::atomic_bool gameReady = false;
-    std::mutex mut;
-    void showWinnerPopup(std::string_view notice);
     void startMoveListener();
     void startCaptureListener();
     void startDeathListener();
@@ -542,30 +539,10 @@ inline void OnlineGameManager::startDeathListener()
 
     this->wsClient->setOnWinLoseCallback([this](std::string_view notice) {
         this->updateMessage(notice);
-        this->showWinnerPopup(notice);
         this->isMyTurn = false;
         this->gameReady = false;
     });
 }
 
-/**
- * Show winner/loser popup window.
- */
-inline void OnlineGameManager::showWinnerPopup(std::string_view notice)
-{
-    // Always center this next dialog
-    ImVec2 center = ImGui::GetMainViewport()->GetCenter();
-    ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2(0.5, 0.5));
-    ImGui::OpenPopup("GameOver", ImGuiPopupFlags_NoOpenOverExistingPopup);
-    if (ImGui::BeginPopupModal("GameOver", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
-    {
-        ImGui::Text(u8"%s", notice.data());
-        ImGui::Separator();
-        if (ImGui::Button("OK", ImVec2(120, 0)))
-        {
-            ImGui::CloseCurrentPopup();
-        }
-        ImGui::EndPopup();
-    }
-}
+
 } // namespace chk
