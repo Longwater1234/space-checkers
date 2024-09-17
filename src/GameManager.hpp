@@ -56,10 +56,8 @@ class GameManager
     mutable std::string currentMsg;
     // whether match is over
     bool gameOver = false;
-    // mutex for atomic updates
+    // used for atomic updates
     std::mutex my_mutex;
-    // collection of Player's next targets (Map<HunterPieceID, CaptureTarget>)
-    std::unordered_map<short, chk::CaptureTarget> forcedMoves{};
 
     [[nodiscard]] bool boardContainsCell(const int cell_idx) const;
     [[nodiscard]] bool awayFromEdge(const int cell_idx) const;
@@ -81,6 +79,8 @@ class GameManager
     chk::PlayerPtr playerRed = nullptr;
     // second player (p2)
     chk::PlayerPtr playerBlack = nullptr;
+    // collection of Player's next targets (Map<HunterPieceID, CaptureTarget>)
+    std::unordered_map<short, chk::CaptureTarget> forcedMoves{};
 
     [[nodiscard]] const bool &isPlayerRedTurn() const;
     [[nodiscard]] short getPieceFromCell(const int cell_idx) const;

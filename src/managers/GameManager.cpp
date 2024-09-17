@@ -124,12 +124,14 @@ void GameManager::handleCapturePiece(const chk::PlayerPtr &hunter, const chk::Pl
                                      const chk::Block &targetCell)
 {
 
-    assert(!(hunter == prey) && "cannot pass the same player");
+    assert(!(*hunter == *prey) && "cannot pass the same player");
     if (this->gameOver || this->getPieceFromCell(targetCell->getIndex()) != -1)
     {
         // STOP if game over OR there's already a Piece on target cell
         return;
     }
+    bool isKingBefore = false;
+    bool isKingNow = false;
 
     bool isCaptured = false; // outside guard to verify if Capture completed
     for (const auto &[hunterPieceId, target] : this->forcedMoves)
@@ -142,11 +144,12 @@ void GameManager::handleCapturePiece(const chk::PlayerPtr &hunter, const chk::Pl
             }
             isCaptured = true;
             this->updateMessage(hunter->getName() + " has captured " + prey->getName() + "'s piece!");
-            gameMap.erase(this->sourceCell.value());                // set hunter's old location empty!
-            gameMap.erase(target.preyCellIdx);                      // set Prey's old location empty!
-            gameMap.emplace(targetCell->getIndex(), hunterPieceId); // fill in hunter new location
-            prey->losePiece(target.preyPieceId);                    // the defending player loses 1 piece
-            this->sourceCell = std::nullopt;                        // reset source cell
+            gameMap.erase(this->sourceCell.value());                           // set hunter's old location empty!
+            gameMap.erase(target.preyCellIdx);                                 // set Prey's old location empty!
+            gameMap.emplace(targetCell->getIndex(), hunterPieceId);            // fill in hunter new location
+            prey->losePiece(target.preyPieceId);                               // the defending player loses 1 piece
+            this->sourceCell = std::nullopt;                                   // reset source cell
+            isKingNow = hunter->getOwnPieces().at(hunterPieceId)->getIsKing(); // track changes for hunter piece
             break;
         }
     }
@@ -154,9 +157,13 @@ void GameManager::handleCapturePiece(const chk::PlayerPtr &hunter, const chk::Pl
     {
         return;
     }
-    // FIXME do not RUN this next line if this "hunter" piece just became KING!
-    // Check for extra opportunities NOW! (single Cell)
-    this->identifyTargets(hunter, targetCell);
+    //  Check for extra opportunities (only if hunter has NOT just became KING)
+    this->forcedMoves.clear();
+    if (isKingBefore == isKingNow)
+    {
+        GameManager::identifyTargets(hunter, targetCell);
+    }
+
     if (this->forcedMoves.empty())
     {
         // NO MORE JUMPS AVAILABLE. SWITCH TURNS to opponent
@@ -366,7 +373,7 @@ const bool &GameManager::isGameOver() const
 }
 
 /**
- * Whether the game board contains this cell, and is within playable range
+ * Whether the game board contains this cell, AND is within playable range
  * @param cell_idx Cell index
  * @return TRUE if cell on board, else FALSE
  */
@@ -407,7 +414,7 @@ void GameManager::identifyTargets(const PlayerPtr &hunter, const chk::Block &sin
         const short pieceId = this->getPieceFromCell(singleCell->getIndex());
         if (gameMap.find(singleCell->getIndex()) == gameMap.end() || !hunter->hasThisPiece(pieceId))
         {
-            // this CELL is not usable
+            // this CELL is not usable, OR piece not OWNED by hunter
             return;
         }
         this->collectFrontLHS(hunter, singleCell);
@@ -427,7 +434,7 @@ void GameManager::identifyTargets(const PlayerPtr &hunter, const chk::Block &sin
             const short pieceId = this->getPieceFromCell(cell_ptr->getIndex());
             if (gameMap.find(cell_ptr->getIndex()) == gameMap.end() || !hunter->hasThisPiece(pieceId))
             {
-                // this CELL is not usable, OR piece not OWNED by hunter
+                // same reason as previous code-block
                 continue;
             }
             this->collectFrontLHS(hunter, cell_ptr);
