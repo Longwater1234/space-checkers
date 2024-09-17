@@ -138,6 +138,7 @@ void GameManager::handleCapturePiece(const chk::PlayerPtr &hunter, const chk::Pl
     {
         if (target.hunterNextCell == targetCell->getIndex())
         {
+            isKingBefore = hunter->getOwnPieces().at(hunterPieceId)->getIsKing(); // before capture
             if (!hunter->captureEnemyWith(hunterPieceId, targetCell->getPos()))
             {
                 return;
@@ -149,7 +150,7 @@ void GameManager::handleCapturePiece(const chk::PlayerPtr &hunter, const chk::Pl
             gameMap.emplace(targetCell->getIndex(), hunterPieceId);            // fill in hunter new location
             prey->losePiece(target.preyPieceId);                               // the defending player loses 1 piece
             this->sourceCell = std::nullopt;                                   // reset source cell
-            isKingNow = hunter->getOwnPieces().at(hunterPieceId)->getIsKing(); // track changes for hunter piece
+            isKingNow = hunter->getOwnPieces().at(hunterPieceId)->getIsKing(); // track changes after capture
             break;
         }
     }

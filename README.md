@@ -1,6 +1,6 @@
 # space - checkers
 
-Online Multiplayer Checkers game in C++ built with SFML 2.6 and ixWebsockets. With very minimal dependencies (no Boost required), and
+Online Multiplayer Checkers game in C++ built with SFML 2.6, Protobuf and ixWebsockets. With very minimal dependencies (no Boost required), and
 a simple build process. All dependencies are auto-downloaded and built for you using **CPM.cmake** (similar to CMake FetchContent). The only dependency you need
 pre-installed on your OS is SFML 2.6.
 

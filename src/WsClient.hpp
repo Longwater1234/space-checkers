@@ -504,7 +504,7 @@ inline void WsClient::runGameLoop()
         }
     }
     // clang-format off
-    if(!hasWinner) {
+    if (!hasWinner) {
         std::scoped_lock lg(this->mut);
         this->msgBuffer.clean();
     }
