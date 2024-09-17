@@ -434,7 +434,7 @@ inline void WsClient::runGameLoop()
             return;
         }
     }
-
+    // Mama:
     for (const auto &msg : this->msgBuffer.getAll())
     {
         if (msg.empty())
