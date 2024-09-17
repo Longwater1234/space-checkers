@@ -70,11 +70,11 @@ class WsClient final
     std::mutex mut;
     std::unique_ptr<ix::WebSocket> webSocketPtr = nullptr; // our Websocket object
     void showErrorPopup();                                 // whenver there is an error (from server)
-    void showWinnerPopup(std::string_view notice);         // when server notifies about winner
     void runGameLoop();
     static void showHint(const char *tip);
     void tryConnect(std::string_view address);
     void showConnectWindow();
+    void showWinnerPopup(const std::string &notice);
     void showPublicServerWindow(bool &showPublic);
     void asyncFetchPublicServers();
     void parseServerList(const cpr::Response &response);
@@ -202,18 +202,18 @@ inline void WsClient::showPublicServerWindow(bool &showPublic)
 }
 
 /**
- * Fetch async public servers JSON updated list from central cloud storage
+ * Fetch updated public servers JSON list from central cloud storage (Timeout 5000ms)
  * @see libcpr official docs: https://docs.libcpr.org/advanced-usage.html
  */
 inline void WsClient::asyncFetchPublicServers()
 {
     cpr::GetCallback([this](cpr::Response r) { this->parseServerList(r); }, cpr::Url{chk::cloudfront},
-                     cpr::Timeout{2000});
+                     cpr::Timeout{5000});
 }
 
 /**
  * Parse the response of public server list and display them
- * @param response From the public request
+ * @param response From the previous request
  */
 inline void WsClient::parseServerList(const cpr::Response &response)
 {
@@ -232,6 +232,7 @@ inline void WsClient::parseServerList(const cpr::Response &response)
     {
         simdjson::dom::array jsonArray = jsonParser.parse(simdjson::padded_string_view(response.text));
         this->publicServers.clear();
+        this->publicServers.reserve(jsonArray.size());
         for (const simdjson::dom::object &elem : jsonArray)
         {
             chk::ServerLocation location{};
@@ -427,7 +428,7 @@ inline void WsClient::runGameLoop()
     {
         return;
     }
-
+    static bool hasWinner = false;
     for (const auto &msg : this->msgBuffer.getAll())
     {
         if (msg.empty())
@@ -464,8 +465,9 @@ inline void WsClient::runGameLoop()
         {
             std::scoped_lock lg{this->mut};
             this->errorMsg = basePayload.notice();
-            spdlog::error(basePayload.notice());
             this->isDead = true;
+            hasWinner = false;
+            spdlog::error(basePayload.notice());
         }
         else if (basePayload.has_move_payload())
         {
@@ -479,7 +481,9 @@ inline void WsClient::runGameLoop()
         {
             if (this->_onCaptureCallback != nullptr)
             {
+#ifdef _DEBUG
                 spdlog::warn("RECIEVE {}", basePayload.ShortDebugString());
+#endif // DEBUG
                 this->_onCaptureCallback(basePayload.capture_payload());
             }
         }
@@ -489,13 +493,16 @@ inline void WsClient::runGameLoop()
             {
                 this->_onWinLoseCallback(basePayload.notice());
                 this->showWinnerPopup(basePayload.notice());
-                break;
+                hasWinner = true;
             }
         }
     }
-    // outside cleanup
-    std::scoped_lock lg(this->mut);
-    this->msgBuffer.clean();
+    // clang-format off
+    if (!hasWinner) {
+        std::scoped_lock lg(this->mut);
+        this->msgBuffer.clean();
+    }
+    // clang-format on
 }
 
 /**
@@ -527,15 +534,15 @@ inline void WsClient::showErrorPopup()
 /**
  * Show winner/loser popup window.
  */
-inline void WsClient::showWinnerPopup(std::string_view notice)
+inline void WsClient::showWinnerPopup(const std::string &notice)
 {
     // Always center this next dialog
     ImVec2 center = ImGui::GetMainViewport()->GetCenter();
     ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2(0.5, 0.5));
-    ImGui::OpenPopup("GameOver", ImGuiPopupFlags_AnyPopupLevel);
+    ImGui::OpenPopup("GameOver", ImGuiPopupFlags_NoOpenOverExistingPopup);
     if (ImGui::BeginPopupModal("GameOver", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {
-        ImGui::Text(u8"%s", notice.data());
+        ImGui::Text(u8"%s", notice.c_str());
         ImGui::Separator();
         if (ImGui::Button("OK", ImVec2(120, 0)))
         {
