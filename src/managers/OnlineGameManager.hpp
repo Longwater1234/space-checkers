@@ -60,14 +60,14 @@ inline OnlineGameManager::OnlineGameManager(sf::RenderWindow *windowPtr)
                 this->myTeam = chk::PlayerType::PLAYER_RED;
                 this->isMyTurn = true;
                 spdlog::info("I AM PLAYER RED");
-                this->updateMessage(u8"你将扮演 RED(红色)跳棋");
+                this->updateMessage(u8"你将扮演 RED(红色)跳棋。等待对手。。。");
             }
             else
             {
                 this->myTeam = chk::PlayerType::PLAYER_BLACK;
                 this->isMyTurn = false;
                 spdlog::info("I AM PLAYER BLACK");
-                this->updateMessage(u8"你将扮演 BLACK (黑色)跳棋");
+                this->updateMessage(u8"你将扮演 BLACK (黑色)跳棋。等待对手。。。");
             }
             // this->updateMessage(notice);
         });
