@@ -221,7 +221,7 @@ inline void WsClient::parseServerList(const cpr::Response &response)
     if (statusCode != 200)
     {
         spdlog::error("http request failed. Reason {}", response.error.message);
-        this->errorMsg = response.error.message;
+        this->errorMsg = "httpRequest error: " + response.error.message;
         this->isDead = true;
         return;
     }
