@@ -2,7 +2,8 @@
 
 Offline & Online Multiplayer Checkers game in C++ built with SFML 2.6, Protobuf and ixWebsockets. With very minimal dependencies
 and a simple build process. All dependencies are auto-downloaded (as `.tar.gz`) and built for you using CMake FetchContent.
-This game can connect to both Private and Public game servers. The Server for this game is on a separate GitHubrepo, [available here](#). 
+
+This game can connect to both Private and Public game servers. The Server project for this game is on a separate git repo, [available here](#). 
 The only dependency you need pre-installed on your OS is SFML 2.6.x (or newer).
 
 ### Main Libraries Used
