@@ -69,7 +69,8 @@ inline OnlineGameManager::OnlineGameManager(sf::RenderWindow *windowPtr)
                 spdlog::info("I AM PLAYER BLACK");
                 this->updateMessage(u8"你将扮演 BLACK (黑色)跳棋。等待对手。。。");
             }
-            // this->updateMessage(notice);
+            this->updateMessage(notice);
+            this->startDeathListener();
         });
 }
 
@@ -137,7 +138,6 @@ inline void chk::OnlineGameManager::createAllPieces()
         pieceList.clear(); // safe! no longer used.
         this->startMoveListener();
         this->startCaptureListener();
-        this->startDeathListener();
     });
 }
 

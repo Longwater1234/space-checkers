@@ -221,7 +221,7 @@ inline void WsClient::parseServerList(const cpr::Response &response)
     if (statusCode != 200)
     {
         spdlog::error("http request failed. Reason {}", response.error.message);
-        this->errorMsg = response.error.message;
+        this->errorMsg = "httpRequest error: " + response.error.message;
         this->isDead = true;
         return;
     }
@@ -281,7 +281,7 @@ inline void WsClient::runMainLoop()
     // some error happened 🙁
     if (this->isDead) {
        if (this->_onDeathCallback != nullptr) {
-        _onDeathCallback(this->errorMsg);
+           _onDeathCallback(this->errorMsg);
        }
         this->showErrorPopup();
     }
@@ -315,13 +315,13 @@ inline void WsClient::tryConnect(std::string_view address)
             spdlog::info("Connection established");
             this->isConnected = true;
         }
-        else if (msg->type == ix::WebSocketMessageType::Close)
-        {
-            std::scoped_lock lg{this->mut};
-            this->errorMsg = "Error: 已与服务器断开连接!" + msg->str;
-            spdlog::error(this->errorMsg);
-            this->isDead = true;
-        }
+        /*   else if (msg->type == ix::WebSocketMessageType::Close)
+           {
+               std::scoped_lock lg{this->mut};
+               this->errorMsg = "Error: disconnected from Server!" + msg->str;
+               spdlog::error(this->errorMsg);
+               this->isDead = true;
+           }*/
         else if (msg->type == ix::WebSocketMessageType::Error)
         {
             std::scoped_lock lg{this->mut};
@@ -468,6 +468,7 @@ inline void WsClient::runGameLoop()
             this->isDead = true;
             hasWinner = false;
             spdlog::error(basePayload.notice());
+            //  this->_onDeathCallback(basePayload.notice());
         }
         else if (basePayload.has_move_payload())
         {

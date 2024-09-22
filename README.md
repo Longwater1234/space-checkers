@@ -1,7 +1,7 @@
 # space - checkers
 
-Online Multiplayer Checkers game in C++ built with SFML 2.6, Protobuf and ixWebsockets. With very minimal dependencies (no Boost required), and
-a simple build process. All dependencies are auto-downloaded and built for you using **CPM.cmake** (similar to CMake FetchContent). The only dependency you need
+Online Multiplayer Checkers game in C++ built with SFML 2.6, Protobuf and ixWebsockets. With very minimal dependencies and
+a simple build process. All dependencies are auto-downloaded and built for you using CMake FetchContent, as compressed `.tar.gz`. The only dependency you need
 pre-installed on your OS is SFML 2.6.
 
 ### Main Libraries Used
@@ -10,8 +10,8 @@ pre-installed on your OS is SFML 2.6.
 - imGui-SFML
 - ixWebsockets
 - spdlog
-- Google Protobuf 27.2
-- simdjson
+- Google Protobuf 27.2 (Used entirely during gameplay)
+- simdjson (Used once, for parsing list of public servers)
 
 ## Requirements for Building
 
@@ -39,8 +39,15 @@ pre-installed on your OS is SFML 2.6.
 
 ### For Linux
 
-- Use your OS package manager (`apt-get` or `yum`) to install SFML 2.6 or newer.
+- Use your OS package manager (`apt` or `yum`) to install SFML 2.6 or newer.
 - Alternatively, you may build SFML 2.6 from source, see [official docs SFML](https://www.sfml-dev.org/tutorials/2.6/start-linux.php).
+- You will also need to download and install latest **OpenSSL Dev** libs. See example on Ubuntu / Debian below.
+
+```bash
+  sudo apt install libsfml-dev
+  sudo apt install libssl-dev
+```
+- Luckily, Windows and macOS come with their native SSL libs built-in, so nothing more to do :-)
 
 ## Building Instructions
 
@@ -49,4 +56,3 @@ Please see [BUILDING.md](BUILDING.md) for detailed instructions.
 ### License
 
 [MIT License](LICENSE) (c) 2024, Davis T.
-
