@@ -39,8 +39,15 @@ pre-installed on your OS is SFML 2.6.
 
 ### For Linux
 
-- Use your OS package manager (`apt-get` or `yum`) to install SFML 2.6 or newer.
+- Use your OS package manager (`apt` or `yum`) to install SFML 2.6 or newer.
 - Alternatively, you may build SFML 2.6 from source, see [official docs SFML](https://www.sfml-dev.org/tutorials/2.6/start-linux.php).
+- You will also need to download and install latest **OpenSSL Dev** libs. See example on Ubuntu / Debian below.
+
+```bash
+  sudo apt install libsfml-dev
+  sudo apt install libssl-dev
+```
+- Luckily, Windows and macOS come with their native SSL libs built-in, so this game will utilize them for HTTPS requests.
 
 ## Building Instructions
 
@@ -49,4 +56,3 @@ Please see [BUILDING.md](BUILDING.md) for detailed instructions.
 ### License
 
 [MIT License](LICENSE) (c) 2024, Davis T.
-
