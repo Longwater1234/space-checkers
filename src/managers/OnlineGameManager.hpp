@@ -68,6 +68,7 @@ inline OnlineGameManager::OnlineGameManager(sf::RenderWindow *windowPtr)
                 spdlog::info("I AM PLAYER BLACK");
             }
             this->updateMessage(notice);
+            this->startDeathListener();
         });
 }
 
@@ -135,7 +136,6 @@ inline void chk::OnlineGameManager::createAllPieces()
         pieceList.clear(); // safe! no longer used.
         this->startMoveListener();
         this->startCaptureListener();
-        this->startDeathListener();
     });
 }
 
