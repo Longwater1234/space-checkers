@@ -1,7 +1,7 @@
 # space - checkers
 
 Offline & Online Multiplayer Checkers game in C++ built with SFML 2.6, Protobuf and ixWebsockets. With very minimal dependencies
-and a simple build process. All dependencies are auto-downloaded (as `.tar.gz`) and built for you using CMake FetchContent.
+and a simple build process. All dependencies are auto-downloaded (as `.tar.gz`) and built for you using [CPM.cmake](https://github.com/cpm-cmake/CPM.cmake).
 
 This game can connect to both Private and Public game servers. The Server project for this game is on a separate git repo, [available here](#). 
 The only dependency you need pre-installed on your OS is SFML 2.6.x (or newer).
@@ -23,7 +23,7 @@ The only dependency you need pre-installed on your OS is SFML 2.6.x (or newer).
 
 ### For Windows
 
-- At least Windows 10 64-bit
+- At least Windows 10
 - MS Visual Studio 2019 or newer (NOT vscode), with "**Desktop C++ Development**" bundle.
 - Please download "Visual C++ 64bit" edition of SFML; ignore others.
 - Move your unzipped `SFML-2.6.x` folder to its own home, example: `C:/SFML/SFML-2.6.1`.
@@ -40,8 +40,9 @@ The only dependency you need pre-installed on your OS is SFML 2.6.x (or newer).
   sudo xcode-select --install
 ```
 
-### For Linux
+### For Linux Destkop
 
+- Latest display drivers
 - Use your OS package manager (`apt` or `yum`) to install SFML 2.6 or newer.
 - Alternatively, you may build SFML 2.6 from source, see [official SFML docs](https://www.sfml-dev.org/tutorials/2.6/start-linux.php).
 - You are required to install latest **OpenSSL Dev** library. See example on Ubuntu / Debian below.
