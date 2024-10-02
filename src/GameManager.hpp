@@ -56,20 +56,18 @@ class GameManager
     mutable std::string currentMsg;
     // whether match is over
     bool gameOver = false;
-    // mutex for atomic updates
+    // used for atomic updates
     std::mutex my_mutex;
-    // collection of my next targets (Map<HunterPieceID, CaptureTarget>)
-    std::unordered_map<short, chk::CaptureTarget> forcedMoves{};
 
-    [[nodiscard]] bool boardContainsCell(const int &cell_idx) const;
-    [[nodiscard]] bool awayFromEdge(const int &cell_idx) const;
-    void collectFrontRHS(const chk::PlayerPtr &hunter, chk::Cell *cell_ptr);
-    void collectFrontLHS(const chk::PlayerPtr &hunter, chk::Cell *cell_ptr);
-    void collectBehindRHS(const chk::PlayerPtr &hunter, chk::Cell *cell_ptr);
-    void collectBehindLHS(const chk::PlayerPtr &hunter, chk::Cell *cell_ptr);
+    [[nodiscard]] bool boardContainsCell(const int cell_idx) const;
+    [[nodiscard]] bool awayFromEdge(const int cell_idx) const;
+    void collectFrontRHS(const chk::PlayerPtr &hunter, const chk::Block &cell_ptr);
+    void collectFrontLHS(const chk::PlayerPtr &hunter, const chk::Block &cell_ptr);
+    void collectBehindRHS(const chk::PlayerPtr &hunter, const chk::Block &cell_ptr);
+    void collectBehindLHS(const chk::PlayerPtr &hunter, const chk::Block &cell_ptr);
 
   protected:
-    // map of cell_index -> piece_id
+    // gameBoard: map of cell_index -> piece_id
     std::map<int, short> gameMap;
     // main window
     sf::RenderWindow *window = nullptr;
@@ -81,15 +79,17 @@ class GameManager
     chk::PlayerPtr playerRed = nullptr;
     // second player (p2)
     chk::PlayerPtr playerBlack = nullptr;
+    // collection of Player's next targets (Map<HunterPieceID, CaptureTarget>)
+    std::unordered_map<short, chk::CaptureTarget> forcedMoves{};
 
     [[nodiscard]] const bool &isPlayerRedTurn() const;
-    [[nodiscard]] short getPieceFromCell(int cell_idx);
+    [[nodiscard]] short getPieceFromCell(const int cell_idx) const;
     [[nodiscard]] const std::vector<chk::Block> &getBlockList() const;
-    [[nodiscard]] bool hasPendingCaptures() const;
+    [[nodiscard]] bool isHunterActive() const;
     [[nodiscard]] const bool &isGameOver() const;
     void setSourceCell(int src_cell);
     void doCleanup();
-    void identifyTargets(const chk::PlayerPtr &hunter, chk::Cell *singleCell = nullptr);
+    void identifyTargets(const chk::PlayerPtr &hunter, const chk::Block &singleCell = nullptr);
     virtual void handleMovePiece(const chk::PlayerPtr &player, const chk::PlayerPtr &opponent, const Block &destCell,
                                  const short &currentPieceId);
     virtual void handleCapturePiece(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,

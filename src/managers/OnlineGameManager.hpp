@@ -3,7 +3,6 @@
 #include "../WsClient.hpp"
 #include "../payloads/base_payload.pb.hpp"
 #include "imgui-SFML.h"
-#include <atomic>
 
 namespace chk
 {
@@ -17,9 +16,9 @@ class OnlineGameManager final : public chk::GameManager
   public:
     explicit OnlineGameManager(sf::RenderWindow *windowPtr);
     OnlineGameManager() = delete;
-    void createAllPieces() override;
 
     // Inherited via GameManager
+    void createAllPieces() override;
     void handleEvents(chk::CircularBuffer<short> &circularBuffer) override;
     void drawBoard() override;
 
@@ -37,7 +36,6 @@ class OnlineGameManager final : public chk::GameManager
     std::unique_ptr<chk::WsClient> wsClient = nullptr;
     std::atomic_bool isMyTurn = false;
     std::atomic_bool gameReady = false;
-    std::mutex mut;
     void startMoveListener();
     void startCaptureListener();
     void startDeathListener();
@@ -62,16 +60,17 @@ inline OnlineGameManager::OnlineGameManager(sf::RenderWindow *windowPtr)
                 this->myTeam = chk::PlayerType::PLAYER_RED;
                 this->isMyTurn = true;
                 spdlog::info("I AM PLAYER RED");
-                this->updateMessage(u8"你将扮演 RED(红色)跳棋");
+                this->updateMessage(u8"你将扮演 RED(红色)跳棋。等待对手。。。");
             }
             else
             {
                 this->myTeam = chk::PlayerType::PLAYER_BLACK;
                 this->isMyTurn = false;
                 spdlog::info("I AM PLAYER BLACK");
-                this->updateMessage(u8"你将扮演 BLACK (黑色)跳棋");
+                this->updateMessage(u8"你将扮演 BLACK (黑色)跳棋。等待对手。。。");
             }
-            // this->updateMessage(notice);
+            this->updateMessage(notice);
+            this->startDeathListener();
         });
 }
 
@@ -139,7 +138,6 @@ inline void chk::OnlineGameManager::createAllPieces()
         pieceList.clear(); // safe! no longer used.
         this->startMoveListener();
         this->startCaptureListener();
-        this->startDeathListener();
     });
 }
 
@@ -188,205 +186,10 @@ inline void OnlineGameManager::drawBoard()
 }
 
 /**
- * Move the selected piece to clicked cell, then update the gameMap and notify Server
- * @param player current player
- * @param opponent opposing player
- * @param destCell target cell
- * @param currentPieceId the selected PieceId
- */
-inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, const chk::PlayerPtr &opponent,
-                                               const Block &destCell, const short &currentPieceId)
-{
-    // VERIFY if move is successful
-    const bool success = player->movePiece(currentPieceId, destCell->getPos());
-    if (!success)
-    {
-        return;
-    }
-    int sourceCellCopy = this->sourceCell.value();
-    gameMap.erase(this->sourceCell.value());               // set old location empty!
-    gameMap.emplace(destCell->getIndex(), currentPieceId); // fill in the new location
-    this->sourceCell = std::nullopt;                       // reset source cell
-    this->identifyTargets(opponent);                       // check  opportunities for Opponent
-
-    if (!this->getForcedMoves().empty())
-    {
-        spdlog::info("YOU ARE IN DANGER ");
-    }
-
-    // prepare to send to SERVER
-    auto *newDestCell = new chk::payload::MovePayload_Detination();
-    newDestCell->set_cell_index(destCell->getIndex());
-    newDestCell->set_x(destCell->getPos().x);
-    newDestCell->set_y(destCell->getPos().y);
-
-    // create Movepayload Protobuf
-    auto *movePayload = new chk::payload::MovePayload();
-    movePayload->set_source_cell(sourceCellCopy);
-    movePayload->set_piece_id(currentPieceId);
-    movePayload->set_from_team(TeamColor::TEAM_RED);
-    if (this->myTeam == chk::PlayerType::PLAYER_BLACK)
-    {
-        movePayload->set_from_team(TeamColor::TEAM_BLACK);
-    }
-    movePayload->set_allocated_destination(newDestCell);
-
-    // finally, create Base request
-    chk::payload::BasePayload requestBody;
-    requestBody.set_allocated_move_payload(movePayload);
-    if (!this->wsClient->replyServer(requestBody))
-    {
-        spdlog::error("failed to send message to Server");
-        return;
-    }
-
-    this->isMyTurn = !this->isMyTurn; // toggle player turns
-    // this->updateMessage("You have moved to " + std::to_string(destCell->getIndex()) + ". It's " + opponent->getName()
-    // +
-    //                     "'s turn.");
-    this->updateMessage("你已经搬到 " + std::to_string(destCell->getIndex()) + ". 轮到 " + opponent->getName() + " 了");
-}
-
-/**
- * Perform capturing of "prey's" pieces by me (the "hunter"), then update gameMap, and notify Server
- * @param hunter the attacking player
- * @param prey the defensive player
- * @param targetCell the destination of hunter
- */
-inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,
-                                                  const chk::Block &targetCell)
-{
-    // using namespace chk::payload;
-    // call base method
-    if (!this->isMyTurn || this->getPieceFromCell(targetCell->getIndex()) != -1)
-    {
-        // STOP if not my turn OR there's already a Piece on target cell
-        return;
-    }
-
-    int copyHunterPiece = 0; // hunter pieceId
-    int copySrcCell = 0;     // hunter src cell
-    int copyPreyPieceId = 0;
-    int copyPreyCell = 0;
-    for (const auto &[hunterPieceId, target] : this->getForcedMoves())
-    {
-        if (target.hunterNextCell == targetCell->getIndex())
-        {
-            if (!hunter->captureEnemyWith(hunterPieceId, targetCell->getPos()))
-            {
-                return;
-            }
-            // this->updateMessage("You have captured " + prey->getName() + "'s piece!");
-            this->updateMessage("你拍到了 " + prey->getName() + "格子碎片!");
-            copySrcCell = this->sourceCell.value();
-            gameMap.erase(this->sourceCell.value());                // set hunter's old location empty!
-            gameMap.erase(target.preyCellIdx);                      // set Prey's old location empty!
-            gameMap.emplace(targetCell->getIndex(), hunterPieceId); // fill in hunter new location
-            prey->losePiece(target.preyPieceId);                    // the defending player loses 1 piece
-            this->sourceCell = std::nullopt;                        // reset source cell
-            // create copies for sending to server
-            copyHunterPiece = hunterPieceId;
-            copyPreyPieceId = target.preyPieceId;
-            copyPreyCell = target.preyCellIdx;
-            break;
-        }
-    }
-
-    // prey details
-    auto *details = new chk::payload::CapturePayload_TargetDetails();
-    details->set_hunter_src_cell(copySrcCell);
-    details->set_prey_cell_idx(copyPreyCell);
-    details->set_prey_piece_id(copyPreyPieceId);
-
-    // hunter landing cell
-    auto *hunterDestCell = new chk::payload::CapturePayload_HunterDestination();
-    hunterDestCell->set_cell_index(targetCell->getIndex());
-    hunterDestCell->set_x(targetCell->getPos().x);
-    hunterDestCell->set_y(targetCell->getPos().y);
-
-    // prepare to send to server:
-    auto *capturePayload = new chk::payload::CapturePayload();
-    capturePayload->set_hunter_piece_id(copyHunterPiece);
-    capturePayload->set_allocated_details(details);
-    capturePayload->set_allocated_destination(hunterDestCell);
-    capturePayload->set_from_team(TeamColor::TEAM_RED);
-    if (this->myTeam == chk::PlayerType::PLAYER_BLACK)
-    {
-        capturePayload->set_from_team(TeamColor::TEAM_BLACK);
-    }
-
-    // finally create basePayload
-    chk::payload::BasePayload basePayload;
-    basePayload.set_allocated_capture_payload(capturePayload);
-    if (!this->wsClient->replyServer(basePayload))
-    {
-        spdlog::error("failed to send message to Server");
-        return;
-    }
-
-    // Check for extra opportunities (for myself)!
-    GameManager::identifyTargets(hunter, targetCell.get());
-    if (this->getForcedMoves().empty())
-    {
-        // NO MORE JUMPS AVAILABLE. SWITCH TURNS to opponent
-        this->identifyTargets(prey);
-        this->isMyTurn = !this->isMyTurn;
-    }
-    else
-    {
-        spdlog::info("WE HAVE EXTRA TARGETS TO HUNT");
-    }
-}
-
-/**
- * When current player taps any playable cell.
- * @param hunter currentPlayer
- * @param prey the opposing player
- * @param buffer Temporary store for clicked Pieces
- * @param cell Tapped cell
- */
-inline void OnlineGameManager::handleCellTap(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,
-                                             chk::CircularBuffer<short> &buffer, const chk::Block &cell)
-{
-    if (!this->gameReady || !this->isMyTurn)
-    {
-        return;
-    }
-    // CHECK IF this cell has a Piece
-    const short pieceId = this->getPieceFromCell(cell->getIndex());
-    if (pieceId != -1)
-    {
-        // YES, it has one! CHECK IF THERE IS ANY PENDING "forced jumps"
-        if (!this->getForcedMoves().empty())
-        {
-            this->showForcedMoves(hunter, cell);
-            return;
-        }
-        // OTHERWISE, store it in buffer (for a simple move next)!
-        buffer.addItem(pieceId);
-        this->setSourceCell(cell->getIndex());
-    }
-    else
-    {
-        // Cell is Empty! Let's move a piece (from buffer) here!
-        if (!buffer.isEmpty())
-        {
-            const short movablePieceId = buffer.getTop();
-            if (!hunter->hasThisPiece(movablePieceId))
-            {
-                return;
-            }
-            this->handleMovePiece(hunter, prey, cell, movablePieceId);
-            buffer.clean();
-        }
-    }
-}
-
-/**
  * This will be handling all UI events.
  * @param circularBuffer stores the currently selected piece
  */
-inline void OnlineGameManager::handleEvents(chk::CircularBuffer<short> &circularBuffer)
+inline void OnlineGameManager::handleEvents(chk::CircularBuffer<short> &buffer)
 {
     for (auto event = sf::Event{}; window->pollEvent(event);)
     {
@@ -411,20 +214,232 @@ inline void OnlineGameManager::handleEvents(chk::CircularBuffer<short> &circular
                     // Me
                     const auto &mine = myTeam == chk::PlayerType::PLAYER_RED ? this->playerRed : this->playerBlack;
                     const auto &opponent = myTeam == chk::PlayerType::PLAYER_RED ? this->playerBlack : this->playerRed;
-
-                    if (this->hasPendingCaptures())
-                    {
-                        this->handleCapturePiece(mine, opponent, cell);
-                        GameManager::updateMatchStatus(mine, opponent);
-                        circularBuffer.clean();
-                    }
-                    else
-                    {
-                        this->handleCellTap(mine, opponent, circularBuffer, cell);
-                    }
-                    // END inner loop
+                    this->handleCellTap(mine, opponent, buffer, cell);
                     break;
                 }
+            }
+        }
+    }
+}
+
+/**
+ * Move the selected piece to clicked cell, then update the gameMap and notify Server
+ * @param player current player
+ * @param opponent opposing player
+ * @param destCell target cell
+ * @param currentPieceId the selected PieceId
+ */
+inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, const chk::PlayerPtr &opponent,
+                                               const Block &destCell, const short &currentPieceId)
+{
+    // VERIFY if move is successful
+    const bool success = player->movePiece(currentPieceId, destCell->getPos());
+    if (!success)
+    {
+        std::cout << "move not success " << std::endl;
+        return;
+    }
+    int copySrcCell = this->sourceCell.value();
+    gameMap.erase(this->sourceCell.value());               // set old location empty!
+    gameMap.emplace(destCell->getIndex(), currentPieceId); // fill in the new location
+    this->sourceCell = std::nullopt;                       // reset source cell
+    chk::GameManager::identifyTargets(opponent);           // check  opportunities for Opponent
+
+    if (!this->getForcedMoves().empty())
+    {
+        spdlog::warn("YOU ARE IN DANGER ");
+    }
+
+    // prepare to send to SERVER
+    // (must use raw ptr for embedded protobuf)
+    auto *newDestCell = new chk::payload::MovePayload_Detination();
+    newDestCell->set_cell_index(destCell->getIndex());
+    newDestCell->set_x(destCell->getPos().x);
+    newDestCell->set_y(destCell->getPos().y);
+
+    // create Movepayload Protobuf
+    auto *movePayload = new chk::payload::MovePayload();
+    movePayload->set_source_cell(copySrcCell);
+    movePayload->set_piece_id(currentPieceId);
+    movePayload->set_from_team(TeamColor::TEAM_RED);
+    if (this->myTeam == chk::PlayerType::PLAYER_BLACK)
+    {
+        movePayload->set_from_team(TeamColor::TEAM_BLACK);
+    }
+    movePayload->set_allocated_destination(newDestCell);
+
+    // finally, create BasePayload
+    chk::payload::BasePayload requestBody;
+    requestBody.set_allocated_move_payload(movePayload);
+    if (!this->wsClient->replyServer(requestBody))
+    {
+        spdlog::error("failed to send message to Server");
+        return;
+    }
+
+    this->isMyTurn = !this->isMyTurn; // toggle player turns
+    // this->updateMessage("You have moved to " + std::to_string(destCell->getIndex()) + ". It's " + opponent->getName()
+    // +
+    //                     "'s turn.");
+    this->updateMessage("你已经搬到 " + std::to_string(destCell->getIndex()) + ". 轮到 " + opponent->getName() + " 了");
+}
+
+/**
+ * Perform capturing of "prey's" pieces by me (the "hunter"), then update gameMap, and notify Server
+ * @param hunter the attacking player
+ * @param prey the defensive player
+ * @param targetCell the destination of hunter
+ */
+inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,
+                                                  const chk::Block &targetCell)
+{
+    if (!this->isMyTurn || GameManager::getPieceFromCell(targetCell->getIndex()) != -1)
+    {
+        // STOP if not my turn OR there's already a Piece on target cell
+        return;
+    }
+
+    int copyHunterPiece = 0; // hunter pieceId
+    int copySrcCell = 0;     // hunter src cell
+    int copyPreyPieceId = 0;
+    int copyPreyCell = 0;
+    bool isKingBefore = false;
+    bool isKingNow = false;
+
+    bool isCaptured = false; // external guard to verify if Capture completed
+
+    for (const auto &[hunterPieceId, target] : this->getForcedMoves())
+    {
+        if (target.hunterNextCell == targetCell->getIndex())
+        {
+            isKingBefore = hunter->getOwnPieces().at(hunterPieceId)->getIsKing();
+            if (!hunter->captureEnemyWith(hunterPieceId, targetCell->getPos()))
+            {
+                return;
+            }
+            isCaptured = true; // verified
+            this->updateMessage("你抓住了 " + prey->getName() + "的棋子!");
+            copySrcCell = this->sourceCell.value();
+            gameMap.erase(this->sourceCell.value());                           // set hunter's old location empty!
+            gameMap.erase(target.preyCellIdx);                                 // set Prey's old location empty!
+            gameMap.emplace(targetCell->getIndex(), hunterPieceId);            // fill in hunter new location
+            prey->losePiece(target.preyPieceId);                               // the defending player loses 1 piece
+            this->sourceCell = std::nullopt;                                   // reset source cell
+            isKingNow = hunter->getOwnPieces().at(hunterPieceId)->getIsKing(); // track changes for hunter piece
+            copyHunterPiece = hunterPieceId;
+            copyPreyPieceId = target.preyPieceId;
+            copyPreyCell = target.preyCellIdx;
+            break;
+        }
+    }
+    if (!isCaptured)
+    {
+        return;
+    }
+    // prey details (must use raw pointers for embedded protobuf)
+    auto *details = new chk::payload::CapturePayload_TargetDetails();
+    details->set_hunter_src_cell(copySrcCell);
+    details->set_prey_cell_idx(copyPreyCell);
+    details->set_prey_piece_id(copyPreyPieceId);
+
+    // hunter landing cell
+    auto *hunterDestCell = new chk::payload::CapturePayload_HunterDestination();
+    hunterDestCell->set_cell_index(targetCell->getIndex());
+    hunterDestCell->set_x(targetCell->getPos().x);
+    hunterDestCell->set_y(targetCell->getPos().y);
+
+    // prepare to send to server:
+    auto *capturePayload = new chk::payload::CapturePayload();
+    capturePayload->set_hunter_piece_id(copyHunterPiece);
+    capturePayload->set_allocated_details(details);
+    capturePayload->set_allocated_destination(hunterDestCell);
+    capturePayload->set_from_team(TeamColor::TEAM_RED);
+    if (this->myTeam == chk::PlayerType::PLAYER_BLACK)
+    {
+        capturePayload->set_from_team(TeamColor::TEAM_BLACK);
+    }
+
+    // ATTACH all children to root
+    chk::payload::BasePayload basePayload;
+    basePayload.set_allocated_capture_payload(capturePayload);
+    if (!this->wsClient->replyServer(basePayload))
+    {
+        spdlog::error("failed to send message to Server");
+        return;
+    }
+
+    // Check for extra opportunities (for myself, single cell)! Skip if I just became King recently.
+    this->forcedMoves.clear();
+    if (isKingBefore == isKingNow)
+    {
+        GameManager::identifyTargets(hunter, targetCell);
+    }
+
+    if (this->getForcedMoves().empty())
+    {
+        // NO MORE JUMPS AVAILABLE. SWITCH TURNS to opponent
+        chk::GameManager::identifyTargets(prey);
+        this->isMyTurn = !this->isMyTurn;
+    }
+    else
+    {
+        spdlog::info("WE HAVE EXTRA TARGETS TO HUNT");
+    }
+}
+
+/**
+ * When current player taps any playable cell.
+ * @param hunter currentPlayer
+ * @param prey the opposing player
+ * @param buffer Temporary store for clicked Pieces
+ * @param cell Tapped cell
+ */
+inline void OnlineGameManager::handleCellTap(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,
+                                             chk::CircularBuffer<short> &buffer, const chk::Block &cell)
+{
+    if (!this->gameReady || !this->isMyTurn)
+    {
+        return;
+    }
+
+    // CHECK IF this cell has a Piece
+    const short pieceId = this->getPieceFromCell(cell->getIndex());
+    if (pieceId != -1)
+    {
+        // YES, it has one! VERIFY IF THERE IS ANY PENDING "forced captures" AND
+        // if hunter piece not selected.
+        const bool notSelected = this->getForcedMoves().find(pieceId) == this->getForcedMoves().end();
+        if (!this->getForcedMoves().empty() && notSelected)
+        {
+            this->showForcedMoves(hunter, cell);
+            return;
+        }
+        // OTHERWISE, store it in buffer (for a simple move, next turn)
+        buffer.addItem(pieceId);
+        this->setSourceCell(cell->getIndex());
+    }
+    else
+    {
+        // Cell is Empty! Let's judge if this is SIMPLE move or ATTACK move
+        if (!buffer.isEmpty())
+        {
+            const short movablePieceId = buffer.getTop();
+            if (!hunter->hasThisPiece(movablePieceId))
+            {
+                return;
+            }
+            else if (this->isHunterActive())
+            {
+                // it's an ATTACK
+                this->handleCapturePiece(hunter, prey, cell);
+                GameManager::updateMatchStatus(hunter, prey);
+                buffer.clean();
+            }
+            else
+            {
+                // it's a SIMPLE move
+                this->handleMovePiece(hunter, prey, cell, movablePieceId);
+                buffer.clean();
             }
         }
     }
@@ -436,13 +451,13 @@ inline void OnlineGameManager::handleEvents(chk::CircularBuffer<short> &circular
 inline void OnlineGameManager::startMoveListener()
 {
     this->wsClient->setOnMovePieceCallback([this](const chk::payload::MovePayload &payload) {
-        // which color is the Opponent?
+        // which color is my Opponent?
         // clang-format off
         const chk::PlayerPtr &enemy = payload.from_team() == TeamColor::TEAM_RED ? this->playerRed : this->playerBlack;
         const chk::PlayerPtr &myTeam = enemy->getPlayerType() == PlayerType::PLAYER_RED ? this->playerBlack : this->playerRed;
         // clang-format on
         const auto targetPosition = sf::Vector2f{payload.destination().x(), payload.destination().y()};
-        short movingPieceId = static_cast<short>(payload.piece_id());
+        const short movingPieceId = static_cast<short>(payload.piece_id());
         const bool success = enemy->movePiece(movingPieceId, targetPosition);
         if (!success)
         {
@@ -472,46 +487,60 @@ inline void OnlineGameManager::startMoveListener()
 inline void OnlineGameManager::startCaptureListener()
 {
     this->wsClient->setOnCapturePieceCallback([this](const chk::payload::CapturePayload &payload) {
-        // which color is my Opponent?
+        bool isKingBefore = false;
+        bool isKingNow = false;
         // clang-format off
-        const chk::PlayerPtr &other = payload.from_team() == TeamColor::TEAM_RED ? this->playerRed : this->playerBlack;
-        const chk::PlayerPtr &myTeam = other->getPlayerType() == PlayerType::PLAYER_RED ? this->playerBlack : this->playerRed;
+        const chk::PlayerPtr &opponent = payload.from_team() == TeamColor::TEAM_RED ? this->playerRed : this->playerBlack;
+        const chk::PlayerPtr &myTeam = opponent->getPlayerType() == PlayerType::PLAYER_RED ? this->playerBlack : this->playerRed;
         // clang-format on
-        const auto targetCell = sf::Vector2f{payload.destination().x(), payload.destination().y()};
+        const auto destPos = sf::Vector2f{payload.destination().x(), payload.destination().y()};
         const auto hunterPieceId = static_cast<short>(payload.hunter_piece_id());
 
-        if (!other->captureEnemyWith(hunterPieceId, targetCell))
+        isKingBefore = opponent->getOwnPieces().at(hunterPieceId)->getIsKing();
+        if (!opponent->captureEnemyWith(hunterPieceId, destPos))
         {
             return;
         }
 
-        // this->updateMessage(other->getName() + " has captured your piece!");
-        this->updateMessage(other->getName() + " 已经抓住了你的棋子!");
+        this->updateMessage(opponent->getName() + " has captured your piece!");
+        isKingNow = opponent->getOwnPieces().at(hunterPieceId)->getIsKing();    // track changes for hunter piece
         gameMap.erase(payload.details().hunter_src_cell());                     // set hunter's old location empty!
         gameMap.erase(payload.details().prey_cell_idx());                       // set my old location empty!
         gameMap.emplace(payload.destination().cell_index(), hunterPieceId);     // fill in hunter new location
-        short targetId = static_cast<short>(payload.details().prey_piece_id()); // cast to short
+        short targetId = static_cast<short>(payload.details().prey_piece_id()); // cast to int16_t
         myTeam->losePiece(targetId);                                            // I will lose 1 piece
 
-        // Check for extra opportunities NOW (for Enemy)
-        GameManager::identifyTargets(other);
+        const int destCellIdx = payload.destination().cell_index();
+        const auto it = std::find_if(blockList.begin(), blockList.end(), [&destCellIdx](const chk::Block &cell) {
+            return cell->getIndex() == destCellIdx;
+        });
+
+        // Check for extra opportunities NOW (for Enemy), only if they did NOT just become King
+        this->forcedMoves.clear();
+        if ((isKingBefore == isKingNow) && it != this->blockList.end())
+        {
+            GameManager::identifyTargets(opponent, *it);
+        }
+
         if (this->getForcedMoves().empty())
         {
             // NO MORE JUMPS AVAILABLE. SWITCH TURNS to myself.
-            this->identifyTargets(myTeam);
+            chk::GameManager::identifyTargets(myTeam);
             this->isMyTurn = !this->isMyTurn;
         }
     });
 }
 
 /**
- * Listening for killed connection & Winner notifications from server
+ * Listening for killed connections & Winner notifications from server
  */
 inline void OnlineGameManager::startDeathListener()
 {
     this->wsClient->setOnDeathCallback([this](std::string_view notice) {
         this->updateMessage(notice);
         this->doCleanup();
+        this->isMyTurn = false;
+        this->gameReady = false;
     });
 
     this->wsClient->setOnWinLoseCallback([this](std::string_view notice) {
@@ -520,4 +549,5 @@ inline void OnlineGameManager::startDeathListener()
         this->gameReady = false;
     });
 }
+
 } // namespace chk

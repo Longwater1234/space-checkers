@@ -14,7 +14,8 @@ foreach(FILE ${my_images})
 endforeach()
 
 add_executable(${CMAKE_PROJECT_NAME} MACOSX_BUNDLE
-               ${GAME_SRC} "${CMAKE_SOURCE_DIR}/src/ResourcePath.mm" ${application_icon} "${my_images}")
+               ${GAME_SRC} "${CMAKE_SOURCE_DIR}/src/utils/ResourcePath.mm" 
+               ${application_icon} "${my_images}")
 
 set_target_properties(
   ${CMAKE_PROJECT_NAME}
@@ -24,7 +25,7 @@ set_target_properties(
              XCODE_ATTRIBUTE_LD_RUNPATH_SEARCH_PATHS "@executable_path/../Frameworks"
              MACOSX_BUNDLE_BUNDLE_NAME "${CMAKE_PROJECT_NAME}"
              MACOSX_BUNDLE_GUI_IDENTIFIER "com.davistiba.${CMAKE_PROJECT_NAME}"
-             MACOSX_BUNDLE_COPYRIGHT "(c) 2023, Davis Tibbz"
+             MACOSX_BUNDLE_COPYRIGHT "(c) 2024, Davis Tibbz"
              MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
              MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION}
              RESOURCE "${my_images}")

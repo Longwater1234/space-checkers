@@ -1,5 +1,5 @@
 #pragma once
-#include "ResourcePath.hpp"
+#include "utils/ResourcePath.hpp"
 #include <SFML/Graphics/CircleShape.hpp>
 #include <SFML/Graphics/Drawable.hpp>
 #include <SFML/Graphics/RenderStates.hpp>
@@ -27,6 +27,8 @@ class Piece final : public sf::Drawable, public sf::Transformable
   public:
     Piece(const sf::CircleShape &circle, const PieceType &pType, short id);
     Piece() = delete;
+    Piece(const Piece &) = delete;
+    Piece &operator=(const Piece &) = delete;
     [[nodiscard]] const PieceType &getPieceType() const;
     void activateKing();
     bool getIsKing() const;
@@ -41,7 +43,7 @@ class Piece final : public sf::Drawable, public sf::Transformable
 
   private:
     sf::Texture texture;
-    short id_; // random positive ID assigned at Launch
+    short pid; // random positive ID assigned at Launch
     sf::CircleShape myCircle;
     PieceType pieceType;
     bool isKing = false;
@@ -52,7 +54,7 @@ inline Piece::Piece(const sf::CircleShape &circle, const PieceType &pType, const
 {
     this->myCircle = circle;
     this->pieceType = pType;
-    this->id_ = id;
+    this->pid = id;
     this->setPosition(circle.getPosition());
 
     sf::Texture localTxr;
@@ -173,17 +175,17 @@ inline void Piece::removeOutline()
  */
 inline short Piece::getId() const
 {
-    return this->id_;
+    return this->pid;
 }
 
 /**
- * Custom equality operator
+ * Custom equality operator, compares ID of the pieces
  * @param other The other Piece
  * @return TRUE or FALSE
  */
 inline bool Piece::operator==(const Piece &other) const
 {
-    return this->id_ == other.id_;
+    return this->pid == other.pid;
 }
 
 /**
@@ -196,7 +198,7 @@ inline bool Piece::moveSimple(const sf::Vector2f &destPos)
     const float deltaX = destPos.x - this->getPosition().x;
     const float deltaY = destPos.y - this->getPosition().y;
 
-    if (std::abs(deltaX) > chk::SIZE_CELL || std::abs(deltaY) > chk::SIZE_CELL)
+    if (std::abs(deltaX) != chk::SIZE_CELL || std::abs(deltaY) != chk::SIZE_CELL)
     {
         return false;
     }

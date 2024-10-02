@@ -1,8 +1,9 @@
 ﻿#include "CircularBuffer.hpp"
 #include "MainMenu.hpp"
-#include "ResourcePath.hpp"
 #include "managers/LocalGameManager.hpp"
 #include "managers/OnlineGameManager.hpp"
+#include "utils/ResourcePath.hpp"
+
 #include <SFML/Graphics.hpp>
 #include <SFML/Window/Mouse.hpp>
 #include <cassert>
@@ -14,14 +15,12 @@
 #include "imgui.h"
 
 #if defined(_WIN32)
-constexpr auto CHINESE_FONT = "C:/Windows/Fonts/ARIALUNI.ttf";
+constexpr auto CHINESE_FONT = "C:/Windows/Fonts/msyh.ttc";
 #elif __APPLE__
 constexpr auto CHINESE_FONT = "/System/Library/Fonts/PingFang.ttc";
 #else
 const std::string CHINESE_FONT = chk::getResourcePath(chk::FONT_PATH);
 #endif
-
-#define Widen(x) L#x
 
 int main()
 {
@@ -30,6 +29,7 @@ int main()
     window.setFramerateLimit(60);
 
     ImGui::SFML::Init(window, false);
+    // ImGui::StyleColorsLight(); //<-- light color theme
     std::unique_ptr<chk::GameManager> manager = nullptr;
 
     // SHOW MAIN MENU
@@ -67,6 +67,7 @@ int main()
         exit(EXIT_FAILURE);
     }
 
+    // create all cells
     manager->drawCheckerboard(font);
 
     // create pieces give each player their own
