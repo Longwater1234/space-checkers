@@ -16,7 +16,7 @@ endif()
 set(SFML_HOME "C:/SFML/SFML-2.6.1")
 
 file(GLOB_RECURSE GAME_SRC "src/*.cpp" "src/*.hpp")  
-set(SFML_DIR ${SFML_HOME}/lib/cmake/SFML) 
+set(SFML_DIR ${SFML_HOME}/lib/cmake/SFML)
 
 find_package(SFML 2.6 REQUIRED COMPONENTS "graphics" "window" "system")
 
@@ -31,7 +31,7 @@ elseif(APPLE)
   find_library(FOUNDATION_FRAMEWORK Foundation)
   target_link_libraries(SpaceCheckers PRIVATE ${FOUNDATION_FRAMEWORK})
 else() 
-  add_executable(SpaceCheckers ${GAME_SRC})    
+  add_executable(SpaceCheckers ${GAME_SRC})   
 endif()   
 
 # link all required libraries 
@@ -44,6 +44,7 @@ include_directories(${SFML_HOME}/include)
 # show warnings (depending on C++ compiler)
 if(MSVC)
   target_compile_options(SpaceCheckers PRIVATE /W4 /sdl)
+  target_compile_definitions(SpaceCheckers PRIVATE _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING)
 else()  
   target_compile_options(SpaceCheckers PRIVATE -Wall) 
 endif()
