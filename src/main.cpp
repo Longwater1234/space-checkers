@@ -59,7 +59,7 @@ int main()
     // create all cells
     manager->drawCheckerboard(font);
 
-    // create pieces give each player their own
+    // create pieces and give each player their own
     manager->createAllPieces();
 
     // Storing currently clicked Piece. (NOTE: using braces constructor)
