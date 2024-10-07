@@ -454,8 +454,7 @@ inline void OnlineGameManager::startMoveListener()
         // clang-format on
         const auto targetPosition = sf::Vector2f{payload.destination().x(), payload.destination().y()};
         const short movingPieceId = static_cast<short>(payload.piece_id());
-        const bool success = enemy->movePiece(movingPieceId, targetPosition);
-        if (!success)
+        if (!enemy->movePiece(movingPieceId, targetPosition))
         {
             return;
         }
