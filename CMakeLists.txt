@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
 
-project("SpaceCheckers" VERSION 1.0.8
+project("SpaceCheckers" VERSION 1.0.9
  HOMEPAGE_URL "https://github.com/Longwater1234/space-checkers")
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
