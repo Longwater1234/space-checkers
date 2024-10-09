@@ -46,8 +46,7 @@ inline void LocalGameManager::createAllPieces()
     std::uniform_int_distribution<short> dist(1, std::numeric_limits<short>::max());
 
     // Reserve container for pieces on board
-    std::vector<chk::PiecePtr> pieceList;
-    pieceList.reserve(chk::NUM_PIECES);
+    std::vector<chk::PiecePtr> pieceList(chk::NUM_PIECES);
 
     for (uint16_t row = 0; row < NUM_ROWS; row++)
     {
