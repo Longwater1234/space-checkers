@@ -169,7 +169,7 @@ inline void WsClient::showPublicServerWindow(bool &showPublic)
         static int current_idx = 0;
         if (ImGui::BeginListBox("Select One"))
         {
-            for (int i = 0; i < publicServers.size(); i++)
+            for (int i = 0; i < publicServers.size(); ++i)
             {
                 const bool is_selected = (i == current_idx);
                 if (ImGui::Selectable(publicServers.at(i).name.c_str(), is_selected))
@@ -179,7 +179,9 @@ inline void WsClient::showPublicServerWindow(bool &showPublic)
 
                 // Set the initial focus
                 if (is_selected)
+                {
                     ImGui::SetItemDefaultFocus();
+                }
             }
             ImGui::EndListBox();
         }
@@ -217,8 +219,7 @@ inline void WsClient::asyncFetchPublicServers()
  */
 inline void WsClient::parseServerList(const cpr::Response &response)
 {
-    const long statusCode = response.status_code;
-    if (statusCode != 200)
+    if (response.status_code != 200)
     {
         spdlog::error("http request failed. Reason {}", response.error.message);
         this->errorMsg = "httpRequest error: " + response.error.message;
@@ -315,13 +316,13 @@ inline void WsClient::tryConnect(std::string_view address)
             spdlog::info("Connection established");
             this->isConnected = true;
         }
-        // else if (msg->type == ix::WebSocketMessageType::Close)
-        //{
-        //     std::scoped_lock lg{this->mut};
-        //     this->errorMsg = "Error: disconnected from Server!" + msg->str;
-        //     spdlog::error(this->errorMsg);
-        //     this->isDead = true;
-        // }
+        else if (msg->type == ix::WebSocketMessageType::Close)
+        {
+            std::scoped_lock lg{this->mut};
+            this->errorMsg = "Error: disconnected from Server!" + msg->str;
+            spdlog::error(this->errorMsg);
+            this->isDead = true;
+        }
         else if (msg->type == ix::WebSocketMessageType::Error)
         {
             std::scoped_lock lg{this->mut};
@@ -434,7 +435,7 @@ inline void WsClient::runGameLoop()
             return;
         }
     }
-    static bool hasWinner = false;
+    // static bool hasWinner = false;
     for (const auto &msg : this->msgBuffer.getAll())
     {
         if (msg.empty())
@@ -472,7 +473,7 @@ inline void WsClient::runGameLoop()
             std::scoped_lock lg{this->mut};
             this->errorMsg = basePayload.notice();
             this->isDead = true;
-            hasWinner = false;
+            // hasWinner = false;
             spdlog::error(basePayload.notice());
         }
         else if (basePayload.has_move_payload())
@@ -499,15 +500,16 @@ inline void WsClient::runGameLoop()
             {
                 this->_onWinLoseCallback(basePayload.notice());
                 this->showWinnerPopup(basePayload.notice());
-                hasWinner = true;
+                // hasWinner = true;
+                break;
             }
         }
     }
     // clang-format off
-    if (!hasWinner) {
+  // if (!hasWinner) {
         std::scoped_lock lg(this->mut);
         this->msgBuffer.clean();
-    }
+   // }
     // clang-format on
 }
 
