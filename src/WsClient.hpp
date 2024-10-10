@@ -71,7 +71,7 @@ class WsClient final
     std::mutex mut;
     std::unique_ptr<ix::WebSocket> webSocketPtr = nullptr; // our Websocket object
     void showErrorPopup();                                 // whenver there is an error (from server)
-    void runGameLoop();
+    void runServerLoop();                                  // while connected, keep exchanging messages with server
     static void showHint(const char *tip);
     void tryConnect(std::string_view address);
     void showConnectWindow();
@@ -280,7 +280,7 @@ inline void WsClient::runMainLoop()
     }
     // already connected
     else {
-        this->runGameLoop();
+        this->runServerLoop();
     }
    
     if (this->isDead) { 
@@ -429,18 +429,8 @@ inline bool WsClient::replyServer(const chk::payload::BasePayload &payload) cons
 /**
  * Exchange messages with the server and update the game accordingly. if any error happen, close connection
  */
-inline void WsClient::runGameLoop()
+inline void WsClient::runServerLoop()
 {
-    if (!this->isConnected)
-    {
-        if (ImGui::Begin("Loading", nullptr, ImGuiWindowFlags_NoResize))
-        {
-            /* code */
-            ImGui::TextWrapped("Connecting to %s", this->final_address.c_str());
-            ImGui::End();
-            return;
-        }
-    }
     for (const auto &msg : this->msgBuffer.getAll())
     {
         if (msg.empty())
