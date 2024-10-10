@@ -53,6 +53,7 @@ class WsClient final
   private:
     std::string final_address;                      // IP or URL of private server (input by User)
     std::atomic_bool isDead{false};                 // if connection closed
+    std::atomic_bool haveWinner{false};             // whether server returned Winner or Loser
     std::atomic_bool isConnected{false};            // if done connected to server (else, show loading)
     chk::CircularBuffer<std::string> msgBuffer{1};  // keep only recent 1 incoming message
     mutable std::string deathNote{};                // reason from server for disconnected (KICKED or WIN or LOSE)
@@ -238,7 +239,7 @@ inline void WsClient::parseServerList(const cpr::Response &response)
         this->publicServers.reserve(jsonArray.size());
         for (const simdjson::dom::object &elem : jsonArray)
         {
-            chk::ServerLocation location{};
+            chk::ServerLocation location;
             location.name = elem.at_key("name").get_c_str();
             location.address = elem.at_key("address").get_c_str();
             this->publicServers.emplace_back(std::move_if_noexcept(location));
@@ -259,6 +260,7 @@ inline void WsClient::resetAllStates()
     this->isConnected = false;
     this->connClicked = false;
     this->isDead = false;
+    this->haveWinner = false;
     this->deathNote.clear();
     this->webSocketPtr->stop();
 }
@@ -281,12 +283,15 @@ inline void WsClient::runMainLoop()
     else {
         this->runGameLoop();
     }
-    // some error happened 🙁
-    if (this->isDead) {
+   
+    if (this->isDead) { 
+       // some error happened 🙁
        if (this->_onDeathCallback != nullptr) {
            _onDeathCallback(this->deathNote);
        }
         this->showErrorPopup();
+    } else if (this->haveWinner) {
+        this->showWinnerPopup();
     }
     // clang-format on
 }
@@ -499,8 +504,9 @@ inline void WsClient::runGameLoop()
             if (this->_onWinLoseCallback != nullptr)
             {
                 this->_onWinLoseCallback(basePayload.notice());
-                this->showWinnerPopup();
-                // break;
+                std::scoped_lock lg(this->mut);
+                this->deathNote = basePayload.notice();
+                this->haveWinner = true;
             }
         }
     }
@@ -545,7 +551,7 @@ inline void WsClient::showWinnerPopup()
     ImGui::OpenPopup("GameOver", ImGuiPopupFlags_NoOpenOverExistingPopup);
     if (ImGui::BeginPopupModal("GameOver", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {
-        ImGui::Text(u8"You won or lost");
+        ImGui::Text(u8"%s", this->deathNote.c_str());
         ImGui::Separator();
         if (ImGui::Button("OK", ImVec2(120, 0)))
         {
