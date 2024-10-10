@@ -124,17 +124,17 @@ inline void WsClient::showHint(const char *tip)
  */
 inline void WsClient::showConnectWindow()
 {
-    static bool is_secure = false; // switch to use SSL (for PRIVATE servers only)
-    static bool showPublic = true; // whether to show public server list
+    static bool is_secure = false;  // switch to enable/disable SSL (PRIVATE servers only)
+    static bool show_public = true; // whether to show public server list
 
-    if (showPublic)
+    if (show_public)
     {
-        this->showPublicServerWindow(showPublic);
+        this->showPublicServerWindow(show_public);
         return;
     }
 
     // =================== PRIVATE SERVERS ===============================
-    ImGui::SetNextWindowSize(ImVec2(sf::Vector2f(300.0, 300.0)));
+    ImGui::SetNextWindowSize(ImVec2{300.0, 300.0});
     static char inputUrl[256] = "127.0.0.1:9876/game";
     if (ImGui::Begin("Private Server", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse))
     {
@@ -151,7 +151,7 @@ inline void WsClient::showConnectWindow()
         }
         if (ImGui::Button("< Go Back", ImVec2{100.0f, 0}))
         {
-            showPublic = true;
+            show_public = true;
         }
         ImGui::End();
     }
@@ -164,7 +164,7 @@ inline void WsClient::showConnectWindow()
 inline void WsClient::showPublicServerWindow(bool &showPublic)
 {
     // =================== PUBLIC SERVERS ===============================
-    ImGui::SetNextWindowSize(ImVec2(sf::Vector2f(300.0, 300.0)));
+    ImGui::SetNextWindowSize(ImVec2{300.0, 300.0});
     if (ImGui::Begin("Public Servers", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse))
     {
         static int current_idx = 0;
@@ -262,7 +262,6 @@ inline void WsClient::resetAllStates()
     this->isDead = false;
     this->haveWinner = false;
     this->deathNote.clear();
-    this->webSocketPtr->stop();
 }
 
 /**
@@ -535,6 +534,7 @@ inline void WsClient::showErrorPopup()
         {
             ImGui::CloseCurrentPopup();
             this->resetAllStates();
+            this->webSocketPtr->stop();
         }
         ImGui::EndPopup();
     }
