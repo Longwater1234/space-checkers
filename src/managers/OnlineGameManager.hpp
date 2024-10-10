@@ -84,7 +84,8 @@ inline void chk::OnlineGameManager::createAllPieces()
         this->updateMessage(notice);
 
         // Reserve container for pieces on board
-        std::vector<chk::PiecePtr> pieceList(chk::NUM_PIECES);
+        std::vector<chk::PiecePtr> pieceList;
+        pieceList.reserve(chk::NUM_PIECES);
 
         auto redItr = payload.pieces_red().begin();
         auto blackItr = payload.pieces_black().begin();
