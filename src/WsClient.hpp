@@ -55,7 +55,7 @@ class WsClient final
     std::atomic_bool isDead{false};                 // if connection closed
     std::atomic_bool isConnected{false};            // if done connected to server (else, show loading)
     chk::CircularBuffer<std::string> msgBuffer{1};  // keep only recent 1 incoming message
-    mutable std::string errorMsg{};                 // for any websocket errors
+    mutable std::string deathNote{};                // reason from server for disconnected (KICKED or WIN or LOSE)
     mutable std::string protoBucket{};              // reusable container to store OUTGOING protobuf
     std::atomic_bool connClicked = false;           // if 'connect' button clicked
     std::vector<chk::ServerLocation> publicServers; // list of public servers (fetched from CDN)
@@ -74,7 +74,7 @@ class WsClient final
     static void showHint(const char *tip);
     void tryConnect(std::string_view address);
     void showConnectWindow();
-    void showWinnerPopup(const std::string &notice);
+    void showWinnerPopup();
     void showPublicServerWindow(bool &showPublic);
     void asyncFetchPublicServers();
     void parseServerList(const cpr::Response &response);
@@ -204,7 +204,7 @@ inline void WsClient::showPublicServerWindow(bool &showPublic)
 }
 
 /**
- * Fetch updated public servers JSON list from central cloud storage (Timeout 5000ms)
+ * Fetch updated public servers from central cloud storage (Timeout 5000ms)
  * @see libcpr official docs: https://docs.libcpr.org/advanced-usage.html
  */
 inline void WsClient::asyncFetchPublicServers()
@@ -214,7 +214,7 @@ inline void WsClient::asyncFetchPublicServers()
 }
 
 /**
- * Parse the response of public server list and display them
+ * Parse the JSON response of server list then display them
  * @param response From the previous request
  */
 inline void WsClient::parseServerList(const cpr::Response &response)
@@ -222,7 +222,8 @@ inline void WsClient::parseServerList(const cpr::Response &response)
     if (response.status_code != 200)
     {
         spdlog::error("http request failed. Reason {}", response.error.message);
-        this->errorMsg = "httpRequest error: " + response.error.message;
+        std::scoped_lock lg{this->mut};
+        this->deathNote = "httpRequest error: " + response.error.message;
         this->isDead = true;
         return;
     }
@@ -232,6 +233,7 @@ inline void WsClient::parseServerList(const cpr::Response &response)
     try
     {
         simdjson::dom::array jsonArray = jsonParser.parse(simdjson::padded_string_view(response.text));
+        std::scoped_lock lg{this->mut};
         this->publicServers.clear();
         this->publicServers.reserve(jsonArray.size());
         for (const simdjson::dom::object &elem : jsonArray)
@@ -244,7 +246,7 @@ inline void WsClient::parseServerList(const cpr::Response &response)
     }
     catch (const simdjson::simdjson_error &ex)
     {
-        this->errorMsg = ex.what();
+        this->deathNote = ex.what();
         this->isDead = true;
     }
 }
@@ -257,7 +259,7 @@ inline void WsClient::resetAllStates()
     this->isConnected = false;
     this->connClicked = false;
     this->isDead = false;
-    this->errorMsg.clear();
+    this->deathNote.clear();
     this->webSocketPtr->stop();
 }
 
@@ -282,7 +284,7 @@ inline void WsClient::runMainLoop()
     // some error happened 🙁
     if (this->isDead) {
        if (this->_onDeathCallback != nullptr) {
-           _onDeathCallback(this->errorMsg);
+           _onDeathCallback(this->deathNote);
        }
         this->showErrorPopup();
     }
@@ -319,15 +321,15 @@ inline void WsClient::tryConnect(std::string_view address)
         else if (msg->type == ix::WebSocketMessageType::Close)
         {
             std::scoped_lock lg{this->mut};
-            this->errorMsg = "Error: disconnected from Server!" + msg->str;
-            spdlog::error(this->errorMsg);
+            this->deathNote = "Error: disconnected from Server!" + msg->str;
+            spdlog::error(this->deathNote);
             this->isDead = true;
         }
         else if (msg->type == ix::WebSocketMessageType::Error)
         {
             std::scoped_lock lg{this->mut};
-            this->errorMsg = "Connection error: " + msg->errorInfo.reason;
-            spdlog::error(this->errorMsg);
+            this->deathNote = "Connection error: " + msg->errorInfo.reason;
+            spdlog::error(this->deathNote);
             this->isDead = true;
         }
     });
@@ -435,7 +437,6 @@ inline void WsClient::runGameLoop()
             return;
         }
     }
-    // static bool hasWinner = false;
     for (const auto &msg : this->msgBuffer.getAll())
     {
         if (msg.empty())
@@ -446,7 +447,7 @@ inline void WsClient::runGameLoop()
         if (!basePayload.ParseFromString(msg))
         {
             std::scoped_lock lg(this->mut);
-            this->errorMsg = "Profobuf: Could not parse payload";
+            this->deathNote = "Profobuf: Could not parse payload";
             this->isDead = true;
             return;
         }
@@ -471,9 +472,8 @@ inline void WsClient::runGameLoop()
         else if (basePayload.has_exit_payload())
         {
             std::scoped_lock lg{this->mut};
-            this->errorMsg = basePayload.notice();
+            this->deathNote = basePayload.notice();
             this->isDead = true;
-            // hasWinner = false;
             spdlog::error(basePayload.notice());
         }
         else if (basePayload.has_move_payload())
@@ -499,18 +499,13 @@ inline void WsClient::runGameLoop()
             if (this->_onWinLoseCallback != nullptr)
             {
                 this->_onWinLoseCallback(basePayload.notice());
-                this->showWinnerPopup(basePayload.notice());
-                // hasWinner = true;
-                break;
+                this->showWinnerPopup();
+                // break;
             }
         }
     }
-    // clang-format off
-  // if (!hasWinner) {
-        std::scoped_lock lg(this->mut);
-        this->msgBuffer.clean();
-   // }
-    // clang-format on
+    std::scoped_lock lg(this->mut);
+    this->msgBuffer.clean();
 }
 
 /**
@@ -518,7 +513,7 @@ inline void WsClient::runGameLoop()
  */
 inline void WsClient::showErrorPopup()
 {
-    if (this->errorMsg.empty())
+    if (this->deathNote.empty())
     {
         return;
     }
@@ -528,7 +523,7 @@ inline void WsClient::showErrorPopup()
     ImGui::OpenPopup("Error", ImGuiPopupFlags_NoOpenOverExistingPopup);
     if (ImGui::BeginPopupModal("Error", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {
-        ImGui::Text(u8"%s", this->errorMsg.c_str());
+        ImGui::Text(u8"%s", this->deathNote.c_str());
         ImGui::Separator();
         if (ImGui::Button("OK", ImVec2(120, 0)))
         {
@@ -542,7 +537,7 @@ inline void WsClient::showErrorPopup()
 /**
  * Show winner/loser popup window.
  */
-inline void WsClient::showWinnerPopup(const std::string &notice)
+inline void WsClient::showWinnerPopup()
 {
     // Always center this next dialog
     ImVec2 center = ImGui::GetMainViewport()->GetCenter();
@@ -550,7 +545,7 @@ inline void WsClient::showWinnerPopup(const std::string &notice)
     ImGui::OpenPopup("GameOver", ImGuiPopupFlags_NoOpenOverExistingPopup);
     if (ImGui::BeginPopupModal("GameOver", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {
-        ImGui::Text(u8"%s", notice.c_str());
+        ImGui::Text(u8"You won or lost");
         ImGui::Separator();
         if (ImGui::Button("OK", ImVec2(120, 0)))
         {
