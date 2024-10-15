@@ -24,7 +24,7 @@ The only dependency you need pre-installed on your OS is SFML 2.6.x (or newer).
 ### For Windows
 
 - At least Windows 10
-- MS Visual Studio 2019 or newer (NOT vscode), with "**Desktop C++ Development**" bundle.
+- MS Visual Studio 2022 or newer (NOT vscode), with "**Desktop C++ Development**" bundle.
 - Please download "Visual C++ 64bit" edition of SFML; ignore others.
 - Move your unzipped `SFML-2.6.x` folder to its own home, example: `C:/SFML/SFML-2.6.1`.
 - Edit **line 16** in [CMakeLists.txt](CMakeLists.txt), to set value `SFML_HOME` to folder path you moved SFML into (see
