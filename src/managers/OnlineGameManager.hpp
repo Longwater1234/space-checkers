@@ -60,14 +60,14 @@ inline OnlineGameManager::OnlineGameManager(sf::RenderWindow *windowPtr)
                 this->myTeam = chk::PlayerType::PLAYER_RED;
                 this->isMyTurn = true;
                 spdlog::info("I AM PLAYER RED");
-                this->updateMessage(u8"你将扮演 RED(红色)跳棋。等待对手。。。");
+                this->updateMessage("你将扮演 RED(红色)跳棋。等待对手。。。");
             }
             else
             {
                 this->myTeam = chk::PlayerType::PLAYER_BLACK;
                 this->isMyTurn = false;
                 spdlog::info("I AM PLAYER BLACK");
-                this->updateMessage(u8"你将扮演 BLACK (黑色)跳棋。等待对手。。。");
+                this->updateMessage("你将扮演 BLACK (黑色)跳棋。等待对手。。。");
             }
             this->updateMessage(notice);
             this->startDeathListener();
@@ -502,7 +502,7 @@ inline void OnlineGameManager::startCaptureListener()
             return;
         }
 
-        this->updateMessage(opponent->getName() + " has captured your piece!");
+        this->updateMessage(opponent->getName() + " 已经拿走了你的棋子!");
         isKingNow = opponent->getOwnPieces().at(hunterPieceId)->getIsKing();    // track changes for hunter piece
         gameMap.erase(payload.details().hunter_src_cell());                     // set hunter's old location empty!
         gameMap.erase(payload.details().prey_cell_idx());                       // set my old location empty!

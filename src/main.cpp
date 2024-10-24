@@ -70,7 +70,7 @@ int main()
     // create all cells
     manager->drawCheckerboard(font);
 
-    // create pieces & give each player their own
+    // create pieces and give each player their own
     manager->createAllPieces();
 
     // Storing currently clicked Piece. (NOTE: using braces constructor)
@@ -84,7 +84,7 @@ int main()
     if (userChoice == chk::UserChoice::LOCAL_PLAY)
     {
         // manager->updateMessage(u8"你好。 Now playing! It's RED's turn");
-        manager->updateMessage(u8"游戏开始了。轮到RED球员了");
+        manager->updateMessage("游戏开始了。轮到RED球员了");
     }
 
     std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;

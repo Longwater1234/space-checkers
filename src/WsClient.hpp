@@ -112,7 +112,7 @@ inline void WsClient::showHint(const char *tip)
     if (ImGui::BeginItemTooltip())
     {
         ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-        ImGui::TextUnformatted(tip);
+        ImGui::Text(tip);
         ImGui::PopTextWrapPos();
         ImGui::EndTooltip();
     }
@@ -137,10 +137,10 @@ inline void WsClient::showConnectWindow()
     static char inputUrl[256] = "127.0.0.1:9876/game";
     if (ImGui::Begin("Private Server", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse))
     {
-        ImGui::InputText(u8"服务器地址", inputUrl, IM_ARRAYSIZE(inputUrl), ImGuiInputTextFlags_CharsNoBlank);
+        ImGui::InputText("服务器地址", inputUrl, IM_ARRAYSIZE(inputUrl), ImGuiInputTextFlags_CharsNoBlank);
         ImGui::SameLine();
         WsClient::showHint("eg: 127.0.0.1:8080 OR myserver.example.org");
-        ImGui::Checkbox(u8"安全网络", &is_secure);
+        ImGui::Checkbox("安全网络", &is_secure);
         if (!std::string_view(inputUrl).empty() && ImGui::Button("立即连接", ImVec2{100.0f, 0}))
         {
             const char *suffix = is_secure ? "wss://" : "ws://";
@@ -299,7 +299,7 @@ inline void WsClient::tryConnect(std::string_view address)
     {
         ImGui::SetNextWindowSize(ImVec2(sf::Vector2f{400.0, 100.0}));
         ImGui::Begin("Loading", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
-        ImGui::Text(u8"正在连接到联机服务器。。。");
+        ImGui::Text("正在连接到联机服务器。。。");
         ImGui::End();
     }
 
@@ -521,7 +521,7 @@ inline void WsClient::showErrorPopup()
     ImGui::OpenPopup("Error", ImGuiPopupFlags_NoOpenOverExistingPopup);
     if (ImGui::BeginPopupModal("Error", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {
-        ImGui::Text(u8"%s", this->errorMsg.c_str());
+        ImGui::Text("%s", this->errorMsg.c_str());
         ImGui::Separator();
         if (ImGui::Button("OK", ImVec2(120, 0)))
         {
@@ -543,7 +543,7 @@ inline void WsClient::showWinnerPopup(const std::string &notice)
     ImGui::OpenPopup("GameOver", ImGuiPopupFlags_NoOpenOverExistingPopup);
     if (ImGui::BeginPopupModal("GameOver", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {
-        ImGui::Text(u8"%s", notice.c_str());
+        ImGui::Text("%s", notice.c_str());
         ImGui::Separator();
         if (ImGui::Button("OK", ImVec2(120, 0)))
         {
