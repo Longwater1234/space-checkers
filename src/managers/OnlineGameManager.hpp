@@ -50,7 +50,6 @@ inline OnlineGameManager::OnlineGameManager(sf::RenderWindow *windowPtr)
     // CREATE TWO unique PLAYERS
     this->playerRed = std::make_unique<chk::Player>(chk::PlayerType::PLAYER_RED);
     this->playerBlack = std::make_unique<chk::Player>(chk::PlayerType::PLAYER_BLACK);
-    assert(!(*playerRed == *playerBlack));
 
     // set Listener for connection success
     this->wsClient->setOnReadyConnectedCallback(
@@ -135,7 +134,7 @@ inline void chk::OnlineGameManager::createAllPieces()
                 this->playerBlack->receivePiece(kete);
             }
         }
-        pieceList.clear(); // safe! no longer used.
+        pieceList.clear(); // SAFE! no longer used.
         this->startMoveListener();
         this->startCaptureListener();
     });
@@ -295,7 +294,6 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
 {
     if (!this->isMyTurn || GameManager::getPieceFromCell(targetCell->getIndex()) != -1)
     {
-        // STOP if not my turn OR there's already a Piece on target cell
         return;
     }
 
@@ -303,6 +301,7 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
     int copySrcCell = 0;     // hunter src cell
     int copyPreyPieceId = 0;
     int copyPreyCell = 0;
+    // track King state for Hunter piece
     bool isKingBefore = false;
     bool isKingNow = false;
 
@@ -406,8 +405,7 @@ inline void OnlineGameManager::handleCellTap(const chk::PlayerPtr &hunter, const
     const short pieceId = this->getPieceFromCell(cell->getIndex());
     if (pieceId != -1)
     {
-        // YES, it has one! VERIFY IF THERE IS ANY PENDING "forced captures" AND
-        // if hunter piece not selected.
+        // YES, it has one! VERIFY IF THERE IS ANY PENDING "forced captures", if yes, verify hunter SELECTED
         const bool notSelected = this->getForcedMoves().find(pieceId) == this->getForcedMoves().end();
         if (!this->getForcedMoves().empty() && notSelected)
         {
@@ -458,8 +456,7 @@ inline void OnlineGameManager::startMoveListener()
         // clang-format on
         const auto targetPosition = sf::Vector2f{payload.destination().x(), payload.destination().y()};
         const short movingPieceId = static_cast<short>(payload.piece_id());
-        const bool success = enemy->movePiece(movingPieceId, targetPosition);
-        if (!success)
+        if (!enemy->movePiece(movingPieceId, targetPosition))
         {
             return;
         }
