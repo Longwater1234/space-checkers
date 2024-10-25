@@ -144,7 +144,7 @@ void GameManager::handleCapturePiece(const chk::PlayerPtr &hunter, const chk::Pl
                 return;
             }
             isCaptured = true;
-            this->updateMessage(hunter->getName() + " has captured " + prey->getName() + "'s piece!");
+            this->updateMessage(hunter->getName() + " 已抓了 " + prey->getName() + "的棋子!");
             gameMap.erase(this->sourceCell.value());                           // set hunter's old location empty!
             gameMap.erase(target.preyCellIdx);                                 // set Prey's old location empty!
             gameMap.emplace(targetCell->getIndex(), hunterPieceId);            // fill in hunter new location
