@@ -124,7 +124,7 @@ inline void WsClient::showHint(const char *tip)
  */
 inline void WsClient::showConnectWindow()
 {
-    static bool is_secure = false;  // switch to enable/disable SSL (PRIVATE servers only)
+    static bool is_secure = false;  // switch for enable/disable SSL (PRIVATE servers only)
     static bool show_public = true; // whether to show public server list
 
     if (show_public)
@@ -222,7 +222,10 @@ inline void WsClient::parseServerList(const cpr::Response &response)
 {
     if (response.status_code != 200)
     {
+#ifndef NDEBUG
         spdlog::error("http request failed. Reason {}", response.error.message);
+#endif //DEBUG
+
         std::scoped_lock lg{this->mut};
         this->deathNote = "httpRequest error: " + response.error.message;
         this->isDead = true;
