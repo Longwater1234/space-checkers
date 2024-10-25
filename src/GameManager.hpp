@@ -68,7 +68,7 @@ class GameManager
 
   protected:
     // gameBoard: map of cell_index -> piece_id
-    std::map<int, short> gameMap;
+    std::unordered_map<int, short> gameMap;
     // main window
     sf::RenderWindow *window = nullptr;
     // source cell Index of selected piece

@@ -536,6 +536,7 @@ inline void OnlineGameManager::startDeathListener()
 
     this->wsClient->setOnWinLoseCallback([this](std::string_view notice) {
         this->updateMessage(notice);
+        this->doCleanup();
         this->isMyTurn = false;
         this->gameReady = false;
     });

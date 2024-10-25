@@ -78,6 +78,8 @@ int main()
 
     // THE MAIN GAME LOOP
     sf::Clock deltaClock;
+    sf::Clock counterTime;
+    int32_t timer = 40;
     while (window.isOpen())
     {
         manager->handleEvents(circularBuffer);
@@ -86,7 +88,17 @@ int main()
         window.clear();
         manager->drawBoard();
 
-        txtPanel.setString(manager->getCurrentMsg());
+        // txtPanel.setString(manager->getCurrentMsg());
+        if (counterTime.getElapsedTime().asMilliseconds() >= 1000)
+        {
+            timer--;
+            txtPanel.setString("00:" + fmt::format("{:02d}", timer));
+            counterTime.restart();
+        }
+        if (timer <= 0)
+        {
+            timer = 40;
+        }
         window.draw(txtPanel);
         ImGui::SFML::Render(window);
         window.display();

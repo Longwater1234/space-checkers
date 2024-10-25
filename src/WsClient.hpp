@@ -53,9 +53,10 @@ class WsClient final
   private:
     std::string final_address;                      // IP or URL of private server (input by User)
     std::atomic_bool isDead{false};                 // if connection closed
+    std::atomic_bool haveWinner{false};             // whether server returned Winner or Loser
     std::atomic_bool isConnected{false};            // if done connected to server (else, show loading)
     chk::CircularBuffer<std::string> msgBuffer{1};  // keep only recent 1 incoming message
-    mutable std::string errorMsg{};                 // for any websocket errors
+    mutable std::string deathNote{};                // reason from server for disconnected (KICKED or WIN or LOSE)
     mutable std::string protoBucket{};              // reusable container to store OUTGOING protobuf
     std::atomic_bool connClicked = false;           // if 'connect' button clicked
     std::vector<chk::ServerLocation> publicServers; // list of public servers (fetched from CDN)
@@ -70,11 +71,11 @@ class WsClient final
     std::mutex mut;
     std::unique_ptr<ix::WebSocket> webSocketPtr = nullptr; // our Websocket object
     void showErrorPopup();                                 // whenver there is an error (from server)
-    void runGameLoop();
+    void runServerLoop();                                  // while connected, keep exchanging messages with server
     static void showHint(const char *tip);
     void tryConnect(std::string_view address);
     void showConnectWindow();
-    void showWinnerPopup(const std::string &notice);
+    void showWinnerPopup();
     void showPublicServerWindow(bool &showPublic);
     void asyncFetchPublicServers();
     void parseServerList(const cpr::Response &response);
@@ -123,17 +124,17 @@ inline void WsClient::showHint(const char *tip)
  */
 inline void WsClient::showConnectWindow()
 {
-    static bool is_secure = false; // switch to use SSL (for PRIVATE servers only)
-    static bool showPublic = true; // whether to show public server list
+    static bool is_secure = false;  // switch to enable/disable SSL (PRIVATE servers only)
+    static bool show_public = true; // whether to show public server list
 
-    if (showPublic)
+    if (show_public)
     {
-        this->showPublicServerWindow(showPublic);
+        this->showPublicServerWindow(show_public);
         return;
     }
 
     // =================== PRIVATE SERVERS ===============================
-    ImGui::SetNextWindowSize(ImVec2(sf::Vector2f(300.0, 300.0)));
+    ImGui::SetNextWindowSize(ImVec2{300.0, 300.0});
     static char inputUrl[256] = "127.0.0.1:9876/game";
     if (ImGui::Begin("Private Server", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse))
     {
@@ -150,7 +151,7 @@ inline void WsClient::showConnectWindow()
         }
         if (ImGui::Button("< Go Back", ImVec2{100.0f, 0}))
         {
-            showPublic = true;
+            show_public = true;
         }
         ImGui::End();
     }
@@ -163,13 +164,13 @@ inline void WsClient::showConnectWindow()
 inline void WsClient::showPublicServerWindow(bool &showPublic)
 {
     // =================== PUBLIC SERVERS ===============================
-    ImGui::SetNextWindowSize(ImVec2(sf::Vector2f(300.0, 300.0)));
+    ImGui::SetNextWindowSize(ImVec2{300.0, 300.0});
     if (ImGui::Begin("Public Servers", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse))
     {
         static int current_idx = 0;
         if (ImGui::BeginListBox("Select One"))
         {
-            for (int i = 0; i < publicServers.size(); i++)
+            for (int i = 0; i < publicServers.size(); ++i)
             {
                 const bool is_selected = (i == current_idx);
                 if (ImGui::Selectable(publicServers.at(i).name.c_str(), is_selected))
@@ -179,7 +180,9 @@ inline void WsClient::showPublicServerWindow(bool &showPublic)
 
                 // Set the initial focus
                 if (is_selected)
+                {
                     ImGui::SetItemDefaultFocus();
+                }
             }
             ImGui::EndListBox();
         }
@@ -202,7 +205,7 @@ inline void WsClient::showPublicServerWindow(bool &showPublic)
 }
 
 /**
- * Fetch updated public servers JSON list from central cloud storage (Timeout 5000ms)
+ * Fetch updated public servers from central cloud storage (Timeout 5000ms)
  * @see libcpr official docs: https://docs.libcpr.org/advanced-usage.html
  */
 inline void WsClient::asyncFetchPublicServers()
@@ -212,16 +215,16 @@ inline void WsClient::asyncFetchPublicServers()
 }
 
 /**
- * Parse the response of public server list and display them
+ * Parse the JSON response of server list then display them
  * @param response From the previous request
  */
 inline void WsClient::parseServerList(const cpr::Response &response)
 {
-    const long statusCode = response.status_code;
-    if (statusCode != 200)
+    if (response.status_code != 200)
     {
         spdlog::error("http request failed. Reason {}", response.error.message);
-        this->errorMsg = "httpRequest error: " + response.error.message;
+        std::scoped_lock lg{this->mut};
+        this->deathNote = "httpRequest error: " + response.error.message;
         this->isDead = true;
         return;
     }
@@ -231,11 +234,12 @@ inline void WsClient::parseServerList(const cpr::Response &response)
     try
     {
         simdjson::dom::array jsonArray = jsonParser.parse(simdjson::padded_string_view(response.text));
+        std::scoped_lock lg{this->mut};
         this->publicServers.clear();
         this->publicServers.reserve(jsonArray.size());
         for (const simdjson::dom::object &elem : jsonArray)
         {
-            chk::ServerLocation location{};
+            chk::ServerLocation location;
             location.name = elem.at_key("name").get_c_str();
             location.address = elem.at_key("address").get_c_str();
             this->publicServers.emplace_back(std::move_if_noexcept(location));
@@ -243,7 +247,7 @@ inline void WsClient::parseServerList(const cpr::Response &response)
     }
     catch (const simdjson::simdjson_error &ex)
     {
-        this->errorMsg = ex.what();
+        this->deathNote = ex.what();
         this->isDead = true;
     }
 }
@@ -256,8 +260,8 @@ inline void WsClient::resetAllStates()
     this->isConnected = false;
     this->connClicked = false;
     this->isDead = false;
-    this->errorMsg.clear();
-    this->webSocketPtr->stop();
+    this->haveWinner = false;
+    this->deathNote.clear();
 }
 
 /**
@@ -276,14 +280,17 @@ inline void WsClient::runMainLoop()
     }
     // already connected
     else {
-        this->runGameLoop();
+        this->runServerLoop();
     }
-    // some error happened 🙁
-    if (this->isDead) {
+   
+    if (this->isDead) { 
+       // some error happened 🙁
        if (this->_onDeathCallback != nullptr) {
-           _onDeathCallback(this->errorMsg);
+           _onDeathCallback(this->deathNote);
        }
         this->showErrorPopup();
+    } else if (this->haveWinner) {
+        this->showWinnerPopup();
     }
     // clang-format on
 }
@@ -315,18 +322,18 @@ inline void WsClient::tryConnect(std::string_view address)
             spdlog::info("Connection established");
             this->isConnected = true;
         }
-        // else if (msg->type == ix::WebSocketMessageType::Close)
-        //{
-        //     std::scoped_lock lg{this->mut};
-        //     this->errorMsg = "Error: disconnected from Server!" + msg->str;
-        //     spdlog::error(this->errorMsg);
-        //     this->isDead = true;
-        // }
+        else if (msg->type == ix::WebSocketMessageType::Close)
+        {
+            std::scoped_lock lg{this->mut};
+            this->deathNote = "Error: disconnected from Server!" + msg->str;
+            spdlog::error(this->deathNote);
+            this->isDead = true;
+        }
         else if (msg->type == ix::WebSocketMessageType::Error)
         {
             std::scoped_lock lg{this->mut};
-            this->errorMsg = "Connection error: " + msg->errorInfo.reason;
-            spdlog::error(this->errorMsg);
+            this->deathNote = "Connection error: " + msg->errorInfo.reason;
+            spdlog::error(this->deathNote);
             this->isDead = true;
         }
     });
@@ -422,19 +429,8 @@ inline bool WsClient::replyServer(const chk::payload::BasePayload &payload) cons
 /**
  * Exchange messages with the server and update the game accordingly. if any error happen, close connection
  */
-inline void WsClient::runGameLoop()
+inline void WsClient::runServerLoop()
 {
-    if (!this->isConnected)
-    {
-        if (ImGui::Begin("Loading", nullptr, ImGuiWindowFlags_NoResize))
-        {
-            /* code */
-            ImGui::TextWrapped("Connecting to %s", this->final_address.c_str());
-            ImGui::End();
-            return;
-        }
-    }
-    static bool hasWinner = false;
     for (const auto &msg : this->msgBuffer.getAll())
     {
         if (msg.empty())
@@ -445,7 +441,7 @@ inline void WsClient::runGameLoop()
         if (!basePayload.ParseFromString(msg))
         {
             std::scoped_lock lg(this->mut);
-            this->errorMsg = "Profobuf: Could not parse payload";
+            this->deathNote = "Profobuf: Could not parse payload";
             this->isDead = true;
             return;
         }
@@ -470,9 +466,8 @@ inline void WsClient::runGameLoop()
         else if (basePayload.has_exit_payload())
         {
             std::scoped_lock lg{this->mut};
-            this->errorMsg = basePayload.notice();
+            this->deathNote = basePayload.notice();
             this->isDead = true;
-            hasWinner = false;
             spdlog::error(basePayload.notice());
         }
         else if (basePayload.has_move_payload())
@@ -498,17 +493,14 @@ inline void WsClient::runGameLoop()
             if (this->_onWinLoseCallback != nullptr)
             {
                 this->_onWinLoseCallback(basePayload.notice());
-                this->showWinnerPopup(basePayload.notice());
-                hasWinner = true;
+                std::scoped_lock lg(this->mut);
+                this->deathNote = basePayload.notice();
+                this->haveWinner = true;
             }
         }
     }
-    // clang-format off
-    if (!hasWinner) {
-        std::scoped_lock lg(this->mut);
-        this->msgBuffer.clean();
-    }
-    // clang-format on
+    std::scoped_lock lg(this->mut);
+    this->msgBuffer.clean();
 }
 
 /**
@@ -516,7 +508,7 @@ inline void WsClient::runGameLoop()
  */
 inline void WsClient::showErrorPopup()
 {
-    if (this->errorMsg.empty())
+    if (this->deathNote.empty())
     {
         return;
     }
@@ -526,12 +518,13 @@ inline void WsClient::showErrorPopup()
     ImGui::OpenPopup("Error", ImGuiPopupFlags_NoOpenOverExistingPopup);
     if (ImGui::BeginPopupModal("Error", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {
-        ImGui::Text(u8"%s", this->errorMsg.c_str());
+        ImGui::Text(u8"%s", this->deathNote.c_str());
         ImGui::Separator();
         if (ImGui::Button("OK", ImVec2(120, 0)))
         {
             ImGui::CloseCurrentPopup();
             this->resetAllStates();
+            this->webSocketPtr->stop();
         }
         ImGui::EndPopup();
     }
@@ -540,7 +533,7 @@ inline void WsClient::showErrorPopup()
 /**
  * Show winner/loser popup window.
  */
-inline void WsClient::showWinnerPopup(const std::string &notice)
+inline void WsClient::showWinnerPopup()
 {
     // Always center this next dialog
     ImVec2 center = ImGui::GetMainViewport()->GetCenter();
@@ -548,7 +541,7 @@ inline void WsClient::showWinnerPopup(const std::string &notice)
     ImGui::OpenPopup("GameOver", ImGuiPopupFlags_NoOpenOverExistingPopup);
     if (ImGui::BeginPopupModal("GameOver", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {
-        ImGui::Text(u8"%s", notice.c_str());
+        ImGui::Text(u8"%s", this->deathNote.c_str());
         ImGui::Separator();
         if (ImGui::Button("OK", ImVec2(120, 0)))
         {
