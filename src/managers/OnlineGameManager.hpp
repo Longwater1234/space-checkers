@@ -215,6 +215,7 @@ inline void OnlineGameManager::handleEvents(chk::CircularBuffer<short> &buffer)
                     break;
                 }
             }
+            //^ END inner loop
         }
     }
 }
