@@ -367,7 +367,7 @@ void chk::GameManager::showForcedMoves(const chk::PlayerPtr &player, const chk::
  * Whether game is over
  * @return TRUE or FALSE
  */
-const bool &GameManager::isGameOver() const
+const bool GameManager::isGameOver() const
 {
     return this->gameOver;
 }

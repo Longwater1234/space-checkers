@@ -86,7 +86,7 @@ class GameManager
     [[nodiscard]] short getPieceFromCell(const int cell_idx) const;
     [[nodiscard]] const std::vector<chk::Block> &getBlockList() const;
     [[nodiscard]] bool isHunterActive() const;
-    [[nodiscard]] const bool &isGameOver() const;
+    [[nodiscard]] const bool isGameOver() const;
     void setSourceCell(int src_cell);
     void doCleanup();
     void identifyTargets(const chk::PlayerPtr &hunter, const chk::Block &singleCell = nullptr);
