@@ -40,7 +40,7 @@ The only dependency you need pre-installed on your OS is SFML 2.6.x (or newer).
   sudo xcode-select --install
 ```
 
-### For Linux Destkop
+### For Linux Desktop
 
 - Latest display drivers
 - Use your OS package manager (`apt` or `yum`) to install SFML 2.6 or newer.
@@ -52,7 +52,7 @@ The only dependency you need pre-installed on your OS is SFML 2.6.x (or newer).
   sudo apt install libssl-dev
 ```
 
-- Luckily, Windows and macOS **come with their native SSL libs built-in**, so nothing more to do :-)
+- Luckily, Windows and macOS **come with their native SSL libs built-in**, so nothing more to do 😊
 
 ## Building Instructions
 
