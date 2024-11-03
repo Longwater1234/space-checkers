@@ -30,7 +30,8 @@ using onCaptureCallback = std::function<void(const chk::payload::CapturePayload 
 // when we got a winner or loser
 using onWinLoseCallback = std::function<void(std::string_view notice)>;
 
-constexpr auto cloudfront = "https://d1txhef4jwuosv.cloudfront.net/ws_server_locations.json";
+// CDN which keeps list of public servers
+constexpr auto CLOUDFRONT_URL = "https://d1txhef4jwuosv.cloudfront.net/ws_server_locations.json";
 
 /**
  * This handles all websocket exchanges with Server
@@ -124,7 +125,7 @@ inline void WsClient::showHint(const char *tip)
  */
 inline void WsClient::showConnectWindow()
 {
-    static bool is_secure = false;  // switch for enable/disable SSL (PRIVATE servers only)
+    static bool is_secure = false;  // enable/disable SSL (PRIVATE servers only)
     static bool show_public = true; // whether to show public server list
 
     if (show_public)
@@ -210,7 +211,7 @@ inline void WsClient::showPublicServerWindow(bool &showPublic)
  */
 inline void WsClient::asyncFetchPublicServers()
 {
-    cpr::GetCallback([this](cpr::Response r) { this->parseServerList(r); }, cpr::Url{chk::cloudfront},
+    cpr::GetCallback([this](cpr::Response r) { this->parseServerList(r); }, cpr::Url{chk::CLOUDFRONT_URL},
                      cpr::Timeout{5000});
 }
 
@@ -265,6 +266,7 @@ inline void WsClient::resetAllStates()
     this->isDead = false;
     this->haveWinner = false;
     this->deathNote.clear();
+    this->webSocketPtr->stop();
 }
 
 /**
@@ -521,13 +523,12 @@ inline void WsClient::showErrorPopup()
     ImGui::OpenPopup("Error", ImGuiPopupFlags_NoOpenOverExistingPopup);
     if (ImGui::BeginPopupModal("Error", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {
-        ImGui::Text(u8"%s", this->deathNote.c_str());
+        ImGui::Text("%s", this->deathNote.c_str());
         ImGui::Separator();
-        if (ImGui::Button("OK", ImVec2(120, 0)))
+        if (ImGui::Button("OK", ImVec2(120.f, 0)))
         {
             ImGui::CloseCurrentPopup();
             this->resetAllStates();
-            this->webSocketPtr->stop();
         }
         ImGui::EndPopup();
     }
@@ -544,9 +545,9 @@ inline void WsClient::showWinnerPopup()
     ImGui::OpenPopup("GameOver", ImGuiPopupFlags_NoOpenOverExistingPopup);
     if (ImGui::BeginPopupModal("GameOver", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {
-        ImGui::Text(u8"%s", this->deathNote.c_str());
+        ImGui::Text("%s", this->deathNote.c_str());
         ImGui::Separator();
-        if (ImGui::Button("OK", ImVec2(120, 0)))
+        if (ImGui::Button("OK", ImVec2(120.f, 0)))
         {
             ImGui::CloseCurrentPopup();
             this->resetAllStates();
