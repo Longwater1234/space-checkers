@@ -1,5 +1,6 @@
-#pragma once
 // Created by Davis on 2024-08-04
+
+#pragma once
 #include <string>
 namespace chk
 {
