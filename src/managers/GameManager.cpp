@@ -182,7 +182,7 @@ void GameManager::handleCapturePiece(const chk::PlayerPtr &hunter, const chk::Pl
  * Whether it's Red player's turn
  * @return TRUE or FALSE
  */
-const bool &GameManager::isPlayerRedTurn() const
+const bool GameManager::isPlayerRedTurn() const
 {
     return this->playerRedTurn;
 }

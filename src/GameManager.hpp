@@ -82,7 +82,7 @@ class GameManager
     // collection of Player's next targets (Map<HunterPieceID, CaptureTarget>)
     std::unordered_map<short, chk::CaptureTarget> forcedMoves{};
 
-    [[nodiscard]] const bool &isPlayerRedTurn() const;
+    [[nodiscard]] const bool isPlayerRedTurn() const;
     [[nodiscard]] short getPieceFromCell(const int cell_idx) const;
     [[nodiscard]] const std::vector<chk::Block> &getBlockList() const;
     [[nodiscard]] bool isHunterActive() const;
