@@ -224,7 +224,7 @@ inline void WsClient::parseServerList(const cpr::Response &response)
     {
 #ifndef NDEBUG
         spdlog::error("http request failed. Reason {}", response.error.message);
-#endif //DEBUG
+#endif // DEBUG
 
         std::scoped_lock lg{this->mut};
         this->deathNote = "httpRequest error: " + response.error.message;
