@@ -272,7 +272,7 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
     requestBody.set_allocated_move_payload(movePayload);
     if (!this->wsClient->replyServer(requestBody))
     {
-        spdlog::error("failed to send message to Server");
+        this->updateMessage("failed to send message to Server");
         return;
     }
 
