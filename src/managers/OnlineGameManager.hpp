@@ -208,11 +208,12 @@ inline void OnlineGameManager::handleEvents(chk::CircularBuffer<short> &buffer)
             {
                 if (cell->containsPoint(clickedPos) && cell->getIndex() != -1)
                 {
-                    // Me
-                    const auto &mine = myTeam == chk::PlayerType::PLAYER_RED ? this->playerRed : this->playerBlack;
-                    const auto &opponent = myTeam == chk::PlayerType::PLAYER_RED ? this->playerBlack : this->playerRed;
-                    this->handleCellTap(mine, opponent, buffer, cell);
+                    // clang-format off
+                    const auto &me = (myTeam == chk::PlayerType::PLAYER_RED) ? this->playerRed : this->playerBlack;
+                    const auto &opponent = (myTeam == chk::PlayerType::PLAYER_RED) ? this->playerBlack : this->playerRed;
+                    this->handleCellTap(me, opponent, buffer, cell);
                     break;
+                    // clang-format on
                 }
             }
             //^ END inner loop
@@ -321,7 +322,7 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
             gameMap.emplace(targetCell->getIndex(), hunterPieceId);            // fill in hunter new location
             prey->losePiece(target.preyPieceId);                               // the defending player loses 1 piece
             this->sourceCell = std::nullopt;                                   // reset source cell
-            isKingNow = hunter->getOwnPieces().at(hunterPieceId)->getIsKing(); // track changes for hunter piece
+            isKingNow = hunter->getOwnPieces().at(hunterPieceId)->getIsKing(); // update changes for hunter piece
             copyHunterPiece = hunterPieceId;
             copyPreyPieceId = target.preyPieceId;
             copyPreyCell = target.preyCellIdx;
@@ -448,8 +449,8 @@ inline void OnlineGameManager::startMoveListener()
     this->wsClient->setOnMovePieceCallback([this](const chk::payload::MovePayload &payload) {
         // which color is my Opponent?
         // clang-format off
-        const chk::PlayerPtr &enemy = payload.from_team() == TeamColor::TEAM_RED ? this->playerRed : this->playerBlack;
-        const chk::PlayerPtr &myTeam = enemy->getPlayerType() == PlayerType::PLAYER_RED ? this->playerBlack : this->playerRed;
+        const chk::PlayerPtr &enemy = (payload.from_team() == TeamColor::TEAM_RED) ? this->playerRed : this->playerBlack;
+        const chk::PlayerPtr &myTeam = (enemy->getPlayerType() == PlayerType::PLAYER_RED) ? this->playerBlack : this->playerRed;
         // clang-format on
         const auto targetPosition = sf::Vector2f{payload.destination().x(), payload.destination().y()};
         const short movingPieceId = static_cast<short>(payload.piece_id());
@@ -495,7 +496,7 @@ inline void OnlineGameManager::startCaptureListener()
         }
 
         this->updateMessage(opponent->getName() + " has captured your piece!");
-        isKingNow = opponent->getOwnPieces().at(hunterPieceId)->getIsKing();    // track changes for hunter piece
+        isKingNow = opponent->getOwnPieces().at(hunterPieceId)->getIsKing();    // update changes for hunter piece
         gameMap.erase(payload.details().hunter_src_cell());                     // set hunter's old location empty!
         gameMap.erase(payload.details().prey_cell_idx());                       // set my old location empty!
         gameMap.emplace(payload.destination().cell_index(), hunterPieceId);     // fill in hunter new location
