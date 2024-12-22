@@ -57,7 +57,7 @@ inline void LocalGameManager::createAllPieces()
             {
                 sf::CircleShape circle(0.5 * chk::SIZE_CELL);
                 const float x = static_cast<float>(col % NUM_COLS) * chk::SIZE_CELL;
-                circle.setPosition(sf::Vector2f(x, row * chk::SIZE_CELL));
+                circle.setPosition(sf::Vector2f{x, row * chk::SIZE_CELL});
                 if (row < 3)
                 {
                     // Half Top cells, put BLACK piece
