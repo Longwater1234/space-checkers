@@ -369,7 +369,7 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
     this->forcedMoves.clear();
     if (isKingBefore == isKingNow)
     {
-        GameManager::identifyTargets(hunter, targetCell);
+        GameManager::identifyTargets(hunter, targetCell.get());
     }
 
     if (this->getForcedMoves().empty())
@@ -512,7 +512,7 @@ inline void OnlineGameManager::startCaptureListener()
         this->forcedMoves.clear();
         if ((isKingBefore == isKingNow) && it != this->blockList.end())
         {
-            GameManager::identifyTargets(opponent, *it);
+            GameManager::identifyTargets(opponent, it->get());
         }
 
         if (this->getForcedMoves().empty())
