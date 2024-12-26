@@ -299,7 +299,8 @@ void chk::GameManager::handleCellTap(const chk::PlayerPtr &hunter, const chk::Pl
     const short pieceId = this->getPieceFromCell(cell->getIndex());
     if (pieceId != -1)
     {
-        // YES, it has one! VERIFY IF THERE IS ANY PENDING "forced captures", if yes, verify hunter SELECTED
+        // YES, it has one! VERIFY IF THERE IS ANY PENDING "forced captures", 
+        // if yes, verify hunter SELECTED
         if (!this->getForcedMoves().empty() && this->forcedMoves.find(pieceId) == forcedMoves.end())
         {
             this->showForcedMoves(hunter, cell);
@@ -470,16 +471,16 @@ void GameManager::collectFrontLHS(const chk::PlayerPtr &hunter, const chk::Cell 
     bool hasEnemyAhead = false;
     short deltaForward = cell_ptr->getIsEvenRow() ? 4 : 5;
     short deltaBehindEnemy = cell_ptr->getIsEvenRow() ? 5 : 4;
-    int mSign = +1; // direction. up +1, down -1
+    int direction = +1; // up +1, down -1
 
     // if player piece is Black (PLAYER 2)
     if (hunter->getPlayerType() == PlayerType::PLAYER_BLACK)
     {
-        mSign = -1;
+        direction = -1;
         std::swap(deltaForward, deltaBehindEnemy);
     }
 
-    int cellAheadIdx = cell_ptr->getIndex() + (deltaForward * mSign);
+    int cellAheadIdx = cell_ptr->getIndex() + (deltaForward * direction);
     if (!this->awayFromEdge(cellAheadIdx))
     {
         return;
@@ -488,7 +489,7 @@ void GameManager::collectFrontLHS(const chk::PlayerPtr &hunter, const chk::Cell 
     const short pieceId_NW = this->getPieceFromCell(cellAheadIdx); // North West (of hunter)
     hasEnemyAhead = pieceId_NW != -1 && !hunter->hasThisPiece(pieceId_NW);
 
-    const int cellBehindEnemy = cell_ptr->getIndex() + (deltaBehindEnemy * mSign) + (deltaForward * mSign);
+    const int cellBehindEnemy = cell_ptr->getIndex() + (deltaBehindEnemy * direction) + (deltaForward * direction);
     if (!this->boardContainsCell(cellBehindEnemy))
     {
         return;
@@ -529,16 +530,16 @@ void GameManager::collectFrontRHS(const chk::PlayerPtr &hunter, const chk::Cell 
     bool hasEnemyAhead = false;
     short deltaForward = cell_ptr->getIsEvenRow() ? 3 : 4;
     short deltaBehindEnemy = cell_ptr->getIsEvenRow() ? 4 : 3;
-    int mSign = +1; // direction. up +1, down -1
+    int direction = +1; // up +1, down -1
 
     // if piece is Black (PLAYER 2)
     if (hunter->getPlayerType() == PlayerType::PLAYER_BLACK)
     {
-        mSign = -1;
+        direction = -1;
         std::swap(deltaForward, deltaBehindEnemy);
     }
 
-    const int cellAheadIdx = cell_ptr->getIndex() + (deltaForward * mSign);
+    const int cellAheadIdx = cell_ptr->getIndex() + (deltaForward * direction);
     if (!this->awayFromEdge(cellAheadIdx))
     {
         return;
@@ -546,7 +547,7 @@ void GameManager::collectFrontRHS(const chk::PlayerPtr &hunter, const chk::Cell 
     const short pieceId_NE = this->getPieceFromCell(cellAheadIdx); // North East of hunter
     hasEnemyAhead = pieceId_NE != -1 && !hunter->hasThisPiece(pieceId_NE);
 
-    const int cellBehindEnemy = cell_ptr->getIndex() + (deltaBehindEnemy * mSign) + (deltaForward * mSign);
+    const int cellBehindEnemy = cell_ptr->getIndex() + (deltaBehindEnemy * direction) + (deltaForward * direction);
     if (!this->boardContainsCell(cellBehindEnemy))
     {
         return;
