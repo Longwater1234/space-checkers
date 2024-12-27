@@ -427,26 +427,26 @@ void GameManager::identifyTargets(const PlayerPtr &hunter, const chk::Cell *sing
             this->collectBehindLHS(hunter, singleCell);
             this->collectBehindRHS(hunter, singleCell);
         }
+        // STOP HERE
+        return;
     }
-    else
+
+    // else, LOOP ENTIRE BOARD
+    for (const auto &cell_ptr : this->blockList)
     {
-        // LOOP ENTIRE BOARD
-        for (const auto &cell_ptr : this->blockList)
+        const short pieceId = this->getPieceFromCell(cell_ptr->getIndex());
+        if (gameMap.find(cell_ptr->getIndex()) == gameMap.end() || !hunter->hasThisPiece(pieceId))
         {
-            const short pieceId = this->getPieceFromCell(cell_ptr->getIndex());
-            if (gameMap.find(cell_ptr->getIndex()) == gameMap.end() || !hunter->hasThisPiece(pieceId))
-            {
-                // same reason as previous code-block
-                continue;
-            }
-            this->collectFrontLHS(hunter, cell_ptr.get());
-            this->collectFrontRHS(hunter, cell_ptr.get());
-            const auto &piecePtr = hunter->getOwnPieces().at(pieceId);
-            if (piecePtr->getIsKing())
-            {
-                this->collectBehindLHS(hunter, cell_ptr.get());
-                this->collectBehindRHS(hunter, cell_ptr.get());
-            }
+            // same reason as previous code-block
+            continue;
+        }
+        this->collectFrontLHS(hunter, cell_ptr.get());
+        this->collectFrontRHS(hunter, cell_ptr.get());
+        const auto &piecePtr = hunter->getOwnPieces().at(pieceId);
+        if (piecePtr->getIsKing())
+        {
+            this->collectBehindLHS(hunter, cell_ptr.get());
+            this->collectBehindRHS(hunter, cell_ptr.get());
         }
     }
 }
@@ -506,7 +506,7 @@ void GameManager::collectFrontLHS(const chk::PlayerPtr &hunter, const chk::Cell 
         cf.preyCellIdx = cellAheadIdx;
         cf.hunterNextCell = cellBehindEnemy;
         const auto myPieceId = this->getPieceFromCell(cell_ptr->getIndex());
-        this->forcedMoves.emplace(myPieceId, cf);
+        this->forcedMoves.emplace(myPieceId, std::move_if_noexcept(cf));
     }
 }
 
@@ -563,7 +563,7 @@ void GameManager::collectFrontRHS(const chk::PlayerPtr &hunter, const chk::Cell 
         cf.preyCellIdx = cellAheadIdx;
         cf.hunterNextCell = cellBehindEnemy;
         const auto myPieceId = this->getPieceFromCell(cell_ptr->getIndex());
-        this->forcedMoves.emplace(myPieceId, cf);
+        this->forcedMoves.emplace(myPieceId, std::move_if_noexcept(cf));
     }
 }
 
@@ -620,7 +620,7 @@ void GameManager::collectBehindRHS(const PlayerPtr &hunter, const chk::Cell *cel
         cf.preyCellIdx = cellAheadIdx;
         cf.hunterNextCell = cellBehindEnemy;
         const auto myPieceId = this->getPieceFromCell(cell_ptr->getIndex());
-        this->forcedMoves.emplace(myPieceId, cf);
+        this->forcedMoves.emplace(myPieceId, std::move_if_noexcept(cf));
     }
 }
 
@@ -675,6 +675,6 @@ void GameManager::collectBehindLHS(const PlayerPtr &hunter, const chk::Cell *cel
         cf.preyCellIdx = cellAheadIdx;
         cf.hunterNextCell = cellBehindEnemy;
         const auto myPieceId = this->getPieceFromCell(cell_ptr->getIndex());
-        this->forcedMoves.emplace(myPieceId, cf);
+        this->forcedMoves.emplace(myPieceId, std::move_if_noexcept(cf));
     }
 }
