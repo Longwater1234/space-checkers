@@ -164,7 +164,7 @@ inline void WsClient::showConnectWindow()
 inline void WsClient::showPublicServerWindow(bool &showPublic)
 {
     // =================== PUBLIC SERVERS ===============================
-    ImGui::SetNextWindowSize(ImVec2{300.0, 300.0});
+    ImGui::SetNextWindowSize(ImVec2{300.0f, 300.0f});
     if (ImGui::Begin("Public Servers", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse))
     {
         static int current_idx = 0;
@@ -222,10 +222,6 @@ inline void WsClient::parseServerList(const cpr::Response &response)
 {
     if (response.status_code != 200)
     {
-#ifndef NDEBUG
-        spdlog::error("http request failed. Reason {}", response.error.message);
-#endif // DEBUG
-
         std::scoped_lock lg{this->mut};
         this->deathNote = "httpRequest error: " + response.error.message;
         this->isDead = true;
@@ -307,7 +303,7 @@ inline void WsClient::tryConnect(std::string_view address)
     this->webSocketPtr->setUrl(address.data());
     if (!this->isConnected)
     {
-        ImGui::SetNextWindowSize(ImVec2(sf::Vector2f{400.0, 100.0}));
+        ImGui::SetNextWindowSize(ImVec2{400.0f, 100.0f});
         ImGui::Begin("Loading", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
         ImGui::Text("Connecting to online server");
         ImGui::End();
@@ -521,7 +517,7 @@ inline void WsClient::showErrorPopup()
     ImGui::OpenPopup("Error", ImGuiPopupFlags_NoOpenOverExistingPopup);
     if (ImGui::BeginPopupModal("Error", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {
-        ImGui::Text(u8"%s", this->deathNote.c_str());
+        ImGui::Text("%s", this->deathNote.c_str());
         ImGui::Separator();
         if (ImGui::Button("OK", ImVec2(120, 0)))
         {
@@ -544,7 +540,7 @@ inline void WsClient::showWinnerPopup()
     ImGui::OpenPopup("GameOver", ImGuiPopupFlags_NoOpenOverExistingPopup);
     if (ImGui::BeginPopupModal("GameOver", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {
-        ImGui::Text(u8"%s", this->deathNote.c_str());
+        ImGui::Text("%s", this->deathNote.c_str());
         ImGui::Separator();
         if (ImGui::Button("OK", ImVec2(120, 0)))
         {

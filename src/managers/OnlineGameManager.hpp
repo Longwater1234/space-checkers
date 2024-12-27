@@ -458,8 +458,8 @@ inline void OnlineGameManager::startMoveListener()
         {
             return;
         }
-        gameMap.erase(payload.source_cell());                               // set old location empty!
-        gameMap.emplace(payload.destination().cell_index(), movingPieceId); // fill in the new location
+        this->gameMap.erase(payload.source_cell());                               // set old location empty!
+        this->gameMap.emplace(payload.destination().cell_index(), movingPieceId); // fill in the new location
 
         // check for opportunities (for MYSELF)
         GameManager::identifyTargets(myTeam);
