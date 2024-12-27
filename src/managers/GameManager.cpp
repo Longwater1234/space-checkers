@@ -207,6 +207,7 @@ void chk::GameManager::doCleanup()
     this->playerBlack->emptyBasket();
     this->gameOver = true;
     this->alreadyCached = false;
+    this->sourceCell = std::nullopt;
 }
 
 /**
@@ -299,7 +300,7 @@ void chk::GameManager::handleCellTap(const chk::PlayerPtr &hunter, const chk::Pl
     const short pieceId = this->getPieceFromCell(cell->getIndex());
     if (pieceId != -1)
     {
-        // YES, it has one! VERIFY IF THERE IS ANY PENDING "forced captures", 
+        // YES, it has one! VERIFY IF THERE IS ANY PENDING "forced captures",
         // if yes, verify hunter SELECTED
         if (!this->getForcedMoves().empty() && this->forcedMoves.find(pieceId) == forcedMoves.end())
         {
