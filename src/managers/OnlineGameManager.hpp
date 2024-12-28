@@ -25,7 +25,7 @@ class OnlineGameManager final : public chk::GameManager
   protected:
     // Inherited via GameManager
     void handleMovePiece(const chk::PlayerPtr &player, const chk::PlayerPtr &opponent, const Block &destCell,
-                         const short &currentPieceId) override;
+                         const short currentPieceId) override;
     void handleCapturePiece(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,
                             const chk::Block &targetCell) override;
     void handleCellTap(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey, chk::CircularBuffer<short> &buffer,
@@ -229,7 +229,7 @@ inline void OnlineGameManager::handleEvents(chk::CircularBuffer<short> &buffer)
  * @param currentPieceId the selected PieceId
  */
 inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, const chk::PlayerPtr &opponent,
-                                               const Block &destCell, const short &currentPieceId)
+                                               const Block &destCell, const short currentPieceId)
 {
     // VERIFY if move is successful
     const bool success = player->movePiece(currentPieceId, destCell->getPos());
@@ -369,7 +369,7 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
     this->forcedMoves.clear();
     if (isKingBefore == isKingNow)
     {
-        GameManager::identifyTargets(hunter, targetCell.get());
+        GameManager::identifyTargets(hunter, targetCell);
     }
 
     if (this->getForcedMoves().empty())
@@ -512,7 +512,7 @@ inline void OnlineGameManager::startCaptureListener()
         this->forcedMoves.clear();
         if ((isKingBefore == isKingNow) && it != this->blockList.end())
         {
-            GameManager::identifyTargets(opponent, it->get());
+            GameManager::identifyTargets(opponent, *it);
         }
 
         if (this->getForcedMoves().empty())

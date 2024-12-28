@@ -10,7 +10,7 @@ struct CaptureTarget
 {
     short preyPieceId{-1};  // ID of the piece that MUST be captured
     int preyCellIdx{-1};    // the cell hosting this piece
-    int hunterNextCell{-1}; // landing destination of hunter after capturing enemy
+    int hunterNextCell{-1}; // destination of hunter AFTER capturing enemy
 
     // override output operator
     friend std::ostream &operator<<(std::ostream &os, const CaptureTarget &target)
