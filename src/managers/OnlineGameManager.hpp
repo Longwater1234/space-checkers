@@ -494,12 +494,12 @@ inline void OnlineGameManager::startCaptureListener()
         }
 
         this->updateMessage(opponent->getName() + " has captured your piece!");
-        isKingNow = opponent->getOwnPieces().at(hunterPieceId)->getIsKing();    // update changes for hunter piece
-        gameMap.erase(payload.details().hunter_src_cell());                     // set hunter's old location empty!
-        gameMap.erase(payload.details().prey_cell_idx());                       // set my old location empty!
-        gameMap.emplace(payload.destination().cell_index(), hunterPieceId);     // fill in hunter new location
-        short targetId = static_cast<short>(payload.details().prey_piece_id()); // cast to int16_t
-        myTeam->losePiece(targetId);                                            // I will lose 1 piece
+        isKingNow = opponent->getOwnPieces().at(hunterPieceId)->getIsKing(); // update changes for hunter piece
+        gameMap.erase(payload.details().hunter_src_cell());                  // set opponent's old location empty!
+        gameMap.erase(payload.details().prey_cell_idx());                    // set my old location empty!
+        gameMap.emplace(payload.destination().cell_index(), hunterPieceId);  // fill in hunter new location
+        int targetId = payload.details().prey_piece_id();                    // get the target dead piece
+        myTeam->losePiece(static_cast<short>(targetId));                     // I will lose 1 piece
 
         const int destCellIdx = payload.destination().cell_index();
         const auto it = std::find_if(blockList.begin(), blockList.end(), [&destCellIdx](const chk::Block &cell) {
