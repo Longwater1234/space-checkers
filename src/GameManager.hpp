@@ -72,7 +72,7 @@ class GameManager
     // main window
     sf::RenderWindow *window = nullptr;
     // source cell Index of selected piece
-    std::optional<int> sourceCell;
+    std::optional<int> sourceCell{};
     // all checkerboard cells
     std::vector<chk::Block> blockList{};
     // first player (p1)
@@ -91,7 +91,7 @@ class GameManager
     void doCleanup();
     void identifyTargets(const chk::PlayerPtr &hunter, const chk::Block &singleCell = nullptr);
     virtual void handleMovePiece(const chk::PlayerPtr &player, const chk::PlayerPtr &opponent, const Block &destCell,
-                                 const short &currentPieceId);
+                                 const short currentPieceId);
     virtual void handleCapturePiece(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,
                                     const chk::Block &targetCell);
     virtual void handleCellTap(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,

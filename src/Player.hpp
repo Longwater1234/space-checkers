@@ -12,7 +12,6 @@ namespace chk
 
 // alias for unique pointer of `Piece`
 using PiecePtr = std::unique_ptr<chk::Piece>;
-constexpr auto BLACK_NAME = "BLACK";
 
 class Player final
 {
@@ -72,7 +71,7 @@ inline void Player::losePiece(const short targetId)
 }
 
 /**
- * Highlight all my pieces which must capture the opponent
+ * Highlight all my hunter pieces which must capture the opponent
  * @param hunterPieces set of piece IDs
  */
 inline void Player::showForcedPieces(const std::set<short> &hunterPieces) const

@@ -29,7 +29,7 @@ using onMovePieceCallback = std::function<void(const chk::payload::MovePayload &
 using onCaptureCallback = std::function<void(const chk::payload::CapturePayload &)>;
 // when we got a winner or loser
 using onWinLoseCallback = std::function<void(std::string_view notice)>;
-
+// CDN urL
 constexpr auto cloudfront = "https://d1txhef4jwuosv.cloudfront.net/ws_server_locations.json";
 
 /**
@@ -145,7 +145,7 @@ inline void WsClient::showConnectWindow()
         if (!std::string_view(inputUrl).empty() && ImGui::Button("Connect", ImVec2{100.0f, 0}))
         {
             const char *suffix = is_secure ? "wss://" : "ws://";
-            this->final_address = suffix + std::string(inputUrl);
+            this->final_address = suffix + std::string{inputUrl};
             this->connClicked = true;
             memset(inputUrl, 0, sizeof(inputUrl));
         }
@@ -158,13 +158,13 @@ inline void WsClient::showConnectWindow()
 }
 
 /**
- * Show list of public game servers, using imgui ListBox
+ * Show list of PUBLIC game servers, using imgui ListBox
  * @param showPublic switch for showing/hiding this window
  */
 inline void WsClient::showPublicServerWindow(bool &showPublic)
 {
     // =================== PUBLIC SERVERS ===============================
-    ImGui::SetNextWindowSize(ImVec2{300.0, 300.0});
+    ImGui::SetNextWindowSize(ImVec2{300.0f, 300.0f});
     if (ImGui::Begin("Public Servers", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse))
     {
         static int current_idx = 0;
@@ -172,14 +172,14 @@ inline void WsClient::showPublicServerWindow(bool &showPublic)
         {
             for (int i = 0; i < publicServers.size(); ++i)
             {
-                const bool is_selected = (i == current_idx);
-                if (ImGui::Selectable(publicServers.at(i).name.c_str(), is_selected))
+                const bool selected = (i == current_idx);
+                if (ImGui::Selectable(publicServers.at(i).name.c_str(), selected))
                 {
                     current_idx = i;
                 }
 
                 // Set the initial focus
-                if (is_selected)
+                if (selected)
                 {
                     ImGui::SetItemDefaultFocus();
                 }
@@ -222,10 +222,6 @@ inline void WsClient::parseServerList(const cpr::Response &response)
 {
     if (response.status_code != 200)
     {
-#ifndef NDEBUG
-        spdlog::error("http request failed. Reason {}", response.error.message);
-#endif // DEBUG
-
         std::scoped_lock lg{this->mut};
         this->deathNote = "httpRequest error: " + response.error.message;
         this->isDead = true;
@@ -307,7 +303,7 @@ inline void WsClient::tryConnect(std::string_view address)
     this->webSocketPtr->setUrl(address.data());
     if (!this->isConnected)
     {
-        ImGui::SetNextWindowSize(ImVec2(sf::Vector2f{400.0, 100.0}));
+        ImGui::SetNextWindowSize(ImVec2{400.0f, 100.0f});
         ImGui::Begin("Loading", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
         ImGui::Text("Connecting to online server");
         ImGui::End();
@@ -517,13 +513,13 @@ inline void WsClient::showErrorPopup()
     }
     // Always center this next dialog
     ImVec2 center = ImGui::GetMainViewport()->GetCenter();
-    ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2(0.5, 0.5));
+    ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2{0.5, 0.5});
     ImGui::OpenPopup("Error", ImGuiPopupFlags_NoOpenOverExistingPopup);
     if (ImGui::BeginPopupModal("Error", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {
-        ImGui::Text(u8"%s", this->deathNote.c_str());
+        ImGui::Text("%s", this->deathNote.c_str());
         ImGui::Separator();
-        if (ImGui::Button("OK", ImVec2(120, 0)))
+        if (ImGui::Button("OK", ImVec2{120.0f, 0}))
         {
             ImGui::CloseCurrentPopup();
             this->resetAllStates();
@@ -540,16 +536,17 @@ inline void WsClient::showWinnerPopup()
 {
     // Always center this next dialog
     ImVec2 center = ImGui::GetMainViewport()->GetCenter();
-    ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2(0.5, 0.5));
+    ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2{0.5, 0.5});
     ImGui::OpenPopup("GameOver", ImGuiPopupFlags_NoOpenOverExistingPopup);
     if (ImGui::BeginPopupModal("GameOver", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {
-        ImGui::Text(u8"%s", this->deathNote.c_str());
+        ImGui::Text("%s", this->deathNote.c_str());
         ImGui::Separator();
-        if (ImGui::Button("OK", ImVec2(120, 0)))
+        if (ImGui::Button("OK", ImVec2{120.0f, 0}))
         {
             ImGui::CloseCurrentPopup();
             this->resetAllStates();
+            this->webSocketPtr->stop();
         }
         ImGui::EndPopup();
     }

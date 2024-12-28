@@ -11,7 +11,7 @@ namespace chk
 enum class PieceType
 {
     Red = 69995,
-    Black = 78885,
+    Black,
 };
 
 constexpr auto BLACK_NORMAL = "black_normal.png";
@@ -143,7 +143,6 @@ inline bool Piece::containsPoint(const sf::Vector2i &pos) const
  */
 inline void chk::Piece::addOutline()
 {
-
     this->myCircle.setOutlineColor(sf::Color::Yellow);
     this->myCircle.setOutlineThickness(5.0f);
 }

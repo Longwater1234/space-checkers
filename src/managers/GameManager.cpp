@@ -88,15 +88,14 @@ void GameManager::drawCheckerboard(const sf::Font &font)
  * @param currentPieceId the selected PieceId
  */
 void GameManager::handleMovePiece(const chk::PlayerPtr &player, const chk::PlayerPtr &opponent, const Block &destCell,
-                                  const short &currentPieceId)
+                                  const short currentPieceId)
 {
     if (this->gameOver)
     {
         return;
     }
     // VERIFY if move is successful
-    const bool success = player->movePiece(currentPieceId, destCell->getPos());
-    if (!success)
+    if (!player->movePiece(currentPieceId, destCell->getPos()))
     {
         return;
     }
@@ -207,6 +206,7 @@ void chk::GameManager::doCleanup()
     this->playerBlack->emptyBasket();
     this->gameOver = true;
     this->alreadyCached = false;
+    this->sourceCell = std::nullopt;
 }
 
 /**
@@ -299,7 +299,8 @@ void chk::GameManager::handleCellTap(const chk::PlayerPtr &hunter, const chk::Pl
     const short pieceId = this->getPieceFromCell(cell->getIndex());
     if (pieceId != -1)
     {
-        // YES, it has one! VERIFY IF THERE IS ANY PENDING "forced captures", if yes, verify hunter SELECTED
+        // YES, it has one! VERIFY IF THERE IS ANY PENDING "forced captures",
+        // if yes, verify hunter SELECTED
         if (!this->getForcedMoves().empty() && this->forcedMoves.find(pieceId) == forcedMoves.end())
         {
             this->showForcedMoves(hunter, cell);
@@ -403,14 +404,14 @@ bool GameManager::awayFromEdge(const int cell_idx) const
 /**
  * Collect all possible next "forced captures" for this hunter.
  * @param hunter Current player
- * @param singleCell if not NULL, only check around this cell. Otherwise, loop ENTIRE board
+ * @param singleCell if not NULL, only collect around this cell. Otherwise, loop ENTIRE board
  */
 void GameManager::identifyTargets(const PlayerPtr &hunter, const chk::Block &singleCell)
 {
     this->forcedMoves.clear();
     if (singleCell != nullptr)
     {
-        // JUST CHECK SINGLE CELL
+        // JUST CHECK AROUND this SINGLE CELL
         const short pieceId = this->getPieceFromCell(singleCell->getIndex());
         if (gameMap.find(singleCell->getIndex()) == gameMap.end() || !hunter->hasThisPiece(pieceId))
         {
@@ -425,26 +426,26 @@ void GameManager::identifyTargets(const PlayerPtr &hunter, const chk::Block &sin
             this->collectBehindLHS(hunter, singleCell);
             this->collectBehindRHS(hunter, singleCell);
         }
+        // STOP HERE
+        return;
     }
-    else
+
+    // else, LOOP ENTIRE BOARD
+    for (const auto &cell_ptr : this->blockList)
     {
-        // LOOP ENTIRE BOARD
-        for (const auto &cell_ptr : this->blockList)
+        const short pieceId = this->getPieceFromCell(cell_ptr->getIndex());
+        if (gameMap.find(cell_ptr->getIndex()) == gameMap.end() || !hunter->hasThisPiece(pieceId))
         {
-            const short pieceId = this->getPieceFromCell(cell_ptr->getIndex());
-            if (gameMap.find(cell_ptr->getIndex()) == gameMap.end() || !hunter->hasThisPiece(pieceId))
-            {
-                // same reason as previous code-block
-                continue;
-            }
-            this->collectFrontLHS(hunter, cell_ptr);
-            this->collectFrontRHS(hunter, cell_ptr);
-            const auto &piecePtr = hunter->getOwnPieces().at(pieceId);
-            if (piecePtr->getIsKing())
-            {
-                this->collectBehindLHS(hunter, cell_ptr);
-                this->collectBehindRHS(hunter, cell_ptr);
-            }
+            // same reason as previous code-block
+            continue;
+        }
+        this->collectFrontLHS(hunter, cell_ptr);
+        this->collectFrontRHS(hunter, cell_ptr);
+        const auto &piecePtr = hunter->getOwnPieces().at(pieceId);
+        if (piecePtr->getIsKing())
+        {
+            this->collectBehindLHS(hunter, cell_ptr);
+            this->collectBehindRHS(hunter, cell_ptr);
         }
     }
 }
@@ -470,16 +471,16 @@ void GameManager::collectFrontLHS(const chk::PlayerPtr &hunter, const chk::Block
     bool hasEnemyAhead = false;
     short deltaForward = cell_ptr->getIsEvenRow() ? 4 : 5;
     short deltaBehindEnemy = cell_ptr->getIsEvenRow() ? 5 : 4;
-    int mSign = +1; // direction. up +1, down -1
+    int direction = +1; // up +1, down -1
 
     // if player piece is Black (PLAYER 2)
     if (hunter->getPlayerType() == PlayerType::PLAYER_BLACK)
     {
-        mSign = -1;
+        direction = -1;
         std::swap(deltaForward, deltaBehindEnemy);
     }
 
-    int cellAheadIdx = cell_ptr->getIndex() + (deltaForward * mSign);
+    int cellAheadIdx = cell_ptr->getIndex() + (deltaForward * direction);
     if (!this->awayFromEdge(cellAheadIdx))
     {
         return;
@@ -488,7 +489,7 @@ void GameManager::collectFrontLHS(const chk::PlayerPtr &hunter, const chk::Block
     const short pieceId_NW = this->getPieceFromCell(cellAheadIdx); // North West (of hunter)
     hasEnemyAhead = pieceId_NW != -1 && !hunter->hasThisPiece(pieceId_NW);
 
-    const int cellBehindEnemy = cell_ptr->getIndex() + (deltaBehindEnemy * mSign) + (deltaForward * mSign);
+    const int cellBehindEnemy = cell_ptr->getIndex() + (deltaBehindEnemy * direction) + (deltaForward * direction);
     if (!this->boardContainsCell(cellBehindEnemy))
     {
         return;
@@ -504,7 +505,7 @@ void GameManager::collectFrontLHS(const chk::PlayerPtr &hunter, const chk::Block
         cf.preyCellIdx = cellAheadIdx;
         cf.hunterNextCell = cellBehindEnemy;
         const auto myPieceId = this->getPieceFromCell(cell_ptr->getIndex());
-        this->forcedMoves.emplace(myPieceId, cf);
+        this->forcedMoves.emplace(myPieceId, std::move_if_noexcept(cf));
     }
 }
 
@@ -529,16 +530,16 @@ void GameManager::collectFrontRHS(const chk::PlayerPtr &hunter, const chk::Block
     bool hasEnemyAhead = false;
     short deltaForward = cell_ptr->getIsEvenRow() ? 3 : 4;
     short deltaBehindEnemy = cell_ptr->getIsEvenRow() ? 4 : 3;
-    int mSign = +1; // direction. up +1, down -1
+    int direction = +1; // up +1, down -1
 
     // if piece is Black (PLAYER 2)
     if (hunter->getPlayerType() == PlayerType::PLAYER_BLACK)
     {
-        mSign = -1;
+        direction = -1;
         std::swap(deltaForward, deltaBehindEnemy);
     }
 
-    const int cellAheadIdx = cell_ptr->getIndex() + (deltaForward * mSign);
+    const int cellAheadIdx = cell_ptr->getIndex() + (deltaForward * direction);
     if (!this->awayFromEdge(cellAheadIdx))
     {
         return;
@@ -546,7 +547,7 @@ void GameManager::collectFrontRHS(const chk::PlayerPtr &hunter, const chk::Block
     const short pieceId_NE = this->getPieceFromCell(cellAheadIdx); // North East of hunter
     hasEnemyAhead = pieceId_NE != -1 && !hunter->hasThisPiece(pieceId_NE);
 
-    const int cellBehindEnemy = cell_ptr->getIndex() + (deltaBehindEnemy * mSign) + (deltaForward * mSign);
+    const int cellBehindEnemy = cell_ptr->getIndex() + (deltaBehindEnemy * direction) + (deltaForward * direction);
     if (!this->boardContainsCell(cellBehindEnemy))
     {
         return;
@@ -561,7 +562,7 @@ void GameManager::collectFrontRHS(const chk::PlayerPtr &hunter, const chk::Block
         cf.preyCellIdx = cellAheadIdx;
         cf.hunterNextCell = cellBehindEnemy;
         const auto myPieceId = this->getPieceFromCell(cell_ptr->getIndex());
-        this->forcedMoves.emplace(myPieceId, cf);
+        this->forcedMoves.emplace(myPieceId, std::move_if_noexcept(cf));
     }
 }
 
@@ -618,7 +619,7 @@ void GameManager::collectBehindRHS(const PlayerPtr &hunter, const chk::Block &ce
         cf.preyCellIdx = cellAheadIdx;
         cf.hunterNextCell = cellBehindEnemy;
         const auto myPieceId = this->getPieceFromCell(cell_ptr->getIndex());
-        this->forcedMoves.emplace(myPieceId, cf);
+        this->forcedMoves.emplace(myPieceId, std::move_if_noexcept(cf));
     }
 }
 
@@ -673,6 +674,6 @@ void GameManager::collectBehindLHS(const PlayerPtr &hunter, const chk::Block &ce
         cf.preyCellIdx = cellAheadIdx;
         cf.hunterNextCell = cellBehindEnemy;
         const auto myPieceId = this->getPieceFromCell(cell_ptr->getIndex());
-        this->forcedMoves.emplace(myPieceId, cf);
+        this->forcedMoves.emplace(myPieceId, std::move_if_noexcept(cf));
     }
 }
