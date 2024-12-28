@@ -62,7 +62,7 @@ inline void Player::receivePiece(chk::PiecePtr &piecePtr)
 }
 
 /**
- * When a player's piece is captured, -1 from list
+ * When a player's piece is captured, remove it from basket
  * @param targetId  the captured piece Id
  */
 inline void Player::losePiece(const short targetId)
