@@ -95,8 +95,7 @@ void GameManager::handleMovePiece(const chk::PlayerPtr &player, const chk::Playe
         return;
     }
     // VERIFY if move is successful
-    const bool success = player->movePiece(currentPieceId, destCell->getPos());
-    if (!success)
+    if (!player->movePiece(currentPieceId, destCell->getPos()))
     {
         return;
     }
@@ -412,7 +411,7 @@ void GameManager::identifyTargets(const PlayerPtr &hunter, const chk::Block &sin
     this->forcedMoves.clear();
     if (singleCell != nullptr)
     {
-        // JUST CHECK SINGLE CELL
+        // JUST CHECK AROUND this SINGLE CELL
         const short pieceId = this->getPieceFromCell(singleCell->getIndex());
         if (gameMap.find(singleCell->getIndex()) == gameMap.end() || !hunter->hasThisPiece(pieceId))
         {

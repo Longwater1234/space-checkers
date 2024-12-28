@@ -232,13 +232,11 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
                                                const Block &destCell, const short currentPieceId)
 {
     // VERIFY if move is successful
-    const bool success = player->movePiece(currentPieceId, destCell->getPos());
-    if (!success)
+    if (!player->movePiece(currentPieceId, destCell->getPos()))
     {
-        std::cout << "move not success " << std::endl;
         return;
     }
-    int copySrcCell = this->sourceCell.value();
+    const int copySrcCell = this->sourceCell.value();
     gameMap.erase(this->sourceCell.value());               // set old location empty!
     gameMap.emplace(destCell->getIndex(), currentPieceId); // fill in the new location
     this->sourceCell = std::nullopt;                       // reset source cell
@@ -361,7 +359,7 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
     basePayload.set_allocated_capture_payload(capturePayload);
     if (!this->wsClient->replyServer(basePayload))
     {
-        spdlog::error("failed to send message to Server");
+        this->updateMessage("failed to send message to Server");
         return;
     }
 

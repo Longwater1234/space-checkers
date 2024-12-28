@@ -519,7 +519,7 @@ inline void WsClient::showErrorPopup()
     {
         ImGui::Text("%s", this->deathNote.c_str());
         ImGui::Separator();
-        if (ImGui::Button("OK", ImVec2(120, 0)))
+        if (ImGui::Button("OK", ImVec2{120.0f, 0}))
         {
             ImGui::CloseCurrentPopup();
             this->resetAllStates();
@@ -542,10 +542,11 @@ inline void WsClient::showWinnerPopup()
     {
         ImGui::Text("%s", this->deathNote.c_str());
         ImGui::Separator();
-        if (ImGui::Button("OK", ImVec2(120, 0)))
+        if (ImGui::Button("OK", ImVec2{120.0f, 0}))
         {
             ImGui::CloseCurrentPopup();
             this->resetAllStates();
+            this->webSocketPtr->stop();
         }
         ImGui::EndPopup();
     }
