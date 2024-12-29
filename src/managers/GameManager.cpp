@@ -190,7 +190,7 @@ const bool GameManager::isPlayerRedTurn() const
  * Store the cell idx from which the piece is LEAVING
  * @param src_cell index of the cell
  */
-void GameManager::setSourceCell(int src_cell)
+void GameManager::setSourceCell(const int src_cell)
 {
     this->sourceCell = src_cell;
 }
