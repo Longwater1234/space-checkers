@@ -225,7 +225,7 @@ bool GameManager::isHunterActive() const
 }
 
 /**
- * Using cached gameMap, get the PieceId placed at this cell_index
+ * Using cached gameMap, get the PieceId found at this cell_index
  *
  * @param cell_idx the clicked cell
  * @return positive number or -1 if not found

@@ -50,7 +50,7 @@ endif()
 
 # COPY resources folder to destination
 if(NOT APPLE)
-  add_custom_command(
+  add_custom_command( 
     TARGET SpaceCheckers 
     POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/resources
