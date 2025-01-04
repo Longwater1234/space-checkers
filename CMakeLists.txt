@@ -43,9 +43,9 @@ include_directories(${SFML_HOME}/include)
 
 # show warnings (depending on C++ compiler)
 if(MSVC)
-  target_compile_options(SpaceCheckers PRIVATE /W4 /sdl)
+  target_compile_options(SpaceCheckers PRIVATE /W4 /sdl /Qvec-report:1)
 else()  
-  target_compile_options(SpaceCheckers PRIVATE -Wall) 
+  target_compile_options(SpaceCheckers PRIVATE -Wall "-Rpass=loop-vectorize") 
 endif()
 
 # COPY resources folder to destination
