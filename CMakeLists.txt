@@ -14,11 +14,14 @@ endif()
 # ==== UPDATE ME HERE ===========
 # Absolute path where you installed SFML (Required on Windows)
 set(SFML_HOME "C:/SFML/SFML-2.6.1")
+if(APPLE)
+set(SFML_HOME "/Library/Frameworks/SFML.framework/")
+ENDIF()
 
 file(GLOB_RECURSE GAME_SRC "src/*.cpp" "src/*.hpp")  
 set(SFML_DIR ${SFML_HOME}/lib/cmake/SFML) 
 
-find_package(SFML 2.6 REQUIRED COMPONENTS "graphics" "window" "system")
+find_package(SFML 2.6 REQUIRED COMPONENTS "graphics" "window" "system") 
 
 # download extra libs  
 add_subdirectory(dependencies)   
@@ -45,7 +48,7 @@ include_directories(${SFML_HOME}/include)
 if(MSVC)
   target_compile_options(SpaceCheckers PRIVATE /W4 /sdl /Qvec-report:1)
 else()  
-  target_compile_options(SpaceCheckers PRIVATE -Wall "-Rpass=loop-vectorize") 
+  target_compile_options(SpaceCheckers PRIVATE -Wall) 
 endif()
 
 # COPY resources folder to destination
