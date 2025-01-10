@@ -62,7 +62,7 @@ int main()
     // create pieces and give each player their own
     manager->createAllPieces();
 
-    // Storing currently clicked Piece. (NOTE: using braces constructor)
+    // Storing currently clicked Piece. (NOTE: using curly braces)
     chk::CircularBuffer<short> circularBuffer{1};
 
     // THE STATUS TEXT
