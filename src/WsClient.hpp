@@ -498,7 +498,7 @@ inline void WsClient::runServerLoop()
             }
         }
     }
-    std::scoped_lock lg(this->mut);
+    std::scoped_lock lg{this->mut};
     this->msgBuffer.clean();
 }
 
