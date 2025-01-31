@@ -243,7 +243,7 @@ inline bool Piece::moveCapture(const sf::Vector2f &destPos)
         return false;
     }
 
-    this->move(sf::Vector2f{deltaX, deltaY});
+    this->move(sf::Vector2f{deltaX, deltaY}); // means "move by (x,y) amout"
     this->myCircle.setPosition(this->getPosition());
     if ((this->pieceType == PieceType::Red && destPos.y == 0) ||
         (this->pieceType == PieceType::Black && destPos.y == 7 * chk::SIZE_CELL))

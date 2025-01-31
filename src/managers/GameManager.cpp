@@ -190,7 +190,7 @@ const bool GameManager::isPlayerRedTurn() const
  * Store the cell idx from which the piece is LEAVING
  * @param src_cell index of the cell
  */
-void GameManager::setSourceCell(int src_cell)
+void GameManager::setSourceCell(const int src_cell)
 {
     this->sourceCell = src_cell;
 }
@@ -225,7 +225,7 @@ bool GameManager::isHunterActive() const
 }
 
 /**
- * Using cached gameMap, get the PieceId placed at this cell_index
+ * Using cached gameMap, get the PieceId found at this cell_index
  *
  * @param cell_idx the clicked cell
  * @return positive number or -1 if not found

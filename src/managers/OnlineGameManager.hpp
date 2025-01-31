@@ -73,7 +73,6 @@ inline OnlineGameManager::OnlineGameManager(sf::RenderWindow *windowPtr)
 
 /**
  * Wait for server to generate random IDs and deliver the response, then give each player their own set of pieces
- * @param pieceList destination of created pieces
  */
 inline void chk::OnlineGameManager::createAllPieces()
 {

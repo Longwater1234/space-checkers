@@ -134,7 +134,7 @@ inline void WsClient::showConnectWindow()
     }
 
     // =================== PRIVATE SERVERS ===============================
-    ImGui::SetNextWindowSize(ImVec2{300.0, 300.0});
+    ImGui::SetNextWindowSize(ImVec2{300.0f, 300.0f});
     static char inputUrl[256] = "127.0.0.1:9876/game";
     if (ImGui::Begin("Private Server", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse))
     {
@@ -498,7 +498,7 @@ inline void WsClient::runServerLoop()
             }
         }
     }
-    std::scoped_lock lg(this->mut);
+    std::scoped_lock lg{this->mut};
     this->msgBuffer.clean();
 }
 
@@ -513,7 +513,7 @@ inline void WsClient::showErrorPopup()
     }
     // Always center this next dialog
     ImVec2 center = ImGui::GetMainViewport()->GetCenter();
-    ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2{0.5, 0.5});
+    ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2{0.5f, 0.5f});
     ImGui::OpenPopup("Error", ImGuiPopupFlags_NoOpenOverExistingPopup);
     if (ImGui::BeginPopupModal("Error", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {
@@ -536,7 +536,7 @@ inline void WsClient::showWinnerPopup()
 {
     // Always center this next dialog
     ImVec2 center = ImGui::GetMainViewport()->GetCenter();
-    ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2{0.5, 0.5});
+    ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2{0.5f, 0.5f});
     ImGui::OpenPopup("GameOver", ImGuiPopupFlags_NoOpenOverExistingPopup);
     if (ImGui::BeginPopupModal("GameOver", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {

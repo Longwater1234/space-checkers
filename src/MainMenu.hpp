@@ -20,7 +20,7 @@ constexpr auto ICON_PATH = "win-icon-16.png";
 constexpr auto FONT_PATH = "notosans-regular.ttf";
 constexpr auto APP_VERSION = "v1.0.9";
 
-enum class UserChoice : uint16_t
+enum class UserChoice
 {
     LOCAL_PLAY = 38483, // playing offline
     ONLINE_PLAY,        // playing online
