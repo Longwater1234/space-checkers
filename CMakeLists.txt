@@ -13,7 +13,7 @@ endif()
 
 # ==== UPDATE ME HERE ===========
 # Absolute path where you installed SFML (Required on Windows)
-set(SFML_HOME "C:/SFML/SFML-2.6.1")
+set(SFML_HOME "C:/SFML/SFML-2.6.1") 
 # ==========================
 
 # Collect all sources
