@@ -26,11 +26,15 @@ cmake --build . --config Release --target all
 ## Using CMake GUI (all destkop platforms)
 
 - Download CMake GUI installer for your OS from the official site. (supported on all desktop OS)
-- On MacOS, to add Cmake CLI to path, run the following command:
+- On MacOS, after installing the GUI, add Cmake CLI to path, run the following command:
   ```bash
    sudo "/Applications/CMake.app/Contents/bin/cmake-gui" --install
   ```
+- Refer to the screenshot below:
+![cmake_screenshot](cmake/cmake_gui_screenshot.png)
 
-- Set "Source Folder" to this project root. Then set "Build Folder" to a NEW _relative_ folder `/build` or `/out`. See image above. Then click "**Configure**",
-- In the next screen, Choose **Unix Makefiles** on Linux & Mac. Choose **Visual Studio** on Windows. Then click OK. Click Configure once more, then **Generate**.
-- Finally, open build folder, then run `make all` in Terminal (Linux and macOS). On Windows, double-click the generated VS project `.sln` file.
+- Set "Source Folder" (1) to this project root. Then set "Build Folder" (2) to a NEW _relative_ folder `/build` or `/out`. See image above. Then (3) click "**Configure**",
+- In the next screen, Choose **Unix Makefiles** on Linux; choose **Xcode** on Mac. Choose **Visual Studio** on Windows. Then click OK to save. 
+- Make sure CMAKE_BUILD_TYPE is **Release**.
+- Click Configure once again, then **Generate**.
+- Finally, open build folder, then run `make all` in Terminal (Linux). On Windows and MacOS, click open project for building.
