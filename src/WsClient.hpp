@@ -82,5 +82,4 @@ class WsClient final
     void resetAllStates();
 };
 
-
 } // namespace chk
