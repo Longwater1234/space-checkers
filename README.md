@@ -56,7 +56,7 @@ The only dependency you need pre-installed on your OS is SFML 2.6.x (or newer).
 
 ## Building Instructions
 
-Please see [BUILDING.md](BUILDING.md) for detailed instructions.
+Please see [BUILDING.md](BUILDING.md) for detailed instructions. For macOS-specific build guide with XCode, please refer to [instructions](cmake/macbundle.cmake)
 
 ### License
 
