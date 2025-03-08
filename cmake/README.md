@@ -1,6 +1,6 @@
 ## What's 'macbundle.cmake' for?
 
-This contains cmake instructions to build MacOS GUI `.app` bundle. It embeds the icon to the app bundle. It also copies all static assets into the bundle at build time.
+This contains CMake script to build MacOS GUI `.app` bundle. It embeds the icon to the app bundle. It also copies all static assets into the bundle at build time.
 
 If you installed SFML as "Frameworks", you will need to tell XCode to copy them into the bundle before Building. Follow these steps: 
 
