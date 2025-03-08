@@ -20,7 +20,7 @@ namespace chk
  * Atomically update main UI message
  * @param msg the message content
  */
-void GameManager::updateMessage(const std::string_view msg)
+void GameManager::updateMessage(std::string_view msg)
 {
     std::scoped_lock<std::mutex> lg(my_mutex);
     this->currentMsg = msg;
@@ -107,7 +107,7 @@ void GameManager::handleMovePiece(const chk::PlayerPtr &player, const chk::Playe
 
     if (!this->forcedMoves.empty())
     {
-        spdlog::info(player->getName() + " IS IN DANGER ");
+        this->updateMessage(player->getName() + " IS IN DANGER");
     }
     this->playerRedTurn = !this->playerRedTurn; // toggle player turns
     this->updateMessage(player->getName() + " has moved to " + std::to_string(destCell->getIndex()) + ". It's " +
@@ -150,7 +150,7 @@ void GameManager::handleCapturePiece(const chk::PlayerPtr &hunter, const chk::Pl
             gameMap.emplace(targetCell->getIndex(), hunterPieceId);            // fill in hunter new location
             prey->losePiece(target.preyPieceId);                               // the defending player loses 1 piece
             this->sourceCell = std::nullopt;                                   // reset source cell
-            isKingNow = hunter->getOwnPieces().at(hunterPieceId)->getIsKing(); // track changes after capture
+            isKingNow = hunter->getOwnPieces().at(hunterPieceId)->getIsKing(); // UPDATE changes after capture
             break;
         }
     }
@@ -159,7 +159,6 @@ void GameManager::handleCapturePiece(const chk::PlayerPtr &hunter, const chk::Pl
         return;
     }
     //  Check for extra opportunities (only if hunter has NOT just became KING)
-    this->forcedMoves.clear();
     if (isKingBefore == isKingNow)
     {
         GameManager::identifyTargets(hunter, targetCell);
@@ -173,8 +172,7 @@ void GameManager::handleCapturePiece(const chk::PlayerPtr &hunter, const chk::Pl
     }
     else
     {
-        spdlog::info(prey->getName() + " IS IN DANGER");
-        this->updateMessage(prey->getName() + " IS IN DANGER");
+        this->updateMessage(prey->getName() + " IS IN DANGER again");
     }
 }
 
