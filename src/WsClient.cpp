@@ -1,7 +1,7 @@
 #include "WsClient.hpp"
 
-using namespace chk;
-
+namespace chk
+{
 chk::WsClient::WsClient()
 {
     ix::initNetSystem();
@@ -138,7 +138,7 @@ void WsClient::asyncFetchPublicServers()
  * Parse the JSON response of server list then display them
  * @param response From the previous request
  */
-void chk::WsClient::parseServerList(const cpr::Response &response)
+void WsClient::parseServerList(const cpr::Response &response)
 {
     if (response.status_code != 200)
     {
@@ -174,7 +174,7 @@ void chk::WsClient::parseServerList(const cpr::Response &response)
 /**
  * Reset all local states to FALSE or empty string
  */
-void chk::WsClient::resetAllStates()
+void WsClient::resetAllStates()
 {
     this->isConnected = false;
     this->connClicked = false;
@@ -186,13 +186,13 @@ void chk::WsClient::resetAllStates()
 /**
  * Run main loop of showing connection window, tryConnect, and handle exchanges
  */
-void chk::WsClient::runMainLoop()
+void WsClient::runMainLoop()
 {
 
     // clang-format off
     if (!isConnected) {
         if (!connClicked) {
-           this->showConnectWindow();
+            this->showConnectWindow();
         } else {
             this->tryConnect(final_address);
         }
@@ -201,12 +201,12 @@ void chk::WsClient::runMainLoop()
     else {
         this->runServerLoop();
     }
-   
-    if (this->isDead) { 
-       // some error happened 🙁
-       if (this->_onDeathCallback != nullptr) {
-           _onDeathCallback(this->deathNote);
-       }
+    
+    if (this->isDead) {
+        // some error happened 🙁
+        if (this->_onDeathCallback != nullptr) {
+            _onDeathCallback(this->deathNote);
+        }
         this->showErrorPopup();
     } else if (this->haveWinner) {
         this->showWinnerPopup();
@@ -218,7 +218,7 @@ void chk::WsClient::runMainLoop()
  * Try to connect to Server
  * @param address server IP or URI
  */
-void chk::WsClient::tryConnect(std::string_view address)
+void WsClient::tryConnect(std::string_view address)
 {
     this->webSocketPtr->setUrl(address.data());
     if (!this->isConnected)
@@ -348,7 +348,7 @@ bool WsClient::replyServer(const chk::payload::BasePayload &payload) const
 /**
  * Exchange messages with the server and update the game accordingly. if any error happen, close connection
  */
-void chk::WsClient::runServerLoop()
+void WsClient::runServerLoop()
 {
     for (const auto &msg : this->msgBuffer.getAll())
     {
@@ -454,7 +454,7 @@ void WsClient::showErrorPopup()
 /**
  * Show winner/loser popup window.
  */
-void WsClient::showWinnerPopup()
+void chk::WsClient::showWinnerPopup()
 {
     // Always center this next dialog
     ImVec2 center = ImGui::GetMainViewport()->GetCenter();
@@ -473,3 +473,4 @@ void WsClient::showWinnerPopup()
         ImGui::EndPopup();
     }
 }
+} // namespace chk

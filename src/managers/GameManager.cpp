@@ -4,7 +4,8 @@
 //
 #include "../GameManager.hpp"
 
-using namespace chk;
+namespace chk
+{
 
 /**
  * Get hashmap of hunter pieceID's to the assigned CaptureTarget
@@ -677,3 +678,5 @@ void GameManager::collectBehindLHS(const PlayerPtr &hunter, const chk::Block &ce
         this->forcedMoves.emplace(myPieceId, std::move_if_noexcept(cf));
     }
 }
+
+} // namespace chk
