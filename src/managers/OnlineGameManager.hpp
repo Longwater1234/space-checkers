@@ -300,7 +300,7 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
     bool isKingBefore = false;
     bool isKingNow = false;
 
-    bool isCaptured = false; // external guard to verify if Capture completed
+    bool isCaptured = false; // external guard to verify capture is completed
 
     for (const auto &[hunterPieceId, target] : this->getForcedMoves())
     {

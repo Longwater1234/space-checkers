@@ -133,7 +133,7 @@ void GameManager::handleCapturePiece(const chk::PlayerPtr &hunter, const chk::Pl
     bool isKingBefore = false;
     bool isKingNow = false;
 
-    bool isCaptured = false; // outside guard to verify if Capture completed
+    bool isCaptured = false; // outside guard to verify if capture completed
     for (const auto &[hunterPieceId, target] : this->forcedMoves)
     {
         if (target.hunterNextCell == targetCell->getIndex())
@@ -172,7 +172,7 @@ void GameManager::handleCapturePiece(const chk::PlayerPtr &hunter, const chk::Pl
     }
     else
     {
-        this->updateMessage(prey->getName() + " IS IN DANGER again");
+        this->updateMessage(prey->getName() + " is in DANGER again!");
     }
 }
 
