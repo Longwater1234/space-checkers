@@ -401,14 +401,14 @@ inline void OnlineGameManager::handleCellTap(const chk::PlayerPtr &hunter, const
     const short pieceId = this->getPieceFromCell(cell->getIndex());
     if (pieceId != -1)
     {
-        // YES, it has one! VERIFY IF THERE IS ANY PENDING "forced captures", if yes, verify hunter SELECTED
+        // YES, it has one! VERIFY IF THERE IS ANY PENDING "forced captures".
         const bool notSelected = this->getForcedMoves().find(pieceId) == this->getForcedMoves().end();
         if (!this->getForcedMoves().empty() && notSelected)
         {
             this->showForcedMoves(hunter, cell);
             return;
         }
-        // OTHERWISE, store it in buffer (for a simple move, next turn)
+        // OTHERWISE, store it in buffer (for a simple move, on next turn)
         buffer.addItem(pieceId);
         this->setSourceCell(cell->getIndex());
     }

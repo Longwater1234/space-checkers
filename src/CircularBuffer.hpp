@@ -22,7 +22,7 @@ template <typename T> class CircularBuffer
         m_deque.resize(max_capacity);
     }
     CircularBuffer() = delete;
-    CircularBuffer(CircularBuffer &&other) = delete;
+    CircularBuffer &operator=(const CircularBuffer &) = delete;
     CircularBuffer(CircularBuffer &other) = delete;
     void addItem(const T &item);
     T &getTop() noexcept;

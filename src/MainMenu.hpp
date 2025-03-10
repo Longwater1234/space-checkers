@@ -124,7 +124,7 @@ inline void MainMenu::handleEvents(chk::UserChoice &result)
 }
 
 /**
- * The main loop, renders the main menu screen at 60FPS 
+ * The main loop, renders the main menu screen at 60FPS
  * @return user choice for game Mode
  */
 inline chk::UserChoice MainMenu::runMainLoop()
