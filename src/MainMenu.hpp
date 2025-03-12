@@ -14,6 +14,7 @@
 #include <SFML/Window/Mouse.hpp>
 #include <memory>
 #include <string>
+
 namespace chk
 {
 constexpr auto ICON_PATH = "win-icon-16.png";
@@ -26,10 +27,16 @@ enum class UserChoice
     ONLINE_PLAY,        // playing online
 };
 
+/**
+ * Shown first when game is launched
+ */
 class MainMenu final
 {
   public:
     explicit MainMenu(sf::RenderWindow *windowPtr);
+    MainMenu() = delete;
+    MainMenu(const MainMenu &) = delete;
+    MainMenu &operator=(const MainMenu &) = delete;
     chk::UserChoice runMainLoop();
 
   private:
