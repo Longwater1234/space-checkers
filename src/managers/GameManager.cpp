@@ -259,7 +259,7 @@ void GameManager::matchCellsToPieces(const std::vector<chk::PiecePtr> &pieceList
         }
     }
     this->alreadyCached = true;
-    spdlog::info("gamMap size {}", std::to_string(gameMap.size()));
+    spdlog::info("gameMap size {}", gameMap.size());
 }
 
 /**
