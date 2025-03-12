@@ -46,7 +46,7 @@ include_directories(${SFML_HOME}/include)
 if(MSVC)
   target_compile_options(SpaceCheckers PRIVATE /W4 /sdl /Qvec-report:1)
 else()  
-  target_compile_options(SpaceCheckers PRIVATE -Wall) 
+  target_compile_options(SpaceCheckers PRIVATE -Wall -Werror=overflow) 
 endif()
 
 # COPY resources folder to destination

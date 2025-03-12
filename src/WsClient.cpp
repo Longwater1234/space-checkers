@@ -87,10 +87,10 @@ void WsClient::showPublicServerWindow(bool &showPublic)
     ImGui::SetNextWindowSize(ImVec2{300.0f, 300.0f});
     if (ImGui::Begin("Public Servers", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse))
     {
-        static int current_idx = 0;
+        static size_t current_idx{0};
         if (ImGui::BeginListBox("Select One"))
         {
-            for (int i = 0; i < publicServers.size(); ++i)
+            for (size_t i = 0; i < publicServers.size(); ++i)
             {
                 const bool selected = (i == current_idx);
                 if (ImGui::Selectable(publicServers.at(i).name.c_str(), selected))
