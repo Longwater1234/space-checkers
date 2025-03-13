@@ -64,8 +64,8 @@ void chk::WsClient::showConnectWindow()
         ImGui::Checkbox("Secure", &is_secure);
         if (!std::string_view(inputUrl).empty() && ImGui::Button("Connect", ImVec2{100.0f, 0}))
         {
-            const char *suffix = is_secure ? "wss://" : "ws://";
-            this->final_address = suffix + std::string{inputUrl};
+            const char *prefix = is_secure ? "wss://" : "ws://";
+            this->final_address = prefix + std::string{inputUrl};
             this->connClicked = true;
             memset(inputUrl, 0, sizeof(inputUrl));
         }
