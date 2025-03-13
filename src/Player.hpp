@@ -87,7 +87,7 @@ inline void Player::showForcedPieces(const std::set<short> &hunterPieces) const
 }
 
 /**
- * Remove all pieces from my basket
+ * Remove all pieces from this player's ownership
  */
 inline void Player::emptyBasket()
 {
