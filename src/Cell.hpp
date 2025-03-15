@@ -60,7 +60,7 @@ inline void Cell::draw(sf::RenderTarget &target, sf::RenderStates states) const
 }
 
 /**
- * Whether this cell is in even numbered row
+ * Whether this cell is in even-numbered row
  * @return TRUE or FALSE
  */
 inline bool Cell::getIsEvenRow() const

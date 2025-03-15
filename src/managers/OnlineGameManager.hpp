@@ -296,11 +296,11 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
     int copySrcCell = 0;     // hunter src cell
     int copyPreyPieceId = 0;
     int copyPreyCell = 0;
-    // track King state for Hunter piece
+    // track King status for Hunter piece
     bool isKingBefore = false;
     bool isKingNow = false;
 
-    bool isCaptured = false; // external guard to verify if Capture completed
+    bool isCaptured = false; // external guard to verify capture is completed
 
     for (const auto &[hunterPieceId, target] : this->getForcedMoves())
     {
@@ -378,6 +378,7 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
     else
     {
         spdlog::info("WE HAVE EXTRA TARGETS TO HUNT");
+        this->updateMessage("Continue. You can capture another piece!");
     }
 }
 
@@ -385,7 +386,7 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
  * When current player taps any playable cell.
  * @param hunter currentPlayer
  * @param prey the opposing player
- * @param buffer Temporary store for clicked Pieces
+ * @param buffer Temporary store for clicked Piece
  * @param cell Tapped cell
  */
 inline void OnlineGameManager::handleCellTap(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,
@@ -400,14 +401,14 @@ inline void OnlineGameManager::handleCellTap(const chk::PlayerPtr &hunter, const
     const short pieceId = this->getPieceFromCell(cell->getIndex());
     if (pieceId != -1)
     {
-        // YES, it has one! VERIFY IF THERE IS ANY PENDING "forced captures", if yes, verify hunter SELECTED
+        // YES, it has one! VERIFY IF THERE IS ANY PENDING "forced captures".
         const bool notSelected = this->getForcedMoves().find(pieceId) == this->getForcedMoves().end();
         if (!this->getForcedMoves().empty() && notSelected)
         {
             this->showForcedMoves(hunter, cell);
             return;
         }
-        // OTHERWISE, store it in buffer (for a simple move, next turn)
+        // OTHERWISE, store it in buffer (for a simple move, on next turn)
         buffer.addItem(pieceId);
         this->setSourceCell(cell->getIndex());
     }
@@ -498,15 +499,14 @@ inline void OnlineGameManager::startCaptureListener()
         gameMap.erase(payload.details().prey_cell_idx());                    // set my old location empty!
         gameMap.emplace(payload.destination().cell_index(), hunterPieceId);  // fill in hunter new location
         int targetId = payload.details().prey_piece_id();                    // get the target dead piece
-        myTeam->losePiece(static_cast<short>(targetId));                     // I will lose 1 piece
+        myTeam->losePiece(static_cast<short>(targetId));                     // I will lose one piece
 
         const int destCellIdx = payload.destination().cell_index();
         const auto it = std::find_if(blockList.begin(), blockList.end(), [&destCellIdx](const chk::Block &cell) {
             return cell->getIndex() == destCellIdx;
         });
 
-        // Check for extra opportunities NOW (for Enemy), only if they did NOT just become King
-        this->forcedMoves.clear();
+        // Check for extra opportunities (for Enemy), only if Enemy did NOT just become King
         if ((isKingBefore == isKingNow) && it != this->blockList.end())
         {
             GameManager::identifyTargets(opponent, *it);

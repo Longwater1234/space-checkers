@@ -34,7 +34,7 @@ cmake --build . --config Release --target all
 ![cmake_screenshot](cmake/cmake_gui_screenshot.png)
 
 - Set "Source Folder" (1) to this project root. Then set "Build Folder" (2) to a NEW _relative_ folder `/build` or `/out`. See image above. Then (3) click "**Configure**",
-- In the next screen, Choose **Unix Makefiles** on Linux; choose **Xcode** on Mac. Choose **Visual Studio** on Windows. Then click OK to save. 
+- In the next screen, Choose **Unix Makefiles** if on Linux; choose **XCode** if on Mac. Choose **Visual Studio** if on Windows. Then click OK to save. 
 - Make sure CMAKE_BUILD_TYPE is **Release**.
 - Click Configure once again, then **Generate**.
-- Finally, open build folder, then run `make all` in Terminal (Linux). On Windows and MacOS, click open project for building.
+- Finally, on Windows and MacOS, click **Open Project** for building in respective IDE. On Linux desktop, open build folder, then run `make all` in Terminal. 
