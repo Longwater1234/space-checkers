@@ -40,6 +40,12 @@ The only dependency you need pre-installed on your OS is SFML 2.6.x (or newer).
   sudo xcode-select --install
 ```
 
+- After installing the CMake GUI, add its accompanied CLI to Path, run the following command:
+
+```bash
+   sudo "/Applications/CMake.app/Contents/bin/cmake-gui" --install
+```
+
 ### For Linux Destkop
 
 - Latest display drivers
@@ -52,11 +58,11 @@ The only dependency you need pre-installed on your OS is SFML 2.6.x (or newer).
   sudo apt install libssl-dev
 ```
 
-- Luckily, Windows and macOS **come with their native SSL libs built-in**, so nothing more to do :-)
+- Luckily, Windows and macOS come with their **native SSL libs pre-installed**, so nothing more to do 😁
 
 ## Building Instructions
 
-Please see [BUILDING.md](BUILDING.md) for detailed instructions. For macOS-specific build guide with XCode, please [see this doc](cmake/README.md)
+Please see [BUILDING.md](BUILDING.md) for detailed instructions. For macOS-specific guide with XCode, please [see this doc](cmake/README.md)
 
 ### License
 

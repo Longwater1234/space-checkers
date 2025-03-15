@@ -1,46 +1,13 @@
-- [ ] Dont allow immediate capture, if Hunter Piece just became King (wasnt king before capture)
-- [ ] reset isMyTurn after game is over.
-- [ ] reset all states to FALSE inside OnlineManager after game is over
+# TODO list
 
-  192.168.2.110:9876/game
+- [ ] (Online mode) Display countdown timer (40 s), waiting for player's move. Reset it when they make a move.
+- [ ] Record and list all previous moves and captures (for current match), in a scroll window.
 
-```cpp
-#include <iostream>
-using namespace std;
+### (Extras) Standard CJK font paths
 
-bool xnor(bool p, bool q) {
-    return !(p ^ q);
-}
-
-int main() {
-    bool p = true;
-    bool q = false;
-
-    bool result = xnor(p, q);
-
-    if (result) {
-        cout << "XNOR is true" << endl;
-    } else {
-        cout << "XNOR is false" << endl;
-    }
-
-    return 0;
-}
-
-```
-
-## GAME LOGS
-
-### first game
-
-- start time: 19:31:12
-- end time: 19:35:17
-
-### Standard CJK font paths
-
-- Windows: `C:/Windows/Fonts/ARIALUNI.TTF.ttf`
+- Windows 10/11: `C:/Windows/Fonts/msyc.ttc`
 - MacOS: `/System/Library/Fonts/PingFang.ttc`
-- How to load cjk font in imgui
+- How to load CJK font in imGui:
 
 ```cpp
 ImFont* font = io.Fonts->AddFontFromFileTTF("/path/to/font.ext", 18.0f, nullptr, io.Fonts->GetGlyphRangesChineseFull());
