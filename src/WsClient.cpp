@@ -188,7 +188,6 @@ void WsClient::resetAllStates()
  */
 void WsClient::runMainLoop()
 {
-
     // clang-format off
     if (!isConnected) {
         if (!connClicked) {
@@ -196,16 +195,16 @@ void WsClient::runMainLoop()
         } else {
             this->tryConnect(final_address);
         }
+        return;
     }
+
     // already connected
-    else {
-        this->runServerLoop();
-    }
-    
+    this->runServerLoop();
+
+    // some error happened 🙁
     if (this->isDead) {
-        // some error happened 🙁
         if (this->_onDeathCallback != nullptr) {
-            _onDeathCallback(this->deathNote);
+            _onDeathCallback(deathNote);
         }
         this->showErrorPopup();
     } else if (this->haveWinner) {
@@ -243,17 +242,17 @@ void WsClient::tryConnect(std::string_view address)
         }
         else if (msg->type == ix::WebSocketMessageType::Close)
         {
-            std::scoped_lock lg{this->mut};
-            this->deathNote = "Error: disconnected from Server!" + msg->str;
-            spdlog::error(this->deathNote);
             this->isDead = true;
+            std::scoped_lock lg{this->mut};
+            this->deathNote = "Error: Server closed the connection!" + msg->str;
+            spdlog::error(this->deathNote);
         }
         else if (msg->type == ix::WebSocketMessageType::Error)
         {
+            this->isDead = true;
             std::scoped_lock lg{this->mut};
             this->deathNote = "Connection error: " + msg->errorInfo.reason;
             spdlog::error(this->deathNote);
-            this->isDead = true;
         }
     });
 
@@ -384,9 +383,8 @@ void WsClient::runServerLoop()
         }
         else if (basePayload.has_exit_payload())
         {
-            std::scoped_lock lg{this->mut};
-            this->deathNote = basePayload.notice();
             this->isDead = true;
+            this->deathNote = basePayload.notice();
             spdlog::error(basePayload.notice());
         }
         else if (basePayload.has_move_payload())
