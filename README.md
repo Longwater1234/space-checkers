@@ -12,7 +12,7 @@ The only dependency you need pre-installed on your OS is SFML 2.6.x (or newer).
 - imGui-SFML
 - ixWebsockets
 - spdlog
-- Google Protobuf 27.2 (Used entirely during gameplay)
+- Google Protobuf v30.1 (Used entirely during gameplay)
 - simdjson (Used once, for parsing list of public servers)
 
 ## Requirements for Building
