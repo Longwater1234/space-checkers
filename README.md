@@ -8,7 +8,7 @@ The only dependency you need pre-installed on your OS is SFML 2.6.x (or newer).
 
 ### Main Libraries Used
 
-- SFML 2.6
+- SFML 2.6.1
 - imGui-SFML
 - ixWebsockets
 - spdlog
