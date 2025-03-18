@@ -13,6 +13,6 @@ CPMAddPackage(
   URL  "https://github.com/protocolbuffers/protobuf/archive/refs/tags/v30.1.tar.gz" 
   VERSION 30.1
   DOWNLOAD_EXTRACT_TIMESTAMP TRUE
-  OPTIONS        "protobuf_BUILD_TESTS OFF" "protobuf_INSTALL OFF" "protobuf_BUILD_LIBPROTOC ON" 
-  "protobuf_BUILD_PROTOC_BINARIES OFF" "protobuf_WITH_ZLIB ON" "protobuf_MSVC_STATIC_RUNTIME OFF"
+  OPTIONS    "protobuf_BUILD_TESTS OFF" "protobuf_INSTALL OFF" "protobuf_BUILD_PROTOBUF_BINARIES ON"
+   "protobuf_BUILD_LIBUPB OFF" "protobuf_BUILD_PROTOC_BINARIES OFF" "protobuf_MSVC_STATIC_RUNTIME OFF"
 ) 
