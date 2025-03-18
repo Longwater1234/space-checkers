@@ -23,7 +23,7 @@ class Player final
     void receivePiece(PiecePtr &piecePtr);
     void losePiece(const short targetId);
     [[nodiscard]] const std::unordered_map<short, chk::PiecePtr> &getOwnPieces() const;
-    void showForcedPieces(const std::set<short> &hunterPieces) const;
+    void showMyHunters(const std::set<short> &hunterPieces) const;
     void emptyBasket();
     [[nodiscard]] size_t getPieceCount() const;
     [[nodiscard]] const std::string &getName() const;
@@ -72,9 +72,9 @@ inline void Player::losePiece(const short targetId)
 
 /**
  * Highlight all my hunter pieces which must capture the opponent
- * @param hunterPieces set of piece IDs
+ * @param hunterPieces set of my piece IDs
  */
-inline void Player::showForcedPieces(const std::set<short> &hunterPieces) const
+inline void Player::showMyHunters(const std::set<short> &hunterPieces) const
 {
     if (hunterPieces.empty())
     {

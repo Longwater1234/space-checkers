@@ -348,12 +348,12 @@ void chk::GameManager::showForcedMoves(const chk::PlayerPtr &player, const chk::
     if (moves.find(pieceId) == moves.end())
     {
         // FORCE PLAYER TO CAPTURE these targets, don't proceed until done!
-        std::set<short> targetPieces;
+        std::set<short> pieceSet;
         for (const auto &[hunter_piece, captureTarget] : moves)
         {
-            targetPieces.emplace(hunter_piece);
+            pieceSet.emplace(hunter_piece);
         }
-        player->showForcedPieces(targetPieces);
+        player->showMyHunters(pieceSet);
         this->updateMessage(player->getName() + " must capture piece!");
     }
     else
