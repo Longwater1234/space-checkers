@@ -14,7 +14,7 @@ endif()
 # ==== UPDATE ME HERE ===========
 # Absolute path where you installed SFML (Required on Windows)
 set(SFML_HOME "C:/SFML/SFML-2.6.1") 
-set(SFML_DIR ${SFML_HOME}/lib/cmake/SFML)  
+set(SFML_DIR ${SFML_HOME}/lib/cmake/SFML)   
 # ==========================
 
 # Collect all sources
@@ -56,4 +56,4 @@ if (NOT APPLE)
     POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/resources
             $<TARGET_FILE_DIR:SpaceCheckers>/resources)
-endif()
+endif() 
