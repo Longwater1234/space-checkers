@@ -64,7 +64,7 @@ message ExitPayload {
 message CapturePayload {
   // extra details about this capture
   message TargetDetails {
-    /** ID of the piece that is to be captured */
+    // ID of the piece that is to be captured
     int32 prey_piece_id = 1;
     // the cell Index hosting this target piece
     int32 prey_cell_idx = 2;
@@ -87,7 +87,7 @@ message CapturePayload {
   HunterDestination destination = 5;
 }
 
-/** When one of player wins. Also, this ends the  match */
+// When one of player wins. Also, this marks the end of the match
 message WinLosePayload {
   //which player won
   TeamColor winner = 1;

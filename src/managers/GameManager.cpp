@@ -259,7 +259,7 @@ void GameManager::matchCellsToPieces(const std::vector<chk::PiecePtr> &pieceList
         }
     }
     this->alreadyCached = true;
-    spdlog::info("gamMap size {}", std::to_string(gameMap.size()));
+    spdlog::info("gameMap size {}", gameMap.size());
 }
 
 /**
@@ -347,13 +347,13 @@ void chk::GameManager::showForcedMoves(const chk::PlayerPtr &player, const chk::
     const short pieceId = this->getPieceFromCell(cell->getIndex());
     if (moves.find(pieceId) == moves.end())
     {
-        // FORCE PLAYER TO CAPTURE opponent, don't proceed until done!
+        // FORCE PLAYER TO CAPTURE these targets, don't proceed until done!
         std::set<short> pieceSet;
         for (const auto &[hunter_piece, captureTarget] : moves)
         {
             pieceSet.emplace(hunter_piece);
         }
-        player->showForcedPieces(pieceSet);
+        player->showMyHunters(pieceSet);
         this->updateMessage(player->getName() + " must capture piece!");
     }
     else

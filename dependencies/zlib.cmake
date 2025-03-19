@@ -1,4 +1,4 @@
-# zlib v1.3.0 (zlib License)
+# zlib v1.3.1 (zlib License)
 
 CPMAddPackage(
     NAME zlib 

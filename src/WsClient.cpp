@@ -2,6 +2,7 @@
 
 namespace chk
 {
+
 chk::WsClient::WsClient()
 {
     ix::initNetSystem();
@@ -58,14 +59,14 @@ void chk::WsClient::showConnectWindow()
     static char inputUrl[256] = "127.0.0.1:9876/game";
     if (ImGui::Begin("Private Server", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse))
     {
-        ImGui::InputText("Server IP", inputUrl, IM_ARRAYSIZE(inputUrl), ImGuiInputTextFlags_CharsNoBlank);
+        ImGui::InputText("Host or IP", inputUrl, IM_ARRAYSIZE(inputUrl), ImGuiInputTextFlags_CharsNoBlank);
         ImGui::SameLine();
         WsClient::showHint("eg: 127.0.0.1:8080 OR myserver.example.org");
         ImGui::Checkbox("Secure", &is_secure);
         if (!std::string_view(inputUrl).empty() && ImGui::Button("Connect", ImVec2{100.0f, 0}))
         {
-            const char *suffix = is_secure ? "wss://" : "ws://";
-            this->final_address = suffix + std::string{inputUrl};
+            const char *prefix = is_secure ? "wss://" : "ws://";
+            this->final_address = prefix + std::string{inputUrl};
             this->connClicked = true;
             memset(inputUrl, 0, sizeof(inputUrl));
         }
@@ -188,24 +189,24 @@ void WsClient::resetAllStates()
  */
 void WsClient::runMainLoop()
 {
-
     // clang-format off
     if (!isConnected) {
         if (!connClicked) {
             this->showConnectWindow();
         } else {
             this->tryConnect(final_address);
-        }
-    }
-    // already connected
-    else {
-        this->runServerLoop();
+        }     
     }
     
+    else {
+        // already connected
+        this->runServerLoop(); 
+    }
+    
+    // some error happened 🙁
     if (this->isDead) {
-        // some error happened 🙁
         if (this->_onDeathCallback != nullptr) {
-            _onDeathCallback(this->deathNote);
+            _onDeathCallback(deathNote);
         }
         this->showErrorPopup();
     } else if (this->haveWinner) {
@@ -244,16 +245,16 @@ void WsClient::tryConnect(std::string_view address)
         else if (msg->type == ix::WebSocketMessageType::Close)
         {
             std::scoped_lock lg{this->mut};
-            this->deathNote = "Error: disconnected from Server!" + msg->str;
-            spdlog::error(this->deathNote);
             this->isDead = true;
+            this->deathNote = "Error: Server closed the connection!" + msg->str;
+            spdlog::error(this->deathNote);
         }
         else if (msg->type == ix::WebSocketMessageType::Error)
         {
             std::scoped_lock lg{this->mut};
+            this->isDead = true;
             this->deathNote = "Connection error: " + msg->errorInfo.reason;
             spdlog::error(this->deathNote);
-            this->isDead = true;
         }
     });
 
@@ -384,9 +385,8 @@ void WsClient::runServerLoop()
         }
         else if (basePayload.has_exit_payload())
         {
-            std::scoped_lock lg{this->mut};
-            this->deathNote = basePayload.notice();
             this->isDead = true;
+            this->deathNote = basePayload.notice();
             spdlog::error(basePayload.notice());
         }
         else if (basePayload.has_move_payload())

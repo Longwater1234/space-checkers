@@ -7,7 +7,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
-if(NOT APPLE) 
+if (NOT APPLE) 
   set(SFML_STATIC_LIBRARIES TRUE) 
 endif() 
 
@@ -43,14 +43,14 @@ target_link_libraries(SpaceCheckers PRIVATE sfml-graphics sfml-window sfml-syste
 include_directories(${SFML_HOME}/include)     
 
 # show warnings (depending on C++ compiler)
-if(MSVC)
+if (MSVC) 
   target_compile_options(SpaceCheckers PRIVATE /W4 /sdl /Qvec-report:1)
 else()  
-  target_compile_options(SpaceCheckers PRIVATE -Wall -Werror=overflow) 
+  target_compile_options(SpaceCheckers PRIVATE -Wall -Werror=constant-conversion) 
 endif()
-
+ 
 # COPY resources folder to destination
-if(NOT APPLE)
+if (NOT APPLE)
   add_custom_command( 
     TARGET SpaceCheckers 
     POST_BUILD

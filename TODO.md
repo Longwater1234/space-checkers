@@ -1,16 +1,13 @@
+# TODO list
 
-## GAME LOGS
+- [ ] (Online mode) Display countdown timer (40 s), waiting for player's move. Reset it when they make a move.
+- [ ] Record and list all previous moves and captures (for current match), in a scroll window.
 
-### first game
+### (Extras) Standard CJK font paths
 
-- start time: 19:31:12
-- end time: 19:35:17
-
-### Standard CJK font paths
-
-- Windows: `C:/Windows/Fonts/ARIALUNI.TTF.ttf`
+- Windows 10/11: `C:/Windows/Fonts/msyc.ttc`
 - MacOS: `/System/Library/Fonts/PingFang.ttc`
-- How to load cjk font in imgui
+- How to load CJK font in imGui:
 
 ```cpp
 ImFont* font = io.Fonts->AddFontFromFileTTF("/path/to/font.ext", 18.0f, nullptr, io.Fonts->GetGlyphRangesChineseFull());
