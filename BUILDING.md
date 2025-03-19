@@ -24,7 +24,7 @@ cmake --build . --config Release --target all
 4. Done. Your optimized game executable (`.app` on MacOS) will be found inside `{project_dir}/build/bin/`
 5. Alternatively, if you have CLion IDE, you can skip ALL steps above, and use it to build in "Release" mode.
 
-## Using CMake GUI (all destkop platforms)
+## Using CMake GUI (all desktop platforms)
 
 - Download latest stable [CMake GUI installer](https://cmake.org/download/) from official site
 - Open CMake GUI, refer to the screenshot below:
