@@ -2,6 +2,7 @@
 
 namespace chk
 {
+
 chk::WsClient::WsClient()
 {
     ix::initNetSystem();
@@ -194,13 +195,14 @@ void WsClient::runMainLoop()
             this->showConnectWindow();
         } else {
             this->tryConnect(final_address);
-        }
-        return;
+        }     
     }
-
-    // already connected
-    this->runServerLoop();
-
+    
+    else {
+        // already connected
+        this->runServerLoop(); 
+    }
+    
     // some error happened 🙁
     if (this->isDead) {
         if (this->_onDeathCallback != nullptr) {
@@ -242,15 +244,15 @@ void WsClient::tryConnect(std::string_view address)
         }
         else if (msg->type == ix::WebSocketMessageType::Close)
         {
-            this->isDead = true;
             std::scoped_lock lg{this->mut};
+            this->isDead = true;
             this->deathNote = "Error: Server closed the connection!" + msg->str;
             spdlog::error(this->deathNote);
         }
         else if (msg->type == ix::WebSocketMessageType::Error)
         {
-            this->isDead = true;
             std::scoped_lock lg{this->mut};
+            this->isDead = true;
             this->deathNote = "Connection error: " + msg->errorInfo.reason;
             spdlog::error(this->deathNote);
         }

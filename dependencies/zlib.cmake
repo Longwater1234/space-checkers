@@ -9,7 +9,7 @@ CPMAddPackage(
 )
 
 if(zlib_ADDED)
-    add_library(zlibstatic STATIC
+    add_library(zlibstatic_ix STATIC
         ${zlib_SOURCE_DIR}/adler32.c
         ${zlib_SOURCE_DIR}/compress.c
         ${zlib_SOURCE_DIR}/crc32.c
@@ -30,11 +30,11 @@ if(zlib_ADDED)
     include(CheckIncludeFile)
     check_include_file(unistd.h Z_HAVE_UNISTD_H)
     if(Z_HAVE_UNISTD_H)
-        target_compile_definitions(zlibstatic PRIVATE Z_HAVE_UNISTD_H)
+        target_compile_definitions(zlibstatic_ix PRIVATE Z_HAVE_UNISTD_H)
     endif()
 
     if(MSVC)
-        target_compile_definitions(zlibstatic PRIVATE _CRT_SECURE_NO_DEPRECATE _CRT_NONSTDC_NO_DEPRECATE)
+        target_compile_definitions(zlibstatic_ix PRIVATE _CRT_SECURE_NO_DEPRECATE _CRT_NONSTDC_NO_DEPRECATE)
     endif()
-    target_include_directories(zlibstatic PUBLIC ${zlib_SOURCE_DIR})
+    target_include_directories(zlibstatic_ix PUBLIC ${zlib_SOURCE_DIR})
 endif()
