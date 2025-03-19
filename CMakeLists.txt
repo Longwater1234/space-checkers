@@ -1,10 +1,5 @@
 cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
 
-# Disable the CMP0002 policy error by setting it to OLD
-if(POLICY CMP0002)
-  cmake_policy(SET CMP0002 OLD)
-endif()
-
 project("SpaceCheckers" VERSION 1.0.10
  HOMEPAGE_URL "https://github.com/Longwater1234/space-checkers")
 

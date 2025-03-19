@@ -60,7 +60,7 @@ This game can connect to both Private and Public game servers. The Server projec
 
 ## Building Instructions
 
-Please see [BUILDING.md](BUILDING.md) for detailed instructions. For macOS-specific guide with XCode, please [see this doc](cmake/README.md)
+Please see [BUILDING.md](BUILDING.md) for detailed instructions. For macOS-specific guide with XCode, please [cmake/README.md](cmake/README.md)
 
 ### License
 
