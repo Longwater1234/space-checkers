@@ -42,11 +42,7 @@ target_link_libraries(SpaceCheckers PRIVATE sfml-graphics sfml-window sfml-syste
                         ixwebsocket spdlog::spdlog cpr::cpr simdjson::simdjson protobuf::libprotobuf)
 
 # include SFML headers
-if(WIN32)
- include_directories(${SFML_HOME}/include)     
-elseif(APPLE)
-  include_directories(${SFML_HOME}/Headers)     
-endif(WIN32)
+include_directories(${SFML_HOME}/include)     
 
 # show warnings (depending on C++ compiler)
 if (MSVC) 
