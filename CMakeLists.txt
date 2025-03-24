@@ -19,6 +19,11 @@ set(SFML_HOME "C:/SFML/SFML-2.6.1")
 set(SFML_DIR ${SFML_HOME}/lib/cmake/SFML)   
 # ==========================
 
+if (APPLE) 
+  set(SFML_HOME "/Library/Frameworks/SFML.framework")   
+  set(SFML_DIR ${SFML_HOME}/Resources/CMake)  
+endif(APPLE)
+
 # Collect all sources
 file(GLOB_RECURSE GAME_SRC "src/*.cpp" "src/*.hpp")  
 find_package(SFML 2.6 REQUIRED COMPONENTS "graphics" "window" "system") 
@@ -42,7 +47,11 @@ target_link_libraries(SpaceCheckers PRIVATE sfml-graphics sfml-window sfml-syste
                         ixwebsocket spdlog::spdlog cpr::cpr simdjson::simdjson protobuf::libprotobuf)
 
 # include SFML headers
-include_directories(${SFML_HOME}/include)     
+if(WIN32)
+ include_directories(${SFML_HOME}/include)     
+elseif(APPLE)
+  include_directories(${SFML_HOME}/Headers)     
+endif(WIN32)
 
 # show warnings (depending on C++ compiler)
 if (MSVC) 
