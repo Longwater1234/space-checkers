@@ -26,7 +26,7 @@ This game can connect to both Private and Public game servers. The Server projec
 - MS Visual Studio 2022 or newer (NOT vscode), with "**Desktop C++ Development**" bundle.
 - Please download "Visual C++ 64bit" edition of SFML; ignore others.
 - Move your unzipped `SFML-2.6.x` folder to its own home, example: `C:/SFML/SFML-2.6.1`.
-- Edit **line 16** in [CMakeLists.txt](CMakeLists.txt), to set value `SFML_HOME` to folder path you moved SFML into (seeprevious step)
+- Edit **line 18** in [CMakeLists.txt](CMakeLists.txt), to set value `SFML_HOME` to folder path you moved SFML into (see previous step)
 
 ### For macOS (x64 & arm64)
 
@@ -38,7 +38,7 @@ This game can connect to both Private and Public game servers. The Server projec
   sudo xcode-select --install
 ```
 
-- After installing the CMake GUI, add its accompanying CLI to PATH by simply run the following command:
+- After installing the CMake GUI, add its accompanying CLI to PATH, simply run the following command:
 
 ```bash
    sudo "/Applications/CMake.app/Contents/bin/cmake-gui" --install
