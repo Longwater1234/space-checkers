@@ -13,6 +13,12 @@ if (NOT APPLE)
   set(SFML_STATIC_LIBRARIES TRUE) 
 endif() 
 
+# write app version ONCE into Header
+configure_file(
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/proto_schema/AppVersion.hpp.in
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/AppVersion.hpp
+)
+
 # ==== UPDATE ME HERE ===========
 # Absolute path where you installed SFML (Required on Windows)
 set(SFML_HOME "C:/SFML/SFML-2.6.1") 
@@ -42,7 +48,7 @@ target_link_libraries(SpaceCheckers PRIVATE sfml-graphics sfml-window sfml-syste
                         ixwebsocket spdlog::spdlog cpr::cpr simdjson::simdjson protobuf::libprotobuf)
 
 # include SFML headers
-include_directories(${SFML_HOME}/include)     
+target_include_directories(SpaceCheckers PUBLIC ${SFML_HOME}/include)
 
 # show warnings (depending on C++ compiler)
 if (MSVC) 

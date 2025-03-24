@@ -2,6 +2,7 @@
 // Created by Davis 2024-04-09
 //
 #pragma once
+#include "AppVersion.hpp"
 #include "Piece.hpp"
 #include "utils/ResourcePath.hpp"
 #include <SFML/Graphics/Color.hpp>
@@ -19,7 +20,6 @@ namespace chk
 {
 constexpr auto ICON_PATH = "win-icon-16.png";
 constexpr auto FONT_PATH = "notosans-regular.ttf";
-constexpr auto APP_VERSION = "v1.0.10";
 
 enum class UserChoice
 {
