@@ -19,11 +19,6 @@ set(SFML_HOME "C:/SFML/SFML-2.6.1")
 set(SFML_DIR ${SFML_HOME}/lib/cmake/SFML)   
 # ==========================
 
-if (APPLE) 
-  set(SFML_HOME "/Library/Frameworks/SFML.framework")   
-  set(SFML_DIR ${SFML_HOME}/Resources/CMake)  
-endif(APPLE)
-
 # Collect all sources
 file(GLOB_RECURSE GAME_SRC "src/*.cpp" "src/*.hpp")  
 find_package(SFML 2.6 REQUIRED COMPONENTS "graphics" "window" "system") 
