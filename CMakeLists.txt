@@ -7,14 +7,22 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
 if (NOT APPLE) 
   set(SFML_STATIC_LIBRARIES TRUE) 
 endif() 
 
+# write app version ONCE into Header
+configure_file(
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/proto_schema/AppVersion.hpp.in
+  ${CMAKE_CURRENT_SOURCE_DIR}/src/AppVersion.hpp
+)
+
 # ==== UPDATE ME HERE ===========
 # Absolute path where you installed SFML (Required on Windows)
 set(SFML_HOME "C:/SFML/SFML-2.6.1") 
-set(SFML_DIR ${SFML_HOME}/lib/cmake/SFML)  
+set(SFML_DIR ${SFML_HOME}/lib/cmake/SFML)   
 # ==========================
 
 # Collect all sources
@@ -40,7 +48,7 @@ target_link_libraries(SpaceCheckers PRIVATE sfml-graphics sfml-window sfml-syste
                         ixwebsocket spdlog::spdlog cpr::cpr simdjson::simdjson protobuf::libprotobuf)
 
 # include SFML headers
-include_directories(${SFML_HOME}/include)     
+target_include_directories(SpaceCheckers PUBLIC ${SFML_HOME}/include)
 
 # show warnings (depending on C++ compiler)
 if (MSVC) 
@@ -56,4 +64,4 @@ if (NOT APPLE)
     POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/resources
             $<TARGET_FILE_DIR:SpaceCheckers>/resources)
-endif()
+endif() 
