@@ -48,11 +48,15 @@ jobs:
       - name: Create build_version TXT file
         shell: pwsh
         run: Get-Date > ${{github.workspace}}/build/bin/Release/build_date.txt
+      
+      - name: Extract App Version
+        id: get-version
+        run: pwsh get-version.ps1
 
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: space-checkers-x64-windows
+          name: space-checkers-x64-windows-v${{ steps.get-version.outputs.app_version }}
           path: |
             ${{github.workspace}}/build/bin/Release/SpaceCheckers.exe
             ${{github.workspace}}/build/bin/Release/resources/
