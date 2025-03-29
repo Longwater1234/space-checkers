@@ -20,7 +20,6 @@ bld/
 .idea/
 /cmake-build-*/
 
-
 # Prerequisites
 *.d
 
@@ -57,4 +56,3 @@ bld/
 *.zip
 *.rar
 .DS_Store
-game_map.txt
