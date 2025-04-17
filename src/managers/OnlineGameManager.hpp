@@ -382,7 +382,7 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
     else
     {
         spdlog::info("WE HAVE EXTRA TARGETS TO HUNT");
-        this->updateMessage("Continue. You can capture another piece!");
+        this->updateMessage("继续。你可以吃掉另一个棋子!");
     }
 }
 

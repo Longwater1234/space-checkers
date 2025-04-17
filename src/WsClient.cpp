@@ -57,20 +57,20 @@ void chk::WsClient::showConnectWindow()
     // =================== PRIVATE SERVERS ===============================
     ImGui::SetNextWindowSize(ImVec2{300.0f, 300.0f});
     static char inputUrl[256] = "127.0.0.1:9876/game";
-    if (ImGui::Begin("Private Server", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse))
+    if (ImGui::Begin("私人服务器", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse))
     {
-        ImGui::InputText("Host or IP", inputUrl, IM_ARRAYSIZE(inputUrl), ImGuiInputTextFlags_CharsNoBlank);
+        ImGui::InputText("网址主机 or IP", inputUrl, IM_ARRAYSIZE(inputUrl), ImGuiInputTextFlags_CharsNoBlank);
         ImGui::SameLine();
         WsClient::showHint("eg: 127.0.0.1:8080 OR myserver.example.org");
-        ImGui::Checkbox("Secure", &is_secure);
-        if (!std::string_view(inputUrl).empty() && ImGui::Button("Connect", ImVec2{100.0f, 0}))
+        ImGui::Checkbox("安全连接", &is_secure);
+        if (!std::string_view(inputUrl).empty() && ImGui::Button("连接", ImVec2{100.0f, 0}))
         {
             const char *prefix = is_secure ? "wss://" : "ws://";
             this->final_address = prefix + std::string{inputUrl};
             this->connClicked = true;
             memset(inputUrl, 0, sizeof(inputUrl));
         }
-        if (ImGui::Button("< Go Back", ImVec2{100.0f, 0}))
+        if (ImGui::Button("< 回去", ImVec2{100.0f, 0}))
         {
             show_public = true;
         }
@@ -86,10 +86,10 @@ void WsClient::showPublicServerWindow(bool &showPublic)
 {
     // =================== PUBLIC SERVERS ===============================
     ImGui::SetNextWindowSize(ImVec2{300.0f, 300.0f});
-    if (ImGui::Begin("Public Servers", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse))
+    if (ImGui::Begin("公共服务器", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse))
     {
         static size_t current_idx{0};
-        if (ImGui::BeginListBox("Select One"))
+        if (ImGui::BeginListBox("选择一个"))
         {
             for (size_t i = 0; i < publicServers.size(); ++i)
             {
@@ -107,17 +107,17 @@ void WsClient::showPublicServerWindow(bool &showPublic)
             }
             ImGui::EndListBox();
         }
-        if (!publicServers.empty() && ImGui::Button("Connect", ImVec2{100.0f, 0}))
+        if (!publicServers.empty() && ImGui::Button("连接", ImVec2{100.0f, 0}))
         {
             this->final_address = publicServers.at(current_idx).address;
             this->connClicked = true;
         }
         publicServers.empty() ? ImGui::NewLine() : ImGui::SameLine();
-        if (ImGui::Button("Refresh", ImVec2{90.0f, 0}))
+        if (ImGui::Button("刷新", ImVec2{90.0f, 0}))
         {
             this->asyncFetchPublicServers();
         }
-        if (ImGui::Button("My Private Server >", ImVec2{150.0f, 0}))
+        if (ImGui::Button("前往私人服务器 >", ImVec2{150.0f, 0}))
         {
             showPublic = false;
         }
@@ -225,8 +225,8 @@ void WsClient::tryConnect(std::string_view address)
     if (!this->isConnected)
     {
         ImGui::SetNextWindowSize(ImVec2{400.0f, 100.0f});
-        ImGui::Begin("Loading", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
-        ImGui::Text("Connecting to online server");
+        ImGui::Begin("加载中...", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
+        ImGui::Text("正在连接到服务器");
         ImGui::End();
     }
 
@@ -246,14 +246,14 @@ void WsClient::tryConnect(std::string_view address)
         {
             std::scoped_lock lg{this->mut};
             this->isDead = true;
-            this->deathNote = "Error: Server closed the connection!" + msg->str;
+            this->deathNote = "Error: 服务器关闭了连接!" + msg->str;
             spdlog::error(this->deathNote);
         }
         else if (msg->type == ix::WebSocketMessageType::Error)
         {
             std::scoped_lock lg{this->mut};
             this->isDead = true;
-            this->deathNote = "Connection error: " + msg->errorInfo.reason;
+            this->deathNote = "连接错误: " + msg->errorInfo.reason;
             spdlog::error(this->deathNote);
         }
     });
@@ -436,8 +436,8 @@ void WsClient::showErrorPopup()
     // Always center this next dialog
     ImVec2 center = ImGui::GetMainViewport()->GetCenter();
     ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2{0.5f, 0.5f});
-    ImGui::OpenPopup("Error", ImGuiPopupFlags_NoOpenOverExistingPopup);
-    if (ImGui::BeginPopupModal("Error", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+    ImGui::OpenPopup("错误", ImGuiPopupFlags_NoOpenOverExistingPopup);
+    if (ImGui::BeginPopupModal("错误", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {
         ImGui::Text("%s", this->deathNote.c_str());
         ImGui::Separator();
@@ -459,8 +459,8 @@ void chk::WsClient::showWinnerPopup()
     // Always center this next dialog
     ImVec2 center = ImGui::GetMainViewport()->GetCenter();
     ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2{0.5f, 0.5f});
-    ImGui::OpenPopup("GameOver", ImGuiPopupFlags_NoOpenOverExistingPopup);
-    if (ImGui::BeginPopupModal("GameOver", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+    ImGui::OpenPopup("游戏结束", ImGuiPopupFlags_NoOpenOverExistingPopup);
+    if (ImGui::BeginPopupModal("游戏结束", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {
         ImGui::Text("%s", this->deathNote.c_str());
         ImGui::Separator();

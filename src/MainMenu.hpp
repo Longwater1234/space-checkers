@@ -56,7 +56,7 @@ inline MainMenu::MainMenu(sf::RenderWindow *windowPtr)
 {
     this->window = windowPtr;
     this->mainFrame = sf::RectangleShape(sf::Vector2f(600, 700));
-    if (!this->bgroundImage.loadFromFile(chk::getResourcePath("main_menu_en.png")))
+    if (!this->bgroundImage.loadFromFile(chk::getResourcePath("main_menu_cn.png")))
     {
         perror("cannot find background image");
         exit(EXIT_FAILURE);
