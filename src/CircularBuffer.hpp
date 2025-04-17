@@ -1,5 +1,5 @@
 //
-// Created by Davis on 11/4/2023.
+// Created by Davis on 2023/11/04
 //
 
 #pragma once
@@ -17,12 +17,12 @@ template <typename T> class CircularBuffer
 
   public:
     // Constructor, sets maxCapacity limit
-    explicit CircularBuffer(const uint32_t &maxCapacity) : max_capacity(maxCapacity)
+    explicit CircularBuffer(const uint32_t maxCapacity) : max_capacity(maxCapacity)
     {
         m_deque.resize(max_capacity);
     }
     CircularBuffer() = delete;
-    CircularBuffer(CircularBuffer &&other) = delete;
+    CircularBuffer &operator=(const CircularBuffer &) = delete;
     CircularBuffer(CircularBuffer &other) = delete;
     void addItem(const T &item);
     T &getTop() noexcept;
@@ -32,8 +32,8 @@ template <typename T> class CircularBuffer
     void clean();
 
   private:
-    uint32_t max_capacity{}; // max Capacity
-    std::deque<T> m_deque{}; // actual container of elements
+    uint32_t max_capacity; // max Capacity
+    std::deque<T> m_deque; // actual container of elements
 };
 
 /**

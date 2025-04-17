@@ -11,7 +11,7 @@ namespace chk
 enum class PieceType
 {
     Red = 69995,
-    Black = 78885,
+    Black,
 };
 
 constexpr auto BLACK_NORMAL = "black_normal.png";
@@ -25,7 +25,7 @@ class Piece final : public sf::Drawable, public sf::Transformable
 {
 
   public:
-    Piece(const sf::CircleShape &circle, const PieceType &pType, short id);
+    explicit Piece(const sf::CircleShape &circle, const PieceType &pType, short id);
     Piece() = delete;
     Piece(const Piece &) = delete;
     Piece &operator=(const Piece &) = delete;
@@ -143,7 +143,6 @@ inline bool Piece::containsPoint(const sf::Vector2i &pos) const
  */
 inline void chk::Piece::addOutline()
 {
-
     this->myCircle.setOutlineColor(sf::Color::Yellow);
     this->myCircle.setOutlineThickness(5.0f);
 }
@@ -244,7 +243,7 @@ inline bool Piece::moveCapture(const sf::Vector2f &destPos)
         return false;
     }
 
-    this->move(sf::Vector2f{deltaX, deltaY});
+    this->move(sf::Vector2f{deltaX, deltaY}); // means "move by (x,y) amount"
     this->myCircle.setPosition(this->getPosition());
     if ((this->pieceType == PieceType::Red && destPos.y == 0) ||
         (this->pieceType == PieceType::Black && destPos.y == 7 * chk::SIZE_CELL))

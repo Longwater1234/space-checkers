@@ -1,5 +1,5 @@
 //
-// Created by Davis on 10/29/2023.
+// Created by Davis on 2023-10-29.
 //
 #pragma once
 
@@ -68,11 +68,11 @@ class GameManager
 
   protected:
     // gameBoard: map of cell_index -> piece_id
-    std::map<int, short> gameMap;
+    std::unordered_map<int, short> gameMap;
     // main window
     sf::RenderWindow *window = nullptr;
     // source cell Index of selected piece
-    std::optional<int> sourceCell;
+    std::optional<int> sourceCell{};
     // all checkerboard cells
     std::vector<chk::Block> blockList{};
     // first player (p1)
@@ -82,16 +82,16 @@ class GameManager
     // collection of Player's next targets (Map<HunterPieceID, CaptureTarget>)
     std::unordered_map<short, chk::CaptureTarget> forcedMoves{};
 
-    [[nodiscard]] const bool &isPlayerRedTurn() const;
+    [[nodiscard]] const bool isPlayerRedTurn() const;
     [[nodiscard]] short getPieceFromCell(const int cell_idx) const;
     [[nodiscard]] const std::vector<chk::Block> &getBlockList() const;
     [[nodiscard]] bool isHunterActive() const;
-    [[nodiscard]] const bool &isGameOver() const;
-    void setSourceCell(int src_cell);
+    [[nodiscard]] const bool isGameOver() const;
+    void setSourceCell(const int src_cell);
     void doCleanup();
     void identifyTargets(const chk::PlayerPtr &hunter, const chk::Block &singleCell = nullptr);
     virtual void handleMovePiece(const chk::PlayerPtr &player, const chk::PlayerPtr &opponent, const Block &destCell,
-                                 const short &currentPieceId);
+                                 const short currentPieceId);
     virtual void handleCapturePiece(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,
                                     const chk::Block &targetCell);
     virtual void handleCellTap(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,

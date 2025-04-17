@@ -2,6 +2,7 @@
 // Created by Davis 2024-04-09
 //
 #pragma once
+#include "AppVersion.hpp"
 #include "Piece.hpp"
 #include "utils/ResourcePath.hpp"
 #include <SFML/Graphics/Color.hpp>
@@ -14,28 +15,34 @@
 #include <SFML/Window/Mouse.hpp>
 #include <memory>
 #include <string>
+
 namespace chk
 {
 constexpr auto ICON_PATH = "win-icon-16.png";
 constexpr auto FONT_PATH = "notosans-regular.ttf";
-constexpr auto APP_VERSION = "v1.0.9";
 
-enum class UserChoice : uint16_t
+enum class UserChoice
 {
     LOCAL_PLAY = 38483, // playing offline
     ONLINE_PLAY,        // playing online
 };
 
+/**
+ * Shown first when game is launched
+ */
 class MainMenu final
 {
   public:
     explicit MainMenu(sf::RenderWindow *windowPtr);
+    MainMenu() = delete;
+    MainMenu(const MainMenu &) = delete;
+    MainMenu &operator=(const MainMenu &) = delete;
     chk::UserChoice runMainLoop();
 
   private:
     void init();
     sf::RenderWindow *window;
-    sf::Texture mainImage;
+    sf::Texture bgroundImage;
     sf::RectangleShape mainFrame;
     sf::RectangleShape localBtn;
     sf::RectangleShape onlineBtn;
@@ -49,12 +56,12 @@ inline MainMenu::MainMenu(sf::RenderWindow *windowPtr)
 {
     this->window = windowPtr;
     this->mainFrame = sf::RectangleShape(sf::Vector2f(600, 700));
-    if (!this->mainImage.loadFromFile(chk::getResourcePath("main_menu_cn.png")))
+    if (!this->bgroundImage.loadFromFile(chk::getResourcePath("main_menu_en.png")))
     {
-        perror("cannot find home image");
+        perror("cannot find background image");
         exit(EXIT_FAILURE);
     }
-    mainFrame.setTexture(&this->mainImage);
+    mainFrame.setTexture(&this->bgroundImage);
     mainFrame.setPosition(0, 0);
     sf::Image appIcon;
     if (appIcon.loadFromFile(chk::getResourcePath(ICON_PATH)))
@@ -92,6 +99,7 @@ inline void MainMenu::init()
 
 /**
  * Listen for GUI events, and store the selected choice to `result`
+ * @param result Output will be written into this
  */
 inline void MainMenu::handleEvents(chk::UserChoice &result)
 {
@@ -123,8 +131,8 @@ inline void MainMenu::handleEvents(chk::UserChoice &result)
 }
 
 /**
- * The main loop, renders the main menu screen, returning user choice for game Mode
- * @return The selected result
+ * The main loop, renders the main menu screen at 60FPS
+ * @return user choice for game Mode
  */
 inline chk::UserChoice MainMenu::runMainLoop()
 {
@@ -148,7 +156,7 @@ inline chk::UserChoice MainMenu::runMainLoop()
         {
             this->localBtn.setOutlineThickness(0);
         }
-        if (this->onlineBtn.getGlobalBounds().contains(sf::Vector2f(mousePos)))
+        if (this->onlineBtn.getGlobalBounds().contains(sf::Vector2f{mousePos}))
         {
             this->onlineBtn.setOutlineColor(DARK_BROWN);
             this->onlineBtn.setOutlineThickness(5.0f);

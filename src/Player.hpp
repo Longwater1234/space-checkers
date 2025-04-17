@@ -12,7 +12,6 @@ namespace chk
 
 // alias for unique pointer of `Piece`
 using PiecePtr = std::unique_ptr<chk::Piece>;
-constexpr auto BLACK_NAME = "BLACK";
 
 class Player final
 {
@@ -24,7 +23,7 @@ class Player final
     void receivePiece(PiecePtr &piecePtr);
     void losePiece(const short targetId);
     [[nodiscard]] const std::unordered_map<short, chk::PiecePtr> &getOwnPieces() const;
-    void showForcedPieces(const std::set<short> &hunterPieces) const;
+    void showMyHunters(const std::set<short> &hunterPieces) const;
     void emptyBasket();
     [[nodiscard]] size_t getPieceCount() const;
     [[nodiscard]] const std::string &getName() const;
@@ -63,7 +62,7 @@ inline void Player::receivePiece(chk::PiecePtr &piecePtr)
 }
 
 /**
- * When a player's piece is captured, -1 from list
+ * When a player's piece is captured, remove it from basket
  * @param targetId  the captured piece Id
  */
 inline void Player::losePiece(const short targetId)
@@ -72,10 +71,10 @@ inline void Player::losePiece(const short targetId)
 }
 
 /**
- * Highlight all my pieces which must capture the opponent
- * @param hunterPieces set of piece IDs
+ * Highlight all my hunter pieces which must capture the opponent
+ * @param hunterPieces set of my piece IDs
  */
-inline void Player::showForcedPieces(const std::set<short> &hunterPieces) const
+inline void Player::showMyHunters(const std::set<short> &hunterPieces) const
 {
     if (hunterPieces.empty())
     {
@@ -88,7 +87,7 @@ inline void Player::showForcedPieces(const std::set<short> &hunterPieces) const
 }
 
 /**
- * Remove all pieces from my basket
+ * Remove all pieces from this player's ownership
  */
 inline void Player::emptyBasket()
 {

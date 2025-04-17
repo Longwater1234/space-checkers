@@ -37,7 +37,6 @@ inline LocalGameManager::LocalGameManager(sf::RenderWindow *windowPtr)
 
 /**
  * Create all pieces for both players and add them to pieceList, using std C++ random num generator
- * @param pieceList destination of created pieces
  */
 inline void LocalGameManager::createAllPieces()
 {
@@ -57,7 +56,7 @@ inline void LocalGameManager::createAllPieces()
             {
                 sf::CircleShape circle(0.5 * chk::SIZE_CELL);
                 const float x = static_cast<float>(col % NUM_COLS) * chk::SIZE_CELL;
-                circle.setPosition(sf::Vector2f(x, row * chk::SIZE_CELL));
+                circle.setPosition(sf::Vector2f{x, row * chk::SIZE_CELL});
                 if (row < 3)
                 {
                     // Half Top cells, put BLACK piece
@@ -149,9 +148,9 @@ inline void LocalGameManager::handleEvents(chk::CircularBuffer<short> &buffer)
             {
                 continue;
             }
+            // START inner loop:
             for (auto &cell : this->getBlockList())
             {
-                // inner loop
                 if (cell->containsPoint(clickedPos) && cell->getIndex() != -1)
                 {
                     const auto &hunter = this->isPlayerRedTurn() ? this->playerRed : this->playerBlack;
@@ -160,6 +159,7 @@ inline void LocalGameManager::handleEvents(chk::CircularBuffer<short> &buffer)
                     break;
                 }
             }
+            //^ END inner loop
         }
     }
 }

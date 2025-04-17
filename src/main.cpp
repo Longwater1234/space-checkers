@@ -73,13 +73,13 @@ int main()
     // create pieces and give each player their own
     manager->createAllPieces();
 
-    // Storing currently clicked Piece. (NOTE: using braces constructor)
+    // Storing currently clicked Piece. (NOTE: using curly braces for constructor)
     chk::CircularBuffer<short> circularBuffer{1};
 
     // THE STATUS TEXT
     sf::Text txtPanel{"Space Checkers", font, 16};
     txtPanel.setFillColor(sf::Color::White);
-    txtPanel.setPosition(sf::Vector2f{10.0, 8.5 * chk::SIZE_CELL});
+    txtPanel.setPosition(sf::Vector2f{10.0f, 8.5 * chk::SIZE_CELL});
     manager->updateMessage("Welcome to Space Checkers");
     if (userChoice == chk::UserChoice::LOCAL_PLAY)
     {
