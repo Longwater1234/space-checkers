@@ -59,7 +59,7 @@ void chk::WsClient::showConnectWindow()
     static char inputUrl[256] = "127.0.0.1:9876/game";
     if (ImGui::Begin("私人服务器", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse))
     {
-        ImGui::InputText("网址主机 or IP", inputUrl, IM_ARRAYSIZE(inputUrl), ImGuiInputTextFlags_CharsNoBlank);
+        ImGui::InputText("Host or IP", inputUrl, IM_ARRAYSIZE(inputUrl), ImGuiInputTextFlags_CharsNoBlank);
         ImGui::SameLine();
         WsClient::showHint("eg: 127.0.0.1:8080 OR myserver.example.org");
         ImGui::Checkbox("安全连接", &is_secure);
