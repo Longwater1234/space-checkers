@@ -52,7 +52,7 @@ target_include_directories(SpaceCheckers PUBLIC ${SFML_HOME}/include)
 
 # show warnings (depending on C++ compiler)
 if (MSVC) 
-  target_compile_options(SpaceCheckers PRIVATE /W4 /sdl /Qvec-report:1)
+ target_compile_definitions(SpaceCheckers PRIVATE /W4 /sdl _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING)
 else()  
   target_compile_options(SpaceCheckers PRIVATE -Wall -Werror=constant-conversion) 
 endif()
