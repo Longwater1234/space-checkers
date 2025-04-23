@@ -1,7 +1,7 @@
 # TODO list
 
 - [ ] (Online mode) Display countdown timer (40 s), waiting for player's move. Reset it when they make a move.
-- [ ] Record and list all previous moves and captures (for current match), in a scroll window.
+- [ ] Record and list all previous moves and captures (for current match), in a scroll panel.
 
 ### (Extras) Standard CJK font paths
 
