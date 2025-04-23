@@ -1,4 +1,4 @@
-# Building Locally
+# Building Locally (Release mode only)
 
 ## On Windows
 
@@ -31,7 +31,11 @@ cmake --build . --config Release --target all
   ![cmake_screenshot](cmake/cmake_gui_screenshot.png)
 
 - Set "Source Folder" (1) to this project root dir. Then, set "Build Folder" (2) to a NEW _relative_ folder `/build` or `/out`.
-- Ensure "CMAKE_BUILD_TYPE" is **Release** (see image above, blue highlight). Ignore other settings. Then (3) click "**Configure**".
+- Ensure "CMAKE_BUILD_TYPE" is **Release** (see image above, blue highlight). Ignore other settings. Then (3) click **Configure**.
 - In the popup window, choose generator **'Unix Makefiles'** if on Linux; choose **'XCode'** if on MacOS. Choose **'Visual Studio'** if on Windows. Then click OK to save.
-- Click **'Configure'** once again, then **'Generate'**.
+- Click **Configure** once again, then **Generate**.
 - Finally, on Windows or MacOS, click **Open Project** for building in respective IDE. On Linux desktop, open build folder, then run `make all` in Terminal.
+
+### Important:
+
+For macOS-specific guide with XCode, please [cmake/README.md](cmake/README.md)

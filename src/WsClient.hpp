@@ -61,6 +61,7 @@ class WsClient final
     std::atomic_bool connClicked = false;           // if 'connect' button clicked
     std::vector<chk::ServerLocation> publicServers; // list of public servers (fetched from CDN)
 
+    /* callbacks for different events from server */
     onConnectedServer _onReadyConnected;
     onReadyStartGame _onReadyStartGame;
     onDeathCallback _onDeathCallback;

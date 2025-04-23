@@ -1,13 +1,14 @@
 # space - checkers
 
 Offline & Online Multiplayer Checkers game in C++ built with SFML 2.6, imGui, Protobuf and ixWebsockets. With very minimal dependencies
-and a simple build process. All dependencies are auto-downloaded (compressed as `.tar.gz`) and built for you using [CPM.cmake](https://github.com/cpm-cmake/CPM.cmake).
+and a simple build process. All dependencies are auto-downloaded (as `.tar.gz`) and configured for you using [CPM.cmake](https://github.com/cpm-cmake/CPM.cmake). The only dependency you need pre-installed on your OS is SFML 2.6.x (or newer).
 
-This game can connect to both Private and Public game servers. The Server project for this game is on a separate Git repo, [available here](https://github.com/Longwater1234/checkers-backend) which you can self-host! The only dependency you need pre-installed on your OS is SFML 2.6.x (or newer).
+
+This game can connect to both Private and Public game servers. The Server project for this game is written in Golang, and is [available here](https://github.com/Longwater1234/checkers-backend) which you can self-host!
 
 ### Main Libraries Used
 
-- SFML 2.6
+- SFML 2.6.1
 - imGui-SFML
 - ixWebsockets
 - spdlog
@@ -16,8 +17,8 @@ This game can connect to both Private and Public game servers. The Server projec
 
 ## Requirements for Building
 
-- C++17 (or newer) build tools.
-- Pre-built [SFML 2.6.x](https://www.sfml-dev.org/download/sfml/2.6.1/) binaries. (Must match your Compiler and OS)
+- C++17 (or newer) compiler.
+- Pre-built [SFML 2.6.x](https://www.sfml-dev.org/download/sfml/2.6.1/) binaries.
 - [CMake 3.20+](https://cmake.org/download/) or newer (GUI recommended)
 
 ### For Windows
@@ -26,7 +27,7 @@ This game can connect to both Private and Public game servers. The Server projec
 - MS Visual Studio 2022 or newer (NOT vscode), with "**Desktop C++ Development**" bundle.
 - Please download "Visual C++ 64bit" edition of SFML; ignore others.
 - Move your unzipped `SFML-2.6.x` folder to its own home, example: `C:/SFML/SFML-2.6.1`.
-- Edit **line 25** in [CMakeLists.txt](CMakeLists.txt), to set value `SFML_HOME` to folder path you moved SFML into (see previous step)
+- Edit **line 24** in [CMakeLists.txt](CMakeLists.txt#L24), to set value `SFML_HOME` to folder path you moved SFML into (from previous step)
 
 ### For macOS (x64 & arm64)
 
@@ -58,10 +59,14 @@ This game can connect to both Private and Public game servers. The Server projec
 
 - Luckily, Windows and macOS come with their **native SSL libs pre-installed**, so nothing more to do 😁
 
-## Building Instructions
+## Build Instructions
 
-Please see [BUILDING.md](BUILDING.md) for detailed instructions. For macOS-specific guide with XCode, please [cmake/README.md](cmake/README.md)
+Please see [BUILDING.md](BUILDING.md) for detailed instructions for each platform.
 
-### License
+## Code Contributions
+
+Pull requests are welcome! See GitHub Issues tab to help with new Features. Just kindly remember run `lint.sh` script before you git push. Also, for this project, header files should end with `.hpp`.
+
+## License
 
 [GPL v3](LICENSE) &copy; 2024, Davis T.

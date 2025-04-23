@@ -13,7 +13,7 @@ if (NOT APPLE)
   set(SFML_STATIC_LIBRARIES TRUE) 
 endif() 
 
-# write app version ONCE into Header
+# write app version into Header
 configure_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/src/proto_schema/AppVersion.hpp.in
   ${CMAKE_CURRENT_SOURCE_DIR}/src/AppVersion.hpp

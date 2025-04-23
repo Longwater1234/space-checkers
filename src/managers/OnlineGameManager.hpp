@@ -498,7 +498,7 @@ inline void OnlineGameManager::startCaptureListener()
         gameMap.erase(payload.details().hunter_src_cell());                  // set opponent's old location empty!
         gameMap.erase(payload.details().prey_cell_idx());                    // set my old location empty!
         gameMap.emplace(payload.destination().cell_index(), hunterPieceId);  // fill in hunter new location
-        int targetId = payload.details().prey_piece_id();                    // get the target dead piece
+        const int targetId = payload.details().prey_piece_id();              // get the target dead piece
         myTeam->losePiece(static_cast<short>(targetId));                     // I will lose one piece
 
         const int destCellIdx = payload.destination().cell_index();
