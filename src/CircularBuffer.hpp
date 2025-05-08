@@ -24,10 +24,11 @@ template <typename T> class CircularBuffer
     CircularBuffer() = delete;
     CircularBuffer &operator=(const CircularBuffer &) = delete;
     CircularBuffer(CircularBuffer &other) = delete;
-    void addItem(const T &item);
-    T &getTop() noexcept;
+    void addItem(const T &item); // copy overload
+    void addItem(T &&item);      // Move overload
+    T &getFront() noexcept;
     void removeFirst();
-    [[nodiscard]] bool isEmpty() const;
+    [[nodiscard]] bool isEmpty() const noexcept;
     const std::deque<T> &getAll() const;
     void clean();
 
@@ -50,7 +51,7 @@ template <typename T> void CircularBuffer<T>::clean()
  * @tparam T any type
  * @return TRUE or FALSE
  */
-template <typename T> bool CircularBuffer<T>::isEmpty() const
+template <typename T> bool CircularBuffer<T>::isEmpty() const noexcept
 {
     return m_deque.empty();
 }
@@ -68,7 +69,7 @@ template <typename T> inline const std::deque<T> &CircularBuffer<T>::getAll() co
  * @tparam T any type
  * @return The first element in queue
  */
-template <typename T> T &CircularBuffer<T>::getTop() noexcept
+template <typename T> T &CircularBuffer<T>::getFront() noexcept
 {
     return m_deque.front();
 }
@@ -78,11 +79,14 @@ template <typename T> T &CircularBuffer<T>::getTop() noexcept
  */
 template <typename T> void CircularBuffer<T>::removeFirst()
 {
-    m_deque.pop_front();
+    if (!m_deque.empty())
+    {
+        m_deque.pop_front();
+    }
 }
 
 /**
- * Add new element to buffer
+ * Add new element to buffer (using copy)
  * @tparam T any type
  * @param item the element to be inserted
  */
@@ -94,5 +98,19 @@ template <typename T> void CircularBuffer<T>::addItem(const T &item)
         m_deque.pop_front();
     }
     m_deque.emplace_back(item);
+}
+
+/**
+ * Move element into the buffer
+ * @tparam T any type
+ * @param item the element to be inserted
+ */
+template <typename T> void CircularBuffer<T>::addItem(T &&item)
+{
+    if (m_deque.size() >= max_capacity)
+    {
+        m_deque.pop_front();
+    }
+    m_deque.emplace_back(std::move(item));
 }
 } // namespace chk
