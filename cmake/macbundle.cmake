@@ -6,11 +6,14 @@ set_source_files_properties(${application_icon}
 
 # images
 file(GLOB_RECURSE my_images "${CMAKE_SOURCE_DIR}/resources/*")
-foreach(FILE ${my_images})
-  file(RELATIVE_PATH NEW_FILE "${CMAKE_SOURCE_DIR}/" ${FILE})
-  get_filename_component(NEW_FILE_PATH ${NEW_FILE} DIRECTORY)
-  set_source_files_properties(${FILE} PROPERTIES MACOSX_PACKAGE_LOCATION
-                                                 "Resources/${NEW_FILE_PATH}")
+foreach(FILE ${my_images}) 
+  get_filename_component(FILENAME ${FILE} DIRECTORY)
+  # SKIP .DS_Store files
+  if (NOT FILENAME STREQUAL ".DS_Store")   
+    file(RELATIVE_PATH NEW_FILE "${CMAKE_SOURCE_DIR}/" ${FILE})
+    get_filename_component(NEW_FILE_PATH ${NEW_FILE} DIRECTORY)
+    set_source_files_properties(${FILE} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources/${NEW_FILE_PATH}")
+  endif()
 endforeach()
 
 add_executable(${CMAKE_PROJECT_NAME} MACOSX_BUNDLE
