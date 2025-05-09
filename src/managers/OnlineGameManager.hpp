@@ -417,7 +417,7 @@ inline void OnlineGameManager::handleCellTap(const chk::PlayerPtr &hunter, const
         // Cell is Empty! Let's judge if this is SIMPLE move or ATTACK move
         if (!buffer.isEmpty())
         {
-            const short movablePieceId = buffer.getTop();
+            const short movablePieceId = buffer.getFront();
             if (!hunter->hasThisPiece(movablePieceId))
             {
                 return;

@@ -13,6 +13,12 @@ if (NOT APPLE)
   set(SFML_STATIC_LIBRARIES TRUE) 
 endif() 
 
+# defualt to building in "RELEASE" mode
+if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  set(CMAKE_BUILD_TYPE "Release" CACHE STRING
+    "Choose the type of build." FORCE)
+endif()
+
 # write app version into Header
 configure_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/src/proto_schema/AppVersion.hpp.in
