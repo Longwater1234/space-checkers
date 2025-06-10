@@ -22,7 +22,7 @@ This game can connect to both Private and Public game servers. The backend serve
 
 ### For Windows
 
-- At least Windows 10
+- At least Windows 10 / Server 2016
 - MS Visual Studio 2022 or newer (NOT vscode), with "**Desktop C++ Development**" bundle.
 - Please download "Visual C++ 64bit" edition of SFML; ignore others.
 - Move your unzipped `SFML-2.6.x` folder to its own home, example: `C:/SFML/SFML-2.6.1`.
@@ -30,9 +30,9 @@ This game can connect to both Private and Public game servers. The backend serve
 
 ### For macOS (x64 & arm64)
 
-- Please install SFML 2.6 as **Frameworks**, not as "dylibs", as shown in [official SFML guide](https://www.sfml-dev.org/tutorials/2.6/start-osx.php).
 - XCode 14 or newer from AppStore (with MacOS SDK)
-- Apple Developer tools. After Xcode is installed, run this in your Terminal:
+- Please install SFML 2.6 as **Frameworks**, not as "dylibs", as shown in [official SFML guide](https://www.sfml-dev.org/tutorials/2.6/start-osx.php).
+- Download Apple Developer tools. After Xcode is installed, run this in your Terminal:
 
 ```bash
   sudo xcode-select --install
@@ -49,14 +49,14 @@ This game can connect to both Private and Public game servers. The backend serve
 - Latest display drivers
 - Use your OS package manager (`apt` or `yum`) to install SFML 2.6 or newer.
 - Alternatively, you may build SFML 2.6 from source, see [official SFML docs](https://www.sfml-dev.org/tutorials/2.6/start-linux.php).
-- You are required to install latest **OpenSSL Dev** library. See example on Ubuntu / Debian below.
+- You are required to install latest **OpenSSL Dev** library. See example for Ubuntu / Debian below.
 
 ```bash
   sudo apt install libsfml-dev
   sudo apt install libssl-dev
 ```
 
-- Luckily, Windows and macOS come with their **native SSL libs pre-installed**, so nothing more to do 😁
+- Luckily, Windows and macOS come with their **native SSL libs pre-installed**, so nothing more to do 😊
 
 ## Build Instructions
 
@@ -64,7 +64,7 @@ Please see [BUILDING.md](BUILDING.md) for detailed instructions for each platfor
 
 ## Code Contributions
 
-Pull requests are welcome! See GitHub Issues tab to help with new Features. Just kindly remember run `lint.sh` script before you git push. Also, for this project, header files should end with `.hpp`.
+Pull requests are welcome! See GitHub Issues tab to help with new Features. Just kindly remember run `./lint.sh` script before you git push. Also, for this project, header files should end with `.hpp`.
 
 ## License
 
