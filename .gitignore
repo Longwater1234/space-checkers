@@ -11,7 +11,7 @@ bld/
 [Oo]bj/
 [Oo]ut/
 
-# Visual Studio 
+# Visual Studio
 .vs/
 .vscode/
 
@@ -56,3 +56,4 @@ bld/
 *.zip
 *.rar
 .DS_Store
+.cache/
