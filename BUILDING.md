@@ -2,26 +2,26 @@
 
 ## On Windows
 
-1. Just open this project directly in Visual Studio 2022 (or newer), with native CMake extension installed.
+1. Just import this project directly in Visual Studio 2022 (or newer), with native CMake extension installed.
 2. Wait as Visual Studio auto-configures this project for you.
 3. Next, from top toolbar, change mode to **'Release'**, and click **Build** > **Build All**.
 4. Done. That's it! Your game `.exe` will be inside `{project_dir}/out/Release/bin/`. Enjoy!
 
-## On MacOS & Linux
+## On MacOS & Linux (using Terminal)
 
-1. Open this project directory in your Terminal.
-2. Ensure CMake 3.20 or higher is installed. Verify with `cmake --version`
+1. Ensure CMake 3.20 or higher is installed. Verify with `cmake --version`
+2. Open this project directory in your Terminal.
 3. Next, copy and run the following commands:
 
 ```bash
-mkdir build
-cd build
+mkdir out/
+cd out/
 cmake . . -DCMAKE_BUILD_TYPE=Release
-cmake --build . --config Release --target all -j
+cmake --build . --config Release -j
 
 ```
 
-4. Done. Your optimized game executable (`.app` on MacOS) will be found inside `{project_dir}/build/bin/`
+4. Done. Your optimized game executable (`.app` on MacOS) will be found inside `{project_dir}/out/bin/`
 5. Alternatively, if you have CLion IDE, you can skip ALL steps above, and use it to build in "Release" mode.
 
 ## Using CMake GUI (all desktop platforms)
