@@ -159,6 +159,7 @@ void GameManager::handleCapturePiece(const chk::PlayerPtr &hunter, const chk::Pl
         return;
     }
     //  Check for extra opportunities (only if hunter has NOT just became KING)
+    this->forcedMoves.clear();
     if (isKingBefore == isKingNow)
     {
         GameManager::identifyTargets(hunter, targetCell);
