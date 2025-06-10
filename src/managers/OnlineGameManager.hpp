@@ -374,7 +374,7 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
         // NO MORE JUMPS AVAILABLE. SWITCH TURNS to opponent
         chk::GameManager::identifyTargets(prey);
         this->isMyTurn = !this->isMyTurn;
-        spdlog::info("It's " + prey->getName() + "'s turn");
+        this->updateMessage("It's " + prey->getName() + "'s turn");
     }
     else
     {
