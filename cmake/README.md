@@ -13,5 +13,5 @@ Kindly follow these steps:
 - Now select all SFML frameworks listed: `sfml-graphics.framework`, `sflml-window.framework` etc.
 - Lastly, you will need to add `freetype.framework` (for text support). Click **"Add Other..."**, find it inside `/Library/Frameworks`. Click "Copy as reference folder". Click OK.
 - You should have output similar to screenshot below (I renamed "Copy Files" to "Copy Frameworks"):
- ![xcode screenshot](./xcode_copy_frameworks.png)
+  ![xcode screenshot](./xcode_copy_frameworks.png)
 - Now you can build your project. From top toolbar, Click **Product** > **Build**. Done!
