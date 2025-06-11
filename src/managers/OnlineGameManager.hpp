@@ -446,7 +446,7 @@ inline void OnlineGameManager::handleCellTap(const chk::PlayerPtr &hunter, const
 inline void OnlineGameManager::startMoveListener()
 {
     this->wsClient->setOnMovePieceCallback([this](const chk::payload::MovePayload &payload) {
-        // which color is my Opponent?
+        // which color is the Opponent?
         // clang-format off
         const chk::PlayerPtr &enemy = (payload.from_team() == TeamColor::TEAM_RED) ? this->playerRed : this->playerBlack;
         const chk::PlayerPtr &myTeam = (enemy->getPlayerType() == PlayerType::PLAYER_RED) ? this->playerBlack : this->playerRed;
@@ -508,6 +508,7 @@ inline void OnlineGameManager::startCaptureListener()
         });
 
         // Check for extra opportunities (for Enemy), only if Enemy did NOT just become King
+        this->forcedMoves.clear();
         if ((isKingBefore == isKingNow) && it != this->blockList.end())
         {
             GameManager::identifyTargets(opponent, *it);
@@ -518,6 +519,7 @@ inline void OnlineGameManager::startCaptureListener()
             // NO MORE JUMPS AVAILABLE. SWITCH TURNS to myself.
             chk::GameManager::identifyTargets(myTeam);
             this->isMyTurn = !this->isMyTurn;
+            this->updateMessage("It's now your turn!");
         }
     });
 }
