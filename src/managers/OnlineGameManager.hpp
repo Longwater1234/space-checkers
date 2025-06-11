@@ -7,6 +7,7 @@
 namespace chk
 {
 using chk::payload::TeamColor;
+
 /**
  * This class is responsible for online gameplay
  * @since 2024-04-11
@@ -292,11 +293,12 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
         return;
     }
 
+    // CREATE SOME COPIES BEFORE UPDATING:
     int copyHunterPiece = 0; // hunter pieceId
-    int copySrcCell = 0;     // hunter src cell
+    int copySrcCell = 0;     // hunter src cell index
     int copyPreyPieceId = 0;
     int copyPreyCell = 0;
-    // track King status for Hunter piece
+    // for tracking King status of Hunter piece
     bool isKingBefore = false;
     bool isKingNow = false;
 
@@ -330,7 +332,7 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
     {
         return;
     }
-    // prey details (must use raw pointers for embedded protobuf)
+    // prey details (must use raw ptr for embedded protobuf)
     auto *details = new chk::payload::CapturePayload_TargetDetails();
     details->set_hunter_src_cell(copySrcCell);
     details->set_prey_cell_idx(copyPreyCell);
@@ -374,6 +376,7 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
         // NO MORE JUMPS AVAILABLE. SWITCH TURNS to opponent
         chk::GameManager::identifyTargets(prey);
         this->isMyTurn = !this->isMyTurn;
+        this->updateMessage("It's " + prey->getName() + "'s turn");
     }
     else
     {
@@ -414,7 +417,7 @@ inline void OnlineGameManager::handleCellTap(const chk::PlayerPtr &hunter, const
     }
     else
     {
-        // Cell is Empty! Let's judge if this is SIMPLE move or ATTACK move
+        // Cell is Empty! Let's evaluate if this is SIMPLE move or ATTACK move
         if (!buffer.isEmpty())
         {
             const short movablePieceId = buffer.getFront();
@@ -445,7 +448,7 @@ inline void OnlineGameManager::handleCellTap(const chk::PlayerPtr &hunter, const
 inline void OnlineGameManager::startMoveListener()
 {
     this->wsClient->setOnMovePieceCallback([this](const chk::payload::MovePayload &payload) {
-        // which color is my Opponent?
+        // which color is the Opponent?
         // clang-format off
         const chk::PlayerPtr &enemy = (payload.from_team() == TeamColor::TEAM_RED) ? this->playerRed : this->playerBlack;
         const chk::PlayerPtr &myTeam = (enemy->getPlayerType() == PlayerType::PLAYER_RED) ? this->playerBlack : this->playerRed;
@@ -507,6 +510,7 @@ inline void OnlineGameManager::startCaptureListener()
         });
 
         // Check for extra opportunities (for Enemy), only if Enemy did NOT just become King
+        this->forcedMoves.clear();
         if ((isKingBefore == isKingNow) && it != this->blockList.end())
         {
             GameManager::identifyTargets(opponent, *it);
@@ -517,6 +521,7 @@ inline void OnlineGameManager::startCaptureListener()
             // NO MORE JUMPS AVAILABLE. SWITCH TURNS to myself.
             chk::GameManager::identifyTargets(myTeam);
             this->isMyTurn = !this->isMyTurn;
+            this->updateMessage("It's now your turn!");
         }
     });
 }
