@@ -202,8 +202,8 @@ void chk::GameManager::doCleanup()
 {
     this->gameMap.clear();
     this->forcedMoves.clear();
-    this->playerRed->emptyBasket();
-    this->playerBlack->emptyBasket();
+    this->playerRed->clearBasket();
+    this->playerBlack->clearBasket();
     this->gameOver = true;
     this->alreadyCached = false;
     this->sourceCell = std::nullopt;
