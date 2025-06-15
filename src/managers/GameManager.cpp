@@ -181,7 +181,7 @@ void GameManager::handleCapturePiece(const chk::PlayerPtr &hunter, const chk::Pl
  * Whether it's Red player's turn
  * @return TRUE or FALSE
  */
-const bool GameManager::isPlayerRedTurn() const
+bool GameManager::isPlayerRedTurn() const
 {
     return this->playerRedTurn;
 }
@@ -368,7 +368,7 @@ void chk::GameManager::showForcedMoves(const chk::PlayerPtr &player, const chk::
  * Whether game is over
  * @return TRUE or FALSE
  */
-const bool GameManager::isGameOver() const
+bool GameManager::isGameOver() const
 {
     return this->gameOver;
 }
