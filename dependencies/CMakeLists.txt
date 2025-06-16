@@ -13,7 +13,6 @@ include(protobuf.cmake)
 CPMAddPackage(
   NAME imgui
   URL "https://github.com/ocornut/imgui/archive/refs/tags/v1.90.8.tar.gz"
-  VERSION		1.90.8
   DOWNLOAD_EXTRACT_TIMESTAMP TRUE 
 ) 
 
@@ -35,7 +34,6 @@ endif()
 CPMAddPackage(
   NAME imgui-sfml
   URL "https://github.com/SFML/imgui-sfml/archive/refs/tags/v2.6.tar.gz"
-  VERSION 2.6
   DOWNLOAD_EXTRACT_TIMESTAMP TRUE
   OPTIONS        "IMGUI_SFML_FIND_SFML OFF" "IMGUI_DIR ${imgui_SOURCE_DIR}"
 )

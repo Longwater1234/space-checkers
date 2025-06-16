@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Define the source directory
+# source directory
 SRC_DIR="src"
 
 clang-format $(find $SRC_DIR -type f -name "*.cpp" -o -name "*.hpp") -i --verbose

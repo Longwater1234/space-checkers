@@ -3,7 +3,6 @@
 CPMAddPackage(
     NAME zlib 
     URL   "https://github.com/madler/zlib/archive/refs/tags/v1.3.1.tar.gz"
-    VERSION 1.3.1
     DOWNLOAD_EXTRACT_TIMESTAMP TRUE
     DOWNLOAD_ONLY ON
 )

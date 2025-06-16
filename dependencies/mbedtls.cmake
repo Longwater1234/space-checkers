@@ -2,8 +2,7 @@
 
 CPMAddPackage(
     NAME mbedtls
-    URL "https://github.com/Mbed-TLS/mbedtls/archive/refs/tags/v2.25.0.tar.gz"
-    VERSION 2.25.0
+    URL "https://github.com/Mbed-TLS/mbedtls/archive/refs/tags/mbedtls-2.28.10.tar.gz"
     DOWNLOAD_EXTRACT_TIMESTAMP TRUE
     DOWNLOAD_ONLY ON
 ) 
