@@ -22,7 +22,6 @@ This game can connect to both Private and Public game servers. The backend serve
 
 ### For Windows
 
-- At least Windows 10 / Server 2016
 - MS Visual Studio 2022 or newer (NOT vscode), with "**Desktop C++ Development**" bundle.
 - Please download "Visual C++ 64bit" edition of SFML; ignore others.
 - Move your unzipped `SFML-2.6.x` folder to its own home, example: `C:/SFML/SFML-2.6.1`.
