@@ -24,7 +24,7 @@ class Player final
     void losePiece(const short targetId);
     [[nodiscard]] const std::unordered_map<short, chk::PiecePtr> &getOwnPieces() const;
     void showMyHunters(const std::set<short> &hunterPieces) const;
-    void emptyBasket();
+    void clearBasket();
     [[nodiscard]] size_t getPieceCount() const;
     [[nodiscard]] const std::string &getName() const;
     [[nodiscard]] PlayerType getPlayerType() const;
@@ -89,7 +89,7 @@ inline void Player::showMyHunters(const std::set<short> &hunterPieces) const
 /**
  * Remove all pieces from this player's ownership
  */
-inline void Player::emptyBasket()
+inline void Player::clearBasket()
 {
     this->basket.clear();
 }

@@ -181,7 +181,7 @@ void GameManager::handleCapturePiece(const chk::PlayerPtr &hunter, const chk::Pl
  * Whether it's Red player's turn
  * @return TRUE or FALSE
  */
-const bool GameManager::isPlayerRedTurn() const
+bool GameManager::isPlayerRedTurn() const
 {
     return this->playerRedTurn;
 }
@@ -202,8 +202,8 @@ void chk::GameManager::doCleanup()
 {
     this->gameMap.clear();
     this->forcedMoves.clear();
-    this->playerRed->emptyBasket();
-    this->playerBlack->emptyBasket();
+    this->playerRed->clearBasket();
+    this->playerBlack->clearBasket();
     this->gameOver = true;
     this->alreadyCached = false;
     this->sourceCell = std::nullopt;
@@ -368,7 +368,7 @@ void chk::GameManager::showForcedMoves(const chk::PlayerPtr &player, const chk::
  * Whether game is over
  * @return TRUE or FALSE
  */
-const bool GameManager::isGameOver() const
+bool GameManager::isGameOver() const
 {
     return this->gameOver;
 }

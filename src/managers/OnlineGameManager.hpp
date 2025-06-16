@@ -96,7 +96,7 @@ inline void chk::OnlineGameManager::createAllPieces()
             {
                 if ((row + col) % 2 != 0)
                 {
-                    sf::CircleShape circle(0.5 * chk::SIZE_CELL);
+                    sf::CircleShape circle{0.5 * chk::SIZE_CELL};
                     const float x = static_cast<float>(col % NUM_COLS) * chk::SIZE_CELL;
                     circle.setPosition(sf::Vector2f{x, row * chk::SIZE_CELL});
                     if (row < 3 && blackItr != payload.pieces_black().end())
