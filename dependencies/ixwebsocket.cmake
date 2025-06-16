@@ -1,4 +1,4 @@
-# IXWebSocket 11.4.2 (BSD-3-Clause License)
+# IXWebSocket 11.4.5 (BSD-3-Clause License)
 
 CPMAddPackage(
     NAME ixwebsocket

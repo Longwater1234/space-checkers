@@ -1,4 +1,4 @@
-# mbedtls v2.25.0 (Apache-2.0 License)
+# mbedtls v2.28 (Apache-2.0 License)
 
 CPMAddPackage(
     NAME mbedtls
