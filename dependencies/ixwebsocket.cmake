@@ -1,9 +1,8 @@
-# IXWebSocket 11.4.2 (BSD-3-Clause License)
+# IXWebSocket 11.4.5 (BSD-3-Clause License)
 
 CPMAddPackage(
     NAME ixwebsocket
     URL    "https://github.com/machinezone/IXWebSocket/archive/refs/tags/v11.4.5.tar.gz"
-    VERSION 11.4.5
     DOWNLOAD_EXTRACT_TIMESTAMP TRUE
     DOWNLOAD_ONLY ON
     OPTIONS "USE_TLS TRUE" "USE_MBED_TLS TRUE" "USE_ZLIB TRUE"

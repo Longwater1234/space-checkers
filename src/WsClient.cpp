@@ -126,7 +126,7 @@ void WsClient::showPublicServerWindow(bool &showPublic)
 }
 
 /**
- * Fetch updated public servers from central cloud storage (Timeout 5000ms)
+ * Fetch updated public servers from CDN (Timeout 5000ms)
  * @see libcpr official docs: https://docs.libcpr.org/advanced-usage.html
  */
 void WsClient::asyncFetchPublicServers()
