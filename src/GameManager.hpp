@@ -54,7 +54,7 @@ class GameManager
     bool playerRedTurn = true;
     // bottom display message
     mutable std::string currentMsg;
-    // whether match is over
+    // whether match is over (for offline play only)
     bool gameOver = false;
     // used for atomic updates
     std::mutex my_mutex;

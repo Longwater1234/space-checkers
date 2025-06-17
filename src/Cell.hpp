@@ -14,7 +14,7 @@ namespace chk
 class Cell final : public sf::Drawable
 {
   public:
-    explicit Cell(int idx, const sf::RectangleShape &rec, const sf::Vector2f &pos, const sf::Font &font);
+    explicit Cell(int idx, const sf::RectangleShape &rec, const sf::Font &font);
     Cell() = delete;
     Cell &operator=(const Cell &) = delete;
     Cell(const Cell &) = delete;
@@ -34,17 +34,17 @@ class Cell final : public sf::Drawable
     void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
 };
 
-inline Cell::Cell(const int idx, const sf::RectangleShape &rect, const sf::Vector2f &pos, const sf::Font &font)
+inline Cell::Cell(const int idx, const sf::RectangleShape &rect, const sf::Font &font)
 {
     this->rec = rect;
     this->index = idx;
-    this->cell_pos = pos;
+    this->cell_pos = rec.getPosition();
 
     sf::Text text;
     text.setFont(font);
     text.setFillColor(sf::Color{255, 255, 255, 100});
     text.setString(std::to_string(this->index));
-    text.setPosition(pos);
+    text.setPosition(this->cell_pos);
     this->sfText = text;
 }
 

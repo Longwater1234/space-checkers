@@ -63,7 +63,7 @@ void GameManager::drawCheckerboard(const sf::Font &font)
                 lightRec.setFillColor(sf::Color{255, 225, 151});
                 float x = static_cast<float>(col % NUM_COLS) * chk::SIZE_CELL;
                 lightRec.setPosition(sf::Vector2f(x, row * chk::SIZE_CELL));
-                auto whiteBlock = std::make_unique<chk::Cell>(-1, lightRec, lightRec.getPosition(), font);
+                auto whiteBlock = std::make_unique<chk::Cell>(-1, lightRec, font);
                 blockList.emplace_back(std::move_if_noexcept(whiteBlock));
             }
             else
@@ -72,8 +72,8 @@ void GameManager::drawCheckerboard(const sf::Font &font)
                 sf::RectangleShape darkRect(sf::Vector2f{chk::SIZE_CELL, chk::SIZE_CELL});
                 darkRect.setFillColor(sf::Color{82, 55, 27});
                 float x = static_cast<float>(col % NUM_COLS) * chk::SIZE_CELL;
-                darkRect.setPosition(sf::Vector2f(x, row * chk::SIZE_CELL));
-                auto redBlock = std::make_unique<chk::Cell>(counter, darkRect, darkRect.getPosition(), font);
+                darkRect.setPosition(sf::Vector2f{x, row * chk::SIZE_CELL});
+                auto redBlock = std::make_unique<chk::Cell>(counter, darkRect, font);
                 redBlock->setEvenRow(row % 2 == 0);
                 blockList.emplace_back(std::move_if_noexcept(redBlock));
                 counter--;
@@ -144,7 +144,7 @@ void GameManager::handleCapturePiece(const chk::PlayerPtr &hunter, const chk::Pl
             {
                 return;
             }
-            isCaptured = true;
+            isCaptured = true; // verified
             this->updateMessage(hunter->getName() + " has captured " + prey->getName() + "'s piece!");
             gameMap.erase(this->sourceCell.value());                           // set hunter's old location empty!
             gameMap.erase(target.preyCellIdx);                                 // set Prey's old location empty!
@@ -159,7 +159,7 @@ void GameManager::handleCapturePiece(const chk::PlayerPtr &hunter, const chk::Pl
     {
         return;
     }
-    //  Check for extra opportunities (only if hunter has NOT just became KING)
+    // Check for extra opportunities (only if hunter has NOT just became KING)
     this->forcedMoves.clear();
     if (isKingBefore == isKingNow)
     {
@@ -174,7 +174,7 @@ void GameManager::handleCapturePiece(const chk::PlayerPtr &hunter, const chk::Pl
     }
     else
     {
-        this->updateMessage(prey->getName() + " is in DANGER again!");
+        this->updateMessage(hunter->getName() + " can CAPTURE another piece!");
     }
 }
 
