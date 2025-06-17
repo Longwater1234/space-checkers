@@ -22,7 +22,7 @@ namespace chk
  */
 void GameManager::updateMessage(std::string_view msg)
 {
-    std::scoped_lock<std::mutex> lg(my_mutex);
+    std::scoped_lock<std::mutex> lg{my_mutex};
     this->currentMsg = msg;
 }
 
