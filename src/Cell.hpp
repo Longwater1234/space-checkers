@@ -22,12 +22,12 @@ class Cell final : public sf::Drawable
     bool isAtPosition(const sf::Vector2f &pos) const;
     const sf::Vector2f &getPos() const;
     int getIndex() const;
-    void setEvenRow(bool is_even);
+    void setEvenRow(bool val);
     bool getIsEvenRow() const;
 
   private:
     sf::RectangleShape rec;
-    int index; // Darker cells have index in range [1~32]. Lighter cells are all -1
+    int index = -1; // Darker cells have index in range [1~32]. Lighter cells are all -1
     bool isEvenRow = false;
     sf::Vector2f cell_pos;
     sf::Text sfText;
@@ -50,7 +50,6 @@ inline Cell::Cell(const int idx, const sf::RectangleShape &rect, const sf::Vecto
 
 inline void Cell::draw(sf::RenderTarget &target, sf::RenderStates states) const
 {
-
     target.draw(rec, states);
     if (this->index != -1)
     {
@@ -69,7 +68,8 @@ inline bool Cell::getIsEvenRow() const
 }
 
 /**
- * Check whether mouse cursor is anywhere within this Cell region
+ * Check whether mouse cursor is anywhere INSIDE this Cell region
+ *
  * @param pos position x,y (int) relative to main Window
  * @return TRUE or FALSE
  */
@@ -80,6 +80,7 @@ inline bool Cell::containsPoint(const sf::Vector2i &pos) const
 
 /**
  * Check whether given object's position is EQUAL to this Cell's position
+ *
  * @param pos position x,y (float) relative to main window
  * @return TRUE or FALSE
  */
@@ -99,11 +100,11 @@ inline int Cell::getIndex() const
 
 /**
  * Set whether this cell's row is even
- * @param is_even TRUE or FALSE
+ * @param val TRUE or FALSE
  */
-inline void Cell::setEvenRow(bool is_even)
+inline void Cell::setEvenRow(bool val)
 {
-    this->isEvenRow = is_even;
+    this->isEvenRow = val;
 }
 
 /**

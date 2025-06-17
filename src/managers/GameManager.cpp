@@ -45,8 +45,9 @@ const std::vector<chk::Block> &GameManager::getBlockList() const
 }
 
 /**
- * Create checkerboard cells, labeled with an index using given font
- * @param font used for text labels
+ * Create checkerboard cells, labeled with an index using given font.
+ *
+ * @param font used for text
  */
 void GameManager::drawCheckerboard(const sf::Font &font)
 {
@@ -58,7 +59,7 @@ void GameManager::drawCheckerboard(const sf::Font &font)
             if ((row + col) % 2 == 0)
             {
                 // even CELL, set LIGHTER color (unused)
-                sf::RectangleShape lightRec(sf::Vector2f(chk::SIZE_CELL, chk::SIZE_CELL));
+                sf::RectangleShape lightRec(sf::Vector2f{chk::SIZE_CELL, chk::SIZE_CELL});
                 lightRec.setFillColor(sf::Color{255, 225, 151});
                 float x = static_cast<float>(col % NUM_COLS) * chk::SIZE_CELL;
                 lightRec.setPosition(sf::Vector2f(x, row * chk::SIZE_CELL));
@@ -68,7 +69,7 @@ void GameManager::drawCheckerboard(const sf::Font &font)
             else
             {
                 // Odd cell, SET DARKER color (USED BY PIECES)
-                sf::RectangleShape darkRect(sf::Vector2f(chk::SIZE_CELL, chk::SIZE_CELL));
+                sf::RectangleShape darkRect(sf::Vector2f{chk::SIZE_CELL, chk::SIZE_CELL});
                 darkRect.setFillColor(sf::Color{82, 55, 27});
                 float x = static_cast<float>(col % NUM_COLS) * chk::SIZE_CELL;
                 darkRect.setPosition(sf::Vector2f(x, row * chk::SIZE_CELL));
