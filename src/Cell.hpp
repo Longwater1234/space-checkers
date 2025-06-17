@@ -125,6 +125,7 @@ const inline sf::Vector2f &Cell::getPos() const
  */
 inline void Cell::highlightActive()
 {
+    this->rec.setFillColor(BABY_BLUE);
 }
 
 /**
@@ -132,6 +133,7 @@ inline void Cell::highlightActive()
  */
 inline void Cell::resetColor()
 {
+    this->rec.setFillColor(DARK_BROWN);
 }
 
 } // namespace chk

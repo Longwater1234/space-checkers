@@ -398,7 +398,13 @@ inline void OnlineGameManager::handleCellTap(const chk::PlayerPtr &hunter, const
     {
         return;
     }
-
+    // reset color of all previous active cells
+    std::for_each(this->blockList.begin(), this->blockList.end(), [](const chk::Block &cell) {
+        if (cell->getIndex() != -1)
+        {
+            cell->resetColor();
+        }
+    });
     // CHECK IF this cell has a Piece
     const short pieceId = this->getPieceFromCell(cell->getIndex());
     if (pieceId != -1)
@@ -413,6 +419,7 @@ inline void OnlineGameManager::handleCellTap(const chk::PlayerPtr &hunter, const
         // OTHERWISE, store it in buffer (for a simple move, on next turn)
         buffer.addItem(pieceId);
         this->setSourceCell(cell->getIndex());
+        cell->highlightActive();
     }
     else
     {

@@ -296,6 +296,13 @@ void chk::GameManager::handleCellTap(const chk::PlayerPtr &hunter, const chk::Pl
     {
         return;
     }
+    // reset color of all previous active cells
+    std::for_each(this->blockList.begin(), this->blockList.end(), [](const chk::Block &cell) {
+        if (cell->getIndex() != -1)
+        {
+            cell->resetColor();
+        }
+    });
     // CHECK IF this cell has a Piece
     const short pieceId = this->getPieceFromCell(cell->getIndex());
     if (pieceId != -1)
@@ -309,15 +316,6 @@ void chk::GameManager::handleCellTap(const chk::PlayerPtr &hunter, const chk::Pl
         }
         // OTHERWISE, store it in buffer (for a SIMPLE/CAPTURE move next)!
         buffer.addItem(pieceId);
-        // copy original src cell
-        int copySrcCell = this->sourceCell.value();
-        // reset old active cell color
-        const auto it = std::find_if(this->blockList.begin(), this->blockList.end(),
-                               [&](const chk::Block &cell) { cell->getIndex() == copySrcCell; });
-        if (it != this->blockList.end())
-        {
-         
-        }
         this->setSourceCell(cell->getIndex());
         cell->highlightActive();
     }
