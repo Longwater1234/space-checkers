@@ -23,7 +23,7 @@ int main()
     std::unique_ptr<chk::GameManager> manager = nullptr;
 
     // SHOW MAIN MENU
-    chk::MainMenu homeMenu(&window);
+    chk::MainMenu homeMenu{&window};
     const auto userChoice = homeMenu.runMainLoop();
     if (userChoice == chk::UserChoice::ONLINE_PLAY)
     {
@@ -37,7 +37,7 @@ int main()
     // LOAD FONT for IMGUI
     ImGuiIO &io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-    ImFont *imfont = io.Fonts->AddFontFromFileTTF(chk::getResourcePath(chk::FONT_PATH).c_str(), 16);
+    ImFont *imfont = io.Fonts->AddFontFromFileTTF(chk::getResourcePath(chk::FONT_PATH).c_str(), chk::FONT_SIZE);
     IM_ASSERT(imfont != nullptr);
     ImGui::SFML::UpdateFontTexture();
 
@@ -66,7 +66,7 @@ int main()
     chk::CircularBuffer<short> circularBuffer{1};
 
     // THE STATUS TEXT
-    sf::Text txtPanel{"Space Checkers", font, 16};
+    sf::Text txtPanel{"Space Checkers", font, chk::FONT_SIZE};
     txtPanel.setFillColor(sf::Color::White);
     txtPanel.setPosition(sf::Vector2f{10.0f, 8.5 * chk::SIZE_CELL});
     manager->updateMessage("Welcome to Space Checkers");
