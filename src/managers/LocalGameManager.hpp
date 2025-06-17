@@ -90,7 +90,7 @@ inline void LocalGameManager::createAllPieces()
 }
 
 /**
- * This will be called in the main game loop, every 60 FPS, drawing elements on screen
+ * This will be called in the main game loop, at 60 FPS, drawing elements on screen
  */
 inline void LocalGameManager::drawBoard()
 {

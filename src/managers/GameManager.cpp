@@ -300,8 +300,8 @@ void chk::GameManager::handleCellTap(const chk::PlayerPtr &hunter, const chk::Pl
     const short pieceId = this->getPieceFromCell(cell->getIndex());
     if (pieceId != -1)
     {
-        // YES, it has one! VERIFY IF THERE IS ANY PENDING "forced captures",
-        // if yes, verify hunter SELECTED
+        // YES, it has one! VERIFY IF THERE IS ANY PENDING "forced captures".
+        // If yes, ensure hunter is SELECTED!
         if (!this->getForcedMoves().empty() && this->forcedMoves.find(pieceId) == forcedMoves.end())
         {
             this->showForcedMoves(hunter, cell);
@@ -309,11 +309,21 @@ void chk::GameManager::handleCellTap(const chk::PlayerPtr &hunter, const chk::Pl
         }
         // OTHERWISE, store it in buffer (for a SIMPLE/CAPTURE move next)!
         buffer.addItem(pieceId);
+        // copy original src cell
+        int copySrcCell = this->sourceCell.value();
+        // reset old active cell color
+        const auto it = std::find_if(this->blockList.begin(), this->blockList.end(),
+                               [&](const chk::Block &cell) { cell->getIndex() == copySrcCell; });
+        if (it != this->blockList.end())
+        {
+         
+        }
         this->setSourceCell(cell->getIndex());
+        cell->highlightActive();
     }
     else
     {
-        // Cell is Empty! Let's judge if this is SIMPLE move or ATTACK move
+        // Playable Cell is Empty! Let's judge if this is SIMPLE move or ATTACK move
         if (!buffer.isEmpty())
         {
             const short movablePieceId = buffer.getFront();
@@ -321,7 +331,7 @@ void chk::GameManager::handleCellTap(const chk::PlayerPtr &hunter, const chk::Pl
             {
                 return;
             }
-            else if (isHunterActive())
+            else if (this->isHunterActive())
             {
                 // it's an ATTACK move
                 this->handleCapturePiece(hunter, prey, cell);

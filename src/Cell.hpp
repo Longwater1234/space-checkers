@@ -24,9 +24,13 @@ class Cell final : public sf::Drawable
     int getIndex() const;
     void setEvenRow(bool val);
     bool getIsEvenRow() const;
+    void highlightActive();
+    void resetColor();
 
   private:
     sf::RectangleShape rec;
+    sf::Color DARK_BROWN = sf::Color{82, 55, 27};
+    sf::Color BABY_BLUE = sf::Color{98, 174, 239};
     int index = -1; // Darker cells have index in range [1~32]. Lighter cells are all -1
     bool isEvenRow = false;
     sf::Vector2f cell_pos;
@@ -114,6 +118,20 @@ inline void Cell::setEvenRow(bool val)
 const inline sf::Vector2f &Cell::getPos() const
 {
     return this->cell_pos;
+}
+
+/**
+ * (ONLY FOR PLAYABLE CELLS) Highlight the currently clicked cell with a piece with BLUE
+ */
+inline void Cell::highlightActive()
+{
+}
+
+/**
+ * Restore the original color
+ */
+inline void Cell::resetColor()
+{
 }
 
 } // namespace chk
