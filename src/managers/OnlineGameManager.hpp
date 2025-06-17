@@ -121,15 +121,15 @@ inline void chk::OnlineGameManager::createAllPieces()
 
         // GIVE EACH PLAYER their own piece
         GameManager::matchCellsToPieces(pieceList);
-        for (auto &kete : pieceList)
+        for (auto &pp : pieceList)
         {
-            if (kete->getPieceType() == chk::PieceType::Red)
+            if (pp->getPieceType() == chk::PieceType::Red)
             {
-                this->playerRed->receivePiece(kete);
+                this->playerRed->receivePiece(pp);
             }
             else
             {
-                this->playerBlack->receivePiece(kete);
+                this->playerBlack->receivePiece(pp);
             }
         }
         pieceList.clear(); // SAFE! no longer used.

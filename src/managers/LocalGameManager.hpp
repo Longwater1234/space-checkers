@@ -74,15 +74,15 @@ inline void LocalGameManager::createAllPieces()
     }
     GameManager::matchCellsToPieces(pieceList);
     // GIVE EACH PLAYER their own piece
-    for (auto &kete : pieceList)
+    for (auto &pp : pieceList)
     {
-        if (kete->getPieceType() == chk::PieceType::Red)
+        if (pp->getPieceType() == chk::PieceType::Red)
         {
-            this->playerRed->receivePiece(kete);
+            this->playerRed->receivePiece(pp);
         }
         else
         {
-            this->playerBlack->receivePiece(kete);
+            this->playerBlack->receivePiece(pp);
         }
     }
     // SAFE. It's now useless.
