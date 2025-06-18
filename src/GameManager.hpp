@@ -23,7 +23,9 @@
 
 namespace chk
 {
+// cell ptr
 using Block = std::unique_ptr<chk::Cell>;
+// player ptr
 using PlayerPtr = std::unique_ptr<chk::Player>;
 
 constexpr uint16_t NUM_ROWS{8};
