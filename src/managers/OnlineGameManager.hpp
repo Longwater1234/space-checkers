@@ -87,9 +87,9 @@ inline void chk::OnlineGameManager::createAllPieces()
         std::vector<chk::PiecePtr> pieceList;
         pieceList.reserve(chk::NUM_PIECES);
 
-        auto redItr = payload.pieces_red().begin();
-        auto blackItr = payload.pieces_black().begin();
-        // create pieces objects, and position them on Board
+        auto redItr = payload.pieces_red().begin();     // red iterator
+        auto blackItr = payload.pieces_black().begin(); // black iterator
+        // place them on board
         for (uint16_t row = 0; row < chk::NUM_ROWS; row++)
         {
             for (uint16_t col = 0; col < chk::NUM_COLS; col++)
@@ -132,7 +132,7 @@ inline void chk::OnlineGameManager::createAllPieces()
                 this->playerBlack->receivePiece(pp);
             }
         }
-        pieceList.clear(); // SAFE! no longer used.
+        pieceList.clear(); // SAFE! no longer needed.
         this->startMoveListener();
         this->startCaptureListener();
     });
