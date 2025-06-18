@@ -63,7 +63,7 @@ target_include_directories(SpaceCheckers PUBLIC ${SFML_HOME}/include)
 if(MSVC)
   target_compile_options(SpaceCheckers PRIVATE /W4 /sdl)
 else()
-  target_compile_options(SpaceCheckers PRIVATE -Wall -Werror=constant-conversion)
+  target_compile_options(SpaceCheckers PRIVATE -Wall -Werror=constant-conversion -Werror=fortify-source)
 endif()
 
 # COPY resources folder to destination

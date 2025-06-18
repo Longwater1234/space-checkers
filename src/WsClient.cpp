@@ -170,6 +170,9 @@ void WsClient::parseServerList(const cpr::Response &response)
     {
         this->deathNote = ex.what();
         this->isDead = true;
+#ifndef NDEBUG
+        spdlog::error(ex.what());
+#endif // DEBUG
     }
 }
 

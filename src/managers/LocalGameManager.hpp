@@ -36,12 +36,12 @@ inline LocalGameManager::LocalGameManager(sf::RenderWindow *windowPtr)
 }
 
 /**
- * Create all pieces for both players and add them to pieceList, using std C++ random num generator
+ * Create all pieces for both players (using std C++ PRNG), then place them on the board.
  */
 inline void LocalGameManager::createAllPieces()
 {
     std::random_device randomDevice;
-    std::mt19937 randEngine(randomDevice());
+    std::mt19937 randEngine{randomDevice()};
     std::uniform_int_distribution<short> dist(1, std::numeric_limits<short>::max());
 
     // Reserve container for pieces on board
