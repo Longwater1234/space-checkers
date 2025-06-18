@@ -22,7 +22,7 @@ namespace chk
  */
 void GameManager::updateMessage(std::string_view msg)
 {
-    std::scoped_lock<std::mutex> lg(my_mutex);
+    std::scoped_lock<std::mutex> lg{my_mutex};
     this->currentMsg = msg;
 }
 
@@ -45,8 +45,9 @@ const std::vector<chk::Block> &GameManager::getBlockList() const
 }
 
 /**
- * Create checkerboard cells, labeled with an index using given font
- * @param font used for text labels
+ * Create checkerboard cells, labeled with an index using given font.
+ *
+ * @param font used for text
  */
 void GameManager::drawCheckerboard(const sf::Font &font)
 {
@@ -58,21 +59,21 @@ void GameManager::drawCheckerboard(const sf::Font &font)
             if ((row + col) % 2 == 0)
             {
                 // even CELL, set LIGHTER color (unused)
-                sf::RectangleShape lightRec(sf::Vector2f(chk::SIZE_CELL, chk::SIZE_CELL));
+                sf::RectangleShape lightRec(sf::Vector2f{chk::SIZE_CELL, chk::SIZE_CELL});
                 lightRec.setFillColor(sf::Color{255, 225, 151});
                 float x = static_cast<float>(col % NUM_COLS) * chk::SIZE_CELL;
                 lightRec.setPosition(sf::Vector2f(x, row * chk::SIZE_CELL));
-                auto whiteBlock = std::make_unique<chk::Cell>(-1, lightRec, lightRec.getPosition(), font);
+                auto whiteBlock = std::make_unique<chk::Cell>(-1, lightRec, font);
                 blockList.emplace_back(std::move_if_noexcept(whiteBlock));
             }
             else
             {
                 // Odd cell, SET DARKER color (USED BY PIECES)
-                sf::RectangleShape darkRect(sf::Vector2f(chk::SIZE_CELL, chk::SIZE_CELL));
+                sf::RectangleShape darkRect(sf::Vector2f{chk::SIZE_CELL, chk::SIZE_CELL});
                 darkRect.setFillColor(sf::Color{82, 55, 27});
                 float x = static_cast<float>(col % NUM_COLS) * chk::SIZE_CELL;
-                darkRect.setPosition(sf::Vector2f(x, row * chk::SIZE_CELL));
-                auto redBlock = std::make_unique<chk::Cell>(counter, darkRect, darkRect.getPosition(), font);
+                darkRect.setPosition(sf::Vector2f{x, row * chk::SIZE_CELL});
+                auto redBlock = std::make_unique<chk::Cell>(counter, darkRect, font);
                 redBlock->setEvenRow(row % 2 == 0);
                 blockList.emplace_back(std::move_if_noexcept(redBlock));
                 counter--;
@@ -143,7 +144,7 @@ void GameManager::handleCapturePiece(const chk::PlayerPtr &hunter, const chk::Pl
             {
                 return;
             }
-            isCaptured = true;
+            isCaptured = true; // verified
             this->updateMessage(hunter->getName() + " has captured " + prey->getName() + "'s piece!");
             gameMap.erase(this->sourceCell.value());                           // set hunter's old location empty!
             gameMap.erase(target.preyCellIdx);                                 // set Prey's old location empty!
@@ -158,7 +159,7 @@ void GameManager::handleCapturePiece(const chk::PlayerPtr &hunter, const chk::Pl
     {
         return;
     }
-    //  Check for extra opportunities (only if hunter has NOT just became KING)
+    // Check for extra opportunities (only if hunter has NOT just became KING)
     this->forcedMoves.clear();
     if (isKingBefore == isKingNow)
     {
@@ -173,7 +174,7 @@ void GameManager::handleCapturePiece(const chk::PlayerPtr &hunter, const chk::Pl
     }
     else
     {
-        this->updateMessage(prey->getName() + " is in DANGER again!");
+        this->updateMessage(hunter->getName() + " can CAPTURE another piece!");
     }
 }
 
@@ -295,12 +296,19 @@ void chk::GameManager::handleCellTap(const chk::PlayerPtr &hunter, const chk::Pl
     {
         return;
     }
+    // reset color of all previous active cells
+    std::for_each(this->blockList.begin(), this->blockList.end(), [](const chk::Block &cell) {
+        if (cell->getIndex() != -1)
+        {
+            cell->resetColor();
+        }
+    });
     // CHECK IF this cell has a Piece
     const short pieceId = this->getPieceFromCell(cell->getIndex());
     if (pieceId != -1)
     {
-        // YES, it has one! VERIFY IF THERE IS ANY PENDING "forced captures",
-        // if yes, verify hunter SELECTED
+        // YES, it has one! VERIFY IF THERE IS ANY PENDING "forced captures".
+        // If yes, ensure hunter is SELECTED!
         if (!this->getForcedMoves().empty() && this->forcedMoves.find(pieceId) == forcedMoves.end())
         {
             this->showForcedMoves(hunter, cell);
@@ -309,10 +317,11 @@ void chk::GameManager::handleCellTap(const chk::PlayerPtr &hunter, const chk::Pl
         // OTHERWISE, store it in buffer (for a SIMPLE/CAPTURE move next)!
         buffer.addItem(pieceId);
         this->setSourceCell(cell->getIndex());
+        cell->highlightActive();
     }
     else
     {
-        // Cell is Empty! Let's judge if this is SIMPLE move or ATTACK move
+        // Playable Cell is Empty! Let's judge if this is SIMPLE move or ATTACK move
         if (!buffer.isEmpty())
         {
             const short movablePieceId = buffer.getFront();
@@ -320,7 +329,7 @@ void chk::GameManager::handleCellTap(const chk::PlayerPtr &hunter, const chk::Pl
             {
                 return;
             }
-            else if (isHunterActive())
+            else if (this->isHunterActive())
             {
                 // it's an ATTACK move
                 this->handleCapturePiece(hunter, prey, cell);

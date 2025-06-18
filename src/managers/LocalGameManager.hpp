@@ -54,7 +54,7 @@ inline void LocalGameManager::createAllPieces()
         {
             if ((row + col) % 2 != 0)
             {
-                sf::CircleShape circle(0.5 * chk::SIZE_CELL);
+                sf::CircleShape circle{0.5 * chk::SIZE_CELL};
                 const float x = static_cast<float>(col % NUM_COLS) * chk::SIZE_CELL;
                 circle.setPosition(sf::Vector2f{x, row * chk::SIZE_CELL});
                 if (row < 3)
@@ -74,15 +74,15 @@ inline void LocalGameManager::createAllPieces()
     }
     GameManager::matchCellsToPieces(pieceList);
     // GIVE EACH PLAYER their own piece
-    for (auto &kete : pieceList)
+    for (auto &pp : pieceList)
     {
-        if (kete->getPieceType() == chk::PieceType::Red)
+        if (pp->getPieceType() == chk::PieceType::Red)
         {
-            this->playerRed->receivePiece(kete);
+            this->playerRed->receivePiece(pp);
         }
         else
         {
-            this->playerBlack->receivePiece(kete);
+            this->playerBlack->receivePiece(pp);
         }
     }
     // SAFE. It's now useless.
@@ -90,7 +90,7 @@ inline void LocalGameManager::createAllPieces()
 }
 
 /**
- * This will be called in the main game loop, every 60 FPS, drawing elements on screen
+ * This will be called in the main game loop, at 60 FPS, drawing elements on screen
  */
 inline void LocalGameManager::drawBoard()
 {

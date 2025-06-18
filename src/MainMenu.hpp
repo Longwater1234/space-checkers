@@ -20,6 +20,7 @@ namespace chk
 {
 constexpr auto ICON_PATH = "win-icon-16.png";
 constexpr auto FONT_PATH = "notosans-regular.ttf";
+constexpr unsigned FONT_SIZE{16};
 
 enum class UserChoice
 {

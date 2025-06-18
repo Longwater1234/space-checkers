@@ -5,12 +5,13 @@
 #include <SFML/Graphics/RenderStates.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Graphics/Texture.hpp>
+#include <iostream>
 
 namespace chk
 {
 enum class PieceType
 {
-    Red = 69995,
+    Red = 67895,
     Black,
 };
 

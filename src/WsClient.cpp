@@ -16,7 +16,8 @@ chk::WsClient::WsClient()
     this->webSocketPtr->setPingInterval(30);
     ix::SocketTLSOptions tlsOptions;
 #ifndef _WIN32
-    // Currently system CAs are not supported on non-Windows platforms with mbedtls
+    // Currently system CAs are not supported on non-Windows platforms with
+    // mbedtls
     tlsOptions.caFile = "NONE";
 #endif // _WIN32
     this->webSocketPtr->setTLSOptions(tlsOptions);
@@ -200,9 +201,9 @@ void WsClient::runMainLoop()
     
     else {
         // already connected
-        this->runServerLoop(); 
+        this->runServerLoop();
     }
-    
+
     // some error happened 🙁
     if (this->isDead) {
         if (this->_onDeathCallback != nullptr) {
@@ -212,11 +213,10 @@ void WsClient::runMainLoop()
     } else if (this->haveWinner) {
         this->showWinnerPopup();
     }
-    // clang-format on
 }
 
 /**
- * Try to connect to Server
+ * Try to connect to Server.
  * @param address server IP or URI
  */
 void WsClient::tryConnect(std::string_view address)
@@ -282,7 +282,7 @@ void WsClient::setOnReadyConnectedCallback(const onConnectedServer &callback)
 }
 
 /**
- * Set the callback to handle starting game after signal from server
+ * Set the callback to handle starting game after signal from server.
  * @param callback the callback function
  */
 void WsClient::setOnReadyStartGameCallback(const onReadyStartGame &callback)
@@ -291,7 +291,7 @@ void WsClient::setOnReadyStartGameCallback(const onReadyStartGame &callback)
 }
 
 /**
- * Set the callback to handle connection failures or server kickouts
+ * Set the callback to handle connection failures or server kickouts.
  * @param callback the callback function
  */
 void WsClient::setOnDeathCallback(const onDeathCallback &callback)
@@ -300,7 +300,7 @@ void WsClient::setOnDeathCallback(const onDeathCallback &callback)
 }
 
 /**
- * Set the callback for handling Opponent moving their piece
+ * Set the callback for handling Opponent moving their piece.
  * @param callback the callback function
  */
 void WsClient::setOnMovePieceCallback(const onMovePieceCallback &callback)
@@ -309,7 +309,7 @@ void WsClient::setOnMovePieceCallback(const onMovePieceCallback &callback)
 }
 
 /**
- * Set the callback for handling Opponent capturing my Piece
+ * Set the callback for handling Opponent capturing my Piece.
  * @param callback the callback function
  */
 void WsClient::setOnCapturePieceCallback(const onCaptureCallback &callback)
@@ -318,7 +318,7 @@ void WsClient::setOnCapturePieceCallback(const onCaptureCallback &callback)
 }
 
 /**
- * Set the callback for handling Winner or Loser of match
+ * Set the callback for handling Winner or Loser of match.
  * @param callback the callback function
  */
 void WsClient::setOnWinLoseCallback(const onWinLoseCallback &callback)
@@ -327,7 +327,8 @@ void WsClient::setOnWinLoseCallback(const onWinLoseCallback &callback)
 }
 
 /**
- * Send Protobuf response back to server
+ * Send Protobuf response back to server.
+ * 
  * @param payload the request body
  * @return TRUE if sent successfully, else FALSE
  */
@@ -347,7 +348,8 @@ bool WsClient::replyServer(const chk::payload::BasePayload &payload) const
 }
 
 /**
- * Exchange messages with the server and update the game accordingly. if any error happen, close connection
+ * Exchange messages with the server and update the game accordingly. if any
+ * error happens, close connection
  */
 void WsClient::runServerLoop()
 {
@@ -360,7 +362,7 @@ void WsClient::runServerLoop()
         chk::payload::BasePayload basePayload;
         if (!basePayload.ParseFromString(msg))
         {
-            std::scoped_lock lg(this->mut);
+            std::scoped_lock lg{this->mut};
             this->deathNote = "Profobuf: Could not parse payload";
             this->isDead = true;
             return;
@@ -368,7 +370,6 @@ void WsClient::runServerLoop()
 
         if (basePayload.has_welcome())
         {
-            /* code */
             chk::payload::WelcomePayload welcome = basePayload.welcome();
             if (this->_onReadyConnected != nullptr)
             {
@@ -414,7 +415,7 @@ void WsClient::runServerLoop()
             if (this->_onWinLoseCallback != nullptr)
             {
                 this->_onWinLoseCallback(basePayload.notice());
-                std::scoped_lock lg(this->mut);
+                std::scoped_lock lg{this->mut};
                 this->deathNote = basePayload.notice();
                 this->haveWinner = true;
             }

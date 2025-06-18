@@ -121,15 +121,15 @@ inline void chk::OnlineGameManager::createAllPieces()
 
         // GIVE EACH PLAYER their own piece
         GameManager::matchCellsToPieces(pieceList);
-        for (auto &kete : pieceList)
+        for (auto &pp : pieceList)
         {
-            if (kete->getPieceType() == chk::PieceType::Red)
+            if (pp->getPieceType() == chk::PieceType::Red)
             {
-                this->playerRed->receivePiece(kete);
+                this->playerRed->receivePiece(pp);
             }
             else
             {
-                this->playerBlack->receivePiece(kete);
+                this->playerBlack->receivePiece(pp);
             }
         }
         pieceList.clear(); // SAFE! no longer used.
@@ -380,7 +380,6 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
     }
     else
     {
-        spdlog::info("WE HAVE EXTRA TARGETS TO HUNT");
         this->updateMessage("Continue. You can capture another piece!");
     }
 }
@@ -399,7 +398,13 @@ inline void OnlineGameManager::handleCellTap(const chk::PlayerPtr &hunter, const
     {
         return;
     }
-
+    // reset color of all previous active cells
+    std::for_each(this->blockList.begin(), this->blockList.end(), [](const chk::Block &cell) {
+        if (cell->getIndex() != -1)
+        {
+            cell->resetColor();
+        }
+    });
     // CHECK IF this cell has a Piece
     const short pieceId = this->getPieceFromCell(cell->getIndex());
     if (pieceId != -1)
@@ -414,6 +419,7 @@ inline void OnlineGameManager::handleCellTap(const chk::PlayerPtr &hunter, const
         // OTHERWISE, store it in buffer (for a simple move, on next turn)
         buffer.addItem(pieceId);
         this->setSourceCell(cell->getIndex());
+        cell->highlightActive();
     }
     else
     {

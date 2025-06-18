@@ -56,7 +56,7 @@ class WsClient final
     std::atomic_bool haveWinner{false};             // whether server returned Winner or Loser
     std::atomic_bool isConnected{false};            // if done connected to server (else, show loading)
     chk::CircularBuffer<std::string> msgBuffer{1};  // keep only recent 1 incoming message
-    mutable std::string deathNote;                  // reason from server for disconnected (KICKED or WIN or LOSE)
+    mutable std::string deathNote;                  // reason from server for disconnecting
     mutable std::string protoBucket;                // REUSABLE container to store OUTGOING protobuf
     std::atomic_bool connClicked = false;           // if 'connect' button clicked
     std::vector<chk::ServerLocation> publicServers; // list of public servers (fetched from CDN)
