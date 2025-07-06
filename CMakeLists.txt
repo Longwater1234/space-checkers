@@ -61,7 +61,7 @@ target_include_directories(SpaceCheckers PUBLIC ${SFML_HOME}/include)
 
 # show warnings (depending on C++ compiler)
 if(MSVC)
-  target_compile_options(SpaceCheckers PRIVATE /W4 /sdl)
+  target_compile_options(SpaceCheckers PRIVATE /W4 /sdl /fsanitize=address)
 else()
   target_compile_options(SpaceCheckers PRIVATE -Wall -Werror=constant-conversion -Werror=fortify-source)
 endif()
