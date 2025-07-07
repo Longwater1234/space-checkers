@@ -204,7 +204,7 @@ void WsClient::runMainLoop()
     
     else {
         // already connected
-        this->runServerLoop();
+        this->readIncomingSignals();
     }
 
     // some error happened 🙁
@@ -216,6 +216,7 @@ void WsClient::runMainLoop()
     } else if (this->haveWinner) {
         this->showWinnerPopup();
     }
+    // clang-format on
 }
 
 /**
@@ -331,7 +332,7 @@ void WsClient::setOnWinLoseCallback(const onWinLoseCallback &callback)
 
 /**
  * Send Protobuf response back to server.
- * 
+ *
  * @param payload the request body
  * @return TRUE if sent successfully, else FALSE
  */
@@ -351,10 +352,10 @@ bool WsClient::replyServer(const chk::payload::BasePayload &payload) const
 }
 
 /**
- * Exchange messages with the server and update the game accordingly. if any
- * error happens, close connection
+ * Read messages from server and update the game accordingly. If any
+ * error happens or match ends, close connection
  */
-void WsClient::runServerLoop()
+void WsClient::readIncomingSignals()
 {
     for (const auto &msg : this->msgBuffer.getAll())
     {
@@ -365,9 +366,9 @@ void WsClient::runServerLoop()
         chk::payload::BasePayload basePayload;
         if (!basePayload.ParseFromString(msg))
         {
+            this->isDead = true;
             std::scoped_lock lg{this->mut};
             this->deathNote = "Profobuf: Could not parse payload";
-            this->isDead = true;
             return;
         }
 
@@ -390,6 +391,7 @@ void WsClient::runServerLoop()
         else if (basePayload.has_exit_payload())
         {
             this->isDead = true;
+            std::scoped_lock lg{this->mut};
             this->deathNote = basePayload.notice();
             spdlog::error(basePayload.notice());
         }
