@@ -416,6 +416,11 @@ inline void OnlineGameManager::handleCellTap(const chk::PlayerPtr &hunter, const
             this->showForcedMoves(hunter, cell);
             return;
         }
+        // Does current player own this piece?
+        if (!hunter->hasThisPiece(pieceId))
+        {
+            return;
+        }
         // OTHERWISE, store it in buffer (for a simple move, on next turn)
         buffer.addItem(pieceId);
         this->setSourceCell(cell->getIndex());

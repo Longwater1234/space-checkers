@@ -314,6 +314,11 @@ void chk::GameManager::handleCellTap(const chk::PlayerPtr &hunter, const chk::Pl
             this->showForcedMoves(hunter, cell);
             return;
         }
+        // Does current player own this piece?
+        if (!hunter->hasThisPiece(pieceId))
+        {
+            return;
+        }
         // OTHERWISE, store it in buffer (for a SIMPLE/CAPTURE move next)!
         buffer.addItem(pieceId);
         this->setSourceCell(cell->getIndex());
