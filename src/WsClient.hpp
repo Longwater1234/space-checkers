@@ -27,7 +27,7 @@ using onDeathCallback = std::function<void(std::string_view notice)>;
 using onMovePieceCallback = std::function<void(const chk::payload::MovePayload &)>;
 // when opponent captures my piece
 using onCaptureCallback = std::function<void(const chk::payload::CapturePayload &)>;
-// when we got a winner or loser
+// when we get a winner or loser
 using onWinLoseCallback = std::function<void(std::string_view notice)>;
 // CDN address
 constexpr auto cloudfront = "https://d1txhef4jwuosv.cloudfront.net/ws_server_locations.json";

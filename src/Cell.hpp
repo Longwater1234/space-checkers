@@ -121,7 +121,7 @@ const inline sf::Vector2f &Cell::getPos() const
 }
 
 /**
- * (ONLY FOR PLAYABLE CELLS) Highlight the currently clicked cell with a piece with BLUE
+ * (ONLY FOR PLAYABLE CELLS) Highlight with BLUE the currently clicked cell with a piece
  */
 inline void Cell::highlightActive()
 {
