@@ -18,7 +18,7 @@ int main()
     GOOGLE_PROTOBUF_VERIFY_VERSION;
     auto window = sf::RenderWindow{sf::VideoMode{600, 700}, "SpaceCheckers", sf::Style::Titlebar | sf::Style::Close};
     window.setFramerateLimit(60);
-    ImGui::SFML::Init(window, false);
+    (void)ImGui::SFML::Init(window, false);
     // ImGui::StyleColorsLight(); //<-- light color theme
     std::unique_ptr<chk::GameManager> manager = nullptr;
 
@@ -39,7 +39,7 @@ int main()
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     ImFont *imfont = io.Fonts->AddFontFromFileTTF(chk::getResourcePath(chk::FONT_PATH).c_str(), chk::FONT_SIZE);
     IM_ASSERT(imfont != nullptr);
-    ImGui::SFML::UpdateFontTexture();
+    (void)ImGui::SFML::UpdateFontTexture();
 
     sf::Image appIcon;
     if (appIcon.loadFromFile(chk::getResourcePath(chk::ICON_PATH)))

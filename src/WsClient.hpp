@@ -27,7 +27,7 @@ using onDeathCallback = std::function<void(std::string_view notice)>;
 using onMovePieceCallback = std::function<void(const chk::payload::MovePayload &)>;
 // when opponent captures my piece
 using onCaptureCallback = std::function<void(const chk::payload::CapturePayload &)>;
-// when we got a winner or loser
+// when we get a winner or loser
 using onWinLoseCallback = std::function<void(std::string_view notice)>;
 // CDN address
 constexpr auto cloudfront = "https://d1txhef4jwuosv.cloudfront.net/ws_server_locations.json";
@@ -72,7 +72,7 @@ class WsClient final
     std::mutex mut;
     std::unique_ptr<ix::WebSocket> webSocketPtr = nullptr; // our Websocket object
     void showErrorPopup();                                 // whenver there is an error (from server)
-    void runServerLoop();                                  // while connected, keep exchanging messages with server
+    void readIncomingSignals();                            // while connected, keep reading messages from server
     static void showHint(const char *tip);
     void tryConnect(std::string_view address);
     void showConnectWindow();

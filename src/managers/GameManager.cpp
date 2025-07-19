@@ -163,7 +163,7 @@ void GameManager::handleCapturePiece(const chk::PlayerPtr &hunter, const chk::Pl
     this->forcedMoves.clear();
     if (isKingBefore == isKingNow)
     {
-        GameManager::identifyTargets(hunter, targetCell);
+        this->identifyTargets(hunter, targetCell);
     }
 
     if (this->forcedMoves.empty())
@@ -226,7 +226,7 @@ bool GameManager::isHunterActive() const
 }
 
 /**
- * Using cached gameMap, get the PieceId found at this cell_index
+ * Using cached gameMap, get the piece_id found at this cell
  *
  * @param cell_idx the clicked cell
  * @return positive number or -1 if not found
@@ -242,7 +242,8 @@ short GameManager::getPieceFromCell(const int cell_idx) const
 
 /**
  * Match cells to pieces at game launch, using position, and cache it to Hashmap
- * @param pieceList vector of all pieces
+ *
+ * @param pieceList vector containing all pieces
  */
 void GameManager::matchCellsToPieces(const std::vector<chk::PiecePtr> &pieceList)
 {
@@ -308,13 +309,17 @@ void chk::GameManager::handleCellTap(const chk::PlayerPtr &hunter, const chk::Pl
     if (pieceId != -1)
     {
         // YES, it has one! VERIFY IF THERE IS ANY PENDING "forced captures".
-        // If yes, ensure hunter is SELECTED!
         if (!this->getForcedMoves().empty() && this->forcedMoves.find(pieceId) == forcedMoves.end())
         {
             this->showForcedMoves(hunter, cell);
             return;
         }
-        // OTHERWISE, store it in buffer (for a SIMPLE/CAPTURE move next)!
+        // Does current player own this piece?
+        if (!hunter->hasThisPiece(pieceId))
+        {
+            return;
+        }
+        // Store it in buffer (for a SIMPLE/CAPTURE move next!)
         buffer.addItem(pieceId);
         this->setSourceCell(cell->getIndex());
         cell->highlightActive();
@@ -413,7 +418,7 @@ bool GameManager::awayFromEdge(const int cell_idx) const
 /**
  * Collect all possible next "forced captures" for this hunter.
  * @param hunter Current player
- * @param singleCell if not NULL, only collect around this cell. Otherwise, loop ENTIRE board
+ * @param singleCell if NOT null, then only collect around this cell. Otherwise, loop ENTIRE board
  */
 void GameManager::identifyTargets(const PlayerPtr &hunter, const chk::Block &singleCell)
 {
@@ -424,7 +429,7 @@ void GameManager::identifyTargets(const PlayerPtr &hunter, const chk::Block &sin
         const short pieceId = this->getPieceFromCell(singleCell->getIndex());
         if (gameMap.find(singleCell->getIndex()) == gameMap.end() || !hunter->hasThisPiece(pieceId))
         {
-            // this CELL is not usable, OR piece not OWNED by hunter
+            // this CELL is not usable, OR piece not owned to hunter
             return;
         }
         this->collectFrontLHS(hunter, singleCell);
