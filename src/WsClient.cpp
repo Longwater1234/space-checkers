@@ -204,7 +204,7 @@ void WsClient::runMainLoop()
     
     else {
         // already connected
-        this->readIncomingSignals();
+        this->readIncomingPayloads();
     }
 
     // some error happened 🙁
@@ -355,7 +355,7 @@ bool WsClient::replyServer(const chk::payload::BasePayload &payload) const
  * Read messages from server and update the game accordingly. If any
  * error happens or match ends, close connection
  */
-void WsClient::readIncomingSignals()
+void WsClient::readIncomingPayloads()
 {
     for (const auto &msg : this->msgBuffer.getAll())
     {
