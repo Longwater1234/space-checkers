@@ -30,7 +30,7 @@ class Piece final : public sf::Drawable, public sf::Transformable
     Piece() = delete;
     Piece(const Piece &) = delete;
     Piece &operator=(const Piece &) = delete;
-    [[nodiscard]] const PieceType &getPieceType() const;
+    [[nodiscard]] const PieceType getPieceType() const;
     void activateKing();
     bool getIsKing() const;
     bool containsPoint(const sf::Vector2i &pos) const;
@@ -89,7 +89,7 @@ inline void Piece::draw(sf::RenderTarget &target, sf::RenderStates states) const
  * Get piece type, whether it's Black or Red
  * @return the pieceType
  */
-inline const PieceType &Piece::getPieceType() const
+inline const PieceType Piece::getPieceType() const
 {
     return this->pieceType;
 }
