@@ -12,7 +12,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(BUILD_SHARED_LIBS OFF)
 
-# On macOS using Frameworks, NOT static (dylib)
+# On macOS using Frameworks, NOT static libs
 if(NOT APPLE)
   set(SFML_STATIC_LIBRARIES TRUE)
 endif()
