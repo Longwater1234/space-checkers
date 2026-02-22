@@ -376,31 +376,32 @@ void WsClient::readIncomingPayloads()
             return;
         }
 
-        if (basePayload.has_welcome())
+       // =================== begin switch block =====================
+        switch (basePayload.inner_case())
         {
-            chk::payload::WelcomePayload welcome = basePayload.welcome();
+        case chk::payload::BasePayload::kWelcome:
             if (this->_onReadyConnected != nullptr)
             {
-                this->_onReadyConnected(welcome, basePayload.notice());
+                this->_onReadyConnected(basePayload.welcome(), basePayload.notice());
             }
-        }
-        else if (basePayload.has_start())
-        {
-            chk::payload::StartPayload startPayload = basePayload.start();
+            break;
+
+        case chk::payload::BasePayload::kStart:
             if (this->_onReadyStartGame != nullptr)
             {
-                this->_onReadyStartGame(startPayload, basePayload.notice());
+                this->_onReadyStartGame(basePayload.start(), basePayload.notice());
             }
-        }
-        else if (basePayload.has_exit_payload())
-        {
+            break;
+
+        case chk::payload::BasePayload::kExitPayload: {
             this->isDead = true;
             std::scoped_lock lg{this->mut};
             this->deathNote = basePayload.notice();
             spdlog::error(basePayload.notice());
+            break;
         }
-        else if (basePayload.has_move_payload())
-        {
+
+        case chk::payload::BasePayload::kMovePayload: {
             if (this->_onMovePieceCallback != nullptr)
             {
 #ifndef NDEBUG
@@ -408,9 +409,10 @@ void WsClient::readIncomingPayloads()
 #endif // DEBUG
                 this->_onMovePieceCallback(basePayload.move_payload());
             }
+            break;
         }
-        else if (basePayload.has_capture_payload())
-        {
+
+        case chk::payload::BasePayload::kCapturePayload: {
             if (this->_onCaptureCallback != nullptr)
             {
 #ifndef NDEBUG
@@ -418,9 +420,10 @@ void WsClient::readIncomingPayloads()
 #endif // DEBUG
                 this->_onCaptureCallback(basePayload.capture_payload());
             }
+            break;
         }
-        else if (basePayload.has_winlose_payload())
-        {
+
+        case chk::payload::BasePayload::kWinlosePayload: {
             if (this->_onWinLoseCallback != nullptr)
             {
                 this->_onWinLoseCallback(basePayload.notice());
@@ -428,6 +431,11 @@ void WsClient::readIncomingPayloads()
                 this->deathNote = basePayload.notice();
                 this->haveWinner = true;
             }
+            break;
+        }
+
+        default:
+            break;
         }
     }
     std::scoped_lock lg{this->mut};
