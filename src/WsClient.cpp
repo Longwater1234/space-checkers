@@ -204,7 +204,7 @@ void WsClient::runMainLoop()
     
     else {
         // already connected
-        this->readIncomingSignals();
+        this->readIncomingPayloads();
     }
 
     // some error happened 🙁
@@ -239,7 +239,7 @@ void WsClient::tryConnect(std::string_view address)
         if (msg->type == ix::WebSocketMessageType::Message)
         {
             std::scoped_lock<std::mutex> lg{this->mut};
-            this->msgBuffer.addItem(msg->str);
+            this->msgBuffer.addItem(std::move_if_noexcept(msg->str));
         }
         else if (msg->type == ix::WebSocketMessageType::Open)
         {
@@ -346,7 +346,11 @@ bool WsClient::replyServer(const chk::payload::BasePayload &payload) const
     spdlog::info("SENDING {}", payload.ShortDebugString());
 #endif // DEBUG
 
-    payload.SerializeToString(&this->protoBucket);
+    if (!payload.SerializeToString(&protoBucket))
+    {
+        spdlog::error("Protobuf serialization failed");
+        return false;
+    }
     const auto &result = this->webSocketPtr->sendBinary(this->protoBucket);
     return result.success;
 }
@@ -355,7 +359,7 @@ bool WsClient::replyServer(const chk::payload::BasePayload &payload) const
  * Read messages from server and update the game accordingly. If any
  * error happens or match ends, close connection
  */
-void WsClient::readIncomingSignals()
+void WsClient::readIncomingPayloads()
 {
     for (const auto &msg : this->msgBuffer.getAll())
     {
@@ -372,31 +376,32 @@ void WsClient::readIncomingSignals()
             return;
         }
 
-        if (basePayload.has_welcome())
+        // =================== BEGIN SWITCH BLOCk =====================
+        switch (basePayload.inner_case())
         {
-            chk::payload::WelcomePayload welcome = basePayload.welcome();
+        case chk::payload::BasePayload::kWelcome:
             if (this->_onReadyConnected != nullptr)
             {
-                this->_onReadyConnected(welcome, basePayload.notice());
+                this->_onReadyConnected(basePayload.welcome(), basePayload.notice());
             }
-        }
-        else if (basePayload.has_start())
-        {
-            chk::payload::StartPayload startPayload = basePayload.start();
+            break;
+
+        case chk::payload::BasePayload::kStart:
             if (this->_onReadyStartGame != nullptr)
             {
-                this->_onReadyStartGame(startPayload, basePayload.notice());
+                this->_onReadyStartGame(basePayload.start(), basePayload.notice());
             }
-        }
-        else if (basePayload.has_exit_payload())
-        {
+            break;
+
+        case chk::payload::BasePayload::kExitPayload: {
             this->isDead = true;
             std::scoped_lock lg{this->mut};
             this->deathNote = basePayload.notice();
             spdlog::error(basePayload.notice());
+            break;
         }
-        else if (basePayload.has_move_payload())
-        {
+
+        case chk::payload::BasePayload::kMovePayload: {
             if (this->_onMovePieceCallback != nullptr)
             {
 #ifndef NDEBUG
@@ -404,9 +409,10 @@ void WsClient::readIncomingSignals()
 #endif // DEBUG
                 this->_onMovePieceCallback(basePayload.move_payload());
             }
+            break;
         }
-        else if (basePayload.has_capture_payload())
-        {
+
+        case chk::payload::BasePayload::kCapturePayload: {
             if (this->_onCaptureCallback != nullptr)
             {
 #ifndef NDEBUG
@@ -414,9 +420,10 @@ void WsClient::readIncomingSignals()
 #endif // DEBUG
                 this->_onCaptureCallback(basePayload.capture_payload());
             }
+            break;
         }
-        else if (basePayload.has_winlose_payload())
-        {
+
+        case chk::payload::BasePayload::kWinlosePayload: {
             if (this->_onWinLoseCallback != nullptr)
             {
                 this->_onWinLoseCallback(basePayload.notice());
@@ -424,6 +431,11 @@ void WsClient::readIncomingSignals()
                 this->deathNote = basePayload.notice();
                 this->haveWinner = true;
             }
+            break;
+        }
+
+        default:
+            break;
         }
     }
     std::scoped_lock lg{this->mut};

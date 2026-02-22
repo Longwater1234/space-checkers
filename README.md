@@ -5,15 +5,15 @@
 Offline & Online Multiplayer Checkers game in C++ built with SFML 2.6, imGui, Protobuf and ixWebsockets. With very minimal dependencies
 and a simple build process. All dependencies are auto-downloaded (as `.tar.gz`) and configured for you using [CPM.cmake](https://github.com/cpm-cmake/CPM.cmake). The only dependency you need pre-installed on your OS is SFML 2.6.x (or newer).
 
-This game can connect to both Private and Public game servers. The backend server for this game is written in Golang, and is [available on GitHub](https://github.com/Longwater1234/checkers-backend) which you can self-host! Download and Play the game from the itch.io link above.
+This game can connect to both Private and Public game servers. The backend server for Online Mode is written in Golang, and is [available on GitHub](https://github.com/Longwater1234/checkers-backend) which you can self-host! Download and Play the game from the itch.io link above.
 
 ### Main Libraries Used
 
-- SFML 2.6.1
+- SFML 2.6.2
 - imGui-SFML
 - ixWebsockets
 - spdlog
-- Google Protobuf v30.1 (Used entirely during gameplay)
+- Google Protobuf v33.5 (Used entirely during gameplay)
 - simdjson (Used once, for parsing list of public servers)
 
 ## Requirements for Building
@@ -26,8 +26,8 @@ This game can connect to both Private and Public game servers. The backend serve
 
 - MS Visual Studio 2022 or newer (NOT vscode), with "**Desktop C++ Development**" bundle.
 - Please download "Visual C++ 64bit" edition of SFML; ignore others.
-- Move your unzipped `SFML-2.6.x` folder to its own home, example: `C:/SFML/SFML-2.6.1`.
-- Edit **line 25** in [CMakeLists.txt](CMakeLists.txt#L25), to set value `SFML_HOME` to folder path you moved SFML into (from previous step)
+- Move your unzipped `SFML-2.6.x` folder to its own home, example: `C:/SFML/SFML-2.6.2`.
+- Edit file [CMakeLists.txt](CMakeLists.txt#L25), to set value `SFML_HOME` to folder path you moved SFML into (from previous step)
 
 ### For macOS (x64 & arm64)
 

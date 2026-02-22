@@ -11,6 +11,7 @@ on:
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
+  GAME_VERSION: "1.0.14"
   SFML_DIR: "C:/SFML/SFML-2.6.2"
   SFML_WIN_ZIP: SFML-2.6.2-windows-vc17-64-bit.zip
 
@@ -47,15 +48,17 @@ jobs:
 
       - name: Create build_version TXT file
         shell: pwsh
-        run: Get-Date > ${{github.workspace}}/build/bin/Release/build_date.txt
+        run: |
+          echo "${{ env.GAME_VERSION }}" >> ${{github.workspace}}/build/bin/Release/build_info.txt
+          Get-Date >> ${{github.workspace}}/build/bin/Release/build_info.txt
 
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: space-checkers-x64-windows
+          name: space-checkers-${{ env.GAME_VERSION }}-${{ runner.os }}
           path: |
             ${{github.workspace}}/build/bin/Release/SpaceCheckers.exe
             ${{github.workspace}}/build/bin/Release/resources/
-            ${{github.workspace}}/build/bin/Release/build_date.txt
+            ${{github.workspace}}/build/bin/Release/build_info.txt
 
             

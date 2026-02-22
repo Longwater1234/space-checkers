@@ -23,16 +23,9 @@ class LocalGameManager final : public chk::GameManager
  * Custom constructor
  * @param windowPtr original window from main.cpp
  */
-inline LocalGameManager::LocalGameManager(sf::RenderWindow *windowPtr)
+inline LocalGameManager::LocalGameManager(sf::RenderWindow *windowPtr) : GameManager(windowPtr)
 {
-    this->window = windowPtr;
-    this->sourceCell = std::nullopt;
-    this->blockList.reserve(chk::NUM_COLS * chk::NUM_COLS);
-
-    // CREATE TWO unique PLAYERS
-    this->playerRed = std::make_unique<chk::Player>(chk::PlayerType::PLAYER_RED);
-    this->playerBlack = std::make_unique<chk::Player>(chk::PlayerType::PLAYER_BLACK);
-    assert(!(*playerRed == *playerBlack));
+    // nothing here — players already created by base
 }
 
 /**

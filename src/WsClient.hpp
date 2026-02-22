@@ -72,7 +72,7 @@ class WsClient final
     std::mutex mut;
     std::unique_ptr<ix::WebSocket> webSocketPtr = nullptr; // our Websocket object
     void showErrorPopup();                                 // whenver there is an error (from server)
-    void readIncomingSignals();                            // while connected, keep reading messages from server
+    void readIncomingPayloads();                           // while connected, keep reading messages from server
     static void showHint(const char *tip);
     void tryConnect(std::string_view address);
     void showConnectWindow();

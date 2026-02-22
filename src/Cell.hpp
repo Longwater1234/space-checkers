@@ -28,28 +28,24 @@ class Cell final : public sf::Drawable
     void resetColor();
 
   private:
+    const int index = -1; // Darker cells are in range [1~32]. Lighter cells are all -1
     sf::RectangleShape rec;
-    sf::Color DARK_BROWN = sf::Color{82, 55, 27};
-    sf::Color BABY_BLUE = sf::Color{98, 174, 239};
-    int index = -1; // Darker cells have index in range [1~32]. Lighter cells are all -1
+    inline static const sf::Color DARK_BROWN{82, 55, 27};
+    inline static const sf::Color BABY_BLUE{98, 174, 239};
     bool isEvenRow = false;
     sf::Vector2f cell_pos;
     sf::Text sfText;
     void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
 };
 
-inline Cell::Cell(const int idx, const sf::RectangleShape &rect, const sf::Font &font)
+inline Cell::Cell(const int idx, const sf::RectangleShape &rect, const sf::Font &font) : index(idx)
 {
     this->rec = rect;
-    this->index = idx;
     this->cell_pos = rec.getPosition();
-
-    sf::Text text;
-    text.setFont(font);
-    text.setFillColor(sf::Color{255, 255, 255, 100});
-    text.setString(std::to_string(this->index));
-    text.setPosition(this->cell_pos);
-    this->sfText = text;
+    this->sfText.setFont(font);
+    this->sfText.setFillColor(sf::Color{255, 255, 255, 100});
+    this->sfText.setString(std::to_string(this->index));
+    this->sfText.setPosition(this->cell_pos);
 }
 
 inline void Cell::draw(sf::RenderTarget &target, sf::RenderStates states) const

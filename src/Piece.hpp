@@ -30,7 +30,7 @@ class Piece final : public sf::Drawable, public sf::Transformable
     Piece() = delete;
     Piece(const Piece &) = delete;
     Piece &operator=(const Piece &) = delete;
-    [[nodiscard]] const PieceType &getPieceType() const;
+    [[nodiscard]] const PieceType getPieceType() const;
     void activateKing();
     bool getIsKing() const;
     bool containsPoint(const sf::Vector2i &pos) const;
@@ -44,18 +44,17 @@ class Piece final : public sf::Drawable, public sf::Transformable
 
   private:
     sf::Texture texture;
-    short pid; // random positive ID assigned at Launch
+    const short pid; // random positive ID assigned at Launch
     sf::CircleShape myCircle;
     PieceType pieceType;
     bool isKing = false;
     void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
 };
 
-inline Piece::Piece(const sf::CircleShape &circle, const PieceType &pType, const short id)
+inline Piece::Piece(const sf::CircleShape &circle, const PieceType &pType, const short id) : pid(id)
 {
     this->myCircle = circle;
     this->pieceType = pType;
-    this->pid = id;
     this->setPosition(circle.getPosition());
 
     sf::Texture localTxr;
@@ -89,7 +88,7 @@ inline void Piece::draw(sf::RenderTarget &target, sf::RenderStates states) const
  * Get piece type, whether it's Black or Red
  * @return the pieceType
  */
-inline const PieceType &Piece::getPieceType() const
+inline const PieceType Piece::getPieceType() const
 {
     return this->pieceType;
 }

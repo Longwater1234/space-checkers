@@ -3,7 +3,9 @@
 #include "ResourcePath.hpp"
 #import <Foundation/Foundation.h>
 
-std::string chk::getResourcePath(const std::string &relativePath)
+namespace chk
+{
+std::string getResourcePath(const std::string &relativePath)
 {
     NSBundle *mainBundle = [NSBundle mainBundle];
     NSString *resourcePath = [mainBundle pathForResource:@(relativePath.c_str()) ofType:nil];
@@ -16,4 +18,5 @@ std::string chk::getResourcePath(const std::string &relativePath)
 
     return [resourcePath UTF8String];
 }
+} // namespace chk
 #endif
