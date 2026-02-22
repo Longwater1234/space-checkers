@@ -18,7 +18,7 @@ This game can connect to both Private and Public game servers. The backend serve
 
 ## Requirements for Building
 
-- C++20 (or newer) compiler.
+- C++17 (or newer) compiler.
 - Pre-built [SFML 2.6.x](https://www.sfml-dev.org/download/sfml/2.6.1/) binaries.
 - [CMake 3.20+](https://cmake.org/download/) or newer (GUI recommended)
 
