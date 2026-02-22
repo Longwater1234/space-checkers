@@ -1,6 +1,6 @@
-# Get simdjson 3.10.0
+# Get simdjson 4.3.1
 CPMAddPackage(
   NAME simdjson
-  URL  "https://github.com/simdjson/simdjson/archive/refs/tags/v3.13.0.tar.gz"
+  URL  "https://github.com/simdjson/simdjson/archive/refs/tags/v4.3.1.tar.gz"
   DOWNLOAD_EXTRACT_TIMESTAMP TRUE
 ) 
