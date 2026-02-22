@@ -11,6 +11,7 @@ on:
 env:
   # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
   BUILD_TYPE: Release
+  GAME_VERSION: "1.0.14"
   SFML_DIR: "C:/SFML/SFML-2.6.2"
   SFML_WIN_ZIP: SFML-2.6.2-windows-vc17-64-bit.zip
 
@@ -35,13 +36,6 @@ jobs:
         # See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
         run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DSFML_DIR=${{env.SFML_DIR}} -DCMAKE_CXX_COMPILER=cl -DCMAKE_C_COMPILER=cl
 
-      - name: Get project version
-        id: get-version
-        uses: DarwinInnovation/cmake-project-version-action@v1.0         
-
-      - name: Print game version
-        run: echo "Project version is ${{ steps.get-version.outputs.version }}"
-
       - name: Build
         # Build your program with the given configuration
         run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
@@ -55,13 +49,13 @@ jobs:
       - name: Create build_version TXT file
         shell: pwsh
         run: |
-          echo "${{ steps.get-version.outputs.version }}" >> ${{github.workspace}}/build/bin/Release/build_info.txt
+          echo "${{ GAME_VERSION }}" >> ${{github.workspace}}/build/bin/Release/build_info.txt
           Get-Date >> ${{github.workspace}}/build/bin/Release/build_info.txt
 
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: space-checkers-${{ steps.get-version.outputs.version }}-${{ runner.os }}
+          name: space-checkers-${{ GAME_VERSION }}-${{ runner.os }}
           path: |
             ${{github.workspace}}/build/bin/Release/SpaceCheckers.exe
             ${{github.workspace}}/build/bin/Release/resources/
