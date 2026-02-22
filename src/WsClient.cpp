@@ -239,7 +239,7 @@ void WsClient::tryConnect(std::string_view address)
         if (msg->type == ix::WebSocketMessageType::Message)
         {
             std::scoped_lock<std::mutex> lg{this->mut};
-            this->msgBuffer.addItem(msg->str);
+            this->msgBuffer.addItem(std::move_if_noexcept(msg->str));
         }
         else if (msg->type == ix::WebSocketMessageType::Open)
         {
