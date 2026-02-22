@@ -9,7 +9,7 @@ This game can connect to both Private and Public game servers. The backend serve
 
 ### Main Libraries Used
 
-- SFML 2.6.1
+- SFML 2.6.2
 - imGui-SFML
 - ixWebsockets
 - spdlog
@@ -26,8 +26,8 @@ This game can connect to both Private and Public game servers. The backend serve
 
 - MS Visual Studio 2022 or newer (NOT vscode), with "**Desktop C++ Development**" bundle.
 - Please download "Visual C++ 64bit" edition of SFML; ignore others.
-- Move your unzipped `SFML-2.6.x` folder to its own home, example: `C:/SFML/SFML-2.6.1`.
-- Edit **line 25** in [CMakeLists.txt](CMakeLists.txt#L25), to set value `SFML_HOME` to folder path you moved SFML into (from previous step)
+- Move your unzipped `SFML-2.6.x` folder to its own home, example: `C:/SFML/SFML-2.6.2`.
+- Edit file [CMakeLists.txt](CMakeLists.txt#L25), to set value `SFML_HOME` to folder path you moved SFML into (from previous step)
 
 ### For macOS (x64 & arm64)
 
