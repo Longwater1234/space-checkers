@@ -376,7 +376,7 @@ void WsClient::readIncomingPayloads()
             return;
         }
 
-       // =================== begin switch block =====================
+        // =================== begin switch block =====================
         switch (basePayload.inner_case())
         {
         case chk::payload::BasePayload::kWelcome:

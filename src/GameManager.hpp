@@ -38,7 +38,6 @@ class GameManager
 {
 
   public:
-    GameManager() = default;
     virtual ~GameManager() = default;
     virtual void createAllPieces() = 0;
     virtual void handleEvents(chk::CircularBuffer<short> &buffer) = 0;
@@ -69,6 +68,7 @@ class GameManager
     void collectBehindLHS(const chk::PlayerPtr &hunter, const chk::Block &cell_ptr);
 
   protected:
+    explicit GameManager(sf::RenderWindow *windowPtr);
     // gameBoard: map of cell_index -> piece_id
     std::unordered_map<int, short> gameMap;
     // main window

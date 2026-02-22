@@ -42,15 +42,9 @@ class OnlineGameManager final : public chk::GameManager
     void startDeathListener();
 };
 
-inline OnlineGameManager::OnlineGameManager(sf::RenderWindow *windowPtr)
+inline OnlineGameManager::OnlineGameManager(sf::RenderWindow *windowPtr) : GameManager(windowPtr)
 {
-    this->window = windowPtr;
-    this->sourceCell = std::nullopt;
-    this->blockList.reserve(chk::NUM_COLS * chk::NUM_COLS);
     this->wsClient = std::make_unique<chk::WsClient>();
-    // CREATE TWO unique PLAYERS
-    this->playerRed = std::make_unique<chk::Player>(chk::PlayerType::PLAYER_RED);
-    this->playerBlack = std::make_unique<chk::Player>(chk::PlayerType::PLAYER_BLACK);
 
     // set Listener for connection success
     this->wsClient->setOnReadyConnectedCallback(

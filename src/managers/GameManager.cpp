@@ -7,6 +7,16 @@
 namespace chk
 {
 
+GameManager::GameManager(sf::RenderWindow *windowPtr) : window(windowPtr)
+{
+    assert(window && "GameManager requires a valid RenderWindow");
+    this->sourceCell = std::nullopt;
+    this->blockList.reserve(chk::NUM_COLS * chk::NUM_COLS);
+    // CREATE TWO unique PLAYERS
+    this->playerRed = std::make_unique<chk::Player>(chk::PlayerType::PLAYER_RED);
+    this->playerBlack = std::make_unique<chk::Player>(chk::PlayerType::PLAYER_BLACK);
+}
+
 /**
  * Get hashmap of hunter pieceID's to the assigned CaptureTarget
  * @return )pair of forced captures
