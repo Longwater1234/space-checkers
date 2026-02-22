@@ -1,4 +1,4 @@
-# Get abseil 20250127
+# Get abseil 20260107
 CPMAddPackage(
   NAME abseil
   URL  "https://github.com/abseil/abseil-cpp/archive/refs/tags/20260107.1.tar.gz"
@@ -6,7 +6,7 @@ CPMAddPackage(
   OPTIONS "ABSL_ENABLE_INSTALL ON" "ABSL_PROPAGATE_CXX_STD ON"
 ) 
 
-# Get protobuf 30.1
+# Get protobuf 33.5
 CPMAddPackage(
   NAME protobuf
   URL  "https://github.com/protocolbuffers/protobuf/archive/refs/tags/v33.5.tar.gz" 
