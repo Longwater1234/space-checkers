@@ -44,18 +44,17 @@ class Piece final : public sf::Drawable, public sf::Transformable
 
   private:
     sf::Texture texture;
-    short pid; // random positive ID assigned at Launch
+    const short pid; // random positive ID assigned at Launch
     sf::CircleShape myCircle;
     PieceType pieceType;
     bool isKing = false;
     void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
 };
 
-inline Piece::Piece(const sf::CircleShape &circle, const PieceType &pType, const short id)
+inline Piece::Piece(const sf::CircleShape &circle, const PieceType &pType, const short id) : pid(id)
 {
     this->myCircle = circle;
     this->pieceType = pType;
-    this->pid = id;
     this->setPosition(circle.getPosition());
 
     sf::Texture localTxr;
