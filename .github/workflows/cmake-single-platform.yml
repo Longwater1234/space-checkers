@@ -49,13 +49,13 @@ jobs:
       - name: Create build_version TXT file
         shell: pwsh
         run: |
-          echo "${{ GAME_VERSION }}" >> ${{github.workspace}}/build/bin/Release/build_info.txt
+          echo "${{ env.GAME_VERSION }}" >> ${{github.workspace}}/build/bin/Release/build_info.txt
           Get-Date >> ${{github.workspace}}/build/bin/Release/build_info.txt
 
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: space-checkers-${{ GAME_VERSION }}-${{ runner.os }}
+          name: space-checkers-${{ env.GAME_VERSION }}-${{ runner.os }}
           path: |
             ${{github.workspace}}/build/bin/Release/SpaceCheckers.exe
             ${{github.workspace}}/build/bin/Release/resources/
