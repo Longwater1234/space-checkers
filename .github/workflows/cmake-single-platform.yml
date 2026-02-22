@@ -37,9 +37,7 @@ jobs:
 
       - name: Get project version
         id: get-version
-        uses: DarwinInnovation/cmake-project-version-action@v1.0
-        with:
-          path: ${{github.workspace}}           
+        uses: DarwinInnovation/cmake-project-version-action@v1.0         
 
       - name: Print game version
         run: echo "Project version is ${{ steps.get-version.outputs.version }}"
