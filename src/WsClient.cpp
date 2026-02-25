@@ -90,6 +90,10 @@ void WsClient::showPublicServerWindow(bool &showPublic)
     if (ImGui::Begin("Public Servers", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse))
     {
         static size_t current_idx{0};
+        if (!publicServers.empty() && current_idx >= publicServers.size())
+        {
+            current_idx = 0;
+        }
         if (ImGui::BeginListBox("Select One"))
         {
             for (size_t i = 0; i < publicServers.size(); ++i)
