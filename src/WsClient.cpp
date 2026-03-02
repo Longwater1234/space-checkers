@@ -46,12 +46,12 @@ void chk::WsClient::showHint(const char *tip)
  */
 void chk::WsClient::showConnectWindow()
 {
-    static bool is_secure = false;  // switch for enable/disable SSL (PRIVATE servers only)
-    static bool show_public = true; // whether to show public server list
+    static bool sslEnabled = false;  // switch for enable/disable SSL (PRIVATE servers only)
+    static bool showPublic = true; // whether to show public server list
 
-    if (show_public)
+    if (showPublic)
     {
-        this->showPublicServerWindow(show_public);
+        this->showPublicServerWindow(showPublic);
         return;
     }
 
@@ -63,17 +63,17 @@ void chk::WsClient::showConnectWindow()
         ImGui::InputText("Host or IP", inputUrl, IM_ARRAYSIZE(inputUrl), ImGuiInputTextFlags_CharsNoBlank);
         ImGui::SameLine();
         WsClient::showHint("eg: 127.0.0.1:8080 OR myserver.example.org");
-        ImGui::Checkbox("Secure", &is_secure);
+        ImGui::Checkbox("Secure", &sslEnabled);
         if (!std::string_view(inputUrl).empty() && ImGui::Button("Connect", ImVec2{100.0f, 0}))
         {
-            const char *prefix = is_secure ? "wss://" : "ws://";
+            const char *prefix = sslEnabled ? "wss://" : "ws://";
             this->final_address = prefix + std::string{inputUrl};
             this->connClicked = true;
             memset(inputUrl, 0, sizeof(inputUrl));
         }
         if (ImGui::Button("< Go Back", ImVec2{100.0f, 0}))
         {
-            show_public = true;
+            showPublic = true;
         }
         ImGui::End();
     }
@@ -89,19 +89,19 @@ void WsClient::showPublicServerWindow(bool &showPublic)
     ImGui::SetNextWindowSize(ImVec2{300.0f, 300.0f});
     if (ImGui::Begin("Public Servers", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse))
     {
-        static size_t current_idx{0};
-        if (!publicServers.empty() && current_idx >= publicServers.size())
+        static size_t currentIdx{0};
+        if (!publicServers.empty() && currentIdx >= publicServers.size())
         {
-            current_idx = 0;
+            currentIdx = 0;
         }
         if (ImGui::BeginListBox("Select One"))
         {
             for (size_t i = 0; i < publicServers.size(); ++i)
             {
-                const bool selected = (i == current_idx);
+                const bool selected = (i == currentIdx);
                 if (ImGui::Selectable(publicServers.at(i).name.c_str(), selected))
                 {
-                    current_idx = i;
+                    currentIdx = i;
                 }
 
                 // Set the initial focus
@@ -114,7 +114,7 @@ void WsClient::showPublicServerWindow(bool &showPublic)
         }
         if (!publicServers.empty() && ImGui::Button("Connect", ImVec2{100.0f, 0}))
         {
-            this->final_address = publicServers.at(current_idx).address;
+            this->final_address = publicServers.at(currentIdx).address;
             this->connClicked = true;
         }
         publicServers.empty() ? ImGui::NewLine() : ImGui::SameLine();
