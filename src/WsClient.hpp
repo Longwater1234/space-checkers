@@ -17,7 +17,7 @@
 namespace chk
 {
 
-// callback when connected to server success
+// callback when connected to WS game server
 using onConnectedServer = std::function<void(const chk::payload::WelcomePayload &, std::string_view notice)>;
 // callback when both players joined match
 using onReadyStartGame = std::function<void(const chk::payload::StartPayload &, std::string_view notice)>;
