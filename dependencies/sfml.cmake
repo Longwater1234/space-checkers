@@ -1,5 +1,7 @@
 # optional: download SFML 2.6.2
 
+set(SFML_STATIC_LIBRARIES TRUE)
+
 CPMAddPackage(
     NAME sfml
     URL    "https://github.com/SFML/SFML/archive/refs/tags/2.6.2.tar.gz"

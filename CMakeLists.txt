@@ -10,7 +10,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_CXX_EXTENSIONS OFF)
-set(BUILD_SHARED_LIBS OFF)
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 
 # On macOS using Frameworks, NOT static libs
 if(NOT APPLE)
@@ -61,12 +61,12 @@ target_link_libraries(
 # include SFML headers
 target_include_directories(SpaceCheckers PUBLIC ${SFML_HOME}/include)
 
-# show warnings (depending on C++ compiler)
+# compiler flags (depending on C++ compiler)
 if(MSVC)
   target_compile_options(SpaceCheckers PRIVATE /W4 /sdl /utf-8 $<$<CONFIG:Release>:/GL>)
 else()
   target_compile_options(SpaceCheckers PRIVATE -Wall -Werror=constant-conversion 
-                          -Werror=fortify-source $<$<CONFIG:Release>:-flto>)
+                          -Werror=fortify-source $<$<CONFIG:Release>:-flto=thin>)
 endif()
 
 # COPY resources folder to destination
