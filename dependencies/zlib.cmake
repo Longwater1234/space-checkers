@@ -4,6 +4,7 @@ CPMAddPackage(
     NAME zlib
     URL "https://github.com/madler/zlib/archive/refs/tags/v1.3.1.tar.gz"
     DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+    OPTIONS "BUILD_EXAMPLES OFF" "BUILD_TESTS OFF" "BUILD_SHARED_LIBS OFF"
 )
 
 if(TARGET zlib AND NOT TARGET ZLIB::ZLIB)
