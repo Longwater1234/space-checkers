@@ -29,7 +29,7 @@ set(SFML_DIR ${SFML_HOME}/lib/cmake/SFML)
 
 # Collect all sources
 file(GLOB_RECURSE GAME_SRC "src/*.cpp" "src/*.hpp")
-# find_package(SFML 2.6 REQUIRED COMPONENTS "graphics" "window" "system")
+find_package(SFML 2.6 REQUIRED COMPONENTS "graphics" "window" "system") 
 
 # download extra libs
 add_subdirectory(dependencies) 
