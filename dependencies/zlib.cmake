@@ -10,6 +10,11 @@ CPMAddPackage(
 if(TARGET zlib AND NOT TARGET ZLIB::ZLIB)
     add_library(ZLIB::ZLIB ALIAS zlib)
 endif()
+
+if(MSVC)
+    target_compile_definitions(zlib PRIVATE _CRT_SECURE_NO_DEPRECATE _CRT_NONSTDC_NO_DEPRECATE)
+endif()
+
 # if(zlib_ADDED)
 #     add_library(zlib STATIC
 #         ${zlib_SOURCE_DIR}/adler32.c
