@@ -1,10 +1,10 @@
-# zlib v1.3.1 (zlib License)
+# zlib v1.3.2 (zlib License)
 
 CPMAddPackage(
     NAME zlib
-    URL "https://github.com/madler/zlib/archive/refs/tags/v1.3.2.tar.gz"
+    URL "https://github.com/madler/zlib/archive/refs/tags/v1.3.1.tar.gz"
     DOWNLOAD_EXTRACT_TIMESTAMP TRUE
-    OPTIONS "ZLIB_BUILD_EXAMPLES OFF" "ZLIB_BUILD_SHARED OFF" "ZLIB_INSTALL OFF"
+    OPTIONS "BUILD_EXAMPLES OFF" "BUILD_TESTS OFF" "BUILD_SHARED_LIBS OFF"
 )
 
 if(TARGET zlib AND NOT TARGET ZLIB::ZLIB)
