@@ -5,7 +5,7 @@
 Offline & Online Multiplayer Checkers game in C++ built with SFML 2.6, imGui, Protobuf and ixWebsockets. With very minimal dependencies
 and a simple build process. All dependencies are auto-downloaded (as `.tar.gz`) and configured for you using [CPM.cmake](https://github.com/cpm-cmake/CPM.cmake). The only dependency you need pre-installed on your OS is SFML 2.6.x (or newer).
 
-This game can connect to both Private and Public game servers. The backend server for Online Mode is written in Golang, and is [available on GitHub](https://github.com/Longwater1234/checkers-backend) which you can self-host! Download and Play the game from the itch.io link above.
+This game can connect to both Private and Public game servers. The backend server for Online Mode is written in Golang, and is [available on GitHub](https://github.com/Longwater1234/checkers-backend) which you can self-host! Download and Play the pre-built game from the itch.io link above.
 
 ### Main Libraries Used
 
@@ -22,18 +22,20 @@ This game can connect to both Private and Public game servers. The backend serve
 - Pre-built [SFML 2.6.x](https://www.sfml-dev.org/download/sfml/2.6.1/) binaries.
 - [CMake 3.20+](https://cmake.org/download/) or newer (GUI recommended)
 
-### For Windows
+### For Windows (10 or later)
 
 - MS Visual Studio 2022 or newer (NOT vscode), with "**Desktop C++ Development**" bundle.
 - Please download "Visual C++ 64bit" edition of SFML; ignore others.
 - Move your unzipped `SFML-2.6.x` folder to its own home, example: `C:/SFML/SFML-2.6.2`.
-- Edit file [CMakeLists.txt](CMakeLists.txt#L25), to set value `SFML_HOME` to folder path you moved SFML into (from previous step)
+- Edit line 29 in [CMakeLists.txt](CMakeLists.txt#L29), to set value `SFML_HOME` to folder path you moved SFML into (from previous step).
+- Luckily, Windows comes pre-installed with native WinSSL libs.
 
 ### For macOS (x64 & arm64)
 
 - XCode 14 or newer from AppStore (with MacOS SDK)
-- Please install SFML 2.6 as **Frameworks**, not as "dylibs", as shown in [official SFML guide](https://www.sfml-dev.org/tutorials/2.6/start-osx.php).
-- Download Apple Developer tools. After Xcode is installed, run this in your Terminal:
+- Please install SFML 2.6 for macOS as **Frameworks**, as shown in [official SFML guide](https://www.sfml-dev.org/tutorials/2.6/start-osx.php).
+- Use homebrew to install OpenSSL Dev libs.
+- Download extra Apple Developer tools. After Xcode is installed, run this in your Terminal:
 
 ```bash
   sudo xcode-select --install
@@ -56,8 +58,6 @@ This game can connect to both Private and Public game servers. The backend serve
   sudo apt install libsfml-dev
   sudo apt install libssl-dev
 ```
-
-- Luckily, Windows and macOS come with their **native SSL libs pre-installed**, so nothing more to do 😊
 
 ## Build Instructions
 
