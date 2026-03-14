@@ -1,8 +1,8 @@
-# IXWebSocket 11.4.5 (BSD-3-Clause License)
+# IXWebSocket 11.4.6 (BSD-3-Clause License)
 
-CPMAddPackage(
+CPMAddPackage( 
     NAME ixwebsocket
-    URL    "https://github.com/machinezone/IXWebSocket/archive/refs/tags/v11.4.5.tar.gz"
+    URL    "https://github.com/machinezone/IXWebSocket/archive/refs/tags/v11.4.6.tar.gz"
     DOWNLOAD_EXTRACT_TIMESTAMP TRUE
     DOWNLOAD_ONLY ON
     OPTIONS "USE_TLS TRUE" "USE_MBED_TLS TRUE" "USE_ZLIB TRUE"
@@ -36,8 +36,9 @@ if(ixwebsocket_ADDED)
         message(STATUS "ixwebsocket: mbedtls support enabled")
         target_compile_definitions(ixwebsocket PUBLIC IXWEBSOCKET_USE_TLS)
         target_compile_definitions(ixwebsocket PUBLIC IXWEBSOCKET_USE_MBED_TLS)
+        target_compile_definitions(ixwebsocket PUBLIC IXWEBSOCKET_USE_MBED_TLS_MIN_VERSION_3)
         target_link_libraries(ixwebsocket PRIVATE mbedtls)
-        if(WIN32)
+     if(WIN32)
             target_link_libraries(ixwebsocket PRIVATE Crypt32)
         endif()
     else()

@@ -3,11 +3,11 @@
 include(CPM.cmake)
 # include(sfml.cmake) ## <-- uncomment to download and build SFML
 include(zlib.cmake)
+include(libcpr.cmake)
 include(mbedtls.cmake)
 include(ixwebsocket.cmake)
 include(spdlog.cmake)
 include(simdjson.cmake)
-include(libcpr.cmake)
 include(protobuf.cmake)
 
 # GET ImGui 1.90.8

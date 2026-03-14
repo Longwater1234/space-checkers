@@ -47,7 +47,7 @@ inline OnlineGameManager::OnlineGameManager(sf::RenderWindow *windowPtr) : GameM
     this->wsClient = std::make_unique<chk::WsClient>();
 
     // set Listener for connection success
-    this->wsClient->setOnReadyConnectedCallback(
+    this->wsClient->setOnConnectedCallback(
         [this](const chk::payload::WelcomePayload &welcome, std::string_view notice) {
             if (welcome.my_team() == chk::payload::TeamColor::TEAM_RED)
             {
@@ -77,7 +77,7 @@ inline void chk::OnlineGameManager::createAllPieces()
         this->gameReady = true;
         this->updateMessage(notice);
 
-        // Reserve container for pieces on board
+        // Reserve capacity for all pieces on board
         std::vector<chk::PiecePtr> pieceList;
         pieceList.reserve(chk::NUM_PIECES);
 

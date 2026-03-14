@@ -224,7 +224,7 @@ void WsClient::runMainLoop()
 }
 
 /**
- * Try to connect to Server.
+ * Try to connect to game WS Server.
  * @param address server IP or URI
  */
 void WsClient::tryConnect(std::string_view address)
@@ -242,7 +242,7 @@ void WsClient::tryConnect(std::string_view address)
     this->webSocketPtr->setOnMessageCallback([this](const ix::WebSocketMessagePtr &msg) {
         if (msg->type == ix::WebSocketMessageType::Message)
         {
-            std::scoped_lock<std::mutex> lg{this->mut};
+            std::scoped_lock lg{this->mut};
             this->msgBuffer.addItem(std::move_if_noexcept(msg->str));
         }
         else if (msg->type == ix::WebSocketMessageType::Open)
@@ -281,12 +281,12 @@ void WsClient::tryConnect(std::string_view address)
 }
 
 /**
- * Set the callback to handle created pieces (from server)
+ * Set the callback after connected and recieve created pieces (from server)
  * @param callback - the callback function
  */
-void WsClient::setOnReadyConnectedCallback(const onConnectedServer &callback)
+void WsClient::setOnConnectedCallback(const onConnectedServer &callback)
 {
-    this->_onReadyConnected = callback;
+    this->_onConnectedCallback = callback;
 }
 
 /**
@@ -384,9 +384,9 @@ void WsClient::readIncomingPayloads()
         switch (basePayload.inner_case())
         {
         case chk::payload::BasePayload::kWelcome:
-            if (this->_onReadyConnected != nullptr)
+            if (this->_onConnectedCallback != nullptr)
             {
-                this->_onReadyConnected(basePayload.welcome(), basePayload.notice());
+                this->_onConnectedCallback(basePayload.welcome(), basePayload.notice());
             }
             break;
 

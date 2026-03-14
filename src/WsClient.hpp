@@ -17,7 +17,7 @@
 namespace chk
 {
 
-// callback when connected to server success
+// callback when connected to WS game server
 using onConnectedServer = std::function<void(const chk::payload::WelcomePayload &, std::string_view notice)>;
 // callback when both players joined match
 using onReadyStartGame = std::function<void(const chk::payload::StartPayload &, std::string_view notice)>;
@@ -42,7 +42,7 @@ class WsClient final
     WsClient(const WsClient &) = delete;
     WsClient &operator=(const WsClient &) = delete;
     void runMainLoop();
-    void setOnReadyConnectedCallback(const onConnectedServer &callback);
+    void setOnConnectedCallback(const onConnectedServer &callback);
     void setOnReadyStartGameCallback(const onReadyStartGame &callback);
     void setOnDeathCallback(const onDeathCallback &callback);
     void setOnMovePieceCallback(const onMovePieceCallback &callback);
@@ -62,7 +62,7 @@ class WsClient final
     std::vector<chk::ServerLocation> publicServers; // list of public servers (fetched from CDN)
 
     /* callbacks for different events from server */
-    onConnectedServer _onReadyConnected;
+    onConnectedServer _onConnectedCallback;
     onReadyStartGame _onReadyStartGame;
     onDeathCallback _onDeathCallback;
     onMovePieceCallback _onMovePieceCallback;

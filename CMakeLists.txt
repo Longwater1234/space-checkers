@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
 
 project(
   "SpaceCheckers"
-  VERSION 1.0.14
+  VERSION 1.0.15
   HOMEPAGE_URL "https://github.com/Longwater1234/space-checkers")
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
@@ -10,7 +10,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_CXX_EXTENSIONS OFF)
-set(BUILD_SHARED_LIBS OFF)
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 
 # On macOS using Frameworks, NOT static libs
 if(NOT APPLE)
@@ -29,10 +29,10 @@ set(SFML_DIR ${SFML_HOME}/lib/cmake/SFML)
 
 # Collect all sources
 file(GLOB_RECURSE GAME_SRC "src/*.cpp" "src/*.hpp")
-find_package(SFML 2.6 REQUIRED COMPONENTS "graphics" "window" "system")
+find_package(SFML 2.6 REQUIRED COMPONENTS "graphics" "window" "system") 
 
 # download extra libs
-add_subdirectory(dependencies)
+add_subdirectory(dependencies) 
 
 if(WIN32)
   add_executable(SpaceCheckers WIN32 ${GAME_SRC} ${CMAKE_SOURCE_DIR}/resources/win-icon.rc)
@@ -61,11 +61,12 @@ target_link_libraries(
 # include SFML headers
 target_include_directories(SpaceCheckers PUBLIC ${SFML_HOME}/include)
 
-# show warnings (depending on C++ compiler)
+# compiler flags (depending on C++ compiler)
 if(MSVC)
-  target_compile_options(SpaceCheckers PRIVATE /W4 /sdl /utf-8)
+  target_compile_options(SpaceCheckers PRIVATE /W4 /sdl /utf-8 $<$<CONFIG:Release>:/GL>)
 else()
-  target_compile_options(SpaceCheckers PRIVATE -Wall -Werror=constant-conversion -Werror=fortify-source)
+  target_compile_options(SpaceCheckers PRIVATE -Wall -Werror=constant-conversion 
+                          -Werror=fortify-source $<$<CONFIG:Release>:-flto=thin>)
 endif()
 
 # COPY resources folder to destination
