@@ -12,7 +12,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 
-# On macOS using Frameworks, NOT static libs
+# Enable unit tests
+option(ENABLE_GAME_TESTS "Enable unit tests" OFF)
+
+# On macOS link SFML as Frameworks
 if(NOT APPLE)
   set(SFML_STATIC_LIBRARIES TRUE)
 endif()
@@ -63,7 +66,8 @@ target_include_directories(SpaceCheckers PUBLIC ${SFML_HOME}/include)
 
 # compiler flags (depending on C++ compiler)
 if(MSVC)
-  target_compile_options(SpaceCheckers PRIVATE /W4 /sdl /utf-8 $<$<CONFIG:Release>:/GL>)
+  # target_compile_options(SpaceCheckers PRIVATE /W4 /sdl /utf-8 $<$<CONFIG:Release>:/GL>)
+  target_compile_options(SpaceCheckers PRIVATE /W4 /sdl /utf-8)
 else()
   target_compile_options(SpaceCheckers PRIVATE -Wall -Werror=constant-conversion 
                           -Werror=fortify-source $<$<CONFIG:Release>:-flto=thin>)
@@ -78,6 +82,7 @@ if(NOT APPLE)
             $<TARGET_FILE_DIR:SpaceCheckers>/resources)
 endif()
 
-# Enable unit tests
-enable_testing()
-include(cmake/testing.cmake)
+if(ENABLE_GAME_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
+endif()
