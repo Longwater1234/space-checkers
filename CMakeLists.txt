@@ -77,3 +77,7 @@ if(NOT APPLE)
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/resources
             $<TARGET_FILE_DIR:SpaceCheckers>/resources)
 endif()
+
+# Enable unit tests
+enable_testing()
+include(cmake/testing.cmake)
