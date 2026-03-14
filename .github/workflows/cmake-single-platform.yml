@@ -45,12 +45,22 @@ jobs:
         # Execute tests defined by the CMake configuration.
         # See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
         run: ctest -C ${{env.BUILD_TYPE}}
-
-      - name: Create build_version TXT file
+  
+      - name: Generate build info
         shell: pwsh
         run: |
-          echo "${{ env.GAME_VERSION }}" >> ${{github.workspace}}/build/bin/Release/build_info.txt
-          Get-Date >> ${{github.workspace}}/build/bin/Release/build_info.txt
+          $date = Get-Date -Format "yyyy-MM-ddTHH:mm:ss"
+          $commit = "${{ github.sha }}"
+          $branch = "${{ github.ref_name }}"
+          $run = "${{ github.run_number }}"
+          $appversion = "${{ env.GAME_VERSION }}"
+
+          @"
+          Build Date:   $date
+          Commit:       $commit
+          Branch:       $branch
+          Game Version: $appversion
+          "@ | Out-File -FilePath "${{github.workspace}}/build/bin/Release/build_info.txt"
 
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v4
