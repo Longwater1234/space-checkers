@@ -66,8 +66,7 @@ target_include_directories(SpaceCheckers PUBLIC ${SFML_HOME}/include)
 
 # compiler flags (depending on C++ compiler)
 if(MSVC)
-  # target_compile_options(SpaceCheckers PRIVATE /W4 /sdl /utf-8 $<$<CONFIG:Release>:/GL>)
-  target_compile_options(SpaceCheckers PRIVATE /W4 /sdl /utf-8)
+  target_compile_options(SpaceCheckers PRIVATE /W4 /sdl /utf-8 $<$<CONFIG:Release>:/GL>)
 else()
   target_compile_options(SpaceCheckers PRIVATE -Wall -Werror=constant-conversion 
                           -Werror=fortify-source $<$<CONFIG:Release>:-flto=thin>)
