@@ -5,7 +5,7 @@
 Offline & Online Multiplayer Checkers game in C++ built with SFML 2.6, imGui, Protobuf and ixWebsockets. With very minimal dependencies
 and a simple build process. All dependencies are auto-downloaded (as `.tar.gz`) and configured for you using [CPM.cmake](https://github.com/cpm-cmake/CPM.cmake). The only dependency you need pre-installed on your OS is SFML 2.6.x (or newer).
 
-This game can connect to both Private and Public game servers. The backend server for Online Mode is written in Golang, and is [available on GitHub](https://github.com/Longwater1234/checkers-backend) which you can self-host! Download and Play the pre-built game from the itch.io link above.
+This game can connect securely to both Private and Public game servers. The backend server for Online Mode is written in Golang, and is [available on GitHub](https://github.com/Longwater1234/checkers-backend) which you can self-host! Download and Play the pre-built game from the itch.io link above.
 
 ### Main Libraries Used
 
@@ -66,7 +66,7 @@ Please see [BUILDING.md](BUILDING.md) for detailed instructions for each platfor
 
 ## Code Contributions
 
-Pull requests are welcome! See GitHub Issues tab to help with new Features. Just kindly remember run `./lint.sh` script before you git push. Also, for this project, header files should end with `.hpp`.
+Pull requests are welcome! See GitHub Issues tab to help with new Features. Just kindly remember run `./lint.sh` script before you git push, and your header files should end with `.hpp`.
 
 ## License
 
