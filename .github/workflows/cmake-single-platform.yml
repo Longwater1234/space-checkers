@@ -50,7 +50,7 @@ jobs:
         shell: pwsh
         run: |
           echo "${{ env.GAME_VERSION }}" >> ${{github.workspace}}/build/bin/Release/build_info.txt
-          Get-Date >> ${{github.workspace}}/build/bin/Release/build_info.txt
+          Get-Date -Format "yyyy-MM-ddTHH:mm:ss" >> ${{github.workspace}}/build/bin/Release/build_info.txt
 
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v4
