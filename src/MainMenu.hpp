@@ -49,14 +49,14 @@ class MainMenu final
     sf::RectangleShape onlineBtn;
     sf::Font font;
     sf::Text versionTxt;
-    sf::Color DARK_BROWN = sf::Color{82, 55, 27};
+    static inline const sf::Color DARK_BROWN{82, 55, 27};
     void handleEvents(chk::UserChoice &result);
 };
 
 inline MainMenu::MainMenu(sf::RenderWindow *windowPtr)
 {
     this->window = windowPtr;
-    this->mainFrame = sf::RectangleShape(sf::Vector2f(600, 700));
+    this->mainFrame = sf::RectangleShape(sf::Vector2f{600.f, 700.f});
     if (!this->bgroundImage.loadFromFile(chk::getResourcePath("main_menu_en.png")))
     {
         perror("cannot find background image");
@@ -79,7 +79,7 @@ inline MainMenu::MainMenu(sf::RenderWindow *windowPtr)
 inline void MainMenu::init()
 {
     // draw two rectangles
-    sf::Vector2f sizeRec{277.0, 55.0};
+    sf::Vector2f sizeRec{277.0f, 55.0f};
     this->localBtn = sf::RectangleShape{sizeRec};
     this->onlineBtn = sf::RectangleShape{sizeRec};
     this->localBtn.setFillColor(sf::Color::Transparent);

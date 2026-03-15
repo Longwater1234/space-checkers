@@ -46,8 +46,8 @@ void chk::WsClient::showHint(const char *tip)
  */
 void chk::WsClient::showConnectWindow()
 {
-    static bool sslEnabled = false;  // switch for enable/disable SSL (PRIVATE servers only)
-    static bool showPublic = true; // whether to show public server list
+    static bool sslEnabled = false; // switch for enable/disable SSL (PRIVATE servers only)
+    static bool showPublic = true;  // whether to show public server list
 
     if (showPublic)
     {

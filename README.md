@@ -70,4 +70,4 @@ Pull requests are welcome! See GitHub Issues tab to help with new Features. Just
 
 ## License
 
-[GPL v3](LICENSE) &copy; 2024, Davis T.
+[BSD v3](LICENSE) &copy; 2024, Davis T.
