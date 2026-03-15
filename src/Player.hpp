@@ -29,8 +29,8 @@ class Player final
     [[nodiscard]] const std::string &getName() const;
     [[nodiscard]] PlayerType getPlayerType() const;
     [[nodiscard]] bool hasThisPiece(const short pieceId) const;
-    [[nodiscard]] bool movePiece(const short pieceId, const sf::Vector2f &destPos) const;
-    [[nodiscard]] bool captureEnemyWith(const short pieceId, const sf::Vector2f &destPos) const;
+    [[nodiscard]] bool movePiece(const short pieceId, const sf::Vector2f &destPos);
+    [[nodiscard]] bool captureEnemyWith(const short pieceId, const sf::Vector2f &destPos);
     bool operator==(const Player &other) const;
 
   private:

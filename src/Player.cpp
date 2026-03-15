@@ -114,7 +114,7 @@ size_t Player::getPieceCount() const
  * @param destPos destination cell position
  * @return TRUE if successful, else FALSE
  */
-bool Player::movePiece(const short pieceId, const sf::Vector2f &destPos) const
+bool Player::movePiece(const short pieceId, const sf::Vector2f &destPos)
 {
     return this->basket.at(pieceId)->moveSimple(destPos);
 }
@@ -125,7 +125,7 @@ bool Player::movePiece(const short pieceId, const sf::Vector2f &destPos) const
  * \param destPos destination cell
  * \return TRUE if successful, else FALSE
  */
-bool Player::captureEnemyWith(const short pieceId, const sf::Vector2f &destPos) const
+bool Player::captureEnemyWith(const short pieceId, const sf::Vector2f &destPos)
 {
     return this->basket.at(pieceId)->moveCapture(destPos);
 }
