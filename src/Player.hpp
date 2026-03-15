@@ -16,7 +16,7 @@ using PiecePtr = std::unique_ptr<chk::Piece>;
 class Player final
 {
   public:
-    explicit Player(PlayerType player_type);
+    explicit Player(PlayerType playerType);
     Player() = delete;
     Player(const Player &) = delete;
     Player &operator=(const Player &) = delete;
@@ -39,6 +39,5 @@ class Player final
     // hashmap of my PieceId -> its Pointer
     std::unordered_map<short, chk::PiecePtr> basket;
 };
-
 
 } // namespace chk

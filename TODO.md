@@ -3,7 +3,7 @@
 - [ ] (Online mode) Display countdown timer (40 s), waiting for player's move. Reset it when they make a move.
 - [ ] Record and list all previous moves and captures (for current match), in a scroll panel.
 - [x] highlight cell color blue after clicking a piece, reset when click srcCell = null
-- [ ] write unit tests using googletests
+- [x] write unit tests using googletests
 
 ### (Extras) Standard CJK font paths
 

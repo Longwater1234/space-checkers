@@ -49,7 +49,7 @@ class MainMenu final
     sf::RectangleShape onlineBtn;
     sf::Font font;
     sf::Text versionTxt;
-    sf::Color DARK_BROWN = sf::Color{82, 55, 27};
+    static inline const sf::Color DARK_BROWN{82, 55, 27};
     void handleEvents(chk::UserChoice &result);
 };
 

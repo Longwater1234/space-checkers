@@ -2,11 +2,10 @@
 
 namespace chk
 {
-    
 
-Player::Player(PlayerType player_type)
+Player::Player(PlayerType playerType)
 {
-    if (player_type == PlayerType::PLAYER_RED)
+    if (playerType == PlayerType::PLAYER_RED)
     {
         this->name = "RED";
     }
