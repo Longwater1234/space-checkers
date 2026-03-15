@@ -56,7 +56,7 @@ jobs:
           $appversion = "${{ env.GAME_VERSION }}"
 
           @"
-          Build Date:   $date
+          Build Date:   $date 'UTC'
           Commit:       $commit
           Branch:       $branch
           Game Version: $appversion
