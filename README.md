@@ -2,6 +2,8 @@
 
 [![CMake on Windows platform](https://github.com/Longwater1234/space-checkers/actions/workflows/cmake-single-platform.yml/badge.svg?branch=main)](https://github.com/Longwater1234/space-checkers/actions/workflows/cmake-single-platform.yml)
 
+![GitHub License](https://img.shields.io/github/license/longwater1234/space-checkers)
+
 Offline & Online Multiplayer Checkers game in C++ built with SFML 2.6, imGui, Protobuf and ixWebsockets. With very minimal dependencies
 and a simple build process. All dependencies are auto-downloaded (as `.tar.gz`) and configured for you using [CPM.cmake](https://github.com/cpm-cmake/CPM.cmake). The only dependency you need pre-installed on your OS is SFML 2.6.x (or newer).
 
