@@ -2,6 +2,7 @@
 
 namespace chk
 {
+
 chk::MainMenu::MainMenu(sf::RenderWindow *windowPtr)
 {
     this->window = windowPtr;
