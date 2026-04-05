@@ -20,11 +20,12 @@ int main()
     window.setFramerateLimit(60);
     (void)ImGui::SFML::Init(window, false);
     // ImGui::StyleColorsLight(); //<-- light color theme
-    std::unique_ptr<chk::GameManager> manager = nullptr;
 
     // SHOW MAIN MENU
     chk::StartMenu startMenu{&window};
     const auto userChoice = startMenu.runMainLoop();
+
+    std::unique_ptr<chk::GameManager> manager = nullptr;
     if (userChoice == chk::UserChoice::ONLINE_PLAY)
     {
         manager = std::make_unique<chk::OnlineGameManager>(&window);
