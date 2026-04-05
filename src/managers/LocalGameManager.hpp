@@ -37,6 +37,10 @@ inline LocalGameManager::LocalGameManager(sf::RenderWindow *windowPtr) : GameMan
 inline void LocalGameManager::createAllPieces()
 {
     auto pieceIds = this->generateRandomPieceIds();
+    // std::cout << "[";
+    // std::for_each(pieceIds.begin(), pieceIds.end(), [](short x) { std::cout << x << ","; });
+    // std::cout << "]" << std::endl;
+
     int counter = 0;
 
     // Reserve container for pieces on board
@@ -160,9 +164,9 @@ inline void LocalGameManager::handleEvents(chk::CircularBuffer<short> &buffer)
 }
 
 /**
- * Generates 24 unique random piece IDs for a local game (both players combined).
+ * Generates 24 unique random piece IDs from the range [1, SHORT_NAX] for both players.
  *
- * @return An array of 24 distinct piece IDs in random order.
+ * @return array of 24 unique shorts in random order.
  */
 inline std::array<short, chk::NUM_PIECES> LocalGameManager::generateRandomPieceIds()
 {
@@ -172,12 +176,15 @@ inline std::array<short, chk::NUM_PIECES> LocalGameManager::generateRandomPieceI
         return std::mt19937{seed};
     }());
 
-    // Generate 24 unique random piece IDs from range 1..SHORT_MAX
-    std::vector<short> pool(std::numeric_limits<short>::max());
-    std::iota(pool.begin(), pool.end(), static_cast<short>(1));
+    constexpr short MAX_ID = std::numeric_limits<short>::max();
+    std::vector<short> pool(MAX_ID);
+    std::iota(pool.begin(), pool.end(), static_cast<short>(1)); // fill with 1..SHORT_MAX
 
     std::array<short, chk::NUM_PIECES> pieceIds{};
     std::sample(pool.begin(), pool.end(), pieceIds.begin(), chk::NUM_PIECES, gen);
+
+    // randomize the order
+    std::shuffle(pieceIds.begin(), pieceIds.end(), gen);
     return pieceIds;
 }
 
