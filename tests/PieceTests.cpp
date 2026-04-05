@@ -4,7 +4,7 @@
 
 TEST(PieceTests, GetId_ReturnsCorrectId)
 {
-    sf::CircleShape circle{37.5f};
+    sf::CircleShape circle{0.5 * chk::SIZE_CELL};
     circle.setPosition(0.0f, 0.0f);
     chk::Piece piece{circle, chk::PieceType::Red, 42};
     EXPECT_EQ(piece.getId(), 42);
@@ -12,7 +12,7 @@ TEST(PieceTests, GetId_ReturnsCorrectId)
 
 TEST(PieceTests, NewPiece_IsNotKing)
 {
-    sf::CircleShape circle{37.5f};
+    sf::CircleShape circle{0.5 * chk::SIZE_CELL};
     circle.setPosition(0.0f, 0.0f);
     chk::Piece piece{circle, chk::PieceType::Red, 1};
     EXPECT_FALSE(piece.getIsKing());
@@ -20,7 +20,7 @@ TEST(PieceTests, NewPiece_IsNotKing)
 
 TEST(PieceTests, MoveSimple_ValidRedMove_ReturnsTrue)
 {
-    sf::CircleShape circle{37.5f};
+    sf::CircleShape circle{0.5 * chk::SIZE_CELL};
     circle.setPosition(150.0f, 150.0f);
     chk::Piece piece{circle, chk::PieceType::Red, 1};
 
