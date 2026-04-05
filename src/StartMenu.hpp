@@ -32,13 +32,13 @@ enum class UserChoice
 /**
  * Shown first when game is launched
  */
-class MainMenu final
+class StartMenu final
 {
   public:
-    explicit MainMenu(sf::RenderWindow *windowPtr);
-    MainMenu() = delete;
-    MainMenu(const MainMenu &) = delete;
-    MainMenu &operator=(const MainMenu &) = delete;
+    explicit StartMenu(sf::RenderWindow *windowPtr);
+    StartMenu() = delete;
+    StartMenu(const StartMenu &) = delete;
+    StartMenu &operator=(const StartMenu &) = delete;
     chk::UserChoice runMainLoop();
 
   private:

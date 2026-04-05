@@ -3,7 +3,7 @@
 namespace chk
 {
 
-chk::MainMenu::MainMenu(sf::RenderWindow *windowPtr)
+chk::StartMenu::StartMenu(sf::RenderWindow *windowPtr)
 {
     this->window = windowPtr;
     this->mainFrame = sf::RectangleShape(sf::Vector2f{600.f, 700.f});
@@ -26,7 +26,7 @@ chk::MainMenu::MainMenu(sf::RenderWindow *windowPtr)
 /**
  * Initialize the menu buttons
  */
-void MainMenu::init()
+void StartMenu::init()
 {
     // draw two rectangles
     sf::Vector2f sizeRec{277.0f, 55.0f};
@@ -52,7 +52,7 @@ void MainMenu::init()
  * Listen for GUI events, and store the selected choice to `result`
  * @param result Output will be written into this
  */
-void MainMenu::handleEvents(chk::UserChoice &result)
+void StartMenu::handleEvents(chk::UserChoice &result)
 {
     for (auto event = sf::Event{}; window->pollEvent(event);)
     {
@@ -85,7 +85,7 @@ void MainMenu::handleEvents(chk::UserChoice &result)
  * The main loop, renders the main menu screen at 60FPS
  * @return user choice for game Mode
  */
-chk::UserChoice MainMenu::runMainLoop()
+chk::UserChoice StartMenu::runMainLoop()
 {
     chk::UserChoice result{};
     constexpr float HOVER_THICKNESS = 5.0f;

@@ -23,8 +23,8 @@ int main()
     std::unique_ptr<chk::GameManager> manager = nullptr;
 
     // SHOW MAIN MENU
-    chk::MainMenu homeMenu{&window};
-    const auto userChoice = homeMenu.runMainLoop();
+    chk::StartMenu startMenu{&window};
+    const auto userChoice = startMenu.runMainLoop();
     if (userChoice == chk::UserChoice::ONLINE_PLAY)
     {
         manager = std::make_unique<chk::OnlineGameManager>(&window);
