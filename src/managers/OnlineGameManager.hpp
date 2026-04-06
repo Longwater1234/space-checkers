@@ -241,11 +241,12 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
         spdlog::warn("YOU ARE IN DANGER ");
     }
 
-    // prepare to send to SERVER
-    chk::payload::BasePayload requestBody;
+      // use Arena for efficient allocation
+    google::protobuf::Arena arena;
+    auto *requestBody = google::protobuf::Arena::Create<chk::payload::BasePayload>(&arena);
 
     // create move proto
-    auto *movePayload = requestBody.mutable_move_payload();
+    auto *movePayload = requestBody->mutable_move_payload();
     movePayload->set_source_cell(copySrcCell);
     movePayload->set_piece_id(currentPieceId);
     movePayload->set_from_team(TeamColor::TEAM_RED);
@@ -260,7 +261,7 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
     dest->set_x(destCell->getPos().x);
     dest->set_y(destCell->getPos().y);
     // flush root to server
-    if (!this->wsClient->replyServer(requestBody))
+    if (!this->wsClient->replyServer(*requestBody))
     {
         this->updateMessage("failed to send message to Server");
         return;
@@ -324,11 +325,12 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
     {
         return;
     }
-    // create root on stack
-    chk::payload::BasePayload basePayload;
+    // use Arena for efficient allocation
+    google::protobuf::Arena arena;
+    auto *basePayload = google::protobuf::Arena::Create<chk::payload::BasePayload>(&arena);
 
     // build CapturePayload from root
-    auto *capturePayload = basePayload.mutable_capture_payload();
+    auto *capturePayload = basePayload->mutable_capture_payload();
     capturePayload->set_hunter_piece_id(copyHunterPiece);
     capturePayload->set_from_team(TeamColor::TEAM_RED);
     if (this->myTeam == chk::PlayerType::PLAYER_BLACK)
@@ -348,7 +350,7 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
     hunterDestCell->set_x(targetCell->getPos().x);
     hunterDestCell->set_y(targetCell->getPos().y);
     // flush root to server
-    if (!this->wsClient->replyServer(basePayload))
+    if (!this->wsClient->replyServer(*basePayload))
     {
         this->updateMessage("failed to send message to Server");
         return;
