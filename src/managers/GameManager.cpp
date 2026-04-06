@@ -428,7 +428,7 @@ bool GameManager::awayFromEdge(const int cell_idx) const
 /**
  * Collect all possible next "forced captures" for this hunter.
  * @param hunter Current player
- * @param singleCell if NOT null, then only collect around this cell. Otherwise, loop ENTIRE board
+ * @param singleCell if NOT nullptr, then collect around this cell only. Otherwise, loop ENTIRE board
  */
 void GameManager::identifyTargets(const PlayerPtr &hunter, const chk::Block &singleCell)
 {
