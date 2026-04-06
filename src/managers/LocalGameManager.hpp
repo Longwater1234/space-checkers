@@ -1,5 +1,9 @@
 #pragma once
 #include "../GameManager.hpp"
+#include <algorithm>
+#include <array>
+#include <limits>
+#include <numeric>
 
 namespace chk
 {
