@@ -11,6 +11,7 @@
 #include <SFML/Graphics/Text.hpp>
 #include <SFML/Window/Mouse.hpp>
 #include <functional>
+#include <algorithm>
 #include <memory>
 #include <mutex>
 #include <optional>
