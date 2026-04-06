@@ -5,10 +5,10 @@ add_executable(SpaceCheckersTests
     # Include more test files as needed
 )
 
-# Add 'src/' directory and SFML_HOME dir
+# include headers directories
 target_include_directories(SpaceCheckersTests PRIVATE ${CMAKE_SOURCE_DIR}/src ${SFML_HOME}/include)
 
-# Include related source files
+# add related source files
 SET(TEST_SRC_FILES
     "${CMAKE_SOURCE_DIR}/src/Player.cpp"
     "${CMAKE_SOURCE_DIR}/src/Piece.cpp"
