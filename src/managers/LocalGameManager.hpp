@@ -37,11 +37,7 @@ inline LocalGameManager::LocalGameManager(sf::RenderWindow *windowPtr) : GameMan
 inline void LocalGameManager::createAllPieces()
 {
     auto pieceIds = this->generateRandomPieceIds();
-    // std::cout << "[";
-    // std::for_each(pieceIds.begin(), pieceIds.end(), [](short x) { std::cout << x << ","; });
-    // std::cout << "]" << std::endl;
-
-    int counter = 0;
+    int idx = 0;
 
     // Reserve container for pieces on board
     std::vector<chk::PiecePtr> pieceList;
@@ -59,13 +55,13 @@ inline void LocalGameManager::createAllPieces()
                 if (row < 3)
                 {
                     // Half Top cells, put BLACK piece
-                    auto pb = std::make_unique<chk::Piece>(circle, chk::PieceType::Black, pieceIds.at(counter++));
+                    auto pb = std::make_unique<chk::Piece>(circle, chk::PieceType::Black, pieceIds.at(idx++));
                     pieceList.emplace_back(std::move_if_noexcept(pb));
                 }
                 else if (row > 4)
                 {
                     // Half Bottom cells, put RED piece
-                    auto ppr = std::make_unique<chk::Piece>(circle, chk::PieceType::Red, pieceIds.at(counter++));
+                    auto ppr = std::make_unique<chk::Piece>(circle, chk::PieceType::Red, pieceIds.at(idx++));
                     pieceList.emplace_back(std::move_if_noexcept(ppr));
                 }
             }
