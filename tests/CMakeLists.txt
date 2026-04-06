@@ -5,21 +5,21 @@ add_executable(SpaceCheckersTests
     # Include more test files as needed
 )
 
-# Add src directory so test files can find headers
+# include headers directories
 target_include_directories(SpaceCheckersTests PRIVATE ${CMAKE_SOURCE_DIR}/src ${SFML_HOME}/include)
 
-SET(TEST_FILES
+# add related source files
+SET(TEST_SRC_FILES
     "${CMAKE_SOURCE_DIR}/src/Player.cpp"
     "${CMAKE_SOURCE_DIR}/src/Piece.cpp"
 )
 
-# Include source files
 if(APPLE)
-    target_sources(SpaceCheckersTests PRIVATE ${TEST_FILES} ${CMAKE_SOURCE_DIR}/src/utils/ResourcePath.mm)
+    target_sources(SpaceCheckersTests PRIVATE ${TEST_SRC_FILES} ${CMAKE_SOURCE_DIR}/src/utils/ResourcePath.mm)
     find_library(FOUNDATION_FRAMEWORK Foundation)
     target_link_libraries(SpaceCheckersTests PRIVATE ${FOUNDATION_FRAMEWORK})
 else()
-    target_sources(SpaceCheckersTests PRIVATE ${TEST_FILES} ${CMAKE_SOURCE_DIR}/src/utils/ResourcePath.cpp)
+    target_sources(SpaceCheckersTests PRIVATE ${TEST_SRC_FILES} ${CMAKE_SOURCE_DIR}/src/utils/ResourcePath.cpp)
 endif()
 
 # Link Google Test and SFML to the test executable

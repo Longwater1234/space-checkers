@@ -1,6 +1,10 @@
 # space - checkers
 
 [![CMake on Windows platform](https://github.com/Longwater1234/space-checkers/actions/workflows/cmake-single-platform.yml/badge.svg?branch=main)](https://github.com/Longwater1234/space-checkers/actions/workflows/cmake-single-platform.yml)
+|
+![GitHub License](https://img.shields.io/github/license/longwater1234/space-checkers)
+|
+[![Itch.io](https://img.shields.io/badge/Itch-%23FF0B34.svg?style=for-the-badge&logo=Itch.io&logoColor=white)](https://longwater1234.itch.io/spacecheckers)
 
 Offline & Online Multiplayer Checkers game in C++ built with SFML 2.6, imGui, Protobuf and ixWebsockets. With very minimal dependencies
 and a simple build process. All dependencies are auto-downloaded (as `.tar.gz`) and configured for you using [CPM.cmake](https://github.com/cpm-cmake/CPM.cmake). The only dependency you need pre-installed on your OS is SFML 2.6.x (or newer).
@@ -14,7 +18,7 @@ This game can connect securely to both Private and Public game servers. The back
 - ixWebsockets
 - spdlog
 - libcpr (curl for C++17)
-- Google Protobuf v33.5 (Used entirely during gameplay)
+- Google Protobuf v33 (Used entirely during gameplay)
 - simdjson (Used once, for parsing list of public servers)
 
 ## Requirements for Building

@@ -1,4 +1,5 @@
 #pragma once
+
 #include "../GameManager.hpp"
 #include "../WsClient.hpp"
 #include "../payloads/base_payload.pb.hpp"
@@ -241,15 +242,12 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
         spdlog::warn("YOU ARE IN DANGER ");
     }
 
-    // prepare to send to SERVER
-    // (must use raw ptr for embedded protobuf)
-    auto *newDestCell = new chk::payload::MovePayload_Detination();
-    newDestCell->set_cell_index(destCell->getIndex());
-    newDestCell->set_x(destCell->getPos().x);
-    newDestCell->set_y(destCell->getPos().y);
+    // use Arena for efficient allocation
+    google::protobuf::Arena arena;
+    auto *requestBody = google::protobuf::Arena::Create<chk::payload::BasePayload>(&arena);
 
-    // create Movepayload Protobuf
-    auto *movePayload = new chk::payload::MovePayload();
+    // create move proto
+    auto *movePayload = requestBody->mutable_move_payload();
     movePayload->set_source_cell(copySrcCell);
     movePayload->set_piece_id(currentPieceId);
     movePayload->set_from_team(TeamColor::TEAM_RED);
@@ -257,12 +255,14 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
     {
         movePayload->set_from_team(TeamColor::TEAM_BLACK);
     }
-    movePayload->set_allocated_destination(newDestCell);
 
-    // finally, create BasePayload
-    chk::payload::BasePayload requestBody;
-    requestBody.set_allocated_move_payload(movePayload);
-    if (!this->wsClient->replyServer(requestBody))
+    // create destination
+    auto *dest = movePayload->mutable_destination();
+    dest->set_cell_index(destCell->getIndex());
+    dest->set_x(destCell->getPos().x);
+    dest->set_y(destCell->getPos().y);
+    // flush root to server
+    if (!this->wsClient->replyServer(*requestBody))
     {
         this->updateMessage("failed to send message to Server");
         return;
@@ -326,33 +326,32 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
     {
         return;
     }
-    // prey details (must use raw ptr for embedded protobuf)
-    auto *details = new chk::payload::CapturePayload_TargetDetails();
-    details->set_hunter_src_cell(copySrcCell);
-    details->set_prey_cell_idx(copyPreyCell);
-    details->set_prey_piece_id(copyPreyPieceId);
+    // use Arena for efficient allocation
+    google::protobuf::Arena arena;
+    auto *basePayload = google::protobuf::Arena::Create<chk::payload::BasePayload>(&arena);
 
-    // hunter landing cell
-    auto *hunterDestCell = new chk::payload::CapturePayload_HunterDestination();
-    hunterDestCell->set_cell_index(targetCell->getIndex());
-    hunterDestCell->set_x(targetCell->getPos().x);
-    hunterDestCell->set_y(targetCell->getPos().y);
-
-    // prepare to send to server:
-    auto *capturePayload = new chk::payload::CapturePayload();
+    // build CapturePayload from root
+    auto *capturePayload = basePayload->mutable_capture_payload();
     capturePayload->set_hunter_piece_id(copyHunterPiece);
-    capturePayload->set_allocated_details(details);
-    capturePayload->set_allocated_destination(hunterDestCell);
     capturePayload->set_from_team(TeamColor::TEAM_RED);
     if (this->myTeam == chk::PlayerType::PLAYER_BLACK)
     {
         capturePayload->set_from_team(TeamColor::TEAM_BLACK);
     }
 
-    // ATTACH all children to root
-    chk::payload::BasePayload basePayload;
-    basePayload.set_allocated_capture_payload(capturePayload);
-    if (!this->wsClient->replyServer(basePayload))
+    // Prey details (nested message)
+    auto *details = capturePayload->mutable_details();
+    details->set_hunter_src_cell(copySrcCell);
+    details->set_prey_cell_idx(copyPreyCell);
+    details->set_prey_piece_id(copyPreyPieceId);
+
+    // Hunter landing dest
+    auto *hunterDestCell = capturePayload->mutable_destination();
+    hunterDestCell->set_cell_index(targetCell->getIndex());
+    hunterDestCell->set_x(targetCell->getPos().x);
+    hunterDestCell->set_y(targetCell->getPos().y);
+    // flush root to server
+    if (!this->wsClient->replyServer(*basePayload))
     {
         this->updateMessage("failed to send message to Server");
         return;

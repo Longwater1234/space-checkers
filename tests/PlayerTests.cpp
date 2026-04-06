@@ -7,7 +7,7 @@ TEST(PlayerTests, CaptureEnemyWith_Success)
     chk::Player player{chk::PlayerType::PLAYER_RED};
 
     // Create a RED piece positioned 2 cells diagonally from destination
-    sf::CircleShape circle{37.5f};
+    sf::CircleShape circle{0.5 * chk::SIZE_CELL};
     circle.setPosition(150.0f, 150.0f);
     chk::PiecePtr piece = std::make_unique<chk::Piece>(circle, chk::PieceType::Red, 1);
     player.receivePiece(piece);
@@ -21,7 +21,7 @@ TEST(PlayerTests, LosePiece_RemovesPieceFromBasket)
 {
     chk::Player player{chk::PlayerType::PLAYER_RED};
 
-    sf::CircleShape circle{37.5f};
+    sf::CircleShape circle{0.5 * chk::SIZE_CELL};
     circle.setPosition(0.0f, 0.0f);
     chk::PiecePtr piece = std::make_unique<chk::Piece>(circle, chk::PieceType::Red, 1);
     player.receivePiece(piece);

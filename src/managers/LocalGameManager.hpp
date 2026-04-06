@@ -1,5 +1,10 @@
 #pragma once
+
 #include "../GameManager.hpp"
+#include <algorithm>
+#include <array>
+#include <limits>
+#include <numeric>
 
 namespace chk
 {
@@ -17,6 +22,9 @@ class LocalGameManager final : public chk::GameManager
     void createAllPieces() override;
     void drawBoard() override;
     void handleEvents(chk::CircularBuffer<short> &buffer) override;
+
+  private:
+    std::array<short, chk::NUM_PIECES> generateRandomPieceIds();
 };
 
 /**
@@ -33,9 +41,8 @@ inline LocalGameManager::LocalGameManager(sf::RenderWindow *windowPtr) : GameMan
  */
 inline void LocalGameManager::createAllPieces()
 {
-    std::random_device randomDevice;
-    std::mt19937 randEngine{randomDevice()};
-    std::uniform_int_distribution<short> dist(1, std::numeric_limits<short>::max());
+    auto pieceIds = this->generateRandomPieceIds();
+    int idx = 0;
 
     // Reserve container for pieces on board
     std::vector<chk::PiecePtr> pieceList;
@@ -53,13 +60,13 @@ inline void LocalGameManager::createAllPieces()
                 if (row < 3)
                 {
                     // Half Top cells, put BLACK piece
-                    auto pb = std::make_unique<chk::Piece>(circle, chk::PieceType::Black, dist(randEngine));
+                    auto pb = std::make_unique<chk::Piece>(circle, chk::PieceType::Black, pieceIds.at(idx++));
                     pieceList.emplace_back(std::move_if_noexcept(pb));
                 }
                 else if (row > 4)
                 {
                     // Half Bottom cells, put RED piece
-                    auto ppr = std::make_unique<chk::Piece>(circle, chk::PieceType::Red, dist(randEngine));
+                    auto ppr = std::make_unique<chk::Piece>(circle, chk::PieceType::Red, pieceIds.at(idx++));
                     pieceList.emplace_back(std::move_if_noexcept(ppr));
                 }
             }
@@ -155,6 +162,31 @@ inline void LocalGameManager::handleEvents(chk::CircularBuffer<short> &buffer)
             //^ END inner loop
         }
     }
+}
+
+/**
+ * Generates 24 unique random piece IDs from the range [1, SHORT_NAX] for both players.
+ *
+ * @return array of 24 unique shorts in random order.
+ */
+inline std::array<short, chk::NUM_PIECES> LocalGameManager::generateRandomPieceIds()
+{
+    static std::mt19937 gen([] {
+        std::random_device rd;
+        std::seed_seq seed{rd(), rd(), rd(), rd(), rd(), rd(), rd(), rd()};
+        return std::mt19937{seed};
+    }());
+
+    constexpr short MAX_ID = std::numeric_limits<short>::max();
+    std::vector<short> pool(MAX_ID);
+    std::iota(pool.begin(), pool.end(), static_cast<short>(1)); // fill with 1..SHORT_MAX
+
+    std::array<short, chk::NUM_PIECES> pieceIds{};
+    std::sample(pool.begin(), pool.end(), pieceIds.begin(), chk::NUM_PIECES, gen);
+
+    // randomize the order
+    std::shuffle(pieceIds.begin(), pieceIds.end(), gen);
+    return pieceIds;
 }
 
 } // namespace chk

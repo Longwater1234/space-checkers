@@ -26,7 +26,7 @@ class Piece final : public sf::Drawable, public sf::Transformable
 {
 
   public:
-    explicit Piece(const sf::CircleShape &circle, const PieceType &pType, short id);
+    explicit Piece(const sf::CircleShape &circle, const PieceType pType, short id);
     Piece() = delete;
     Piece(const Piece &) = delete;
     Piece &operator=(const Piece &) = delete;
