@@ -34,7 +34,7 @@ template <typename T> class CircularBuffer
 
   private:
     const uint32_t max_capacity; // max Capacity
-    std::deque<T> m_deque; // actual container of elements
+    std::deque<T> m_deque;       // actual container of elements
 };
 
 /**

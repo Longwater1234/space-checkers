@@ -241,7 +241,7 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
         spdlog::warn("YOU ARE IN DANGER ");
     }
 
-      // use Arena for efficient allocation
+    // use Arena for efficient allocation
     google::protobuf::Arena arena;
     auto *requestBody = google::protobuf::Arena::Create<chk::payload::BasePayload>(&arena);
 
