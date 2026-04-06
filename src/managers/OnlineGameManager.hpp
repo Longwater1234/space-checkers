@@ -1,4 +1,5 @@
 #pragma once
+
 #include "../GameManager.hpp"
 #include "../WsClient.hpp"
 #include "../payloads/base_payload.pb.hpp"
