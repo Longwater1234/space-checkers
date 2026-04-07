@@ -5,7 +5,6 @@
 #include "utils/ResourcePath.hpp"
 
 #include <SFML/Graphics.hpp>
-#include <SFML/Window/Mouse.hpp>
 #include <cassert>
 #include <google/protobuf/stubs/common.h>
 #include <vector>
