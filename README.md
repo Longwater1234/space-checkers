@@ -26,20 +26,19 @@ This game can connect securely to both Private and Public game servers. The back
 - C++17 (or newer) compiler.
 - Pre-built [SFML 2.6.x](https://www.sfml-dev.org/download/sfml/2.6.1/) libs.
 - [CMake 3.20+](https://cmake.org/download/) or newer (GUI recommended)
-- (OPTIONAL) OpenSSL v3+ development libs.
+- (OPTIONAL) OpenSSL v3+ dev libs.
 
 ### For Windows (10 or later)
 
 - MS Visual Studio 2022 or newer (NOT vscode), with "**Desktop C++ Development**" bundle.
 - Please download "Visual C++ 64bit" edition of SFML; ignore others.
 - Move your unzipped `SFML-2.6.x` folder to its own home, example: `C:/SFML/SFML-2.6.2`.
-- Edit line 29 in [CMakeLists.txt](CMakeLists.txt#L29), to set value `SFML_HOME` to absolute path you moved SFML into (from previous step).
+- Edit file [CMakeLists.txt](CMakeLists.txt#L29), to set value `SFML_HOME` to absolute path you moved SFML into (from previous step).
 
 ### For macOS (x64 & arm64)
 
 - XCode 14 or newer from AppStore (with MacOS SDK)
 - Please install SFML 2.6 for macOS as **"Frameworks"**, as shown in [official SFML guide](https://www.sfml-dev.org/tutorials/2.6/start-osx.php).
-- Use homebrew to install OpenSSL.
 - Download Apple Developer tools. After Xcode is installed, run this in your Terminal:
 
 ```bash
