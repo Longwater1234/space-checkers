@@ -2,14 +2,14 @@
 
 CPMAddPackage(
     NAME zlib
-    URL "https://github.com/madler/zlib/archive/refs/tags/v1.3.1.tar.gz"
+    URL "https://github.com/madler/zlib/archive/refs/tags/v1.3.2.tar.gz"
     DOWNLOAD_EXTRACT_TIMESTAMP TRUE
     OPTIONS "ZLIB_BUILD_EXAMPLES OFF" "BUILD_TESTS OFF" "BUILD_SHARED_LIBS OFF" "ZLIB_BUILD_SHARED OFF"
 )
 
-if(TARGET zlib AND NOT TARGET ZLIB::ZLIB)
-    add_library(ZLIB::ZLIB ALIAS zlib)
-endif()
+# if(TARGET zlib AND NOT TARGET ZLIB::ZLIB)
+#     add_library(ZLIB::ZLIB ALIAS zlib)
+# endif()
 
 if(MSVC)
     target_compile_definitions(zlib PRIVATE _CRT_SECURE_NO_DEPRECATE _CRT_NONSTDC_NO_DEPRECATE)
