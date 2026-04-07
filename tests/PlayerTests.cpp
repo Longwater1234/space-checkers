@@ -14,7 +14,7 @@ TEST(PlayerTests, CaptureEnemyWith_Success)
 
     // RED piece captures by jumping 2 cells diagonally upward (deltaX=-150, deltaY=-150)
     sf::Vector2f destination{0.0f, 0.0f};
-    EXPECT_TRUE(player.captureEnemyWith(1, destination));
+    EXPECT_TRUE(player.captureEnemyWith(piece->getId(), destination));
 }
 
 TEST(PlayerTests, LosePiece_RemovesPieceFromBasket)
@@ -27,5 +27,5 @@ TEST(PlayerTests, LosePiece_RemovesPieceFromBasket)
     player.receivePiece(piece);
 
     player.losePiece(1);
-    EXPECT_FALSE(player.hasThisPiece(1));
+    EXPECT_FALSE(player.hasThisPiece(piece->getId()));
 }

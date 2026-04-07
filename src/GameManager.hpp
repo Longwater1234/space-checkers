@@ -10,8 +10,8 @@
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/Text.hpp>
 #include <SFML/Window/Mouse.hpp>
-#include <functional>
 #include <algorithm>
+#include <functional>
 #include <memory>
 #include <mutex>
 #include <optional>
