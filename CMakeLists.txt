@@ -30,12 +30,14 @@ set(SFML_HOME "C:/SFML/SFML-2.6.1")
 set(SFML_DIR ${SFML_HOME}/lib/cmake/SFML)
 # ==========================
 
-# Collect all sources
-file(GLOB_RECURSE GAME_SRC "src/*.cpp" "src/*.hpp")
+# comment line below if using CPM to download SFML
 find_package(SFML 2.6 REQUIRED COMPONENTS "graphics" "window" "system") 
 
 # download extra libs
 add_subdirectory(dependencies) 
+
+# Collect all sources
+file(GLOB_RECURSE GAME_SRC "src/*.cpp" "src/*.hpp")
 
 if(WIN32)
   add_executable(SpaceCheckers WIN32 ${GAME_SRC} ${CMAKE_SOURCE_DIR}/resources/win-icon.rc)
@@ -48,7 +50,7 @@ else()
   add_executable(SpaceCheckers ${GAME_SRC})
 endif()
 
-# link all required libraries
+# link all common libraries
 target_link_libraries(
   SpaceCheckers
   PRIVATE sfml-graphics
@@ -71,7 +73,7 @@ else()
   target_compile_options(SpaceCheckers PRIVATE -Wall -Werror=constant-conversion 
                           -Werror=fortify-source $<$<CONFIG:Release>:-flto=thin>)
 endif()
-
+ 
 # COPY resources folder to destination
 if(NOT APPLE)
   add_custom_command(
