@@ -1,17 +1,23 @@
-# add libcpr (simpler CURL) v1.11.3
+# add libcpr (CURL for modern CPP) v1.14.2
 
-SET(SSL_OPTION "CPR_FORCE_OPENSSL_BACKEND TRUE")
 if(WIN32)
-   SET(SSL_OPTION "CPR_FORCE_WINSSL_BACKEND TRUE")
-# elseif(APPLE)
-#   SET(SSL_OPTION "CPR_FORCE_DARWINSSL_BACKEND TRUE")
+    SET(SSL_OPTION "CPR_FORCE_WINSSL_BACKEND TRUE")
+else()
+    SET(SSL_OPTION "CPR_FORCE_MBEDTLS_BACKEND TRUE")
 endif()
 
-# dont upgrade, will require MESON to build!
 CPMAddPackage(
     NAME cpr
-    URL    "https://github.com/libcpr/cpr/archive/refs/tags/1.11.3.tar.gz"
+    URL    "https://github.com/libcpr/cpr/archive/refs/tags/1.14.2.tar.gz"
     DOWNLOAD_EXTRACT_TIMESTAMP TRUE
-    OPTIONS "BUILD_SHARED_LIBS FALSE" "CURL_ENABLE_EXPORT_TARGET OFF" "CURL_DISABLE_INSTALL TRUE"
-    "CURL_USE_LIBPSL OFF" "USE_LIBIDN2 OFF" ${SSL_OPTION}
-) 
+    OPTIONS
+        "BUILD_SHARED_LIBS OFF"
+        "CURL_ENABLE_EXPORT_TARGET OFF"
+        "CMAKE_SKIP_INSTALL_RULES TRUE"
+        "CURL_DISABLE_INSTALL TRUE"
+        "CURL_ZLIB ON"
+        "CPR_CURL_USE_LIBPSL OFF"
+        "USE_LIBIDN2 OFF"
+        ${SSL_OPTION}
+        "BUILD_EXAMPLES FALSE"
+)

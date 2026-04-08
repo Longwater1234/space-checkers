@@ -1,6 +1,6 @@
 # IXWebSocket 11.4.6 (BSD-3-Clause License)
 
-CPMAddPackage( 
+CPMAddPackage(
     NAME ixwebsocket
     URL    "https://github.com/machinezone/IXWebSocket/archive/refs/tags/v11.4.6.tar.gz"
     DOWNLOAD_EXTRACT_TIMESTAMP TRUE
@@ -8,7 +8,7 @@ CPMAddPackage(
     OPTIONS "USE_TLS TRUE" "USE_MBED_TLS TRUE" "USE_ZLIB TRUE"
 )
 
-if(ixwebsocket_ADDED) 
+if(ixwebsocket_ADDED)
     file(GLOB ixwebsocket_SOURCES ${ixwebsocket_SOURCE_DIR}/ixwebsocket/*.cpp)
     add_library(ixwebsocket STATIC ${ixwebsocket_SOURCES})
     target_include_directories(ixwebsocket PUBLIC ${ixwebsocket_SOURCE_DIR})
@@ -24,14 +24,14 @@ if(ixwebsocket_ADDED)
         target_link_libraries(ixwebsocket PUBLIC ${CMAKE_THREAD_LIBS_INIT})
     endif()
 
-    if(TARGET zlib)
+    if(TARGET zlibstatic)
         message(STATUS "ixwebsocket: zlib support enabled")
         target_compile_definitions(ixwebsocket PRIVATE IXWEBSOCKET_USE_ZLIB)
-        target_link_libraries(ixwebsocket PRIVATE zlib)
+        target_link_libraries(ixwebsocket PRIVATE zlibstatic)
     else()
         message(STATUS "ixwebsocket: zlib support disabled (include zlib first)")
     endif()
-    
+
     if(TARGET mbedtls)
         message(STATUS "ixwebsocket: mbedtls support enabled")
         target_compile_definitions(ixwebsocket PUBLIC IXWEBSOCKET_USE_TLS)
@@ -45,5 +45,3 @@ if(ixwebsocket_ADDED)
         message(STATUS "ixwebsocket: mbedtls support disabled (include mbedtls first)")
     endif()
 endif()
-
-
