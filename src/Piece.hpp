@@ -45,8 +45,8 @@ class Piece final : public sf::Drawable, public sf::Transformable
   private:
     sf::Texture texture;
     const short pid; // random positive ID assigned at Launch
+    const PieceType pieceType;
     sf::CircleShape myCircle;
-    PieceType pieceType;
     bool isKing = false;
     void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
 };

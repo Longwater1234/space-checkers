@@ -3,10 +3,9 @@
 namespace chk
 {
 
-Piece::Piece(const sf::CircleShape &circle, const PieceType pType, const short id) : pid(id)
+Piece::Piece(const sf::CircleShape &circle, const PieceType pType, const short id) : pid(id), pieceType(pType)
 {
     this->myCircle = circle;
-    this->pieceType = pType;
     this->setPosition(circle.getPosition());
 
     sf::Texture localTxr;
