@@ -7,7 +7,7 @@
 [![Itch.io](https://img.shields.io/badge/Itch-%23FF0B34.svg?style=for-the-badge&logo=Itch.io&logoColor=white)](https://longwater1234.itch.io/spacecheckers)
 
 Offline & Online Multiplayer Checkers game in C++ built with SFML 2.6, imGui, Protobuf and ixWebsockets. With very minimal dependencies
-and a simple build process. All dependencies are auto-downloaded (as `.tar.gz`) and configured for you using [CPM.cmake](https://github.com/cpm-cmake/CPM.cmake). The only dependency you need pre-installed on your OS is SFML 2.6.x (or newer).
+and a simple build process. All dependencies are auto-downloaded (as `.tar.gz`) and configured for you using [CPM.cmake](https://github.com/cpm-cmake/CPM.cmake).
 
 This game can connect securely to both Private and Public game servers. The backend server for Online Mode is written in Golang, and is [available on GitHub](https://github.com/Longwater1234/checkers-backend) which you can self-host! Download and Play the pre-built game from the itch.io link above.
 
@@ -17,6 +17,7 @@ This game can connect securely to both Private and Public game servers. The back
 - imGui-SFML
 - ixWebsockets
 - spdlog
+- mbedtls
 - libcpr (curl for C++17)
 - Google Protobuf v33 (Used entirely during gameplay)
 - simdjson (Used once, for parsing list of public servers)
@@ -26,7 +27,6 @@ This game can connect securely to both Private and Public game servers. The back
 - C++17 (or newer) compiler.
 - Pre-built [SFML 2.6.x](https://www.sfml-dev.org/download/sfml/2.6.1/) libs.
 - [CMake 3.20+](https://cmake.org/download/) or newer (GUI recommended)
-- (OPTIONAL) Download OpenSSL v3+ dev libs.
 
 ### For Windows (10 or later)
 
@@ -55,13 +55,12 @@ This game can connect securely to both Private and Public game servers. The back
 
 - Latest display drivers
 - Use your OS package manager to install SFML 2.6 or newer.
-- Alternatively, you may build SFML 2.6 from source, see [official SFML docs](https://www.sfml-dev.org/tutorials/2.6/start-linux.php).
-- You are required to install latest **OpenSSL Dev** library. See example for Ubuntu / Debian below.
 
 ```bash
   sudo apt install libsfml-dev
-  sudo apt install libssl-dev
 ```
+
+- Alternatively, you may build SFML 2.6 from source, by uncommenting `include(sfml.cmake)` inside [dependencies/CMakeLists.txt](dependencies/CMakeLists.txt).
 
 ## Build Instructions
 
