@@ -2,6 +2,7 @@
 // Created by Davis 2024-04-09
 //
 #pragma once
+
 #include "AppVersion.hpp"
 #include "Piece.hpp"
 #include "utils/ResourcePath.hpp"
