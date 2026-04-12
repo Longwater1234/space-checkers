@@ -1,4 +1,5 @@
 #pragma once
+
 #include "CircularBuffer.hpp"
 #include "ServerLocation.hpp"
 #include "payloads/base_payload.pb.hpp"
