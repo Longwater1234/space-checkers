@@ -181,7 +181,7 @@ bool Piece::moveCapture(const sf::Vector2f &destPos)
     const float deltaX = destPos.x - this->getPosition().x;
     const float deltaY = destPos.y - this->getPosition().y;
 
-    if (std::abs(deltaX) != 2 * SIZE_CELL && std::abs(deltaY) != 2 * SIZE_CELL)
+    if (std::abs(deltaX) != 2 * SIZE_CELL || std::abs(deltaY) != 2 * SIZE_CELL)
     {
         return false;
     }
