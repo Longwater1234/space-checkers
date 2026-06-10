@@ -35,13 +35,13 @@ class OnlineGameManager final : public chk::GameManager
 
   private:
     mutable chk::PlayerType myTeam{};
-    std::unique_ptr<chk::WsClient> wsClient = nullptr;
     std::atomic_bool isMyTurn = false;
     std::atomic_bool gameReady = false;
+    std::unique_ptr<chk::WsClient> wsClient = nullptr;
     void startMoveListener();
     void startCaptureListener();
     void startDeathListener();
-    TeamColor toTeamColor(chk::PlayerType team);
+    chk::payload::TeamColor toTeamColor(chk::PlayerType team);
 };
 
 inline OnlineGameManager::OnlineGameManager(sf::RenderWindow *windowPtr) : GameManager(windowPtr)
