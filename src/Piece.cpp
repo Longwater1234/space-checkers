@@ -51,20 +51,17 @@ const PieceType Piece::getPieceType() const
 void Piece::activateKing()
 {
     this->isKing = true;
-    sf::Texture localTxr;
     if (pieceType == PieceType::Red)
     {
-        if (localTxr.loadFromFile(chk::getResourcePath(RED_KING)))
+        if (this->texture.loadFromFile(chk::getResourcePath(RED_KING)))
         {
-            this->texture = std::move_if_noexcept(localTxr);
             this->myCircle.setTexture(&this->texture);
         }
     }
     else
     {
-        if (localTxr.loadFromFile(chk::getResourcePath(BLACK_KING)))
+        if (this->texture.loadFromFile(chk::getResourcePath(BLACK_KING)))
         {
-            this->texture = std::move_if_noexcept(localTxr);
             this->myCircle.setTexture(&this->texture);
         }
     }
