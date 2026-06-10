@@ -3,7 +3,7 @@
 #include "Piece.hpp"
 #include "PlayerType.hpp"
 #include <iostream>
-#include <set>
+#include <unordered_set>
 #include <string>
 #include <unordered_map>
 
@@ -23,7 +23,7 @@ class Player final
     void receivePiece(PiecePtr &piecePtr);
     void losePiece(const short targetId);
     [[nodiscard]] const std::unordered_map<short, chk::PiecePtr> &getOwnPieces() const;
-    void showMyHunters(const std::set<short> &hunterPieces) const;
+    void showMyHunters(const std::unordered_set<short> &hunterPieces) const;
     void clearBasket();
     [[nodiscard]] size_t getPieceCount() const;
     [[nodiscard]] const std::string &getName() const;

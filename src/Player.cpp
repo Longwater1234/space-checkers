@@ -37,7 +37,7 @@ void Player::losePiece(const short targetId)
  * Highlight all my hunter pieces which must capture the opponent
  * @param hunterPieces set of my piece IDs
  */
-void Player::showMyHunters(const std::set<short> &hunterPieces) const
+void Player::showMyHunters(const std::unordered_set<short> &hunterPieces) const
 {
     if (hunterPieces.empty())
     {
