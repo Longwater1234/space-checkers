@@ -365,7 +365,14 @@ bool WsClient::replyServer(const chk::payload::BasePayload &payload) const
  */
 void WsClient::readIncomingPayloads()
 {
-    for (const auto &msg : this->msgBuffer.getAll())
+    std::deque<std::string> localMessages;
+    {
+        std::scoped_lock lg{this->mut};
+        localMessages = this->msgBuffer.getAll();
+        this->msgBuffer.clean();
+    }
+
+    for (const auto &msg : localMessages)
     {
         if (msg.empty())
         {
@@ -442,8 +449,8 @@ void WsClient::readIncomingPayloads()
             break;
         }
     }
-    std::scoped_lock lg{this->mut};
-    this->msgBuffer.clean();
+    // std::scoped_lock lg{this->mut};
+    // this->msgBuffer.clean();
 }
 
 /**
