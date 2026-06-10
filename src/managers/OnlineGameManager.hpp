@@ -41,6 +41,7 @@ class OnlineGameManager final : public chk::GameManager
     void startMoveListener();
     void startCaptureListener();
     void startDeathListener();
+    TeamColor toTeamColor(chk::PlayerType team);
 };
 
 inline OnlineGameManager::OnlineGameManager(sf::RenderWindow *windowPtr) : GameManager(windowPtr)
@@ -250,11 +251,7 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
     auto *movePayload = requestBody->mutable_move_payload();
     movePayload->set_source_cell(copySrcCell);
     movePayload->set_piece_id(currentPieceId);
-    movePayload->set_from_team(TeamColor::TEAM_RED);
-    if (this->myTeam == chk::PlayerType::PLAYER_BLACK)
-    {
-        movePayload->set_from_team(TeamColor::TEAM_BLACK);
-    }
+    movePayload->set_from_team(toTeamColor(this->myTeam));
 
     // create destination
     auto *dest = movePayload->mutable_destination();
@@ -333,11 +330,7 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
     // build CapturePayload from root
     auto *capturePayload = basePayload->mutable_capture_payload();
     capturePayload->set_hunter_piece_id(copyHunterPiece);
-    capturePayload->set_from_team(TeamColor::TEAM_RED);
-    if (this->myTeam == chk::PlayerType::PLAYER_BLACK)
-    {
-        capturePayload->set_from_team(TeamColor::TEAM_BLACK);
-    }
+    capturePayload->set_from_team(toTeamColor(this->myTeam));
 
     // Prey details (nested message)
     auto *details = capturePayload->mutable_details();
@@ -528,6 +521,14 @@ inline void OnlineGameManager::startCaptureListener()
             this->updateMessage("It's now your turn!");
         }
     });
+}
+
+/**
+ * Convert PlayerType to TeamColor (for protobuf)
+ */
+inline TeamColor OnlineGameManager::toTeamColor(chk::PlayerType team)
+{
+    return team == chk::PlayerType::PLAYER_BLACK ? TeamColor::TEAM_BLACK : TeamColor::TEAM_RED;
 }
 
 /**
