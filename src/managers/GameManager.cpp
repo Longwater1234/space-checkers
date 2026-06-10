@@ -165,7 +165,7 @@ void GameManager::handleCapturePiece(const chk::PlayerPtr &hunter, const chk::Pl
             gameMap.emplace(targetCell->getIndex(), hunterPieceId);            // fill in hunter new location
             prey->losePiece(target.preyPieceId);                               // the defending player loses 1 piece
             this->sourceCell = std::nullopt;                                   // reset source cell
-            isKingNow = hunter->getOwnPieces().at(hunterPieceId)->getIsKing(); // UPDATE changes after capture
+            isKingNow = hunter->getOwnPieces().at(hunterPieceId)->getIsKing(); // UPDATE kind status
             break;
         }
     }
