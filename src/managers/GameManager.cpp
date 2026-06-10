@@ -28,7 +28,7 @@ GameManager::GameManager(sf::RenderWindow *windowPtr) : window(windowPtr)
 
 /**
  * Atomically update main UI message
- * 
+ *
  * @param msg the message content
  */
 void GameManager::updateMessage(std::string_view msg)
@@ -39,7 +39,7 @@ void GameManager::updateMessage(std::string_view msg)
 
 /**
  * Get current message passed from Main
- * 
+ *
  * @return string value of message
  */
 const std::string &GameManager::getCurrentMsg() const
@@ -96,7 +96,7 @@ void GameManager::drawCheckerboard(const sf::Font &font)
 
 /**
  * Move the selected piece to clicked cell, and update the gameMap
- * 
+ *
  * @param player current player
  * @param opponent opposing player
  * @param destCell target cell
@@ -130,7 +130,7 @@ void GameManager::handleMovePiece(const chk::PlayerPtr &player, const chk::Playe
 
 /**
  * Perform capturing of "prey's" pieces by "hunter", then update gameMap
- * 
+ *
  * @param hunter the attacking player
  * @param prey the defensive player
  * @param targetCell the destination of hunter
@@ -194,7 +194,7 @@ void GameManager::handleCapturePiece(const chk::PlayerPtr &hunter, const chk::Pl
 
 /**
  * Whether it's Red player's turn
- * 
+ *
  * @return TRUE or FALSE
  */
 bool GameManager::isPlayerRedTurn() const
@@ -204,7 +204,7 @@ bool GameManager::isPlayerRedTurn() const
 
 /**
  * Store the cell idx from which the piece is LEAVING
- * 
+ *
  * @param src_cell index of the cell
  */
 void GameManager::setSourceCell(const int src_cell)
@@ -283,6 +283,7 @@ void GameManager::matchCellsToPieces(const std::vector<chk::PiecePtr> &pieceList
 
 /**
  * Checks piece count for both players (in any order), then updates match status
+ *
  * @param p1 first player
  * @param p2 second player
  */
@@ -301,6 +302,7 @@ void GameManager::updateMatchStatus(const chk::PlayerPtr &p1, const chk::PlayerP
 
 /**
  * When current player taps any playable cell.
+ *
  * @param hunter currentPlayer
  * @param prey the opposing player
  * @param buffer Temporary store for clicked Pieces
@@ -369,6 +371,7 @@ void chk::GameManager::handleCellTap(const chk::PlayerPtr &hunter, const chk::Pl
 
 /**
  * When player is forced to capture opponent's piece, highlight their hunter pieces with GREEN.
+ *
  * @param player current player
  * @param cell selected destination cell
  */
@@ -433,6 +436,7 @@ bool GameManager::awayFromEdge(const int cell_idx) const
 
 /**
  * Collect all possible next "forced captures" for this hunter.
+ *
  * @param hunter Current player
  * @param singleCell if NOT nullptr, then collect around this cell only. Otherwise, loop ENTIRE board
  */
@@ -482,6 +486,7 @@ void GameManager::identifyTargets(const PlayerPtr &hunter, const chk::Block &sin
 
 /**
  * Collect nearby enemies of Hunter for next "forced" captures (NORTH WEST)
+ *
  * @param hunter  player whose turn is next
  * @param cell_ptr current cell of hunter
  */
@@ -541,6 +546,7 @@ void GameManager::collectFrontLHS(const chk::PlayerPtr &hunter, const chk::Block
 
 /**
  * Collect nearby enemies of Hunter for next "forced" captures (NORTH EAST)
+ *
  * @param hunter player whose turn is next
  * @param cell_ptr current cell of hunter
  */
@@ -598,6 +604,7 @@ void GameManager::collectFrontRHS(const chk::PlayerPtr &hunter, const chk::Block
 
 /**
  * Collect nearby enemies of Hunter for next "forced" captures (SOUTH EAST). Only for KING pieces
+ *
  * @param hunter  player whose turn is next (MUST be King)
  * @param cell_ptr current cell of hunter
  */
@@ -655,6 +662,7 @@ void GameManager::collectBehindRHS(const PlayerPtr &hunter, const chk::Block &ce
 
 /**
  * Collect nearby enemies for next "forced" captures (SOUTH WEST). Only for KING pieces
+ *
  * @param hunter  player whose turn is next
  * @param cell_ptr current cell of hunter
  */

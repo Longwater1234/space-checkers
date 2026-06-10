@@ -218,7 +218,8 @@ inline void OnlineGameManager::handleEvents(chk::CircularBuffer<short> &buffer)
 }
 
 /**
- * Move the selected piece to clicked cell, then update the gameMap and notify Server
+ * Move the selected piece to clicked cell, then update the gameMap and notify Server.
+ *
  * @param player current player
  * @param opponent opposing player
  * @param destCell target cell
@@ -372,6 +373,7 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
 
 /**
  * When current player taps any playable cell.
+ *
  * @param hunter currentPlayer
  * @param prey the opposing player
  * @param buffer Temporary store for clicked Piece
