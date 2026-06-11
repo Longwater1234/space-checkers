@@ -176,14 +176,16 @@ inline std::array<short, chk::NUM_PIECES> LocalGameManager::generateRandomPieceI
         return std::mt19937{seed};
     }());
 
-    constexpr short MAX_ID = std::numeric_limits<short>::max();
-    std::vector<short> pool(MAX_ID);
-    std::iota(pool.begin(), pool.end(), static_cast<short>(1)); // fill with 1..SHORT_MAX
+    std::uniform_int_distribution<short> dist(1, std::numeric_limits<short>::max());
+
+    std::unordered_set<short> uniqueIds;
+    while (uniqueIds.size() < chk::NUM_PIECES)
+    {
+        uniqueIds.insert(dist(gen));
+    }
 
     std::array<short, chk::NUM_PIECES> pieceIds{};
-    std::sample(pool.begin(), pool.end(), pieceIds.begin(), chk::NUM_PIECES, gen);
-
-    // randomize the order
+    std::copy(uniqueIds.begin(), uniqueIds.end(), pieceIds.begin());
     std::shuffle(pieceIds.begin(), pieceIds.end(), gen);
     return pieceIds;
 }

@@ -19,17 +19,17 @@ template <typename T> class CircularBuffer
     // Constructor, sets maxCapacity limit
     explicit CircularBuffer(const uint32_t maxCapacity) : max_capacity(maxCapacity)
     {
-        m_deque.resize(max_capacity);
+        // do nothing here
     }
     CircularBuffer() = delete;
     CircularBuffer &operator=(const CircularBuffer &) = delete;
     CircularBuffer(CircularBuffer &other) = delete;
     void addItem(const T &item); // copy overload
     void addItem(T &&item);      // Move overload
-    T &getFront() noexcept;
+    const T &getFront() const noexcept;
     void removeFirst();
     [[nodiscard]] bool isEmpty() const noexcept;
-    const std::deque<T> &getAll() const;
+    std::deque<T> getAll();
     void clean();
 
   private:
@@ -59,9 +59,9 @@ template <typename T> bool CircularBuffer<T>::isEmpty() const noexcept
 /**
  * returns all elements from the buffer
  */
-template <typename T> inline const std::deque<T> &CircularBuffer<T>::getAll() const
+template <typename T> inline std::deque<T> CircularBuffer<T>::getAll()
 {
-    return this->m_deque;
+    return std::move(this->m_deque);
 }
 
 /**
@@ -69,7 +69,7 @@ template <typename T> inline const std::deque<T> &CircularBuffer<T>::getAll() co
  * @tparam T any type
  * @return The first element in queue
  */
-template <typename T> T &CircularBuffer<T>::getFront() noexcept
+template <typename T> const T &CircularBuffer<T>::getFront() const noexcept
 {
     return m_deque.front();
 }

@@ -51,20 +51,17 @@ const PieceType Piece::getPieceType() const
 void Piece::activateKing()
 {
     this->isKing = true;
-    sf::Texture localTxr;
     if (pieceType == PieceType::Red)
     {
-        if (localTxr.loadFromFile(chk::getResourcePath(RED_KING)))
+        if (this->texture.loadFromFile(chk::getResourcePath(RED_KING)))
         {
-            this->texture = std::move_if_noexcept(localTxr);
             this->myCircle.setTexture(&this->texture);
         }
     }
     else
     {
-        if (localTxr.loadFromFile(chk::getResourcePath(BLACK_KING)))
+        if (this->texture.loadFromFile(chk::getResourcePath(BLACK_KING)))
         {
-            this->texture = std::move_if_noexcept(localTxr);
             this->myCircle.setTexture(&this->texture);
         }
     }
@@ -181,7 +178,7 @@ bool Piece::moveCapture(const sf::Vector2f &destPos)
     const float deltaX = destPos.x - this->getPosition().x;
     const float deltaY = destPos.y - this->getPosition().y;
 
-    if (std::abs(deltaX) != 2 * SIZE_CELL && std::abs(deltaY) != 2 * SIZE_CELL)
+    if (std::abs(deltaX) != 2 * SIZE_CELL || std::abs(deltaY) != 2 * SIZE_CELL)
     {
         return false;
     }

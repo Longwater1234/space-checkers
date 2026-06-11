@@ -35,12 +35,13 @@ class OnlineGameManager final : public chk::GameManager
 
   private:
     mutable chk::PlayerType myTeam{};
-    std::unique_ptr<chk::WsClient> wsClient = nullptr;
     std::atomic_bool isMyTurn = false;
     std::atomic_bool gameReady = false;
+    std::unique_ptr<chk::WsClient> wsClient = nullptr;
     void startMoveListener();
     void startCaptureListener();
     void startDeathListener();
+    chk::payload::TeamColor toTeamColor(chk::PlayerType team);
 };
 
 inline OnlineGameManager::OnlineGameManager(sf::RenderWindow *windowPtr) : GameManager(windowPtr)
@@ -217,7 +218,8 @@ inline void OnlineGameManager::handleEvents(chk::CircularBuffer<short> &buffer)
 }
 
 /**
- * Move the selected piece to clicked cell, then update the gameMap and notify Server
+ * Move the selected piece to clicked cell, then update the gameMap and notify Server.
+ *
  * @param player current player
  * @param opponent opposing player
  * @param destCell target cell
@@ -250,11 +252,7 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
     auto *movePayload = requestBody->mutable_move_payload();
     movePayload->set_source_cell(copySrcCell);
     movePayload->set_piece_id(currentPieceId);
-    movePayload->set_from_team(TeamColor::TEAM_RED);
-    if (this->myTeam == chk::PlayerType::PLAYER_BLACK)
-    {
-        movePayload->set_from_team(TeamColor::TEAM_BLACK);
-    }
+    movePayload->set_from_team(toTeamColor(this->myTeam));
 
     // create destination
     auto *dest = movePayload->mutable_destination();
@@ -315,7 +313,7 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
             gameMap.emplace(targetCell->getIndex(), hunterPieceId);            // fill in hunter new location
             prey->losePiece(target.preyPieceId);                               // the defending player loses 1 piece
             this->sourceCell = std::nullopt;                                   // reset source cell
-            isKingNow = hunter->getOwnPieces().at(hunterPieceId)->getIsKing(); // update changes for hunter piece
+            isKingNow = hunter->getOwnPieces().at(hunterPieceId)->getIsKing(); // update king status after capture
             copyHunterPiece = hunterPieceId;
             copyPreyPieceId = target.preyPieceId;
             copyPreyCell = target.preyCellIdx;
@@ -333,11 +331,7 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
     // build CapturePayload from root
     auto *capturePayload = basePayload->mutable_capture_payload();
     capturePayload->set_hunter_piece_id(copyHunterPiece);
-    capturePayload->set_from_team(TeamColor::TEAM_RED);
-    if (this->myTeam == chk::PlayerType::PLAYER_BLACK)
-    {
-        capturePayload->set_from_team(TeamColor::TEAM_BLACK);
-    }
+    capturePayload->set_from_team(toTeamColor(this->myTeam));
 
     // Prey details (nested message)
     auto *details = capturePayload->mutable_details();
@@ -379,6 +373,7 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
 
 /**
  * When current player taps any playable cell.
+ *
  * @param hunter currentPlayer
  * @param prey the opposing player
  * @param buffer Temporary store for clicked Piece
@@ -528,6 +523,14 @@ inline void OnlineGameManager::startCaptureListener()
             this->updateMessage("It's now your turn!");
         }
     });
+}
+
+/**
+ * Convert PlayerType to TeamColor (for protobuf)
+ */
+inline TeamColor OnlineGameManager::toTeamColor(chk::PlayerType team)
+{
+    return team == chk::PlayerType::PLAYER_BLACK ? TeamColor::TEAM_BLACK : TeamColor::TEAM_RED;
 }
 
 /**
