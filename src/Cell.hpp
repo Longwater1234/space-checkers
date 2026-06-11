@@ -29,7 +29,7 @@ class Cell final : public sf::Drawable
     void resetColor();
 
   private:
-    const int index = -1; // Darker cells are in range [1~32]. Lighter cells are all -1
+    const int index; // Darker cells are in range [1~32]. Lighter cells are all -1
     sf::RectangleShape rec;
     inline static const sf::Color DARK_BROWN{82, 55, 27};
     inline static const sf::Color BABY_BLUE{98, 174, 239};
