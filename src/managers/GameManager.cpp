@@ -383,9 +383,9 @@ void chk::GameManager::showForcedMoves(const chk::PlayerPtr &player, const chk::
     {
         // FORCE PLAYER TO CAPTURE these targets, don't proceed until done!
         std::unordered_set<int32_t> pieceSet;
-        for (const auto &[hunter_piece, captureTarget] : moves)
+        for (const auto &[hunterId, captureTarget] : moves)
         {
-            pieceSet.emplace(hunter_piece);
+            pieceSet.emplace(hunterId);
         }
         player->showMyHunters(pieceSet);
         this->updateMessage(player->getName() + " must capture piece!");
