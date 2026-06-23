@@ -94,6 +94,9 @@ inline void LocalGameManager::createAllPieces()
 inline void LocalGameManager::drawBoard()
 {
     auto mousePos = sf::Mouse::getPosition(*window);
+    static sf::Clock deltaClock;
+    const float deltaTime = deltaClock.restart().asSeconds();
+
     // DRAW CHECKERBOARD
     for (const auto &cell : this->getBlockList())
     {
@@ -102,6 +105,7 @@ inline void LocalGameManager::drawBoard()
     // DRAW RED PIECES
     for (const auto &[id, red_piece] : this->playerRed->getOwnPieces())
     {
+        red_piece->updateAnimation(deltaTime);
         if (this->isPlayerRedTurn() && red_piece->containsPoint(mousePos))
         {
             red_piece->addOutline();
@@ -115,6 +119,7 @@ inline void LocalGameManager::drawBoard()
     // DRAW BLACK PIECES
     for (const auto &[id, black_piece] : this->playerBlack->getOwnPieces())
     {
+        black_piece->updateAnimation(deltaTime);
         if (!this->isPlayerRedTurn() && black_piece->containsPoint(mousePos))
         {
             black_piece->addOutline();

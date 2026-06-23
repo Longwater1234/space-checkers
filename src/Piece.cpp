@@ -221,8 +221,11 @@ bool Piece::moveCapture(const sf::Vector2f &destPos)
         return false;
     }
 
-    this->move(sf::Vector2f{deltaX, deltaY}); // means "move by (x,y) amount"
-    this->myCircle.setPosition(this->getPosition());
+    //  Trigger Smooth Animation
+    this->startPosition = this->getPosition();
+    this->targetPosition = destPos;
+    this->animationProgress = 0.0f;
+
     if ((this->pieceType == PieceType::Red && destPos.y == 0) ||
         (this->pieceType == PieceType::Black && destPos.y == 7 * chk::SIZE_CELL))
     {

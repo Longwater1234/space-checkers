@@ -55,7 +55,7 @@ class Piece final : public sf::Drawable, public sf::Transformable
     sf::Vector2f startPosition;
     sf::Vector2f targetPosition;
     float animationProgress = 1.0f; // 1.0 means arrived destination.
-    float animationSpeed = 5.0f;    // Controls how fast the piece slides (higher = faster)
+    float animationSpeed = 4.0f;    // Controls how fast the piece slides (higher = faster)
     void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
 };
 

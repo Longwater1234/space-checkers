@@ -138,6 +138,9 @@ inline void chk::OnlineGameManager::createAllPieces()
 inline void OnlineGameManager::drawBoard()
 {
     const auto mousePos = sf::Mouse::getPosition(*window);
+    static sf::Clock deltaClock;
+    const float deltaTime = deltaClock.restart().asSeconds();
+
     // DRAW CHECKERBOARD
     for (const auto &cell : this->getBlockList())
     {
@@ -151,6 +154,7 @@ inline void OnlineGameManager::drawBoard()
     // DRAW RED PIECES
     for (const auto &[id, red_piece] : this->playerRed->getOwnPieces())
     {
+        red_piece->updateAnimation(deltaTime);
         if (this->myTeam == chk::PlayerType::PLAYER_RED && this->isMyTurn && red_piece->containsPoint(mousePos))
         {
             red_piece->addOutline();
@@ -164,6 +168,7 @@ inline void OnlineGameManager::drawBoard()
     // DRAW BLACK PIECES
     for (const auto &[id, black_piece] : this->playerBlack->getOwnPieces())
     {
+        black_piece->updateAnimation(deltaTime);
         if (this->myTeam == chk::PlayerType::PLAYER_BLACK && this->isMyTurn && black_piece->containsPoint(mousePos))
         {
             black_piece->addOutline();
