@@ -63,7 +63,7 @@ int main()
     manager->createAllPieces();
 
     // Storing currently clicked Piece. (NOTE: using curly braces for constructor)
-    chk::CircularBuffer<short> circularBuffer{1};
+    chk::CircularBuffer<int32_t> circularBuffer{1};
 
     // THE STATUS TEXT
     sf::Text txtPanel{"Space Checkers", font, chk::FONT_SIZE};

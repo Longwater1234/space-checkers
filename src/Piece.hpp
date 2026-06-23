@@ -6,6 +6,7 @@
 #include <SFML/Graphics/RenderStates.hpp>
 #include <SFML/Graphics/RenderTarget.hpp>
 #include <SFML/Graphics/Texture.hpp>
+#include <cstdint>
 #include <iostream>
 
 namespace chk
@@ -27,7 +28,7 @@ class Piece final : public sf::Drawable, public sf::Transformable
 {
 
   public:
-    explicit Piece(const sf::CircleShape &circle, const PieceType pType, short id);
+    explicit Piece(const sf::CircleShape &circle, const PieceType pType, int32_t id);
     Piece() = delete;
     Piece(const Piece &) = delete;
     Piece &operator=(const Piece &) = delete;
@@ -40,15 +41,21 @@ class Piece final : public sf::Drawable, public sf::Transformable
     void addOutline();
     void markImportant();
     void removeOutline();
-    short getId() const;
+    int32_t getId() const;
+    void updateAnimation(float deltaTime);
     bool operator==(const Piece &other) const;
 
   private:
     sf::Texture texture;
-    const short pid; // random positive ID assigned at Launch
+    const int32_t pid; // random positive ID assigned at Launch
     const PieceType pieceType;
     sf::CircleShape myCircle;
     bool isKing = false;
+
+    sf::Vector2f startPosition;
+    sf::Vector2f targetPosition;
+    float animationProgress = 1.0f; // 1.0 means arrived destination.
+    float animationSpeed = 4.0f;    // Controls how fast the piece slides (higher = faster)
     void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
 };
 

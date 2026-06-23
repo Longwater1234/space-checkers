@@ -28,7 +28,7 @@ void Player::receivePiece(chk::PiecePtr &piecePtr)
  * When a player's piece is captured, remove it from basket
  * @param targetId  the captured piece Id
  */
-void Player::losePiece(const short targetId)
+void Player::losePiece(const int32_t targetId)
 {
     this->basket.erase(targetId);
 }
@@ -37,7 +37,7 @@ void Player::losePiece(const short targetId)
  * Highlight all my hunter pieces which must capture the opponent
  * @param hunterPieces set of my piece IDs
  */
-void Player::showMyHunters(const std::unordered_set<short> &hunterPieces) const
+void Player::showMyHunters(const std::unordered_set<int32_t> &hunterPieces) const
 {
     if (hunterPieces.empty())
     {
@@ -84,7 +84,7 @@ const std::string &Player::getName() const
  * Get all pieces this player owns
  * @return list of pieces
  */
-const std::unordered_map<short, chk::PiecePtr> &Player::getOwnPieces() const
+const std::unordered_map<int32_t, chk::PiecePtr> &Player::getOwnPieces() const
 {
     return this->basket;
 }
@@ -94,7 +94,7 @@ const std::unordered_map<short, chk::PiecePtr> &Player::getOwnPieces() const
  * @param pieceId the pieceId
  * @return TRUE or FALSE
  */
-bool Player::hasThisPiece(const short pieceId) const
+bool Player::hasThisPiece(const int32_t pieceId) const
 {
     return this->basket.find(pieceId) != this->basket.end();
 }
@@ -114,7 +114,7 @@ size_t Player::getPieceCount() const
  * @param destPos destination cell position
  * @return TRUE if successful, else FALSE
  */
-bool Player::movePiece(const short pieceId, const sf::Vector2f &destPos)
+bool Player::movePiece(const int32_t pieceId, const sf::Vector2f &destPos)
 {
     return this->basket.at(pieceId)->moveSimple(destPos);
 }
@@ -125,7 +125,7 @@ bool Player::movePiece(const short pieceId, const sf::Vector2f &destPos)
  * \param destPos destination cell
  * \return TRUE if successful, else FALSE
  */
-bool Player::captureEnemyWith(const short pieceId, const sf::Vector2f &destPos)
+bool Player::captureEnemyWith(const int32_t pieceId, const sf::Vector2f &destPos)
 {
     return this->basket.at(pieceId)->moveCapture(destPos);
 }

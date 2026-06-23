@@ -41,12 +41,12 @@ class GameManager
   public:
     virtual ~GameManager() = default;
     virtual void createAllPieces() = 0;
-    virtual void handleEvents(chk::CircularBuffer<short> &buffer) = 0;
+    virtual void handleEvents(chk::CircularBuffer<int32_t> &buffer) = 0;
     virtual void drawBoard() = 0;
     void drawCheckerboard(const sf::Font &font);
     void updateMessage(std::string_view msg);
     void matchCellsToPieces(const std::vector<chk::PiecePtr> &pieceList);
-    [[nodiscard]] const std::unordered_map<short, chk::CaptureTarget> &getForcedMoves() const;
+    [[nodiscard]] const std::unordered_map<int32_t, chk::CaptureTarget> &getForcedMoves() const;
     [[nodiscard]] const std::string &getCurrentMsg() const;
 
   private:
@@ -71,7 +71,7 @@ class GameManager
   protected:
     explicit GameManager(sf::RenderWindow *windowPtr);
     // gameBoard: map of cell_index -> piece_id
-    std::unordered_map<int, short> gameMap;
+    std::unordered_map<int, int32_t> gameMap;
     // main window
     sf::RenderWindow *window = nullptr;
     // source cell Index of selected piece
@@ -83,10 +83,10 @@ class GameManager
     // second player (p2)
     chk::PlayerPtr playerBlack = nullptr;
     // collection of Player's next targets (Map<HunterPieceID, CaptureTarget>)
-    std::unordered_map<short, chk::CaptureTarget> forcedMoves{};
+    std::unordered_map<int32_t, chk::CaptureTarget> forcedMoves{};
 
     [[nodiscard]] bool isPlayerRedTurn() const;
-    [[nodiscard]] short getPieceFromCell(const int cell_idx) const;
+    [[nodiscard]] int32_t getPieceFromCell(const int cell_idx) const;
     [[nodiscard]] const std::vector<chk::Block> &getBlockList() const;
     [[nodiscard]] bool isHunterActive() const;
     [[nodiscard]] bool isGameOver() const;
@@ -94,11 +94,11 @@ class GameManager
     void doCleanup();
     void identifyTargets(const chk::PlayerPtr &hunter, const chk::Block &singleCell = nullptr);
     virtual void handleMovePiece(const chk::PlayerPtr &player, const chk::PlayerPtr &opponent, const Block &destCell,
-                                 const short currentPieceId);
+                                 const int32_t currentPieceId);
     virtual void handleCapturePiece(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,
                                     const chk::Block &targetCell);
     virtual void handleCellTap(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,
-                               chk::CircularBuffer<short> &buffer, const chk::Block &cell);
+                               chk::CircularBuffer<int32_t> &buffer, const chk::Block &cell);
     void updateMatchStatus(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2);
     void showForcedMoves(const chk::PlayerPtr &player, const chk::Block &cell);
 };

@@ -3,7 +3,7 @@
 namespace chk
 {
 
-Piece::Piece(const sf::CircleShape &circle, const PieceType pType, const short id) : pid(id), pieceType(pType)
+Piece::Piece(const sf::CircleShape &circle, const PieceType pType, const int32_t id) : pid(id), pieceType(pType)
 {
     this->myCircle = circle;
     this->setPosition(circle.getPosition());
@@ -120,9 +120,36 @@ void Piece::removeOutline()
 /**
  * Get unique ID of this piece
  */
-short Piece::getId() const
+int32_t Piece::getId() const
 {
     return this->pid;
+}
+
+/**
+ * Update the animation for this piece
+ * @param deltaTime Time elapsed since the last frame
+ */
+void Piece::updateAnimation(float deltaTime)
+{
+    // If the animation is finished, don't execute extra math
+    if (animationProgress >= 1.0f)
+        return;
+
+    // Advance the progress percentage based on frame delta time
+    animationProgress += animationSpeed * deltaTime;
+
+    // Clamp it to 1.0f maximum so it doesn't overshoot the landing tile
+    if (animationProgress > 1.0f)
+    {
+        animationProgress = 1.0f;
+    }
+
+    // Standard LERP Vector Formula
+    sf::Vector2f currentPos = startPosition + animationProgress * (targetPosition - startPosition);
+
+    // Update SFML visual components smoothly frame by frame
+    this->setPosition(currentPos);
+    this->myCircle.setPosition(currentPos);
 }
 
 /**
@@ -158,8 +185,11 @@ bool Piece::moveSimple(const sf::Vector2f &destPos)
         return false;
     }
 
-    this->move(sf::Vector2f{deltaX, deltaY});
-    this->myCircle.setPosition(this->getPosition());
+    //  Trigger Smooth Animation
+    this->startPosition = this->getPosition(); // Where we are right now
+    this->targetPosition = destPos;            // Where the server says we must go
+    this->animationProgress = 0.0f;            // Start the clock at 0%!
+
     if ((this->pieceType == PieceType::Red && destPos.y == 0) ||
         (this->pieceType == PieceType::Black && destPos.y == 7 * chk::SIZE_CELL))
     {
@@ -191,8 +221,11 @@ bool Piece::moveCapture(const sf::Vector2f &destPos)
         return false;
     }
 
-    this->move(sf::Vector2f{deltaX, deltaY}); // means "move by (x,y) amount"
-    this->myCircle.setPosition(this->getPosition());
+    //  Trigger Smooth Animation
+    this->startPosition = this->getPosition();
+    this->targetPosition = destPos;
+    this->animationProgress = 0.0f;
+
     if ((this->pieceType == PieceType::Red && destPos.y == 0) ||
         (this->pieceType == PieceType::Black && destPos.y == 7 * chk::SIZE_CELL))
     {

@@ -21,16 +21,16 @@ class OnlineGameManager final : public chk::GameManager
 
     // Inherited via GameManager
     void createAllPieces() override;
-    void handleEvents(chk::CircularBuffer<short> &circularBuffer) override;
+    void handleEvents(chk::CircularBuffer<int32_t> &circularBuffer) override;
     void drawBoard() override;
 
   protected:
     // Inherited via GameManager
     void handleMovePiece(const chk::PlayerPtr &player, const chk::PlayerPtr &opponent, const Block &destCell,
-                         const short currentPieceId) override;
+                         const int32_t currentPieceId) override;
     void handleCapturePiece(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,
                             const chk::Block &targetCell) override;
-    void handleCellTap(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey, chk::CircularBuffer<short> &buffer,
+    void handleCellTap(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey, chk::CircularBuffer<int32_t> &buffer,
                        const chk::Block &cell) override;
 
   private:
@@ -74,64 +74,62 @@ inline OnlineGameManager::OnlineGameManager(sf::RenderWindow *windowPtr) : GameM
 inline void chk::OnlineGameManager::createAllPieces()
 {
     // wait for server to send Piece Ids
-    this->wsClient->setOnReadyStartGameCallback([this](const chk::payload::StartPayload &payload,
-                                                       std::string_view notice) {
-        this->gameReady = true;
-        this->updateMessage(notice);
+    this->wsClient->setOnReadyStartGameCallback(
+        [this](const chk::payload::StartPayload &payload, std::string_view notice) {
+            this->gameReady = true;
+            this->updateMessage(notice);
 
-        // Reserve capacity for all pieces on board
-        std::vector<chk::PiecePtr> pieceList;
-        pieceList.reserve(chk::NUM_PIECES);
+            // Reserve capacity for all pieces on board
+            std::vector<chk::PiecePtr> pieceList;
+            pieceList.reserve(chk::NUM_PIECES);
 
-        auto redItr = payload.pieces_red().begin();     // red iterator
-        auto blackItr = payload.pieces_black().begin(); // black iterator
-        // place them on board
-        for (uint16_t row = 0; row < chk::NUM_ROWS; row++)
-        {
-            for (uint16_t col = 0; col < chk::NUM_COLS; col++)
+            auto redItr = payload.pieces_red().begin();     // red iterator
+            auto blackItr = payload.pieces_black().begin(); // black iterator
+            // place them on board
+            for (uint16_t row = 0; row < chk::NUM_ROWS; row++)
             {
-                if ((row + col) % 2 != 0)
+                for (uint16_t col = 0; col < chk::NUM_COLS; col++)
                 {
-                    sf::CircleShape circle{0.5 * chk::SIZE_CELL};
-                    const float x = static_cast<float>(col % NUM_COLS) * chk::SIZE_CELL;
-                    circle.setPosition(sf::Vector2f{x, row * chk::SIZE_CELL});
-                    if (row < 3 && blackItr != payload.pieces_black().end())
+                    if ((row + col) % 2 != 0)
                     {
-                        // Half Top cells, put BLACK piece
-                        auto pb =
-                            std::make_unique<chk::Piece>(circle, chk::PieceType::Black, static_cast<short>(*blackItr));
-                        pieceList.emplace_back(std::move_if_noexcept(pb));
-                        ++blackItr;
-                    }
-                    else if (row > 4 && redItr != payload.pieces_red().end())
-                    {
-                        // Half Bottom cells, put RED piece
-                        auto pr =
-                            std::make_unique<chk::Piece>(circle, chk::PieceType::Red, static_cast<short>(*redItr));
-                        pieceList.emplace_back(std::move_if_noexcept(pr));
-                        ++redItr;
+                        sf::CircleShape circle{0.5 * chk::SIZE_CELL};
+                        const float x = static_cast<float>(col % NUM_COLS) * chk::SIZE_CELL;
+                        circle.setPosition(sf::Vector2f{x, row * chk::SIZE_CELL});
+                        if (row < 3 && blackItr != payload.pieces_black().end())
+                        {
+                            // Half Top cells, put BLACK piece
+                            auto pb = std::make_unique<chk::Piece>(circle, chk::PieceType::Black, (*blackItr));
+                            pieceList.emplace_back(std::move_if_noexcept(pb));
+                            ++blackItr;
+                        }
+                        else if (row > 4 && redItr != payload.pieces_red().end())
+                        {
+                            // Half Bottom cells, put RED piece
+                            auto pr = std::make_unique<chk::Piece>(circle, chk::PieceType::Red, (*redItr));
+                            pieceList.emplace_back(std::move_if_noexcept(pr));
+                            ++redItr;
+                        }
                     }
                 }
             }
-        }
 
-        // GIVE EACH PLAYER their own piece
-        GameManager::matchCellsToPieces(pieceList);
-        for (auto &pp : pieceList)
-        {
-            if (pp->getPieceType() == chk::PieceType::Red)
+            // GIVE EACH PLAYER their own piece
+            GameManager::matchCellsToPieces(pieceList);
+            for (auto &pp : pieceList)
             {
-                this->playerRed->receivePiece(pp);
+                if (pp->getPieceType() == chk::PieceType::Red)
+                {
+                    this->playerRed->receivePiece(pp);
+                }
+                else
+                {
+                    this->playerBlack->receivePiece(pp);
+                }
             }
-            else
-            {
-                this->playerBlack->receivePiece(pp);
-            }
-        }
-        pieceList.clear(); // SAFE! no longer needed.
-        this->startMoveListener();
-        this->startCaptureListener();
-    });
+            pieceList.clear(); // SAFE! no longer needed.
+            this->startMoveListener();
+            this->startCaptureListener();
+        });
 }
 
 /**
@@ -140,6 +138,9 @@ inline void chk::OnlineGameManager::createAllPieces()
 inline void OnlineGameManager::drawBoard()
 {
     const auto mousePos = sf::Mouse::getPosition(*window);
+    static sf::Clock deltaClock;
+    const float deltaTime = deltaClock.restart().asSeconds();
+
     // DRAW CHECKERBOARD
     for (const auto &cell : this->getBlockList())
     {
@@ -153,6 +154,7 @@ inline void OnlineGameManager::drawBoard()
     // DRAW RED PIECES
     for (const auto &[id, red_piece] : this->playerRed->getOwnPieces())
     {
+        red_piece->updateAnimation(deltaTime);
         if (this->myTeam == chk::PlayerType::PLAYER_RED && this->isMyTurn && red_piece->containsPoint(mousePos))
         {
             red_piece->addOutline();
@@ -166,6 +168,7 @@ inline void OnlineGameManager::drawBoard()
     // DRAW BLACK PIECES
     for (const auto &[id, black_piece] : this->playerBlack->getOwnPieces())
     {
+        black_piece->updateAnimation(deltaTime);
         if (this->myTeam == chk::PlayerType::PLAYER_BLACK && this->isMyTurn && black_piece->containsPoint(mousePos))
         {
             black_piece->addOutline();
@@ -182,7 +185,7 @@ inline void OnlineGameManager::drawBoard()
  * This will be handling all UI events.
  * @param circularBuffer stores the currently selected piece
  */
-inline void OnlineGameManager::handleEvents(chk::CircularBuffer<short> &buffer)
+inline void OnlineGameManager::handleEvents(chk::CircularBuffer<int32_t> &buffer)
 {
     for (auto event = sf::Event{}; window->pollEvent(event);)
     {
@@ -226,7 +229,7 @@ inline void OnlineGameManager::handleEvents(chk::CircularBuffer<short> &buffer)
  * @param currentPieceId the selected PieceId
  */
 inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, const chk::PlayerPtr &opponent,
-                                               const Block &destCell, const short currentPieceId)
+                                               const Block &destCell, const int32_t currentPieceId)
 {
     // VERIFY if move is successful
     if (!player->movePiece(currentPieceId, destCell->getPos()))
@@ -380,7 +383,7 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
  * @param cell Tapped cell
  */
 inline void OnlineGameManager::handleCellTap(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,
-                                             chk::CircularBuffer<short> &buffer, const chk::Block &cell)
+                                             chk::CircularBuffer<int32_t> &buffer, const chk::Block &cell)
 {
     if (!this->gameReady || !this->isMyTurn)
     {
@@ -394,7 +397,7 @@ inline void OnlineGameManager::handleCellTap(const chk::PlayerPtr &hunter, const
         }
     });
     // CHECK IF this cell has a Piece
-    const short pieceId = this->getPieceFromCell(cell->getIndex());
+    const int32_t pieceId = this->getPieceFromCell(cell->getIndex());
     if (pieceId != -1)
     {
         // YES, it has one! VERIFY IF THERE IS ANY PENDING "forced captures".
@@ -419,7 +422,7 @@ inline void OnlineGameManager::handleCellTap(const chk::PlayerPtr &hunter, const
         // Cell is Empty! Let's evaluate if this is SIMPLE move or ATTACK move
         if (!buffer.isEmpty())
         {
-            const short movablePieceId = buffer.getFront();
+            const int32_t movablePieceId = buffer.getFront();
             if (!hunter->hasThisPiece(movablePieceId))
             {
                 return;
@@ -453,7 +456,7 @@ inline void OnlineGameManager::startMoveListener()
         const chk::PlayerPtr &myTeam = (enemy->getPlayerType() == PlayerType::PLAYER_RED) ? this->playerBlack : this->playerRed;
         // clang-format on
         const auto targetPosition = sf::Vector2f{payload.destination().x(), payload.destination().y()};
-        const short movingPieceId = static_cast<short>(payload.piece_id());
+        const int32_t movingPieceId = payload.piece_id();
         if (!enemy->movePiece(movingPieceId, targetPosition))
         {
             return;
@@ -487,7 +490,7 @@ inline void OnlineGameManager::startCaptureListener()
         const chk::PlayerPtr &myTeam = opponent->getPlayerType() == PlayerType::PLAYER_RED ? this->playerBlack : this->playerRed;
         // clang-format on
         const auto destPos = sf::Vector2f{payload.destination().x(), payload.destination().y()};
-        const auto hunterPieceId = static_cast<short>(payload.hunter_piece_id());
+        const auto hunterPieceId = payload.hunter_piece_id();
 
         isKingBefore = opponent->getOwnPieces().at(hunterPieceId)->getIsKing();
         if (!opponent->captureEnemyWith(hunterPieceId, destPos))
@@ -501,7 +504,7 @@ inline void OnlineGameManager::startCaptureListener()
         gameMap.erase(payload.details().prey_cell_idx());                    // set my old location empty!
         gameMap.emplace(payload.destination().cell_index(), hunterPieceId);  // fill in hunter new location
         const int targetId = payload.details().prey_piece_id();              // get the target dead piece
-        myTeam->losePiece(static_cast<short>(targetId));                     // I will lose one piece
+        myTeam->losePiece(targetId);                                         // I will lose one piece
 
         const int destCellIdx = payload.destination().cell_index();
         const auto it = std::find_if(blockList.begin(), blockList.end(), [&destCellIdx](const chk::Block &cell) {
