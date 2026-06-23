@@ -21,7 +21,7 @@ GameManager::GameManager(sf::RenderWindow *windowPtr) : window(windowPtr)
  * Get hashmap of hunter pieceID's to the assigned CaptureTarget
  * @return )pair of forced captures
  */
-[[nodiscard]] const std::unordered_map<short, chk::CaptureTarget> &GameManager::getForcedMoves() const
+[[nodiscard]] const std::unordered_map<int32_t, chk::CaptureTarget> &GameManager::getForcedMoves() const
 {
     return this->forcedMoves;
 }
@@ -103,7 +103,7 @@ void GameManager::drawCheckerboard(const sf::Font &font)
  * @param currentPieceId the selected PieceId
  */
 void GameManager::handleMovePiece(const chk::PlayerPtr &player, const chk::PlayerPtr &opponent, const Block &destCell,
-                                  const short currentPieceId)
+                                  const int32_t currentPieceId)
 {
     if (this->gameOver)
     {
@@ -237,7 +237,7 @@ bool GameManager::isHunterActive() const
     {
         return false;
     }
-    const short pieceId = this->getPieceFromCell(this->sourceCell.value()); // hunter pieceId
+    const int32_t pieceId = this->getPieceFromCell(this->sourceCell.value()); // hunter pieceId
     return pieceId != -1 && (forcedMoves.find(pieceId) != forcedMoves.end());
 }
 
@@ -247,7 +247,7 @@ bool GameManager::isHunterActive() const
  * @param cell_idx the clicked cell
  * @return positive number or -1 if not found
  */
-short GameManager::getPieceFromCell(const int cell_idx) const
+int32_t GameManager::getPieceFromCell(const int cell_idx) const
 {
     if (this->gameMap.find(cell_idx) != gameMap.end())
     {
@@ -309,7 +309,7 @@ void GameManager::updateMatchStatus(const chk::PlayerPtr &p1, const chk::PlayerP
  * @param cell Tapped cell
  */
 void chk::GameManager::handleCellTap(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,
-                                     chk::CircularBuffer<short> &buffer, const chk::Block &cell)
+                                     chk::CircularBuffer<int32_t> &buffer, const chk::Block &cell)
 {
     if (this->isGameOver())
     {
@@ -323,7 +323,7 @@ void chk::GameManager::handleCellTap(const chk::PlayerPtr &hunter, const chk::Pl
         }
     });
     // CHECK IF this cell has a Piece
-    const short pieceId = this->getPieceFromCell(cell->getIndex());
+    const int32_t pieceId = this->getPieceFromCell(cell->getIndex());
     if (pieceId != -1)
     {
         // YES, it has one! VERIFY IF THERE IS ANY PENDING "forced captures".
@@ -347,7 +347,7 @@ void chk::GameManager::handleCellTap(const chk::PlayerPtr &hunter, const chk::Pl
         // Playable Cell is Empty! Let's judge if this is SIMPLE move or ATTACK move
         if (!buffer.isEmpty())
         {
-            const short movablePieceId = buffer.getFront();
+            const int32_t movablePieceId = buffer.getFront();
             if (!hunter->hasThisPiece(movablePieceId))
             {
                 return;
@@ -378,11 +378,11 @@ void chk::GameManager::handleCellTap(const chk::PlayerPtr &hunter, const chk::Pl
 void chk::GameManager::showForcedMoves(const chk::PlayerPtr &player, const chk::Block &cell)
 {
     const auto &moves = this->getForcedMoves();
-    const short pieceId = this->getPieceFromCell(cell->getIndex());
+    const int32_t pieceId = this->getPieceFromCell(cell->getIndex());
     if (moves.find(pieceId) == moves.end())
     {
         // FORCE PLAYER TO CAPTURE these targets, don't proceed until done!
-        std::unordered_set<short> pieceSet;
+        std::unordered_set<int32_t> pieceSet;
         for (const auto &[hunter_piece, captureTarget] : moves)
         {
             pieceSet.emplace(hunter_piece);
@@ -446,7 +446,7 @@ void GameManager::identifyTargets(const PlayerPtr &hunter, const chk::Block &sin
     if (singleCell != nullptr)
     {
         // JUST CHECK AROUND this SINGLE CELL
-        const short pieceId = this->getPieceFromCell(singleCell->getIndex());
+        const int32_t pieceId = this->getPieceFromCell(singleCell->getIndex());
         if (gameMap.find(singleCell->getIndex()) == gameMap.end() || !hunter->hasThisPiece(pieceId))
         {
             // this CELL is not usable, OR piece not owned to hunter
@@ -467,7 +467,7 @@ void GameManager::identifyTargets(const PlayerPtr &hunter, const chk::Block &sin
     // else, LOOP ENTIRE BOARD
     for (const auto &cell_ptr : this->blockList)
     {
-        const short pieceId = this->getPieceFromCell(cell_ptr->getIndex());
+        const int32_t pieceId = this->getPieceFromCell(cell_ptr->getIndex());
         if (gameMap.find(cell_ptr->getIndex()) == gameMap.end() || !hunter->hasThisPiece(pieceId))
         {
             // same reason as previous code-block
@@ -504,8 +504,8 @@ void GameManager::collectFrontLHS(const chk::PlayerPtr &hunter, const chk::Block
     }
     bool enemyOpenBehind = false; // does enemy piece have EMPTY cell behind it?
     bool hasEnemyAhead = false;
-    short deltaForward = cell_ptr->getIsEvenRow() ? 4 : 5;
-    short deltaBehindEnemy = cell_ptr->getIsEvenRow() ? 5 : 4;
+    int32_t deltaForward = cell_ptr->getIsEvenRow() ? 4 : 5;
+    int32_t deltaBehindEnemy = cell_ptr->getIsEvenRow() ? 5 : 4;
     int direction = +1; // up +1, down -1
 
     // if player piece is Black (PLAYER 2)
@@ -521,7 +521,7 @@ void GameManager::collectFrontLHS(const chk::PlayerPtr &hunter, const chk::Block
         return;
     }
 
-    const short pieceId_NW = this->getPieceFromCell(cellAheadIdx); // North West (of hunter)
+    const int32_t pieceId_NW = this->getPieceFromCell(cellAheadIdx); // North West (of hunter)
     hasEnemyAhead = pieceId_NW != -1 && !hunter->hasThisPiece(pieceId_NW);
 
     const int cellBehindEnemy = cell_ptr->getIndex() + (deltaBehindEnemy * direction) + (deltaForward * direction);
@@ -530,7 +530,7 @@ void GameManager::collectFrontLHS(const chk::PlayerPtr &hunter, const chk::Block
         return;
     }
 
-    const short pieceId_SE = this->getPieceFromCell(cellBehindEnemy); // South East (of enemy)
+    const int32_t pieceId_SE = this->getPieceFromCell(cellBehindEnemy); // South East (of enemy)
     enemyOpenBehind = pieceId_SE == -1;
 
     if (hasEnemyAhead && enemyOpenBehind)
@@ -564,8 +564,8 @@ void GameManager::collectFrontRHS(const chk::PlayerPtr &hunter, const chk::Block
     }
     bool enemyOpenBehind = false;
     bool hasEnemyAhead = false;
-    short deltaForward = cell_ptr->getIsEvenRow() ? 3 : 4;
-    short deltaBehindEnemy = cell_ptr->getIsEvenRow() ? 4 : 3;
+    int32_t deltaForward = cell_ptr->getIsEvenRow() ? 3 : 4;
+    int32_t deltaBehindEnemy = cell_ptr->getIsEvenRow() ? 4 : 3;
     int direction = +1; // up +1, down -1
 
     // if piece is Black (PLAYER 2)
@@ -580,7 +580,7 @@ void GameManager::collectFrontRHS(const chk::PlayerPtr &hunter, const chk::Block
     {
         return;
     }
-    const short pieceId_NE = this->getPieceFromCell(cellAheadIdx); // North East of hunter
+    const int32_t pieceId_NE = this->getPieceFromCell(cellAheadIdx); // North East of hunter
     hasEnemyAhead = pieceId_NE != -1 && !hunter->hasThisPiece(pieceId_NE);
 
     const int cellBehindEnemy = cell_ptr->getIndex() + (deltaBehindEnemy * direction) + (deltaForward * direction);
@@ -588,7 +588,7 @@ void GameManager::collectFrontRHS(const chk::PlayerPtr &hunter, const chk::Block
     {
         return;
     }
-    const short pieceId_SW = this->getPieceFromCell(cellBehindEnemy); // South West (of enemy)
+    const int32_t pieceId_SW = this->getPieceFromCell(cellBehindEnemy); // South West (of enemy)
     enemyOpenBehind = pieceId_SW == -1;
 
     if (hasEnemyAhead && enemyOpenBehind)
@@ -621,8 +621,8 @@ void GameManager::collectBehindRHS(const PlayerPtr &hunter, const chk::Block &ce
 
     bool enemyOpenBehind = false;
     bool hasEnemyAhead = false;
-    short deltaForward = cell_ptr->getIsEvenRow() ? 5 : 4;
-    short deltaBehindEnemy = cell_ptr->getIsEvenRow() ? 4 : 5;
+    int32_t deltaForward = cell_ptr->getIsEvenRow() ? 5 : 4;
+    int32_t deltaBehindEnemy = cell_ptr->getIsEvenRow() ? 4 : 5;
     int mSign = +1; // direction. up +1, down -1
 
     // if piece is Black (PLAYER 2)
@@ -638,7 +638,7 @@ void GameManager::collectBehindRHS(const PlayerPtr &hunter, const chk::Block &ce
         return;
     }
 
-    const short pieceId_NW = this->getPieceFromCell(cellAheadIdx); // North west (of hunter, reverse dir)
+    const int32_t pieceId_NW = this->getPieceFromCell(cellAheadIdx); // North west (of hunter, reverse dir)
     hasEnemyAhead = pieceId_NW != -1 && !hunter->hasThisPiece(pieceId_NW);
 
     int cellBehindEnemy = cell_ptr->getIndex() - (deltaBehindEnemy * mSign) - (deltaForward * mSign);
@@ -646,7 +646,7 @@ void GameManager::collectBehindRHS(const PlayerPtr &hunter, const chk::Block &ce
     {
         return;
     }
-    const short pieceId_SE = this->getPieceFromCell(cellBehindEnemy); // South East of enemy
+    const int32_t pieceId_SE = this->getPieceFromCell(cellBehindEnemy); // South East of enemy
     enemyOpenBehind = pieceId_SE == -1;
 
     if (hasEnemyAhead && enemyOpenBehind)
@@ -678,8 +678,8 @@ void GameManager::collectBehindLHS(const PlayerPtr &hunter, const chk::Block &ce
     }
     bool enemyOpenBehind = false;
     bool hasEnemyAhead = false;
-    short deltaForward = cell_ptr->getIsEvenRow() ? 4 : 3;
-    short deltaBehindEnemy = cell_ptr->getIsEvenRow() ? 3 : 4;
+    int32_t deltaForward = cell_ptr->getIsEvenRow() ? 4 : 3;
+    int32_t deltaBehindEnemy = cell_ptr->getIsEvenRow() ? 3 : 4;
     int mSign = +1; // direction. up +1, down -1
 
     // if piece is Black (PLAYER 2)
@@ -694,7 +694,7 @@ void GameManager::collectBehindLHS(const PlayerPtr &hunter, const chk::Block &ce
     {
         return;
     }
-    const short pieceId_NE = this->getPieceFromCell(cellAheadIdx); // North east (of hunter, reverse dir)
+    const int32_t pieceId_NE = this->getPieceFromCell(cellAheadIdx); // North east (of hunter, reverse dir)
     hasEnemyAhead = pieceId_NE != -1 && !hunter->hasThisPiece(pieceId_NE);
 
     int cellBehindEnemy = cell_ptr->getIndex() - (deltaBehindEnemy * mSign) - (deltaForward * mSign);
@@ -702,7 +702,7 @@ void GameManager::collectBehindLHS(const PlayerPtr &hunter, const chk::Block &ce
     {
         return;
     }
-    const short pieceId_SW = this->getPieceFromCell(cellBehindEnemy); // south west of enemy
+    const int32_t pieceId_SW = this->getPieceFromCell(cellBehindEnemy); // south west of enemy
     enemyOpenBehind = pieceId_SW == -1;
 
     if (hasEnemyAhead && enemyOpenBehind)
