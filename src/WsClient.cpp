@@ -169,7 +169,7 @@ void WsClient::asyncRefreshPlayersCount()
  */
 void WsClient::parseServerList(const cpr::Response &response)
 {
-    if (response.status_code != 200)
+    if (response.status_code != 200 || response.error)
     {
         std::scoped_lock lg{this->mut};
         this->deathNote = "httpRequest error: " + response.error.message;
