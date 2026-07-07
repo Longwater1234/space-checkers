@@ -150,8 +150,10 @@ void WsClient::asyncRefreshPlayersCount()
 {
     for (size_t i = 0; i < publicServers.size(); ++i)
     {
-        cpr::GetCallback([this, i](cpr::Response r) { this->parsePlayerCountResponse(r, i); },
-                         cpr::Url{publicServers.at(i).address + "/players"}, cpr::Timeout{5000});
+        std::string cleanUrl = cpr::Url{publicServers.at(i).address + "/players"}.str();
+        cleanUrl.replace(0, 3, "https");
+        cpr::GetCallback([this, i](cpr::Response r) { this->parsePlayerCountResponse(r, i); }, cpr::Url{cleanUrl},
+                         cpr::Timeout{5000});
     }
 }
 
@@ -204,9 +206,9 @@ void WsClient::parseServerList(const cpr::Response &response)
  */
 void WsClient::parsePlayerCountResponse(const cpr::Response &response, size_t index)
 {
-    if (response.status_code != 200)
+    if (response.status_code != 200 || response.error)
     {
-        spdlog::error("Failed to fetch player count, HTTP Status {}", response.status_code);
+        spdlog::error("Failed to fetch player count, Reason: {}", response.error.message);
         return;
     }
     std::cout << "index: " << index << " Player count response: " << response.text << std::endl;
