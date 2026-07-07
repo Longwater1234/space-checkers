@@ -150,8 +150,9 @@ void WsClient::asyncRefreshPlayersCount()
 {
     for (size_t i = 0; i < publicServers.size(); ++i)
     {
-        std::string cleanUrl = cpr::Url{publicServers.at(i).address + "/players"}.str();
+        std::string cleanUrl = cpr::Url{publicServers.at(i).address}.str();
         cleanUrl.replace(0, 3, "https");
+        cleanUrl.replace(cleanUrl.find("/game"), 5, "/players");
         cpr::GetCallback([this, i](cpr::Response r) { this->parsePlayerCountResponse(r, i); }, cpr::Url{cleanUrl},
                          cpr::Timeout{5000});
     }
@@ -211,7 +212,6 @@ void WsClient::parsePlayerCountResponse(const cpr::Response &response, size_t in
         spdlog::error("Failed to fetch player count, Reason: {}", response.error.message);
         return;
     }
-    std::cout << "index: " << index << " Player count response: " << response.text << std::endl;
 
     simdjson::dom::parser parser;
     simdjson::dom::element doc;
@@ -219,8 +219,7 @@ void WsClient::parsePlayerCountResponse(const cpr::Response &response, size_t in
     int64_t count{};
     if (parser.parse(response.text).get(doc) == simdjson::SUCCESS && doc["count"].get(count) == simdjson::SUCCESS)
     {
-        std::cout << "index: " << index << " Parsed player count: " << count << std::endl;
-        this->publicServers[index].playerCount = count;
+        this->publicServers.at(index).playerCount = count;
     }
 }
 
