@@ -96,11 +96,15 @@ void WsClient::showPublicServerWindow(bool &showPublic)
         }
         if (ImGui::BeginListBox("Select One"))
         {
+            std::string label;
+            label.reserve(128); // preallocate once
             for (size_t i = 0; i < publicServers.size(); ++i)
             {
                 const bool selected = (i == currentIdx);
-                std::string playerCountStr = std::to_string(publicServers.at(i).playerCount) + " players";
-                if (ImGui::Selectable((publicServers.at(i).name + "\t(" + playerCountStr + ")").c_str(), selected))
+                const auto &server = publicServers.at(i);
+                label.clear();
+                fmt::format_to(std::back_inserter(label), "{}\t(Players: {})", server.name, server.playerCount);
+                if (ImGui::Selectable(label.c_str(), selected))
                 {
                     currentIdx = i;
                 }
