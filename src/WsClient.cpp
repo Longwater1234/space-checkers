@@ -143,18 +143,23 @@ void WsClient::asyncFetchPublicServers()
 }
 
 /**
- * \brief Refresh the player count of each public server (Timeout 5000ms)
+ * \brief Refresh the player count of each public server asynchronously (Timeout 5000ms)
  * \see libcpr official docs: https://docs.libcpr.org/advanced-usage.html
  */
 void WsClient::asyncRefreshPlayersCount()
 {
+    std::string cleanUrl;
     for (size_t i = 0; i < publicServers.size(); ++i)
     {
-        std::string cleanUrl = cpr::Url{publicServers.at(i).address}.str();
+        const std::string &original = publicServers.at(i).address;
+        cleanUrl.clear();
+        cleanUrl.reserve(original.size() + 3);
+        cleanUrl.assign(original);
         cleanUrl.replace(0, 3, "https");
         cleanUrl.replace(cleanUrl.find("/game"), 5, "/players");
-        cpr::GetCallback([this, i](cpr::Response r) { this->parsePlayerCountResponse(r, i); }, cpr::Url{cleanUrl},
-                         cpr::Timeout{5000});
+        // Send async GET request
+        cpr::GetCallback([this, i](cpr::Response r) { this->parsePlayerCountResponse(r, i); },
+                         cpr::Url{std::move(cleanUrl)}, cpr::Timeout{5000});
     }
 }
 
@@ -217,7 +222,8 @@ void WsClient::parsePlayerCountResponse(const cpr::Response &response, size_t in
     simdjson::dom::element doc;
 
     int64_t count{};
-    if (parser.parse(response.text).get(doc) == simdjson::SUCCESS && doc["count"].get(count) == simdjson::SUCCESS)
+    if (parser.parse(response.text).get(doc) == simdjson::SUCCESS /**/
+        && doc.at_key("count").get(count) == simdjson::SUCCESS)
     {
         this->publicServers.at(index).playerCount = count;
     }
