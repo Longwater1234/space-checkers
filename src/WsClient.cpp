@@ -406,10 +406,13 @@ void WsClient::readIncomingPayloads()
             break;
 
         case chk::payload::BasePayload::kExitPayload: {
+            const auto &notice = basePayload.notice();
             this->isDead = true;
-            std::scoped_lock lg{this->mut};
-            this->deathNote = basePayload.notice();
-            spdlog::error(basePayload.notice());
+            {
+                std::scoped_lock lg{this->mut};
+                this->deathNote = notice;
+            }
+            spdlog::error(notice);
             break;
         }
 
