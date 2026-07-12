@@ -96,15 +96,10 @@ void WsClient::showPublicServerWindow(bool &showPublic)
         }
         if (ImGui::BeginListBox("Select One"))
         {
-            std::string label;
-            label.reserve(128); // preallocate once
             for (size_t i = 0; i < publicServers.size(); ++i)
             {
                 const bool selected = (i == currentIdx);
-                const auto &server = publicServers.at(i);
-                label.clear();
-                fmt::format_to(std::back_inserter(label), "{}\t(Players: {})", server.name, server.playerCount);
-                if (ImGui::Selectable(label.c_str(), selected))
+                if (ImGui::Selectable(publicServers.at(i).name.c_str(), selected))
                 {
                     currentIdx = i;
                 }
@@ -147,27 +142,6 @@ void WsClient::asyncFetchPublicServers()
 }
 
 /**
- * \brief Refresh the player count of each public server asynchronously (Timeout 5000ms)
- * \see libcpr official docs: https://docs.libcpr.org/advanced-usage.html
- */
-void WsClient::asyncRefreshPlayersCount()
-{
-    std::string cleanUrl;
-    for (size_t i = 0; i < publicServers.size(); ++i)
-    {
-        const std::string &original = publicServers.at(i).address;
-        cleanUrl.clear();
-        cleanUrl.reserve(original.size() + 3);
-        cleanUrl.assign(original);
-        cleanUrl.replace(0, 3, "https");
-        cleanUrl.replace(cleanUrl.find("/game"), 5, "/players");
-        // Send async GET request
-        cpr::GetCallback([this, i](cpr::Response r) { this->parsePlayerCountResponse(r, i); },
-                         cpr::Url{std::move(cleanUrl)}, cpr::Timeout{5000});
-    }
-}
-
-/**
  * Parse the JSON response of server list then display them
  * @param response From the previous request
  */
@@ -196,8 +170,6 @@ void WsClient::parseServerList(const cpr::Response &response)
             location.address = elem.at_key("address").get_c_str();
             this->publicServers.emplace_back(std::move_if_noexcept(location));
         }
-        // Refresh player count for each server
-        this->asyncRefreshPlayersCount();
     }
     catch (const simdjson::simdjson_error &ex)
     {
@@ -206,30 +178,6 @@ void WsClient::parseServerList(const cpr::Response &response)
 #ifndef NDEBUG
         spdlog::error(ex.what());
 #endif // DEBUG
-    }
-}
-
-/**
- * \brief Parse the JSON response of player count then update the corresponding server.
- * \param response From the previous request
- * \param index the index of the server in the `publicServers` vector
- */
-void WsClient::parsePlayerCountResponse(const cpr::Response &response, size_t index)
-{
-    if (response.status_code != 200 || response.error)
-    {
-        spdlog::error("Failed to fetch player count, Reason: {}", response.error.message);
-        return;
-    }
-
-    simdjson::dom::parser parser;
-    simdjson::dom::element doc;
-
-    int64_t count{};
-    if (parser.parse(response.text).get(doc) == simdjson::SUCCESS /**/
-        && doc.at_key("count").get(count) == simdjson::SUCCESS)
-    {
-        this->publicServers.at(index).playerCount = count;
     }
 }
 
