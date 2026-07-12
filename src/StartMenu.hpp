@@ -50,7 +50,7 @@ class StartMenu final
     sf::RectangleShape onlineBtn;
     sf::Font font;
     sf::Text versionTxt;
-    static inline const sf::Color DARK_BROWN{82, 55, 27};
+    inline static const sf::Color DARK_BROWN{82, 55, 27};
     void handleEvents(chk::UserChoice &result);
 };
 
