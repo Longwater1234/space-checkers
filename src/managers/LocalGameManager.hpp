@@ -20,10 +20,10 @@ class LocalGameManager final : public chk::GameManager
     // Inherited via GameManager
     void createAllPieces() override;
     void drawBoard() override;
-    void handleEvents(chk::CircularBuffer<int32_t> &buffer) override;
+    void handleEvents(chk::CircularBuffer<int> &buffer) override;
 
   private:
-    std::array<int32_t, chk::NUM_PIECES> generateRandomPieceIds();
+    std::array<int, chk::NUM_PIECES> generateRandomPieceIds();
 };
 
 /**
@@ -136,7 +136,7 @@ inline void LocalGameManager::drawBoard()
  * This will be handling all UI and mouse events
  * @param buffer stores the currently selected piece
  */
-inline void LocalGameManager::handleEvents(chk::CircularBuffer<int32_t> &buffer)
+inline void LocalGameManager::handleEvents(chk::CircularBuffer<int> &buffer)
 {
     for (auto event = sf::Event{}; window->pollEvent(event);)
     {
@@ -169,11 +169,11 @@ inline void LocalGameManager::handleEvents(chk::CircularBuffer<int32_t> &buffer)
 }
 
 /**
- * Generates 24 unique random piece IDs from the range [1, int32_t_NAX] for both players.
+ * Generates 24 unique random piece IDs from the range [1, int_NAX] for both players.
  *
- * @return array of 24 unique int32_ts in random order.
+ * @return array of 24 unique ints in random order.
  */
-inline std::array<int32_t, chk::NUM_PIECES> LocalGameManager::generateRandomPieceIds()
+inline std::array<int, chk::NUM_PIECES> LocalGameManager::generateRandomPieceIds()
 {
     static std::mt19937 gen([] {
         std::random_device rd;
@@ -181,15 +181,15 @@ inline std::array<int32_t, chk::NUM_PIECES> LocalGameManager::generateRandomPiec
         return std::mt19937{seed};
     }());
 
-    std::uniform_int_distribution<int32_t> dist(1, std::numeric_limits<int32_t>::max());
+    std::uniform_int_distribution<int> dist(1, std::numeric_limits<int>::max());
 
-    std::unordered_set<int32_t> uniqueIds;
+    std::unordered_set<int> uniqueIds;
     while (uniqueIds.size() < chk::NUM_PIECES)
     {
         uniqueIds.insert(dist(gen));
     }
 
-    std::array<int32_t, chk::NUM_PIECES> pieceIds{};
+    std::array<int, chk::NUM_PIECES> pieceIds{};
     std::copy(uniqueIds.begin(), uniqueIds.end(), pieceIds.begin());
     std::shuffle(pieceIds.begin(), pieceIds.end(), gen);
     return pieceIds;
