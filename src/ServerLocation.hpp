@@ -13,7 +13,6 @@ struct ServerLocation
 {
     std::string name{};
     std::string address{};
-    int64_t playerCount{};
 };
 
 } // namespace chk

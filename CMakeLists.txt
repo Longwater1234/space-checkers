@@ -21,7 +21,7 @@ if(NOT APPLE)
 endif()
 
 # write app version into Header
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/proto_schema/AppVersion.hpp.in
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/protos/AppVersion.hpp.in
                ${CMAKE_CURRENT_SOURCE_DIR}/src/AppVersion.hpp @ONLY)
 
 # ==== UPDATE ME HERE ===========

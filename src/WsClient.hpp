@@ -80,9 +80,7 @@ class WsClient final
     void showWinnerPopup();
     void showPublicServerWindow(bool &showPublic);
     void asyncFetchPublicServers();
-    void asyncRefreshPlayersCount();
     void parseServerList(const cpr::Response &response);
-    void parsePlayerCountResponse(const cpr::Response &response, size_t index);
     void resetAllStates();
 };
 

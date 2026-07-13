@@ -21,16 +21,16 @@ class OnlineGameManager final : public chk::GameManager
 
     // Inherited via GameManager
     void createAllPieces() override;
-    void handleEvents(chk::CircularBuffer<int32_t> &circularBuffer) override;
+    void handleEvents(chk::CircularBuffer<int> &circularBuffer) override;
     void drawBoard() override;
 
   protected:
     // Inherited via GameManager
     void handleMovePiece(const chk::PlayerPtr &player, const chk::PlayerPtr &opponent, const Block &destCell,
-                         const int32_t currentPieceId) override;
+                         const int currentPieceId) override;
     void handleCapturePiece(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,
                             const chk::Block &targetCell) override;
-    void handleCellTap(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey, chk::CircularBuffer<int32_t> &buffer,
+    void handleCellTap(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey, chk::CircularBuffer<int> &buffer,
                        const chk::Block &cell) override;
 
   private:
@@ -185,7 +185,7 @@ inline void OnlineGameManager::drawBoard()
  * This will be handling all UI events.
  * @param circularBuffer stores the currently selected piece
  */
-inline void OnlineGameManager::handleEvents(chk::CircularBuffer<int32_t> &buffer)
+inline void OnlineGameManager::handleEvents(chk::CircularBuffer<int> &buffer)
 {
     for (auto event = sf::Event{}; window->pollEvent(event);)
     {
@@ -229,7 +229,7 @@ inline void OnlineGameManager::handleEvents(chk::CircularBuffer<int32_t> &buffer
  * @param currentPieceId the selected PieceId
  */
 inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, const chk::PlayerPtr &opponent,
-                                               const Block &destCell, const int32_t currentPieceId)
+                                               const Block &destCell, const int currentPieceId)
 {
     // VERIFY if move is successful
     if (!player->movePiece(currentPieceId, destCell->getPos()))
@@ -383,7 +383,7 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
  * @param cell Tapped cell
  */
 inline void OnlineGameManager::handleCellTap(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,
-                                             chk::CircularBuffer<int32_t> &buffer, const chk::Block &cell)
+                                             chk::CircularBuffer<int> &buffer, const chk::Block &cell)
 {
     if (!this->gameReady || !this->isMyTurn)
     {
@@ -397,7 +397,7 @@ inline void OnlineGameManager::handleCellTap(const chk::PlayerPtr &hunter, const
         }
     });
     // CHECK IF this cell has a Piece
-    const int32_t pieceId = this->getPieceFromCell(cell->getIndex());
+    const int pieceId = this->getPieceFromCell(cell->getIndex());
     if (pieceId != -1)
     {
         // YES, it has one! VERIFY IF THERE IS ANY PENDING "forced captures".
@@ -422,7 +422,7 @@ inline void OnlineGameManager::handleCellTap(const chk::PlayerPtr &hunter, const
         // Cell is Empty! Let's evaluate if this is SIMPLE move or ATTACK move
         if (!buffer.isEmpty())
         {
-            const int32_t movablePieceId = buffer.getFront();
+            const int movablePieceId = buffer.getFront();
             if (!hunter->hasThisPiece(movablePieceId))
             {
                 return;
@@ -456,7 +456,7 @@ inline void OnlineGameManager::startMoveListener()
         const chk::PlayerPtr &myTeam = (enemy->getPlayerType() == PlayerType::PLAYER_RED) ? this->playerBlack : this->playerRed;
         // clang-format on
         const auto targetPosition = sf::Vector2f{payload.destination().x(), payload.destination().y()};
-        const int32_t movingPieceId = payload.piece_id();
+        const int movingPieceId = payload.piece_id();
         if (!enemy->movePiece(movingPieceId, targetPosition))
         {
             return;
