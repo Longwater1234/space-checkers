@@ -41,7 +41,7 @@ class OnlineGameManager final : public chk::GameManager
     void startMoveListener();
     void startCaptureListener();
     void startDeathListener();
-    chk::payload::TeamColor toTeamColor(chk::PlayerType team);
+    chk::payload::TeamColor getMyTeamColor();
 };
 
 inline OnlineGameManager::OnlineGameManager(sf::RenderWindow *windowPtr) : GameManager(windowPtr)
@@ -255,7 +255,7 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
     auto *movePayload = requestBody->mutable_move_payload();
     movePayload->set_source_cell(copySrcCell);
     movePayload->set_piece_id(currentPieceId);
-    movePayload->set_from_team(toTeamColor(this->myTeam));
+    movePayload->set_from_team(getMyTeamColor());
 
     // create destination
     auto *dest = movePayload->mutable_destination();
@@ -334,7 +334,7 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
     // build CapturePayload from root
     auto *capturePayload = basePayload->mutable_capture_payload();
     capturePayload->set_hunter_piece_id(copyHunterPiece);
-    capturePayload->set_from_team(toTeamColor(this->myTeam));
+    capturePayload->set_from_team(getMyTeamColor());
 
     // Prey details (nested message)
     auto *details = capturePayload->mutable_details();
@@ -529,11 +529,11 @@ inline void OnlineGameManager::startCaptureListener()
 }
 
 /**
- * Convert PlayerType to TeamColor (for protobuf)
+ * Get my current team color
  */
-inline TeamColor OnlineGameManager::toTeamColor(chk::PlayerType team)
+inline TeamColor OnlineGameManager::getMyTeamColor()
 {
-    return team == chk::PlayerType::PLAYER_BLACK ? TeamColor::TEAM_BLACK : TeamColor::TEAM_RED;
+    return this->myTeam == chk::PlayerType::PLAYER_BLACK ? TeamColor::TEAM_BLACK : TeamColor::TEAM_RED;
 }
 
 /**
