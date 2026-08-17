@@ -484,10 +484,9 @@ inline void OnlineGameManager::startCaptureListener()
     this->wsClient->setOnCapturePieceCallback([this](const chk::payload::CapturePayload &payload) {
         bool isKingBefore = false;
         bool isKingNow = false;
-        // clang-format off
-        const chk::PlayerPtr &opponent = payload.from_team() == TeamColor::TEAM_RED ? this->playerRed : this->playerBlack;
-        const chk::PlayerPtr &myTeam = opponent->getPlayerType() == PlayerType::PLAYER_RED ? this->playerBlack : this->playerRed;
-        // clang-format on
+        const bool isEnemyRed = (payload.from_team() == TeamColor::TEAM_RED);
+        const chk::PlayerPtr &opponent = isEnemyRed ? this->playerRed : this->playerBlack;
+        const chk::PlayerPtr &myTeam = isEnemyRed ? this->playerBlack : this->playerRed;
         const auto destPos = sf::Vector2f{payload.destination().x(), payload.destination().y()};
         const auto hunterPieceId = payload.hunter_piece_id();
 
