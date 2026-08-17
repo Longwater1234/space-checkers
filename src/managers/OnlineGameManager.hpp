@@ -451,10 +451,9 @@ inline void OnlineGameManager::startMoveListener()
 {
     this->wsClient->setOnMovePieceCallback([this](const chk::payload::MovePayload &payload) {
         // which color is the Opponent?
-        // clang-format off
-        const chk::PlayerPtr &enemy = (payload.from_team() == TeamColor::TEAM_RED) ? this->playerRed : this->playerBlack;
-        const chk::PlayerPtr &myTeam = (enemy->getPlayerType() == PlayerType::PLAYER_RED) ? this->playerBlack : this->playerRed;
-        // clang-format on
+        const bool isEnemyRed = (payload.from_team() == TeamColor::TEAM_RED);
+        const chk::PlayerPtr &enemy = isEnemyRed ? this->playerRed : this->playerBlack;
+        const chk::PlayerPtr &myTeam = isEnemyRed ? this->playerBlack : this->playerRed;
         const auto targetPosition = sf::Vector2f{payload.destination().x(), payload.destination().y()};
         const int32_t movingPieceId = payload.piece_id();
         if (!enemy->movePiece(movingPieceId, targetPosition))
