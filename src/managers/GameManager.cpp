@@ -27,13 +27,12 @@ GameManager::GameManager(sf::RenderWindow *windowPtr) : window(windowPtr)
 }
 
 /**
- * Atomically update main UI message
+ * Update main UI message
  *
  * @param msg the message content
  */
 void GameManager::updateMessage(std::string_view msg)
 {
-    std::scoped_lock<std::mutex> lg{my_mutex};
     this->currentMsg = msg;
 }
 
