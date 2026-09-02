@@ -456,12 +456,13 @@ inline void OnlineGameManager::startMoveListener()
         const chk::PlayerPtr &myTeam = isEnemyRed ? this->playerBlack : this->playerRed;
         const auto targetPosition = sf::Vector2f{payload.destination().x(), payload.destination().y()};
         const int32_t movingPieceId = payload.piece_id();
+        const int destCellIdx = payload.destination().cell_index();
         if (!enemy->movePiece(movingPieceId, targetPosition))
         {
             return;
         }
-        this->gameMap.erase(payload.source_cell());                               // set old location empty!
-        this->gameMap.emplace(payload.destination().cell_index(), movingPieceId); // fill in the new location
+        this->gameMap.erase(payload.source_cell());        // set old location empty!
+        this->gameMap.emplace(destCellIdx, movingPieceId); // fill in the new location
 
         // check for opportunities (for MYSELF)
         GameManager::identifyTargets(myTeam);
@@ -471,8 +472,7 @@ inline void OnlineGameManager::startMoveListener()
         }
 
         this->isMyTurn = !this->isMyTurn; // toggle player turns
-        this->updateMessage("Opponent moved to " + std::to_string(payload.destination().cell_index()) +
-                            ". It's your turn.");
+        this->updateMessage("Opponent moved to " + std::to_string(destCellIdx) + ". It's your turn.");
     });
 }
 
