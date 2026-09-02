@@ -160,24 +160,27 @@ void WsClient::parseServerList(const cpr::Response &response)
     try
     {
         simdjson::dom::array jsonArray = jsonParser.parse(simdjson::padded_string_view(response.text));
-        std::scoped_lock lg{this->mut};
-        this->publicServers.clear();
-        this->publicServers.reserve(jsonArray.size());
+        std::vector<chk::ServerLocation> tempServers;
+        tempServers.reserve(jsonArray.size());
         for (const simdjson::dom::object &elem : jsonArray)
         {
             chk::ServerLocation location;
             location.name = elem.at_key("name").get_c_str();
             location.address = elem.at_key("address").get_c_str();
-            this->publicServers.emplace_back(std::move_if_noexcept(location));
+            tempServers.emplace_back(std::move_if_noexcept(location));
         }
+
+        std::scoped_lock lg{this->mut};
+        this->publicServers = std::move(tempServers);
     }
     catch (const simdjson::simdjson_error &ex)
     {
+        std::scoped_lock lg{this->mut};
         this->deathNote = ex.what();
         this->isDead = true;
 #ifndef NDEBUG
         spdlog::error(ex.what());
-#endif // DEBUG
+#endif // NDEBUG
     }
 }
 
