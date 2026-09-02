@@ -207,12 +207,11 @@ inline void OnlineGameManager::handleEvents(chk::CircularBuffer<int32_t> &buffer
             {
                 if (cell->containsPoint(clickedPos) && cell->getIndex() != -1)
                 {
-                    // clang-format off
-                    const auto &me = (myTeam == chk::PlayerType::PLAYER_RED) ? this->playerRed : this->playerBlack;
-                    const auto &opponent = (myTeam == chk::PlayerType::PLAYER_RED) ? this->playerBlack : this->playerRed;
+                    bool isMyTeamRed = this->myTeam == chk::PlayerType::PLAYER_RED;
+                    const auto &me = isMyTeamRed ? this->playerRed : this->playerBlack;
+                    const auto &opponent = isMyTeamRed ? this->playerBlack : this->playerRed;
                     this->handleCellTap(me, opponent, buffer, cell);
                     break;
-                    // clang-format on
                 }
             }
             //^ END inner loop
