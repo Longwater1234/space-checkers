@@ -342,7 +342,7 @@ void WsClient::setOnWinLoseCallback(const onWinLoseCallback &callback)
  * @param payload the request body
  * @return TRUE if sent successfully, else FALSE
  */
-bool WsClient::replyServer(const chk::payload::BasePayload &payload) const
+bool WsClient::replyServer(const chk::payload::BasePayload &payload)
 {
     if (this->isDead || !this->isConnected)
     {
@@ -350,7 +350,7 @@ bool WsClient::replyServer(const chk::payload::BasePayload &payload) const
     }
 #ifndef NDEBUG
     spdlog::info("SENDING {}", payload.ShortDebugString());
-#endif // DEBUG
+#endif // NDEBUG
 
     if (!payload.SerializeToString(&protoBucket))
     {
