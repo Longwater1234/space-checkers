@@ -373,12 +373,13 @@ bool WsClient::replyServer(const chk::payload::BasePayload &payload)
     spdlog::info("SENDING {}", payload.ShortDebugString());
 #endif // NDEBUG
 
-    if (!payload.SerializeToString(&protoBucket))
+    std::string buffer;
+    if (!payload.SerializeToString(&buffer))
     {
         spdlog::error("Protobuf serialization failed");
         return false;
     }
-    const auto &result = this->webSocketPtr->sendBinary(this->protoBucket);
+    const auto &result = this->webSocketPtr->sendBinary(buffer);
     return result.success;
 }
 

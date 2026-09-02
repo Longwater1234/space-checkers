@@ -59,7 +59,6 @@ class WsClient final
     chk::CircularBuffer<std::string> msgBuffer{1};  // keep only recent 1 incoming message
     std::string deathNote;                          // reason from server for disconnecting
     bool deathNotified = false;                     // whether death callback already fired
-    std::string protoBucket;                        // REUSABLE container to store OUTGOING protobuf
     std::atomic_bool connClicked = false;           // if 'connect' button clicked
     std::vector<chk::ServerLocation> publicServers; // list of public servers (fetched from CDN)
 
