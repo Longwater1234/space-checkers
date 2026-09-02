@@ -131,9 +131,9 @@ void WsClient::showPublicServerWindow(bool &showPublic)
 }
 
 /**
- * Fetch updated public servers from CDN (Timeout 5000ms)
+ * \brief Fetch updated public servers from CDN (Timeout 5000ms)
  *
- * @see libcpr official docs: https://docs.libcpr.org/advanced-usage.html
+ * \see libcpr official docs: https://docs.libcpr.org/advanced-usage.html
  */
 void WsClient::asyncFetchPublicServers()
 {
@@ -147,7 +147,7 @@ void WsClient::asyncFetchPublicServers()
  */
 void WsClient::parseServerList(const cpr::Response &response)
 {
-    if (response.status_code != 200)
+    if (response.status_code != 200 || response.error)
     {
         std::scoped_lock lg{this->mut};
         this->deathNote = "httpRequest error: " + response.error.message;
@@ -410,10 +410,13 @@ void WsClient::readIncomingPayloads()
             break;
 
         case chk::payload::BasePayload::kExitPayload: {
+            const auto &notice = basePayload.notice();
             this->isDead = true;
-            std::scoped_lock lg{this->mut};
-            this->deathNote = basePayload.notice();
-            spdlog::error(basePayload.notice());
+            {
+                std::scoped_lock lg{this->mut};
+                this->deathNote = notice;
+            }
+            spdlog::error(notice);
             break;
         }
 
