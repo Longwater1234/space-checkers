@@ -149,9 +149,7 @@ void WsClient::parseServerList(const cpr::Response &response)
 {
     if (response.status_code != 200 || response.error)
     {
-        std::scoped_lock lg{this->mut};
-        this->deathNote = "httpRequest error: " + response.error.message;
-        this->isDead = true;
+        this->markDead("httpRequest error: " + response.error.message);
         return;
     }
 
@@ -175,9 +173,7 @@ void WsClient::parseServerList(const cpr::Response &response)
     }
     catch (const simdjson::simdjson_error &ex)
     {
-        std::scoped_lock lg{this->mut};
-        this->deathNote = ex.what();
-        this->isDead = true;
+        this->markDead(ex.what());
 #ifndef NDEBUG
         spdlog::error(ex.what());
 #endif // NDEBUG
@@ -185,14 +181,35 @@ void WsClient::parseServerList(const cpr::Response &response)
 }
 
 /**
+ * Atomically set deathNote and mark connection as dead
+ */
+void WsClient::markDead(std::string_view note)
+{
+    std::scoped_lock lg{this->mut};
+    this->deathNote = note;
+    this->isDead = true;
+}
+
+/**
+ * Safely retrieve a copy of current deathNote
+ */
+std::string WsClient::getDeathNote() const
+{
+    std::scoped_lock lg{this->mut};
+    return this->deathNote;
+}
+
+/**
  * Reset all local states to FALSE or empty string
  */
 void WsClient::resetAllStates()
 {
+    std::scoped_lock lg{this->mut};
     this->isConnected = false;
     this->connClicked = false;
     this->isDead = false;
     this->haveWinner = false;
+    this->deathNotified = false;
     this->deathNote.clear();
 }
 
@@ -215,8 +232,11 @@ void WsClient::runMainLoop()
 
     // --- 2. Post-Update / Event State Handling ---
     if (isDead) {
-        if (_onDeathCallback != nullptr) {
-            this->_onDeathCallback(deathNote);
+        if (!deathNotified) {
+            deathNotified = true;
+            if (_onDeathCallback != nullptr) {
+                this->_onDeathCallback(this->getDeathNote());
+            }
         }
         this->showErrorPopup();
         return;
@@ -257,17 +277,15 @@ void WsClient::tryConnect(std::string_view address)
         }
         else if (msg->type == ix::WebSocketMessageType::Close)
         {
-            std::scoped_lock lg{this->mut};
-            this->isDead = true;
-            this->deathNote = "Error: Server closed the connection!" + msg->str;
-            spdlog::error(this->deathNote);
+            std::string reason = "Error: Server closed the connection!" + msg->str;
+            this->markDead(reason);
+            spdlog::error(reason);
         }
         else if (msg->type == ix::WebSocketMessageType::Error)
         {
-            std::scoped_lock lg{this->mut};
-            this->isDead = true;
-            this->deathNote = "Connection error: " + msg->errorInfo.reason;
-            spdlog::error(this->deathNote);
+            std::string reason = "Connection error: " + msg->errorInfo.reason;
+            this->markDead(reason);
+            spdlog::error(reason);
         }
     });
 
@@ -386,9 +404,7 @@ void WsClient::readIncomingPayloads()
         chk::payload::BasePayload basePayload;
         if (!basePayload.ParseFromString(msg))
         {
-            this->isDead = true;
-            std::scoped_lock lg{this->mut};
-            this->deathNote = "Profobuf: Could not parse payload";
+            this->markDead("Protobuf: Could not parse payload");
             return;
         }
 
@@ -411,11 +427,7 @@ void WsClient::readIncomingPayloads()
 
         case chk::payload::BasePayload::kExitPayload: {
             const auto &notice = basePayload.notice();
-            this->isDead = true;
-            {
-                std::scoped_lock lg{this->mut};
-                this->deathNote = notice;
-            }
+            this->markDead(notice);
             spdlog::error(notice);
             break;
         }
@@ -457,8 +469,6 @@ void WsClient::readIncomingPayloads()
             break;
         }
     }
-    // std::scoped_lock lg{this->mut};
-    // this->msgBuffer.clean();
 }
 
 /**
@@ -466,7 +476,8 @@ void WsClient::readIncomingPayloads()
  */
 void WsClient::showErrorPopup()
 {
-    if (this->deathNote.empty())
+    const std::string note = this->getDeathNote();
+    if (note.empty())
     {
         return;
     }
@@ -476,7 +487,7 @@ void WsClient::showErrorPopup()
     ImGui::OpenPopup("Error", ImGuiPopupFlags_NoOpenOverExistingPopup);
     if (ImGui::BeginPopupModal("Error", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {
-        ImGui::Text("%s", this->deathNote.c_str());
+        ImGui::Text("%s", note.c_str());
         ImGui::Separator();
         if (ImGui::Button("OK", ImVec2{120.0f, 0}))
         {
@@ -493,13 +504,14 @@ void WsClient::showErrorPopup()
  */
 void chk::WsClient::showWinnerPopup()
 {
+    const std::string note = this->getDeathNote();
     // Always center this next dialog
     ImVec2 center = ImGui::GetMainViewport()->GetCenter();
     ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2{0.5f, 0.5f});
     ImGui::OpenPopup("GameOver", ImGuiPopupFlags_NoOpenOverExistingPopup);
     if (ImGui::BeginPopupModal("GameOver", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {
-        ImGui::Text("%s", this->deathNote.c_str());
+        ImGui::Text("%s", note.c_str());
         ImGui::Separator();
         if (ImGui::Button("OK", ImVec2{120.0f, 0}))
         {

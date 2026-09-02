@@ -57,8 +57,9 @@ class WsClient final
     std::atomic_bool haveWinner{false};             // whether server returned Winner or Loser
     std::atomic_bool isConnected{false};            // if done connected to server (else, show loading)
     chk::CircularBuffer<std::string> msgBuffer{1};  // keep only recent 1 incoming message
-    mutable std::string deathNote;                  // reason from server for disconnecting
-    mutable std::string protoBucket;                // REUSABLE container to store OUTGOING protobuf
+    std::string deathNote;                          // reason from server for disconnecting
+    bool deathNotified = false;                     // whether death callback already fired
+    std::string protoBucket;                        // REUSABLE container to store OUTGOING protobuf
     std::atomic_bool connClicked = false;           // if 'connect' button clicked
     std::vector<chk::ServerLocation> publicServers; // list of public servers (fetched from CDN)
 
@@ -70,7 +71,7 @@ class WsClient final
     onCaptureCallback _onCaptureCallback;
     onWinLoseCallback _onWinLoseCallback;
 
-    std::mutex mut;
+    mutable std::mutex mut;
     std::unique_ptr<ix::WebSocket> webSocketPtr = nullptr; // our Websocket object
     void showErrorPopup();                                 // whenver there is an error (from server)
     void readIncomingPayloads();                           // while connected, keep reading messages from server
@@ -82,6 +83,8 @@ class WsClient final
     void asyncFetchPublicServers();
     void parseServerList(const cpr::Response &response);
     void resetAllStates();
+    void markDead(std::string_view note);
+    [[nodiscard]] std::string getDeathNote() const;
 };
 
 } // namespace chk
