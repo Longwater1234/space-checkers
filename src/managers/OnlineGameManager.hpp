@@ -4,6 +4,7 @@
 #include "../WsClient.hpp"
 #include "../payloads/base_payload.pb.hpp"
 #include "imgui-SFML.h"
+#include <spdlog/fmt/fmt.h>
 
 namespace chk
 {
@@ -146,7 +147,7 @@ inline void OnlineGameManager::drawBoard()
     {
         window->draw(*cell);
     }
-    // run the Websocket client
+
     if (this->wsClient != nullptr)
     {
         wsClient->runMainLoop();
@@ -269,8 +270,8 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
     }
 
     this->isMyTurn = !this->isMyTurn; // toggle player turns
-    this->updateMessage("You have moved to " + std::to_string(destCell->getIndex()) + ". It's " + opponent->getName() +
-                        "'s turn.");
+    this->updateMessage(
+        fmt::format("You have moved to {}. It's {}'s turn.", destCell->getIndex(), opponent->getName()));
 }
 
 /**
@@ -308,7 +309,7 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
                 return;
             }
             isCaptured = true; // verified
-            this->updateMessage("You have captured " + prey->getName() + "'s piece!");
+            this->updateMessage(fmt::format("You have captured {}'s piece!", prey->getName()));
             copySrcCell = this->sourceCell.value();
             gameMap.erase(this->sourceCell.value());                           // set hunter's old location empty!
             gameMap.erase(target.preyCellIdx);                                 // set Prey's old location empty!
@@ -365,7 +366,7 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
         // NO MORE JUMPS AVAILABLE. SWITCH TURNS to opponent
         chk::GameManager::identifyTargets(prey);
         this->isMyTurn = !this->isMyTurn;
-        this->updateMessage("It's " + prey->getName() + "'s turn");
+        this->updateMessage(fmt::format("It's {}'s turn", prey->getName()));
     }
     else
     {
@@ -471,7 +472,7 @@ inline void OnlineGameManager::startMoveListener()
         }
 
         this->isMyTurn = !this->isMyTurn; // toggle player turns
-        this->updateMessage("Opponent moved to " + std::to_string(destCellIdx) + ". It's your turn.");
+        this->updateMessage(fmt::format("Opponent moved to {}. It's your turn.", destCellIdx));
     });
 }
 
