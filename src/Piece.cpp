@@ -10,7 +10,12 @@ Piece::Piece(const sf::CircleShape &circle, const PieceType pType, const int32_t
     this->myCircle.setTexture(&getSharedTexture(pieceType, isKing));
 }
 
-// Get the shared texture for a given piece type and king status
+/**
+ * Get the shared texture for a given piece type and king status
+ * @param type the piece type (Red or Black)
+ * @param isKing whether the piece is a king
+ * @return reference to the shared texture
+ */
 const sf::Texture &Piece::getSharedTexture(PieceType type, bool isKing)
 {
     static sf::Texture redNormal;
