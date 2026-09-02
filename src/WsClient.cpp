@@ -194,31 +194,32 @@ void WsClient::resetAllStates()
 }
 
 /**
- * Run main loop of showing connection window, tryConnect, and handle exchanges
+ * Run the main loop of the websocket client, handling connection, messages, and events.
  */
 void WsClient::runMainLoop()
 {
     // clang-format off
+    // --- 1. Connection & Payload Handling ---
     if (!isConnected) {
         if (!connClicked) {
-            this->showConnectWindow();
+            showConnectWindow();
         } else {
-            this->tryConnect(final_address);
-        }     
-    }
-    
-    else {
-        // already connected
+            tryConnect(final_address);
+        }
+    } else {
         this->readIncomingPayloads();
     }
 
-    // some error happened 🙁
-    if (this->isDead) {
-        if (this->_onDeathCallback != nullptr) {
-            _onDeathCallback(deathNote);
+    // --- 2. Post-Update / Event State Handling ---
+    if (isDead) {
+        if (_onDeathCallback != nullptr) {
+            this->_onDeathCallback(deathNote);
         }
         this->showErrorPopup();
-    } else if (this->haveWinner) {
+        return;
+    }
+
+    if (haveWinner) {
         this->showWinnerPopup();
     }
     // clang-format on
