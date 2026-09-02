@@ -18,8 +18,9 @@ GameManager::GameManager(sf::RenderWindow *windowPtr) : window(windowPtr)
 }
 
 /**
- * Get hashmap of hunter pieceID's to the assigned CaptureTarget
- * @return )pair of forced captures
+ * Get the hashmap of forced capture moves available to the current player.
+ *
+ * @return hashmap of hunter piece IDs --> CaptureTarget.
  */
 [[nodiscard]] const std::unordered_map<int, chk::CaptureTarget> &GameManager::getForcedMoves() const
 {
@@ -37,7 +38,7 @@ void GameManager::updateMessage(std::string_view msg)
 }
 
 /**
- * Get current message passed from Main
+ * Get current message to display on bottom of window
  *
  * @return string value of message
  */
