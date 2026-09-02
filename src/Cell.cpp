@@ -3,7 +3,8 @@
 namespace chk
 {
 
-Cell::Cell(const int idx, const sf::RectangleShape &rect, const sf::Font &font) : index(idx)
+Cell::Cell(const int idx, const sf::RectangleShape &rect, const sf::Font &font)
+    : index(idx), cachedBounds(rect.getGlobalBounds())
 {
     this->rec = rect;
     this->cell_pos = rec.getPosition();
@@ -13,6 +14,7 @@ Cell::Cell(const int idx, const sf::RectangleShape &rect, const sf::Font &font) 
     this->sfText.setPosition(this->cell_pos);
 }
 
+// override the draw method from sf::Drawable
 void Cell::draw(sf::RenderTarget &target, sf::RenderStates states) const
 {
     target.draw(rec, states);
@@ -40,7 +42,7 @@ bool Cell::getIsEvenRow() const
  */
 bool Cell::containsPoint(const sf::Vector2i &pos) const
 {
-    return this->rec.getGlobalBounds().contains(static_cast<float>(pos.x), static_cast<float>(pos.y));
+    return this->cachedBounds.contains(static_cast<float>(pos.x), static_cast<float>(pos.y));
 }
 
 /**
