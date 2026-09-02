@@ -3,7 +3,8 @@
 #include "../GameManager.hpp"
 #include "../WsClient.hpp"
 #include "../payloads/base_payload.pb.hpp"
-#include "imgui-SFML.h"
+#include <imgui-SFML.h>
+#include <spdlog/fmt/fmt.h>
 
 namespace chk
 {
@@ -41,7 +42,7 @@ class OnlineGameManager final : public chk::GameManager
     void startMoveListener();
     void startCaptureListener();
     void startDeathListener();
-    chk::payload::TeamColor toTeamColor(chk::PlayerType team);
+    chk::payload::TeamColor getMyTeamColor();
 };
 
 inline OnlineGameManager::OnlineGameManager(sf::RenderWindow *windowPtr) : GameManager(windowPtr)
@@ -146,7 +147,7 @@ inline void OnlineGameManager::drawBoard()
     {
         window->draw(*cell);
     }
-    // run the Websocket client
+
     if (this->wsClient != nullptr)
     {
         wsClient->runMainLoop();
@@ -207,12 +208,11 @@ inline void OnlineGameManager::handleEvents(chk::CircularBuffer<int> &buffer)
             {
                 if (cell->containsPoint(clickedPos) && cell->getIndex() != -1)
                 {
-                    // clang-format off
-                    const auto &me = (myTeam == chk::PlayerType::PLAYER_RED) ? this->playerRed : this->playerBlack;
-                    const auto &opponent = (myTeam == chk::PlayerType::PLAYER_RED) ? this->playerBlack : this->playerRed;
+                    bool isMyTeamRed = this->myTeam == chk::PlayerType::PLAYER_RED;
+                    const auto &me = isMyTeamRed ? this->playerRed : this->playerBlack;
+                    const auto &opponent = isMyTeamRed ? this->playerBlack : this->playerRed;
                     this->handleCellTap(me, opponent, buffer, cell);
                     break;
-                    // clang-format on
                 }
             }
             //^ END inner loop
@@ -255,7 +255,7 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
     auto *movePayload = requestBody->mutable_move_payload();
     movePayload->set_source_cell(copySrcCell);
     movePayload->set_piece_id(currentPieceId);
-    movePayload->set_from_team(toTeamColor(this->myTeam));
+    movePayload->set_from_team(getMyTeamColor());
 
     // create destination
     auto *dest = movePayload->mutable_destination();
@@ -263,15 +263,15 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
     dest->set_x(destCell->getPos().x);
     dest->set_y(destCell->getPos().y);
     // flush root to server
-    if (!this->wsClient->replyServer(*requestBody))
+    if (!this->wsClient->sendToServer(*requestBody))
     {
         this->updateMessage("failed to send message to Server");
         return;
     }
 
     this->isMyTurn = !this->isMyTurn; // toggle player turns
-    this->updateMessage("You have moved to " + std::to_string(destCell->getIndex()) + ". It's " + opponent->getName() +
-                        "'s turn.");
+    this->updateMessage(
+        fmt::format("You have moved to {}. It's {}'s turn.", destCell->getIndex(), opponent->getName()));
 }
 
 /**
@@ -309,7 +309,7 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
                 return;
             }
             isCaptured = true; // verified
-            this->updateMessage("You have captured " + prey->getName() + "'s piece!");
+            this->updateMessage(fmt::format("You have captured {}'s piece!", prey->getName()));
             copySrcCell = this->sourceCell.value();
             gameMap.erase(this->sourceCell.value());                           // set hunter's old location empty!
             gameMap.erase(target.preyCellIdx);                                 // set Prey's old location empty!
@@ -334,7 +334,7 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
     // build CapturePayload from root
     auto *capturePayload = basePayload->mutable_capture_payload();
     capturePayload->set_hunter_piece_id(copyHunterPiece);
-    capturePayload->set_from_team(toTeamColor(this->myTeam));
+    capturePayload->set_from_team(getMyTeamColor());
 
     // Prey details (nested message)
     auto *details = capturePayload->mutable_details();
@@ -348,7 +348,7 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
     hunterDestCell->set_x(targetCell->getPos().x);
     hunterDestCell->set_y(targetCell->getPos().y);
     // flush root to server
-    if (!this->wsClient->replyServer(*basePayload))
+    if (!this->wsClient->sendToServer(*basePayload))
     {
         this->updateMessage("failed to send message to Server");
         return;
@@ -366,7 +366,7 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
         // NO MORE JUMPS AVAILABLE. SWITCH TURNS to opponent
         chk::GameManager::identifyTargets(prey);
         this->isMyTurn = !this->isMyTurn;
-        this->updateMessage("It's " + prey->getName() + "'s turn");
+        this->updateMessage(fmt::format("It's {}'s turn", prey->getName()));
     }
     else
     {
@@ -451,18 +451,18 @@ inline void OnlineGameManager::startMoveListener()
 {
     this->wsClient->setOnMovePieceCallback([this](const chk::payload::MovePayload &payload) {
         // which color is the Opponent?
-        // clang-format off
-        const chk::PlayerPtr &enemy = (payload.from_team() == TeamColor::TEAM_RED) ? this->playerRed : this->playerBlack;
-        const chk::PlayerPtr &myTeam = (enemy->getPlayerType() == PlayerType::PLAYER_RED) ? this->playerBlack : this->playerRed;
-        // clang-format on
+        const bool isEnemyRed = (payload.from_team() == TeamColor::TEAM_RED);
+        const chk::PlayerPtr &enemy = isEnemyRed ? this->playerRed : this->playerBlack;
+        const chk::PlayerPtr &myTeam = isEnemyRed ? this->playerBlack : this->playerRed;
         const auto targetPosition = sf::Vector2f{payload.destination().x(), payload.destination().y()};
-        const int movingPieceId = payload.piece_id();
+        const int32_t movingPieceId = payload.piece_id();
+        const int destCellIdx = payload.destination().cell_index();
         if (!enemy->movePiece(movingPieceId, targetPosition))
         {
             return;
         }
-        this->gameMap.erase(payload.source_cell());                               // set old location empty!
-        this->gameMap.emplace(payload.destination().cell_index(), movingPieceId); // fill in the new location
+        this->gameMap.erase(payload.source_cell());        // set old location empty!
+        this->gameMap.emplace(destCellIdx, movingPieceId); // fill in the new location
 
         // check for opportunities (for MYSELF)
         GameManager::identifyTargets(myTeam);
@@ -472,8 +472,7 @@ inline void OnlineGameManager::startMoveListener()
         }
 
         this->isMyTurn = !this->isMyTurn; // toggle player turns
-        this->updateMessage("Opponent moved to " + std::to_string(payload.destination().cell_index()) +
-                            ". It's your turn.");
+        this->updateMessage(fmt::format("Opponent moved to {}. It's your turn.", destCellIdx));
     });
 }
 
@@ -485,10 +484,9 @@ inline void OnlineGameManager::startCaptureListener()
     this->wsClient->setOnCapturePieceCallback([this](const chk::payload::CapturePayload &payload) {
         bool isKingBefore = false;
         bool isKingNow = false;
-        // clang-format off
-        const chk::PlayerPtr &opponent = payload.from_team() == TeamColor::TEAM_RED ? this->playerRed : this->playerBlack;
-        const chk::PlayerPtr &myTeam = opponent->getPlayerType() == PlayerType::PLAYER_RED ? this->playerBlack : this->playerRed;
-        // clang-format on
+        const bool isEnemyRed = (payload.from_team() == TeamColor::TEAM_RED);
+        const chk::PlayerPtr &opponent = isEnemyRed ? this->playerRed : this->playerBlack;
+        const chk::PlayerPtr &myTeam = isEnemyRed ? this->playerBlack : this->playerRed;
         const auto destPos = sf::Vector2f{payload.destination().x(), payload.destination().y()};
         const auto hunterPieceId = payload.hunter_piece_id();
 
@@ -529,11 +527,11 @@ inline void OnlineGameManager::startCaptureListener()
 }
 
 /**
- * Convert PlayerType to TeamColor (for protobuf)
+ * Get my current team color
  */
-inline TeamColor OnlineGameManager::toTeamColor(chk::PlayerType team)
+inline TeamColor OnlineGameManager::getMyTeamColor()
 {
-    return team == chk::PlayerType::PLAYER_BLACK ? TeamColor::TEAM_BLACK : TeamColor::TEAM_RED;
+    return this->myTeam == chk::PlayerType::PLAYER_BLACK ? TeamColor::TEAM_BLACK : TeamColor::TEAM_RED;
 }
 
 /**

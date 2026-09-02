@@ -149,9 +149,7 @@ void WsClient::parseServerList(const cpr::Response &response)
 {
     if (response.status_code != 200 || response.error)
     {
-        std::scoped_lock lg{this->mut};
-        this->deathNote = "httpRequest error: " + response.error.message;
-        this->isDead = true;
+        this->markDead("httpRequest error: " + response.error.message);
         return;
     }
 
@@ -160,25 +158,45 @@ void WsClient::parseServerList(const cpr::Response &response)
     try
     {
         simdjson::dom::array jsonArray = jsonParser.parse(simdjson::padded_string_view(response.text));
-        std::scoped_lock lg{this->mut};
-        this->publicServers.clear();
-        this->publicServers.reserve(jsonArray.size());
+        std::vector<chk::ServerLocation> tempServers;
+        tempServers.reserve(jsonArray.size());
         for (const simdjson::dom::object &elem : jsonArray)
         {
             chk::ServerLocation location;
             location.name = elem.at_key("name").get_c_str();
             location.address = elem.at_key("address").get_c_str();
-            this->publicServers.emplace_back(std::move_if_noexcept(location));
+            tempServers.emplace_back(std::move_if_noexcept(location));
         }
+
+        std::scoped_lock lg{this->mut};
+        this->publicServers = std::move(tempServers);
     }
     catch (const simdjson::simdjson_error &ex)
     {
-        this->deathNote = ex.what();
-        this->isDead = true;
+        this->markDead(ex.what());
 #ifndef NDEBUG
         spdlog::error(ex.what());
-#endif // DEBUG
+#endif // NDEBUG
     }
+}
+
+/**
+ * Atomically set deathNote and mark connection as dead
+ */
+void WsClient::markDead(std::string_view note)
+{
+    std::scoped_lock lg{this->mut};
+    this->deathNote = note;
+    this->isDead = true;
+}
+
+/**
+ * Safely retrieve a copy of current deathNote
+ */
+std::string WsClient::getDeathNote() const
+{
+    std::scoped_lock lg{this->mut};
+    return this->deathNote;
 }
 
 /**
@@ -186,39 +204,45 @@ void WsClient::parseServerList(const cpr::Response &response)
  */
 void WsClient::resetAllStates()
 {
+    std::scoped_lock lg{this->mut};
     this->isConnected = false;
     this->connClicked = false;
     this->isDead = false;
     this->haveWinner = false;
+    this->deathNotified = false;
     this->deathNote.clear();
 }
 
 /**
- * Run main loop of showing connection window, tryConnect, and handle exchanges
+ * Run the main loop of the websocket client, handling connection, messages, and events.
  */
 void WsClient::runMainLoop()
 {
     // clang-format off
+    // --- 1. Connection & Payload Handling ---
     if (!isConnected) {
         if (!connClicked) {
-            this->showConnectWindow();
+            showConnectWindow();
         } else {
-            this->tryConnect(final_address);
-        }     
-    }
-    
-    else {
-        // already connected
+            tryConnect(final_address);
+        }
+    } else {
         this->readIncomingPayloads();
     }
 
-    // some error happened 🙁
-    if (this->isDead) {
-        if (this->_onDeathCallback != nullptr) {
-            _onDeathCallback(deathNote);
+    // --- 2. Post-Update / Event State Handling ---
+    if (isDead) {
+        if (!deathNotified) {
+            deathNotified = true;
+            if (_onDeathCallback != nullptr) {
+                this->_onDeathCallback(this->getDeathNote());
+            }
         }
         this->showErrorPopup();
-    } else if (this->haveWinner) {
+        return;
+    }
+
+    if (haveWinner) {
         this->showWinnerPopup();
     }
     // clang-format on
@@ -253,17 +277,15 @@ void WsClient::tryConnect(std::string_view address)
         }
         else if (msg->type == ix::WebSocketMessageType::Close)
         {
-            std::scoped_lock lg{this->mut};
-            this->isDead = true;
-            this->deathNote = "Error: Server closed the connection!" + msg->str;
-            spdlog::error(this->deathNote);
+            std::string reason = "Error: Server closed the connection!" + msg->str;
+            this->markDead(reason);
+            spdlog::error(reason);
         }
         else if (msg->type == ix::WebSocketMessageType::Error)
         {
-            std::scoped_lock lg{this->mut};
-            this->isDead = true;
-            this->deathNote = "Connection error: " + msg->errorInfo.reason;
-            spdlog::error(this->deathNote);
+            std::string reason = "Connection error: " + msg->errorInfo.reason;
+            this->markDead(reason);
+            spdlog::error(reason);
         }
     });
 
@@ -336,12 +358,12 @@ void WsClient::setOnWinLoseCallback(const onWinLoseCallback &callback)
 }
 
 /**
- * Send Protobuf response back to server.
+ * Send Protobuf payload to server.
  *
  * @param payload the request body
  * @return TRUE if sent successfully, else FALSE
  */
-bool WsClient::replyServer(const chk::payload::BasePayload &payload) const
+bool WsClient::sendToServer(const chk::payload::BasePayload &payload)
 {
     if (this->isDead || !this->isConnected)
     {
@@ -349,20 +371,21 @@ bool WsClient::replyServer(const chk::payload::BasePayload &payload) const
     }
 #ifndef NDEBUG
     spdlog::info("SENDING {}", payload.ShortDebugString());
-#endif // DEBUG
+#endif // NDEBUG
 
-    if (!payload.SerializeToString(&protoBucket))
+    std::string buffer;
+    if (!payload.SerializeToString(&buffer))
     {
         spdlog::error("Protobuf serialization failed");
         return false;
     }
-    const auto &result = this->webSocketPtr->sendBinary(this->protoBucket);
+    const auto &result = this->webSocketPtr->sendBinary(buffer);
     return result.success;
 }
 
 /**
  * Read messages from server and update the game accordingly. If any
- * error happens or match ends, close connection
+ * error happens or match ends, close connection and notify user.
  */
 void WsClient::readIncomingPayloads()
 {
@@ -382,9 +405,7 @@ void WsClient::readIncomingPayloads()
         chk::payload::BasePayload basePayload;
         if (!basePayload.ParseFromString(msg))
         {
-            this->isDead = true;
-            std::scoped_lock lg{this->mut};
-            this->deathNote = "Profobuf: Could not parse payload";
+            this->markDead("Protobuf: Could not parse payload");
             return;
         }
 
@@ -407,11 +428,7 @@ void WsClient::readIncomingPayloads()
 
         case chk::payload::BasePayload::kExitPayload: {
             const auto &notice = basePayload.notice();
-            this->isDead = true;
-            {
-                std::scoped_lock lg{this->mut};
-                this->deathNote = notice;
-            }
+            this->markDead(notice);
             spdlog::error(notice);
             break;
         }
@@ -453,8 +470,6 @@ void WsClient::readIncomingPayloads()
             break;
         }
     }
-    // std::scoped_lock lg{this->mut};
-    // this->msgBuffer.clean();
 }
 
 /**
@@ -462,7 +477,8 @@ void WsClient::readIncomingPayloads()
  */
 void WsClient::showErrorPopup()
 {
-    if (this->deathNote.empty())
+    const std::string note = this->getDeathNote();
+    if (note.empty())
     {
         return;
     }
@@ -472,7 +488,7 @@ void WsClient::showErrorPopup()
     ImGui::OpenPopup("Error", ImGuiPopupFlags_NoOpenOverExistingPopup);
     if (ImGui::BeginPopupModal("Error", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {
-        ImGui::Text("%s", this->deathNote.c_str());
+        ImGui::Text("%s", note.c_str());
         ImGui::Separator();
         if (ImGui::Button("OK", ImVec2{120.0f, 0}))
         {
@@ -489,13 +505,14 @@ void WsClient::showErrorPopup()
  */
 void chk::WsClient::showWinnerPopup()
 {
+    const std::string note = this->getDeathNote();
     // Always center this next dialog
     ImVec2 center = ImGui::GetMainViewport()->GetCenter();
     ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2{0.5f, 0.5f});
     ImGui::OpenPopup("GameOver", ImGuiPopupFlags_NoOpenOverExistingPopup);
     if (ImGui::BeginPopupModal("GameOver", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {
-        ImGui::Text("%s", this->deathNote.c_str());
+        ImGui::Text("%s", note.c_str());
         ImGui::Separator();
         if (ImGui::Button("OK", ImVec2{120.0f, 0}))
         {

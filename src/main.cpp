@@ -9,8 +9,8 @@
 #include <google/protobuf/stubs/common.h>
 #include <vector>
 
-#include "imgui-SFML.h"
-#include "imgui.h"
+#include <imgui-SFML.h>
+#include <imgui.h>
 
 int main()
 {

@@ -13,7 +13,6 @@
 #include <algorithm>
 #include <functional>
 #include <memory>
-#include <mutex>
 #include <optional>
 #include <random>
 #include <spdlog/spdlog.h>
@@ -55,11 +54,9 @@ class GameManager
     // whether it's player Red's turn
     bool playerRedTurn = true;
     // bottom display message
-    mutable std::string currentMsg;
+    std::string currentMsg;
     // whether match is over (for offline mode only)
     bool gameOver = false;
-    // used for atomic updates
-    std::mutex my_mutex;
 
     [[nodiscard]] bool boardContainsCell(const int cell_idx) const;
     [[nodiscard]] bool awayFromEdge(const int cell_idx) const;

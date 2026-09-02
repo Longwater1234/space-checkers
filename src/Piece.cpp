@@ -3,32 +3,47 @@
 namespace chk
 {
 
-Piece::Piece(const sf::CircleShape &circle, const PieceType pType, const int32_t id) : pid(id), pieceType(pType)
+Piece::Piece(const sf::CircleShape &circle, const PieceType pType, const int32_t id)
+    : pid(id), pieceType(pType), myCircle(circle)
 {
-    this->myCircle = circle;
     this->setPosition(circle.getPosition());
-
-    sf::Texture localTxr;
-    if (pieceType == PieceType::Red)
-    {
-        if (localTxr.loadFromFile(chk::getResourcePath(RED_NORMAL)))
-        {
-            this->texture = std::move_if_noexcept(localTxr);
-            this->myCircle.setTexture(&this->texture);
-        }
-    }
-    else
-    {
-        if (localTxr.loadFromFile(chk::getResourcePath(BLACK_NORMAL)))
-        {
-            this->texture = std::move_if_noexcept(localTxr);
-            this->myCircle.setTexture(&this->texture);
-        }
-    }
+    this->myCircle.setTexture(&getSharedTexture(pieceType, isKing));
 }
 
 /**
- * Override the draw function
+ * Get the shared texture for a given piece type and king status
+ * @param type the piece type (Red or Black)
+ * @param isKing whether the piece is a king
+ * @return reference to the shared texture
+ */
+const sf::Texture &Piece::getSharedTexture(PieceType type, bool isKing)
+{
+    static sf::Texture redNormal;
+    static sf::Texture blackNormal;
+    static sf::Texture redKing;
+    static sf::Texture blackKing;
+    static bool loaded = false;
+
+    if (!loaded)
+    {
+        (void)redNormal.loadFromFile(chk::getResourcePath(RED_NORMAL));
+        (void)blackNormal.loadFromFile(chk::getResourcePath(BLACK_NORMAL));
+        (void)redKing.loadFromFile(chk::getResourcePath(RED_KING));
+        (void)blackKing.loadFromFile(chk::getResourcePath(BLACK_KING));
+        loaded = true;
+    }
+
+    if (type == PieceType::Red)
+    {
+        return isKing ? redKing : redNormal;
+    }
+    return isKing ? blackKing : blackNormal;
+}
+
+/**
+ * Override the draw function from sf::Drawable to render the piece on the window
+ * @param target The render target (window) to draw on
+ * @param states The render states to use for drawing
  */
 void Piece::draw(sf::RenderTarget &target, sf::RenderStates states) const
 {
@@ -51,20 +66,7 @@ const PieceType Piece::getPieceType() const
 void Piece::activateKing()
 {
     this->isKing = true;
-    if (pieceType == PieceType::Red)
-    {
-        if (this->texture.loadFromFile(chk::getResourcePath(RED_KING)))
-        {
-            this->myCircle.setTexture(&this->texture);
-        }
-    }
-    else
-    {
-        if (this->texture.loadFromFile(chk::getResourcePath(BLACK_KING)))
-        {
-            this->myCircle.setTexture(&this->texture);
-        }
-    }
+    this->myCircle.setTexture(&getSharedTexture(pieceType, isKing));
 }
 
 /**

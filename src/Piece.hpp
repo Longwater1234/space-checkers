@@ -17,12 +17,12 @@ enum class PieceType
     Black,
 };
 
-constexpr auto BLACK_NORMAL = "black_normal.png";
-constexpr auto BLACK_KING = "black_king.png";
-constexpr auto RED_NORMAL = "red_normal.png";
-constexpr auto RED_KING = "red_king.png";
-constexpr auto SIZE_CELL = 75.0f; // length of square cell
-constexpr uint16_t NUM_PIECES{24};
+inline constexpr auto BLACK_NORMAL = "black_normal.png";
+inline constexpr auto BLACK_KING = "black_king.png";
+inline constexpr auto RED_NORMAL = "red_normal.png";
+inline constexpr auto RED_KING = "red_king.png";
+inline constexpr auto SIZE_CELL = 75.0f; // length of square cell
+inline constexpr uint16_t NUM_PIECES{24};
 
 class Piece final : public sf::Drawable, public sf::Transformable
 {
@@ -55,7 +55,8 @@ class Piece final : public sf::Drawable, public sf::Transformable
     sf::Vector2f startPosition;
     sf::Vector2f targetPosition;
     float animationProgress = 1.0f; // 1.0 means arrived destination.
-    float animationSpeed = 4.0f;    // Controls how fast the piece slides (higher = faster)
+    float animationSpeed = 4.0f;    // How fast the piece slides (higher = faster)
+    static const sf::Texture &getSharedTexture(PieceType type, bool isKing);
     void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
 };
 

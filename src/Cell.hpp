@@ -36,6 +36,7 @@ class Cell final : public sf::Drawable
     bool isEvenRow = false;
     sf::Vector2f cell_pos;
     sf::Text sfText;
+    mutable sf::FloatRect cachedBounds;
     void draw(sf::RenderTarget &target, sf::RenderStates states) const override;
 };
 

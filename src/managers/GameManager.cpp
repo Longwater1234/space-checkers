@@ -3,6 +3,7 @@
 // Created by Davis on 2023/12/21.
 //
 #include "../GameManager.hpp"
+#include <spdlog/fmt/fmt.h>
 
 namespace chk
 {
@@ -18,8 +19,9 @@ GameManager::GameManager(sf::RenderWindow *windowPtr) : window(windowPtr)
 }
 
 /**
- * Get hashmap of hunter pieceID's to the assigned CaptureTarget
- * @return )pair of forced captures
+ * Get the hashmap of forced capture moves available to the current player.
+ *
+ * @return hashmap of hunter piece IDs --> CaptureTarget.
  */
 [[nodiscard]] const std::unordered_map<int, chk::CaptureTarget> &GameManager::getForcedMoves() const
 {
@@ -27,18 +29,17 @@ GameManager::GameManager(sf::RenderWindow *windowPtr) : window(windowPtr)
 }
 
 /**
- * Atomically update main UI message
+ * Update main UI message
  *
  * @param msg the message content
  */
 void GameManager::updateMessage(std::string_view msg)
 {
-    std::scoped_lock<std::mutex> lg{my_mutex};
     this->currentMsg = msg;
 }
 
 /**
- * Get current message passed from Main
+ * Get current message to display on bottom of window
  *
  * @return string value of message
  */
@@ -121,11 +122,11 @@ void GameManager::handleMovePiece(const chk::PlayerPtr &player, const chk::Playe
 
     if (!this->forcedMoves.empty())
     {
-        this->updateMessage(player->getName() + " IS IN DANGER");
+        this->updateMessage(fmt::format("{} IS IN DANGER", player->getName()));
     }
     this->playerRedTurn = !this->playerRedTurn; // toggle player turns
-    this->updateMessage(player->getName() + " has moved to " + std::to_string(destCell->getIndex()) + ". It's " +
-                        opponent->getName() + "'s turn.");
+    this->updateMessage(fmt::format("{} has moved to {}. It's {}'s turn.", player->getName(), destCell->getIndex(),
+                                    opponent->getName()));
 }
 
 /**
@@ -159,7 +160,7 @@ void GameManager::handleCapturePiece(const chk::PlayerPtr &hunter, const chk::Pl
                 return;
             }
             isCaptured = true; // verified
-            this->updateMessage(hunter->getName() + " has captured " + prey->getName() + "'s piece!");
+            this->updateMessage(fmt::format("{} has captured {}'s piece!", hunter->getName(), prey->getName()));
             gameMap.erase(this->sourceCell.value());                           // set hunter's old location empty!
             gameMap.erase(target.preyCellIdx);                                 // set Prey's old location empty!
             gameMap.emplace(targetCell->getIndex(), hunterPieceId);            // fill in hunter new location
@@ -188,7 +189,7 @@ void GameManager::handleCapturePiece(const chk::PlayerPtr &hunter, const chk::Pl
     }
     else
     {
-        this->updateMessage(hunter->getName() + " can CAPTURE another piece!");
+        this->updateMessage(fmt::format("{} can CAPTURE another piece!", hunter->getName()));
     }
 }
 
@@ -296,7 +297,7 @@ void GameManager::updateMatchStatus(const chk::PlayerPtr &p1, const chk::PlayerP
     {
         this->gameOver = true;
         const std::string &winnerName = p1Count > p2Count ? p1->getName() : p2->getName();
-        this->updateMessage("GAME OVER! " + winnerName + " wins!");
+        this->updateMessage(fmt::format("GAME OVER! {} wins!", winnerName));
     }
 }
 
@@ -388,7 +389,7 @@ void chk::GameManager::showForcedMoves(const chk::PlayerPtr &player, const chk::
             pieceSet.emplace(hunterId);
         }
         player->showMyHunters(pieceSet);
-        this->updateMessage(player->getName() + " must capture piece!");
+        this->updateMessage(fmt::format("{} must capture piece!", player->getName()));
     }
     else
     {
