@@ -49,7 +49,7 @@ class WsClient final
     void setOnMovePieceCallback(const onMovePieceCallback &callback);
     void setOnCapturePieceCallback(const onCaptureCallback &callback);
     void setOnWinLoseCallback(const onWinLoseCallback &callback);
-    bool replyServer(const chk::payload::BasePayload &payload);
+    bool sendToServer(const chk::payload::BasePayload &payload);
 
   private:
     std::string final_address;                      // IP or URL of private server (input by User)

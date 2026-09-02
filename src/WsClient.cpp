@@ -358,12 +358,12 @@ void WsClient::setOnWinLoseCallback(const onWinLoseCallback &callback)
 }
 
 /**
- * Send Protobuf response back to server.
+ * Send Protobuf payload to server.
  *
  * @param payload the request body
  * @return TRUE if sent successfully, else FALSE
  */
-bool WsClient::replyServer(const chk::payload::BasePayload &payload)
+bool WsClient::sendToServer(const chk::payload::BasePayload &payload)
 {
     if (this->isDead || !this->isConnected)
     {
@@ -385,7 +385,7 @@ bool WsClient::replyServer(const chk::payload::BasePayload &payload)
 
 /**
  * Read messages from server and update the game accordingly. If any
- * error happens or match ends, close connection
+ * error happens or match ends, close connection and notify user.
  */
 void WsClient::readIncomingPayloads()
 {

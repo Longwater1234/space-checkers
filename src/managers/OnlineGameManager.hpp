@@ -262,7 +262,7 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
     dest->set_x(destCell->getPos().x);
     dest->set_y(destCell->getPos().y);
     // flush root to server
-    if (!this->wsClient->replyServer(*requestBody))
+    if (!this->wsClient->sendToServer(*requestBody))
     {
         this->updateMessage("failed to send message to Server");
         return;
@@ -347,7 +347,7 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
     hunterDestCell->set_x(targetCell->getPos().x);
     hunterDestCell->set_y(targetCell->getPos().y);
     // flush root to server
-    if (!this->wsClient->replyServer(*basePayload))
+    if (!this->wsClient->sendToServer(*basePayload))
     {
         this->updateMessage("failed to send message to Server");
         return;
