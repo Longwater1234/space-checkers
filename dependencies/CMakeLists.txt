@@ -9,5 +9,5 @@ include(libcpr.cmake)
 include(spdlog.cmake)
 include(simdjson.cmake)
 include(protobuf.cmake)
-# include(sfml.cmake) ## <-- uncomment to download and build SFML
+include(sfml.cmake)
 include(imgui.cmake)
