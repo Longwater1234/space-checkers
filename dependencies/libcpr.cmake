@@ -16,6 +16,7 @@ CPMAddPackage(
         "CMAKE_SKIP_INSTALL_RULES TRUE"
         "CURL_DISABLE_INSTALL TRUE"
         "CURL_ZLIB ON"
+        "CURL_ZSTD OFF"
         "CPR_CURL_USE_LIBPSL OFF"
         "USE_LIBIDN2 OFF"
         ${SSL_OPTION}
