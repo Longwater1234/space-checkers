@@ -40,6 +40,7 @@ This game can connect securely to both Private and Public game servers. The back
 
 - XCode 14 or newer from AppStore (with MacOS SDK)
 - Please install SFML 2.6 for macOS as **"Frameworks"**, as shown in [official SFML guide](https://www.sfml-dev.org/tutorials/2.6/start-osx.php).
+- OR, if you have Homebrew installed, run in your terminal `brew install sfml@2`
 - Download Apple Developer tools. After Xcode is installed, run this in your Terminal:
 
 ```bash
