@@ -204,6 +204,16 @@ bool GameManager::isPlayerRedTurn() const
 }
 
 /**
+ * Set whose turn it is
+ *
+ * @param val TRUE for Red, FALSE for Black
+ */
+void GameManager::setPlayerRedTurn(const bool val)
+{
+    this->playerRedTurn = val;
+}
+
+/**
  * Store the cell idx from which the piece is LEAVING
  *
  * @param src_cell index of the cell
