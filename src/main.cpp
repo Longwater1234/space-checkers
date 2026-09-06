@@ -1,5 +1,6 @@
 ﻿#include "CircularBuffer.hpp"
 #include "StartMenu.hpp"
+#include "managers/BotGameManager.hpp"
 #include "managers/LocalGameManager.hpp"
 #include "managers/OnlineGameManager.hpp"
 #include "utils/ResourcePath.hpp"
@@ -28,6 +29,11 @@ int main()
     if (userChoice == chk::UserChoice::ONLINE_PLAY)
     {
         manager = std::make_unique<chk::OnlineGameManager>(&window);
+    }
+    else if (userChoice == chk::UserChoice::BOT_PLAY)
+    {
+        // You are RED and move first; Ibox Offline plays BLACK.
+        manager = std::make_unique<chk::BotGameManager>(&window, chk::bot::Strength::IBOX);
     }
     else
     {
@@ -74,6 +80,10 @@ int main()
     if (userChoice == chk::UserChoice::LOCAL_PLAY)
     {
         manager->updateMessage("Now playing! It's RED's turn");
+    }
+    else if (userChoice == chk::UserChoice::BOT_PLAY)
+    {
+        manager->updateMessage("You are RED. Your move.");
     }
 
     // THE MAIN GAME LOOP

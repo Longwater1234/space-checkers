@@ -15,12 +15,26 @@ set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 # Enable unit tests
 option(ENABLE_GAME_TESTS "Enable unit tests" OFF)
 
-# Link SFML statically
-set(SFML_STATIC_LIBRARIES TRUE)
+# On macOS link SFML as Frameworks
+if(NOT APPLE)
+  set(SFML_STATIC_LIBRARIES TRUE)
+endif()
 
 # write app version into Header
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/protos/AppVersion.hpp.in
-               ${CMAKE_CURRENT_SOURCE_DIR}/src/AppVersion.hpp @ONLY) 
+               ${CMAKE_CURRENT_SOURCE_DIR}/src/AppVersion.hpp @ONLY)
+
+# ==== UPDATE ME HERE ===========
+# Absolute path where you installed SFML (Required on Windows)
+# set(SFML_HOME "C:/SFML/SFML-2.6.2")
+# set(SFML_DIR ${SFML_HOME}/lib/cmake/SFML)
+# ==========================
+
+# comment line below if using CPM to download SFML
+# find_package(SFML 2.6 REQUIRED COMPONENTS "graphics" "window" "system") 
+
+# the bot ("Ibox Offline") searches on a worker thread
+find_package(Threads REQUIRED)
 
 # download extra libs
 add_subdirectory(dependencies) 
@@ -50,13 +64,15 @@ target_link_libraries(
           spdlog::spdlog
           cpr::cpr
           simdjson::simdjson
-          protobuf::libprotobuf)
+          protobuf::libprotobuf
+          Threads::Threads)
 
+# include SFML headers
+target_include_directories(SpaceCheckers PUBLIC ${SFML_HOME}/include)
 
 # compiler flags (depending on C++ compiler)
 if(MSVC)
   target_compile_options(SpaceCheckers PRIVATE /W4 /sdl /utf-8 $<$<CONFIG:Release>:/GL>)
-  target_link_options(SpaceCheckers PRIVATE $<$<CONFIG:Release>:/LTCG>)
 else()
   target_compile_options(SpaceCheckers PRIVATE -Wall -Werror=constant-conversion 
                           -Werror=fortify-source $<$<CONFIG:Release>:-flto=thin>)

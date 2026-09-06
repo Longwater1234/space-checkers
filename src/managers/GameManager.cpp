@@ -23,7 +23,7 @@ GameManager::GameManager(sf::RenderWindow *windowPtr) : window(windowPtr)
  *
  * @return hashmap of hunter piece IDs --> CaptureTarget.
  */
-[[nodiscard]] const std::unordered_map<int, chk::CaptureTarget> &GameManager::getForcedMoves() const
+[[nodiscard]] const chk::ForcedMoveMap &GameManager::getForcedMoves() const
 {
     return this->forcedMoves;
 }
@@ -405,6 +405,17 @@ void chk::GameManager::showForcedMoves(const chk::PlayerPtr &player, const chk::
 bool GameManager::isGameOver() const
 {
     return this->gameOver;
+}
+
+/**
+ * Mark the match finished (or un-finish it). Used by offline modes that can end
+ * a game by stalemate, not just by capturing every piece.
+ *
+ * @param value TRUE to end the match
+ */
+void GameManager::setGameOver(const bool value)
+{
+    this->gameOver = value;
 }
 
 /**

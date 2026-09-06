@@ -37,6 +37,13 @@ void StartMenu::init()
     // position them over menu text
     this->onlineBtn.setPosition(sf::Vector2f{154.0, 476.0});
     this->localBtn.setPosition(sf::Vector2f{154.0, 558.0});
+    // The third entry sits in the gap between "offline play" and the copyright
+    // line. It is drawn as a filled pill so it reads as a deliberate new option
+    // rather than a mismatched imitation of the background artwork.
+    this->botBtn = sf::RectangleShape{sf::Vector2f{340.0f, 44.0f}};
+    this->botBtn.setPosition(sf::Vector2f{130.0f, 606.0f});
+    this->botBtn.setFillColor(this->DARK_BROWN);
+
     // create version text
     if (this->font.loadFromFile(chk::getResourcePath(chk::FONT_PATH)))
     {
@@ -45,6 +52,17 @@ void StartMenu::init()
         this->versionTxt.setFillColor(this->DARK_BROWN);
         this->versionTxt.setString(chk::APP_VERSION);
         this->versionTxt.setPosition(sf::Vector2f{420.0, 410.0});
+
+        this->botTxt.setFont(this->font);
+        this->botTxt.setCharacterSize(20);
+        this->botTxt.setFillColor(this->CREAM);
+        this->botTxt.setString("play vs IBOX OFFLINE");
+        // centre the label inside the pill
+        const sf::FloatRect tb = this->botTxt.getLocalBounds();
+        const sf::Vector2f bp = this->botBtn.getPosition();
+        const sf::Vector2f bs = this->botBtn.getSize();
+        this->botTxt.setPosition(
+            sf::Vector2f{bp.x + (bs.x - tb.width) * 0.5f - tb.left, bp.y + (bs.y - tb.height) * 0.5f - tb.top});
     }
 }
 
@@ -64,18 +82,27 @@ void StartMenu::handleEvents(chk::UserChoice &result)
         if (event.type == sf::Event::MouseButtonPressed && sf::Mouse::isButtonPressed(sf::Mouse::Left))
         {
             const auto clickedPos = sf::Mouse::getPosition(*window);
-            /* Check window bounds */
-            if (clickedPos.y > chk::SIZE_CELL * 8)
+            /* Check window bounds.
+             * NOTE: this used to clamp at SIZE_CELL * 8 (600 px), which is the
+             * height of the *board*, not of the menu. That silently swallowed
+             * clicks on the bottom 13 px of "offline play" and would have made
+             * the new bot button unclickable entirely. */
+            if (clickedPos.y < 0 || clickedPos.y > static_cast<int>(window->getSize().y))
             {
                 continue;
             }
-            if (this->localBtn.getGlobalBounds().contains(sf::Vector2f(clickedPos)))
+            const sf::Vector2f clickF{clickedPos};
+            if (this->localBtn.getGlobalBounds().contains(clickF))
             {
                 result = chk::UserChoice::LOCAL_PLAY;
             }
-            else if (this->onlineBtn.getGlobalBounds().contains(sf::Vector2f(clickedPos)))
+            else if (this->onlineBtn.getGlobalBounds().contains(clickF))
             {
                 result = chk::UserChoice::ONLINE_PLAY;
+            }
+            else if (this->botBtn.getGlobalBounds().contains(clickF))
+            {
+                result = chk::UserChoice::BOT_PLAY;
             }
         }
     }
@@ -87,7 +114,7 @@ void StartMenu::handleEvents(chk::UserChoice &result)
  */
 chk::UserChoice StartMenu::runMainLoop()
 {
-    chk::UserChoice result{};
+    chk::UserChoice result{chk::UserChoice::NONE};
     constexpr float HOVER_THICKNESS = 5.0f;
     constexpr float NORMAL_THICKNESS = 0.0f;
 
@@ -95,7 +122,7 @@ chk::UserChoice StartMenu::runMainLoop()
     {
         // HANDLE EVENTS
         this->handleEvents(result);
-        if (result == chk::UserChoice::LOCAL_PLAY || result == chk::UserChoice::ONLINE_PLAY)
+        if (result != chk::UserChoice::NONE)
         {
             break;
         }
@@ -105,6 +132,7 @@ chk::UserChoice StartMenu::runMainLoop()
         // hover state
         const bool isLocal = this->localBtn.getGlobalBounds().contains(mousePos);
         const bool isOnline = this->onlineBtn.getGlobalBounds().contains(mousePos);
+        const bool isBot = this->botBtn.getGlobalBounds().contains(mousePos);
 
         // Apply outline style based on hover
         auto applyHover = [&](sf::RectangleShape &btn, bool hover) {
@@ -117,11 +145,15 @@ chk::UserChoice StartMenu::runMainLoop()
 
         applyHover(this->localBtn, isLocal);
         applyHover(this->onlineBtn, isOnline);
+        // The bot pill is filled, so it brightens instead of gaining an outline.
+        this->botBtn.setFillColor(isBot ? LIGHT_BROWN : DARK_BROWN);
 
         window->clear();
         window->draw(mainFrame);
         window->draw(localBtn);
         window->draw(onlineBtn);
+        window->draw(botBtn);
+        window->draw(botTxt);
         window->draw(versionTxt);
         window->display();
     }

@@ -37,6 +37,7 @@ class Piece final : public sf::Drawable, public sf::Transformable
     bool getIsKing() const;
     bool containsPoint(const sf::Vector2i &pos) const;
     bool moveSimple(const sf::Vector2f &destPos);
+    [[nodiscard]] const sf::Vector2f &getLogicalPos() const;
     bool moveCapture(const sf::Vector2f &destPos);
     void addOutline();
     void markImportant();
@@ -54,6 +55,12 @@ class Piece final : public sf::Drawable, public sf::Transformable
 
     sf::Vector2f startPosition;
     sf::Vector2f targetPosition;
+    // Where this piece logically IS, as opposed to where it is currently being
+    // drawn. The two differ while a slide animation is playing, and move
+    // validation must use this one — otherwise a piece asked to move again
+    // before its animation finished (every multi-jump chain does this) would be
+    // measured from a half-way position and rejected.
+    sf::Vector2f logicalPosition;
     float animationProgress = 1.0f; // 1.0 means arrived destination.
     float animationSpeed = 4.0f;    // How fast the piece slides (higher = faster)
     static const sf::Texture &getSharedTexture(PieceType type, bool isKing);

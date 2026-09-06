@@ -7,6 +7,7 @@ Piece::Piece(const sf::CircleShape &circle, const PieceType pType, const int32_t
     : pid(id), pieceType(pType), myCircle(circle)
 {
     this->setPosition(circle.getPosition());
+    this->logicalPosition = circle.getPosition();
     this->myCircle.setTexture(&getSharedTexture(pieceType, isKing));
 }
 
@@ -128,6 +129,15 @@ int32_t Piece::getId() const
 }
 
 /**
+ * Where this piece logically sits, ignoring any slide animation in flight.
+ * @return board position of the piece
+ */
+const sf::Vector2f &Piece::getLogicalPos() const
+{
+    return this->logicalPosition;
+}
+
+/**
  * Update the animation for this piece
  * @param deltaTime Time elapsed since the last frame
  */
@@ -171,8 +181,9 @@ bool Piece::operator==(const Piece &other) const
  */
 bool Piece::moveSimple(const sf::Vector2f &destPos)
 {
-    const float deltaX = destPos.x - this->getPosition().x;
-    const float deltaY = destPos.y - this->getPosition().y;
+    // Measured from the logical position, NOT the animated one.
+    const float deltaX = destPos.x - this->logicalPosition.x;
+    const float deltaY = destPos.y - this->logicalPosition.y;
 
     if (std::abs(deltaX) != chk::SIZE_CELL || std::abs(deltaY) != chk::SIZE_CELL)
     {
@@ -188,9 +199,10 @@ bool Piece::moveSimple(const sf::Vector2f &destPos)
     }
 
     //  Trigger Smooth Animation
-    this->startPosition = this->getPosition(); // Where we are right now
-    this->targetPosition = destPos;            // Where the server says we must go
-    this->animationProgress = 0.0f;            // Start the clock at 0%!
+    this->startPosition = this->getPosition(); // where we are being drawn right now
+    this->targetPosition = destPos;            // where we must end up
+    this->logicalPosition = destPos;           // logically we are already there
+    this->animationProgress = 0.0f;            // start the clock at 0%
 
     if ((this->pieceType == PieceType::Red && destPos.y == 0) ||
         (this->pieceType == PieceType::Black && destPos.y == 7 * chk::SIZE_CELL))
@@ -207,8 +219,8 @@ bool Piece::moveSimple(const sf::Vector2f &destPos)
  */
 bool Piece::moveCapture(const sf::Vector2f &destPos)
 {
-    const float deltaX = destPos.x - this->getPosition().x;
-    const float deltaY = destPos.y - this->getPosition().y;
+    const float deltaX = destPos.x - this->logicalPosition.x;
+    const float deltaY = destPos.y - this->logicalPosition.y;
 
     if (std::abs(deltaX) != 2 * SIZE_CELL || std::abs(deltaY) != 2 * SIZE_CELL)
     {
@@ -226,6 +238,7 @@ bool Piece::moveCapture(const sf::Vector2f &destPos)
     //  Trigger Smooth Animation
     this->startPosition = this->getPosition();
     this->targetPosition = destPos;
+    this->logicalPosition = destPos;
     this->animationProgress = 0.0f;
 
     if ((this->pieceType == PieceType::Red && destPos.y == 0) ||

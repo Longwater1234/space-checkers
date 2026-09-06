@@ -2,6 +2,7 @@
 add_executable(SpaceCheckersTests
     ${CMAKE_SOURCE_DIR}/tests/PlayerTests.cpp
     ${CMAKE_SOURCE_DIR}/tests/PieceTests.cpp
+    ${CMAKE_SOURCE_DIR}/tests/EngineTests.cpp
     # Include more test files as needed
 )
 

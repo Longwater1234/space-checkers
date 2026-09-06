@@ -32,6 +32,16 @@ constexpr uint16_t NUM_ROWS{8};
 constexpr uint16_t NUM_COLS{8};
 
 /**
+ * Map of hunter pieceId -> the capture it may play.
+ *
+ * This is a MULTImap on purpose: a single piece can have two legal captures
+ * available (one to each side), and a plain map silently dropped the second,
+ * so that capture could never be played. All existing call sites use only
+ * find/empty/clear/emplace and iteration, which behave identically here.
+ */
+using ForcedMoveMap = std::unordered_multimap<int, chk::CaptureTarget>;
+
+/**
  * Abstract game manager (Base Class)
  */
 class GameManager
@@ -45,7 +55,7 @@ class GameManager
     void drawCheckerboard(const sf::Font &font);
     void updateMessage(std::string_view msg);
     void matchCellsToPieces(const std::vector<chk::PiecePtr> &pieceList);
-    [[nodiscard]] const std::unordered_map<int, chk::CaptureTarget> &getForcedMoves() const;
+    [[nodiscard]] const chk::ForcedMoveMap &getForcedMoves() const;
     [[nodiscard]] const std::string &getCurrentMsg() const;
 
   private:
@@ -79,14 +89,15 @@ class GameManager
     chk::PlayerPtr playerRed = nullptr;
     // second player (p2)
     chk::PlayerPtr playerBlack = nullptr;
-    // collection of Player's next targets (Map<HunterPieceID, CaptureTarget>)
-    std::unordered_map<int, chk::CaptureTarget> forcedMoves{};
+    // collection of Player's next targets (HunterPieceID -> CaptureTarget)
+    chk::ForcedMoveMap forcedMoves{};
 
     [[nodiscard]] bool isPlayerRedTurn() const;
     [[nodiscard]] int getPieceFromCell(const int cell_idx) const;
     [[nodiscard]] const std::vector<chk::Block> &getBlockList() const;
     [[nodiscard]] bool isHunterActive() const;
     [[nodiscard]] bool isGameOver() const;
+    void setGameOver(const bool value);
     void setSourceCell(const int src_cell);
     void doCleanup();
     void identifyTargets(const chk::PlayerPtr &hunter, const chk::Block &singleCell = nullptr);

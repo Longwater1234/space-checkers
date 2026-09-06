@@ -3,6 +3,7 @@
 #include "Piece.hpp"
 #include "PlayerType.hpp"
 #include <iostream>
+#include <memory> // std::unique_ptr — do not rely on <iostream> pulling this in
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
