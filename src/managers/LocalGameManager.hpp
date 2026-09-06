@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../GameManager.hpp"
-#include <SFML/Window/Event.hpp>
 #include <array>
 #include <limits>
 #include <numeric>
