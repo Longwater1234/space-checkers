@@ -8,21 +8,26 @@
 namespace chk
 {
 /**
- * This class is responsible for offline play
+ * This class is responsible for offline play (two humans sharing the keyboard).
+ *
+ * NOTE: no longer `final` — BotGameManager derives from it to reuse the piece
+ * setup and board rendering, and only replaces the input handling.
+ *
  * @since 2024-04-11
  */
-class LocalGameManager final : public chk::GameManager
+class LocalGameManager : public chk::GameManager
 {
   public:
     explicit LocalGameManager(sf::RenderWindow *windowPtr);
     LocalGameManager() = delete;
+    ~LocalGameManager() override = default;
 
     // Inherited via GameManager
     void createAllPieces() override;
     void drawBoard() override;
     void handleEvents(chk::CircularBuffer<int> &buffer) override;
 
-  private:
+  protected:
     std::array<int, chk::NUM_PIECES> generateRandomPieceIds();
 };
 
