@@ -26,6 +26,7 @@ This game can connect securely to both Private and Public game servers. The back
 
 - C++17 (or newer) compiler.
 - Pre-built [SFML 2.6.x](https://www.sfml-dev.org/download/sfml/2.6.1/) libs.
+- OR, you may auto-build SFML 2.6 from source: uncomment `include(sfml.cmake)` inside [dependencies/CMakeLists.txt](dependencies/CMakeLists.txt).
 - [CMake 3.20+](https://cmake.org/download/) or newer (GUI recommended)
 
 ### For Windows (10 or later)
@@ -59,8 +60,6 @@ This game can connect securely to both Private and Public game servers. The back
 ```bash
   sudo apt install libsfml-dev
 ```
-
-- Alternatively, you may build SFML 2.6 from source, by uncommenting `include(sfml.cmake)` inside [dependencies/CMakeLists.txt](dependencies/CMakeLists.txt).
 
 ## Build Instructions
 
