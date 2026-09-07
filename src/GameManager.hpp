@@ -9,6 +9,7 @@
 #include "Player.hpp"
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/Text.hpp>
+#include <SFML/Window/Event.hpp>
 #include <SFML/Window/Mouse.hpp>
 #include <algorithm>
 #include <functional>
@@ -47,6 +48,7 @@ class GameManager
     void matchCellsToPieces(const std::vector<chk::PiecePtr> &pieceList);
     [[nodiscard]] const std::unordered_map<int, chk::CaptureTarget> &getForcedMoves() const;
     [[nodiscard]] const std::string &getCurrentMsg() const;
+    [[nodiscard]] bool hasNoPossibleMoves(const chk::PlayerPtr &player) const;
 
   private:
     // flag to check if cache is already filled
@@ -83,10 +85,12 @@ class GameManager
     std::unordered_map<int, chk::CaptureTarget> forcedMoves{};
 
     [[nodiscard]] bool isPlayerRedTurn() const;
+    void setPlayerRedTurn(bool val);
     [[nodiscard]] int getPieceFromCell(const int cell_idx) const;
     [[nodiscard]] const std::vector<chk::Block> &getBlockList() const;
     [[nodiscard]] bool isHunterActive() const;
     [[nodiscard]] bool isGameOver() const;
+    void setGameOver(bool val);
     void setSourceCell(const int src_cell);
     void doCleanup();
     void identifyTargets(const chk::PlayerPtr &hunter, const chk::Block &singleCell = nullptr);
@@ -96,7 +100,7 @@ class GameManager
                                     const chk::Block &targetCell);
     virtual void handleCellTap(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,
                                chk::CircularBuffer<int> &buffer, const chk::Block &cell);
-    void updateMatchStatus(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2);
+    virtual void updateMatchStatus(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2);
     void showForcedMoves(const chk::PlayerPtr &player, const chk::Block &cell);
 };
 

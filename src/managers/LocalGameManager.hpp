@@ -4,6 +4,7 @@
 #include <array>
 #include <limits>
 #include <numeric>
+#include <spdlog/fmt/fmt.h>
 
 namespace chk
 {
@@ -11,19 +12,23 @@ namespace chk
  * This class is responsible for offline play
  * @since 2024-04-11
  */
-class LocalGameManager final : public chk::GameManager
+class LocalGameManager : public chk::GameManager
 {
   public:
     explicit LocalGameManager(sf::RenderWindow *windowPtr);
     LocalGameManager() = delete;
+    ~LocalGameManager() override = default;
 
     // Inherited via GameManager
     void createAllPieces() override;
     void drawBoard() override;
     void handleEvents(chk::CircularBuffer<int> &buffer) override;
 
-  private:
+  protected:
     std::array<int, chk::NUM_PIECES> generateRandomPieceIds();
+    void handleMovePiece(const chk::PlayerPtr &player, const chk::PlayerPtr &opponent, const Block &destCell,
+                         const int currentPieceId) override;
+    void updateMatchStatus(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2) override;
 };
 
 /**
@@ -193,6 +198,42 @@ inline std::array<int, chk::NUM_PIECES> LocalGameManager::generateRandomPieceIds
     std::copy(uniqueIds.begin(), uniqueIds.end(), pieceIds.begin());
     std::shuffle(pieceIds.begin(), pieceIds.end(), gen);
     return pieceIds;
+}
+
+/**
+ * Move piece and check if opponent has any possible moves remaining.
+ */
+inline void LocalGameManager::handleMovePiece(const chk::PlayerPtr &player, const chk::PlayerPtr &opponent,
+                                              const Block &destCell, const int currentPieceId)
+{
+    GameManager::handleMovePiece(player, opponent, destCell, currentPieceId);
+    if (!this->sourceCell.has_value())
+    {
+        this->updateMatchStatus(player, opponent);
+    }
+}
+
+/**
+ * Checks piece count for both players and verifies if current player has possible moves.
+ *
+ * @param p1 first player
+ * @param p2 second player
+ */
+inline void LocalGameManager::updateMatchStatus(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2)
+{
+    GameManager::updateMatchStatus(p1, p2);
+    if (this->isGameOver())
+    {
+        return;
+    }
+
+    const auto &currentTurnPlayer = this->isPlayerRedTurn() ? this->playerRed : this->playerBlack;
+    const auto &otherPlayer = this->isPlayerRedTurn() ? this->playerBlack : this->playerRed;
+    if (this->hasNoPossibleMoves(currentTurnPlayer))
+    {
+        this->setGameOver(true);
+        this->updateMessage(fmt::format("GAME OVER! {} wins!", otherPlayer->getName()));
+    }
 }
 
 } // namespace chk

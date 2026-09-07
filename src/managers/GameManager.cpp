@@ -122,7 +122,7 @@ void GameManager::handleMovePiece(const chk::PlayerPtr &player, const chk::Playe
 
     if (!this->forcedMoves.empty())
     {
-        this->updateMessage(fmt::format("{} IS IN DANGER", player->getName()));
+        this->updateMessage(player->getName() + " IS IN DANGER");
     }
     this->playerRedTurn = !this->playerRedTurn; // toggle player turns
     this->updateMessage(fmt::format("{} has moved to {}. It's {}'s turn.", player->getName(), destCell->getIndex(),
@@ -189,7 +189,7 @@ void GameManager::handleCapturePiece(const chk::PlayerPtr &hunter, const chk::Pl
     }
     else
     {
-        this->updateMessage(fmt::format("{} can CAPTURE another piece!", hunter->getName()));
+        this->updateMessage(hunter->getName() + " can CAPTURE another piece!");
     }
 }
 
@@ -201,6 +201,16 @@ void GameManager::handleCapturePiece(const chk::PlayerPtr &hunter, const chk::Pl
 bool GameManager::isPlayerRedTurn() const
 {
     return this->playerRedTurn;
+}
+
+/**
+ * Set whose turn it is
+ *
+ * @param val TRUE for Red, FALSE for Black
+ */
+void GameManager::setPlayerRedTurn(const bool val)
+{
+    this->playerRedTurn = val;
 }
 
 /**
@@ -405,6 +415,92 @@ void chk::GameManager::showForcedMoves(const chk::PlayerPtr &player, const chk::
 bool GameManager::isGameOver() const
 {
     return this->gameOver;
+}
+
+/**
+ * Update the game over state
+ * @param val TRUE or FALSE
+ */
+void GameManager::setGameOver(const bool val)
+{
+    this->gameOver = val;
+}
+
+/**
+ * Checks if the given player has no possible moves (no forced captures and no simple moves).
+ *
+ * @param player the player to check
+ * @return true if the player has zero legal moves, false otherwise.
+ */
+bool GameManager::hasNoPossibleMoves(const chk::PlayerPtr &player) const
+{
+    if (player->getPieceCount() == 0)
+    {
+        return true;
+    }
+
+    // 1. If player has any pending forced capture moves
+    for (const auto &[hunterPieceId, target] : this->forcedMoves)
+    {
+        if (player->hasThisPiece(hunterPieceId))
+        {
+            return false;
+        }
+    }
+
+    // 2. Check if any piece belonging to player can make a simple move
+    for (const auto &cell_ptr : this->blockList)
+    {
+        if (cell_ptr->getIndex() == -1)
+        {
+            continue;
+        }
+        const int pieceId = this->getPieceFromCell(cell_ptr->getIndex());
+        if (pieceId == -1 || !player->hasThisPiece(pieceId))
+        {
+            continue;
+        }
+
+        const auto &piece = player->getOwnPieces().at(pieceId);
+        const auto &currPos = cell_ptr->getPos();
+        const bool isKing = piece->getIsKing();
+        const auto pType = player->getPlayerType();
+
+        std::vector<sf::Vector2f> candidateDests;
+        candidateDests.reserve(4);
+        if (pType == PlayerType::PLAYER_RED || isKing)
+        {
+            candidateDests.emplace_back(currPos.x - chk::SIZE_CELL, currPos.y - chk::SIZE_CELL);
+            candidateDests.emplace_back(currPos.x + chk::SIZE_CELL, currPos.y - chk::SIZE_CELL);
+        }
+        if (pType == PlayerType::PLAYER_BLACK || isKing)
+        {
+            candidateDests.emplace_back(currPos.x - chk::SIZE_CELL, currPos.y + chk::SIZE_CELL);
+            candidateDests.emplace_back(currPos.x + chk::SIZE_CELL, currPos.y + chk::SIZE_CELL);
+        }
+
+        for (const auto &destPos : candidateDests)
+        {
+            if (destPos.x < 0.0f || destPos.x > 7.0f * chk::SIZE_CELL || destPos.y < 0.0f ||
+                destPos.y > 7.0f * chk::SIZE_CELL)
+            {
+                continue;
+            }
+            const auto it =
+                std::find_if(this->blockList.begin(), this->blockList.end(), [&destPos](const chk::Block &c) {
+                    return c->getIndex() != -1 && c->isAtPosition(destPos);
+                });
+            if (it != this->blockList.end())
+            {
+                if (this->getPieceFromCell((*it)->getIndex()) == -1)
+                {
+                    return false;
+                }
+            }
+        }
+    }
+
+    return true;
 }
 
 /**

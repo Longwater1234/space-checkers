@@ -5,7 +5,7 @@
 
 // clang-format off
 namespace chk {
-  constexpr const char* APP_VERSION = "1.0.17";
+  constexpr const char* APP_VERSION = "2.0.0";
 }
 
 #endif // APP_VERSION_HPP

@@ -2,6 +2,7 @@
 add_executable(SpaceCheckersTests
     ${CMAKE_SOURCE_DIR}/tests/PlayerTests.cpp
     ${CMAKE_SOURCE_DIR}/tests/PieceTests.cpp
+    ${CMAKE_SOURCE_DIR}/tests/GameManagerTests.cpp
     # Include more test files as needed
 )
 
@@ -12,6 +13,8 @@ target_include_directories(SpaceCheckersTests PRIVATE ${CMAKE_SOURCE_DIR}/src ${
 SET(TEST_SRC_FILES
     "${CMAKE_SOURCE_DIR}/src/Player.cpp"
     "${CMAKE_SOURCE_DIR}/src/Piece.cpp"
+    "${CMAKE_SOURCE_DIR}/src/Cell.cpp"
+    "${CMAKE_SOURCE_DIR}/src/managers/GameManager.cpp"
 )
 
 if(APPLE)
@@ -30,6 +33,7 @@ target_link_libraries(SpaceCheckersTests
     sfml-graphics
     sfml-window
     sfml-system
+    spdlog::spdlog
 )
 
 # Automatically discover and register tests

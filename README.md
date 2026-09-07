@@ -24,9 +24,8 @@ This game can connect securely to both Private and Public game servers. The back
 
 ## Requirements for Building
 
-- C++17 (or newer) compiler.
-- Pre-built [SFML 2.6.x](https://www.sfml-dev.org/download/sfml/2.6.1/) libs.
-- OR, you may auto-build SFML 2.6 from source: uncomment `include(sfml.cmake)` inside [dependencies/CMakeLists.txt](dependencies/CMakeLists.txt).
+- C++17 (or newer) build tools.
+- Pre-built [SFML 2.6.x](https://www.sfml-dev.org/download/sfml/2.6.2/) libs.
 - [CMake 3.20+](https://cmake.org/download/) or newer (GUI recommended)
 
 ### For Windows (10 or later)
@@ -40,6 +39,12 @@ This game can connect securely to both Private and Public game servers. The back
 
 - XCode 14 or newer from AppStore (with MacOS SDK)
 - Please install SFML 2.6 for macOS as **"Frameworks"**, as shown in [official SFML guide](https://www.sfml-dev.org/tutorials/2.6/start-osx.php).
+- OR, if you have Homebrew installed, run in your terminal:
+
+```bash
+  brew install sfml@2
+```
+
 - Download Apple Developer tools. After Xcode is installed, run this in your Terminal:
 
 ```bash
@@ -54,12 +59,16 @@ This game can connect securely to both Private and Public game servers. The back
 
 ### For Linux Desktop
 
-- Latest display drivers
-- Use your OS package manager to install SFML 2.6 or newer.
+- Latest display drivers.
+- Latest stable C++ toolchain.
+- Use your OS package manager to install SFML 2.6.x or newer. Example on Debian/Ubuntu:
 
 ```bash
-  sudo apt install libsfml-dev
+  sudo apt update
+  sudo apt install build-essential libsfml-dev 
 ```
+
+- OR, you may auto-build SFML 2.6 from source: uncomment line shown inside [dependencies/CMakeLists.txt](dependencies/CMakeLists.txt).
 
 ## Build Instructions
 
