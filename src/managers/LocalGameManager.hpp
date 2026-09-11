@@ -26,7 +26,7 @@ class LocalGameManager : public chk::GameManager
 
   protected:
     std::array<int, chk::NUM_PIECES> generateRandomPieceIds();
-    void handleMovePiece(const chk::PlayerPtr &player, const chk::PlayerPtr &opponent, const Block &destCell,
+    void handleMovePiece(const chk::PlayerPtr &player, const chk::PlayerPtr &opponent, const CellPtr &destCell,
                          const int currentPieceId) override;
     void updateMatchStatus(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2) override;
 };
@@ -204,7 +204,7 @@ inline std::array<int, chk::NUM_PIECES> LocalGameManager::generateRandomPieceIds
  * Move piece and check if opponent has any possible moves remaining.
  */
 inline void LocalGameManager::handleMovePiece(const chk::PlayerPtr &player, const chk::PlayerPtr &opponent,
-                                              const Block &destCell, const int currentPieceId)
+                                              const CellPtr &destCell, const int currentPieceId)
 {
     GameManager::handleMovePiece(player, opponent, destCell, currentPieceId);
     if (!this->sourceCell.has_value())

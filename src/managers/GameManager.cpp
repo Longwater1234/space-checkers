@@ -52,7 +52,7 @@ const std::string &GameManager::getCurrentMsg() const
  * \brief Get list of all checkerboard cells
  * \return vector of unique_ptr of Cells
  */
-const std::vector<chk::Block> &GameManager::getBlockList() const
+const std::vector<chk::CellPtr> &GameManager::getBlockList() const
 {
     return this->blockList;
 }
@@ -103,7 +103,7 @@ void GameManager::drawCheckerboard(const sf::Font &font)
  * @param destCell target cell
  * @param currentPieceId the selected PieceId
  */
-void GameManager::handleMovePiece(const chk::PlayerPtr &player, const chk::PlayerPtr &opponent, const Block &destCell,
+void GameManager::handleMovePiece(const chk::PlayerPtr &player, const chk::PlayerPtr &opponent, const CellPtr &destCell,
                                   const int currentPieceId)
 {
     if (this->gameOver)
@@ -137,7 +137,7 @@ void GameManager::handleMovePiece(const chk::PlayerPtr &player, const chk::Playe
  * @param targetCell the destination of hunter
  */
 void GameManager::handleCapturePiece(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,
-                                     const chk::Block &targetCell)
+                                     const chk::CellPtr &targetCell)
 {
 
     assert(!(*hunter == *prey) && "cannot pass the same player");
@@ -320,14 +320,14 @@ void GameManager::updateMatchStatus(const chk::PlayerPtr &p1, const chk::PlayerP
  * @param cell Tapped cell
  */
 void chk::GameManager::handleCellTap(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,
-                                     chk::CircularBuffer<int> &buffer, const chk::Block &cell)
+                                     chk::CircularBuffer<int> &buffer, const chk::CellPtr &cell)
 {
     if (this->isGameOver())
     {
         return;
     }
     // reset color of all previous active cells
-    std::for_each(this->blockList.begin(), this->blockList.end(), [](const chk::Block &cell) {
+    std::for_each(this->blockList.begin(), this->blockList.end(), [](const chk::CellPtr &cell) {
         if (cell->getIndex() != -1)
         {
             cell->resetColor();
@@ -386,7 +386,7 @@ void chk::GameManager::handleCellTap(const chk::PlayerPtr &hunter, const chk::Pl
  * @param player current player
  * @param cell selected destination cell
  */
-void chk::GameManager::showForcedMoves(const chk::PlayerPtr &player, const chk::Block &cell)
+void chk::GameManager::showForcedMoves(const chk::PlayerPtr &player, const chk::CellPtr &cell)
 {
     const auto &moves = this->getForcedMoves();
     const int pieceId = this->getPieceFromCell(cell->getIndex());
@@ -487,7 +487,7 @@ bool GameManager::hasNoPossibleMoves(const chk::PlayerPtr &player) const
                 continue;
             }
             const auto it =
-                std::find_if(this->blockList.begin(), this->blockList.end(), [&destPos](const chk::Block &c) {
+                std::find_if(this->blockList.begin(), this->blockList.end(), [&destPos](const chk::CellPtr &c) {
                     return c->getIndex() != -1 && c->isAtPosition(destPos);
                 });
             if (it != this->blockList.end())
@@ -510,7 +510,7 @@ bool GameManager::hasNoPossibleMoves(const chk::PlayerPtr &player) const
  */
 bool GameManager::boardContainsCell(const int cell_idx) const
 {
-    const auto it = std::find_if(blockList.begin(), blockList.end(), [&cell_idx](const chk::Block &cell) {
+    const auto it = std::find_if(blockList.begin(), blockList.end(), [&cell_idx](const chk::CellPtr &cell) {
         return cell->getIndex() == cell_idx && cell->getPos().x >= 0 && cell->getPos().x <= 7 * chk::SIZE_CELL &&
                cell->getPos().y >= 0 && cell->getPos().y <= 7 * chk::SIZE_CELL;
     });
@@ -524,7 +524,7 @@ bool GameManager::boardContainsCell(const int cell_idx) const
  */
 bool GameManager::awayFromEdge(const int cell_idx) const
 {
-    const auto it = std::find_if(blockList.begin(), blockList.end(), [&cell_idx](const chk::Block &cell) {
+    const auto it = std::find_if(blockList.begin(), blockList.end(), [&cell_idx](const chk::CellPtr &cell) {
         return cell->getIndex() == cell_idx && cell->getPos().x > 0 && cell->getPos().x < 7 * chk::SIZE_CELL &&
                cell->getPos().y > 0 && cell->getPos().y < 7 * chk::SIZE_CELL;
     });
@@ -537,7 +537,7 @@ bool GameManager::awayFromEdge(const int cell_idx) const
  * @param hunter Current player
  * @param singleCell if NOT nullptr, then collect around this cell only. Otherwise, loop ENTIRE board
  */
-void GameManager::identifyTargets(const PlayerPtr &hunter, const chk::Block &singleCell)
+void GameManager::identifyTargets(const PlayerPtr &hunter, const chk::CellPtr &singleCell)
 {
     this->forcedMoves.clear();
     if (singleCell != nullptr)
@@ -587,7 +587,7 @@ void GameManager::identifyTargets(const PlayerPtr &hunter, const chk::Block &sin
  * @param hunter  player whose turn is next
  * @param cell_ptr current cell of hunter
  */
-void GameManager::collectFrontLHS(const chk::PlayerPtr &hunter, const chk::Block &cell_ptr)
+void GameManager::collectFrontLHS(const chk::PlayerPtr &hunter, const chk::CellPtr &cell_ptr)
 {
     if (hunter->getPlayerType() == PlayerType::PLAYER_RED && cell_ptr->getPos().x == 0)
     {
@@ -647,7 +647,7 @@ void GameManager::collectFrontLHS(const chk::PlayerPtr &hunter, const chk::Block
  * @param hunter player whose turn is next
  * @param cell_ptr current cell of hunter
  */
-void GameManager::collectFrontRHS(const chk::PlayerPtr &hunter, const chk::Block &cell_ptr)
+void GameManager::collectFrontRHS(const chk::PlayerPtr &hunter, const chk::CellPtr &cell_ptr)
 {
     if (hunter->getPlayerType() == PlayerType::PLAYER_RED && cell_ptr->getPos().x >= 7 * chk::SIZE_CELL)
     {
@@ -705,7 +705,7 @@ void GameManager::collectFrontRHS(const chk::PlayerPtr &hunter, const chk::Block
  * @param hunter  player whose turn is next (MUST be King)
  * @param cell_ptr current cell of hunter
  */
-void GameManager::collectBehindRHS(const PlayerPtr &hunter, const chk::Block &cell_ptr)
+void GameManager::collectBehindRHS(const PlayerPtr &hunter, const chk::CellPtr &cell_ptr)
 {
     if (hunter->getPlayerType() == PlayerType::PLAYER_RED && cell_ptr->getPos().x >= 7 * chk::SIZE_CELL)
     {
@@ -763,7 +763,7 @@ void GameManager::collectBehindRHS(const PlayerPtr &hunter, const chk::Block &ce
  * @param hunter  player whose turn is next
  * @param cell_ptr current cell of hunter
  */
-void GameManager::collectBehindLHS(const PlayerPtr &hunter, const chk::Block &cell_ptr)
+void GameManager::collectBehindLHS(const PlayerPtr &hunter, const chk::CellPtr &cell_ptr)
 {
     if (hunter->getPlayerType() == PlayerType::PLAYER_RED && cell_ptr->getPos().x == 0)
     {

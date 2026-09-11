@@ -52,7 +52,7 @@ class TestableLocalGameManager : public LocalGameManager
     {
         const auto &cells = this->getBlockList();
         const auto it = std::find_if(cells.begin(), cells.end(),
-                                     [cellIdx](const chk::Block &c) { return c->getIndex() == cellIdx; });
+                                     [cellIdx](const chk::CellPtr &c) { return c->getIndex() == cellIdx; });
         if (it == cells.end())
         {
             return;
@@ -211,7 +211,7 @@ TEST_F(GameManagerTests, LocalGameManager_MovePieceTrappingOpponent_SetsGameOver
 
     // Find destination cell 20 (row 3, col 0, pos = (0, 225))
     const auto &cells = mgr->getBlockList();
-    const auto it = std::find_if(cells.begin(), cells.end(), [](const chk::Block &c) { return c->getIndex() == 20; });
+    const auto it = std::find_if(cells.begin(), cells.end(), [](const chk::CellPtr &c) { return c->getIndex() == 20; });
     ASSERT_NE(it, cells.end());
 
     // It is BLACK's turn
