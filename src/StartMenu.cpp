@@ -69,11 +69,11 @@ void StartMenu::handleEvents(chk::UserChoice &result)
             {
                 continue;
             }
-            if (this->localBtn.getGlobalBounds().contains(sf::Vector2f(clickedPos)))
+            if (this->localBtn.getGlobalBounds().contains(sf::Vector2f{clickedPos}))
             {
                 result = chk::UserChoice::LOCAL_PLAY;
             }
-            else if (this->onlineBtn.getGlobalBounds().contains(sf::Vector2f(clickedPos)))
+            else if (this->onlineBtn.getGlobalBounds().contains(sf::Vector2f{clickedPos}))
             {
                 result = chk::UserChoice::ONLINE_PLAY;
             }
@@ -89,7 +89,7 @@ chk::UserChoice StartMenu::runMainLoop()
 {
     chk::UserChoice result{};
     constexpr float HOVER_THICKNESS = 5.0f;
-    constexpr float NORMAL_THICKNESS = 0.0f;
+    constexpr float ZERO_THICKNESS = 0.0f;
 
     while (this->window->isOpen())
     {
@@ -102,13 +102,13 @@ chk::UserChoice StartMenu::runMainLoop()
 
         const sf::Vector2f mousePos{sf::Mouse::getPosition(*window)};
 
-        // hover state
+        // hover states
         const bool isLocal = this->localBtn.getGlobalBounds().contains(mousePos);
         const bool isOnline = this->onlineBtn.getGlobalBounds().contains(mousePos);
 
         // Apply outline style based on hover
         auto applyHover = [&](sf::RectangleShape &btn, bool hover) {
-            btn.setOutlineThickness(hover ? HOVER_THICKNESS : NORMAL_THICKNESS);
+            btn.setOutlineThickness(hover ? HOVER_THICKNESS : ZERO_THICKNESS);
             if (hover)
             {
                 btn.setOutlineColor(DARK_BROWN);
