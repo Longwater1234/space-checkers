@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
 
 project(
   "SpaceCheckers"
-  VERSION 2.0.0
+  VERSION 2.0.1
   DESCRIPTION "A simple checkers game made with SFML"
   HOMEPAGE_URL "https://github.com/Longwater1234/space-checkers")
 
