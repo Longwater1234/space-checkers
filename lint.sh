@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# target directory
+# target directories
 SRC_DIR="src"
 TEST_DIR="tests"
 
