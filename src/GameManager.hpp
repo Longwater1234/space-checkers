@@ -25,7 +25,7 @@
 namespace chk
 {
 // cell ptr
-using Block = std::unique_ptr<chk::Cell>;
+using CellPtr = std::unique_ptr<chk::Cell>;
 // player ptr
 using PlayerPtr = std::unique_ptr<chk::Player>;
 
@@ -62,10 +62,10 @@ class GameManager
 
     [[nodiscard]] bool boardContainsCell(const int cell_idx) const;
     [[nodiscard]] bool awayFromEdge(const int cell_idx) const;
-    void collectFrontRHS(const chk::PlayerPtr &hunter, const chk::Block &cell_ptr);
-    void collectFrontLHS(const chk::PlayerPtr &hunter, const chk::Block &cell_ptr);
-    void collectBehindRHS(const chk::PlayerPtr &hunter, const chk::Block &cell_ptr);
-    void collectBehindLHS(const chk::PlayerPtr &hunter, const chk::Block &cell_ptr);
+    void collectFrontRHS(const chk::PlayerPtr &hunter, const chk::CellPtr &cell_ptr);
+    void collectFrontLHS(const chk::PlayerPtr &hunter, const chk::CellPtr &cell_ptr);
+    void collectBehindRHS(const chk::PlayerPtr &hunter, const chk::CellPtr &cell_ptr);
+    void collectBehindLHS(const chk::PlayerPtr &hunter, const chk::CellPtr &cell_ptr);
 
   protected:
     explicit GameManager(sf::RenderWindow *windowPtr);
@@ -76,7 +76,7 @@ class GameManager
     // source cell Index of selected piece
     std::optional<int> sourceCell{};
     // all checkerboard cells
-    std::vector<chk::Block> blockList{};
+    std::vector<chk::CellPtr> blockList{};
     // first player (p1)
     chk::PlayerPtr playerRed = nullptr;
     // second player (p2)
@@ -87,21 +87,21 @@ class GameManager
     [[nodiscard]] bool isPlayerRedTurn() const;
     void setPlayerRedTurn(bool val);
     [[nodiscard]] int getPieceFromCell(const int cell_idx) const;
-    [[nodiscard]] const std::vector<chk::Block> &getBlockList() const;
+    [[nodiscard]] const std::vector<chk::CellPtr> &getBlockList() const;
     [[nodiscard]] bool isHunterActive() const;
     [[nodiscard]] bool isGameOver() const;
     void setGameOver(bool val);
     void setSourceCell(const int src_cell);
     void doCleanup();
-    void identifyTargets(const chk::PlayerPtr &hunter, const chk::Block &singleCell = nullptr);
-    virtual void handleMovePiece(const chk::PlayerPtr &player, const chk::PlayerPtr &opponent, const Block &destCell,
+    void identifyTargets(const chk::PlayerPtr &hunter, const chk::CellPtr &singleCell = nullptr);
+    virtual void handleMovePiece(const chk::PlayerPtr &player, const chk::PlayerPtr &opponent, const CellPtr &destCell,
                                  const int currentPieceId);
     virtual void handleCapturePiece(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,
-                                    const chk::Block &targetCell);
+                                    const chk::CellPtr &targetCell);
     virtual void handleCellTap(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,
-                               chk::CircularBuffer<int> &buffer, const chk::Block &cell);
+                               chk::CircularBuffer<int> &buffer, const chk::CellPtr &cell);
     virtual void updateMatchStatus(const chk::PlayerPtr &p1, const chk::PlayerPtr &p2);
-    void showForcedMoves(const chk::PlayerPtr &player, const chk::Block &cell);
+    void showForcedMoves(const chk::PlayerPtr &player, const chk::CellPtr &cell);
 };
 
 } // namespace chk

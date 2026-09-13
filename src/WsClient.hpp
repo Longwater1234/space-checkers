@@ -12,8 +12,8 @@
 #include <spdlog/spdlog.h>
 #include <string>
 
-#include "imgui-SFML.h"
-#include "imgui.h"
+#include <imgui-SFML.h>
+#include <imgui.h>
 
 namespace chk
 {

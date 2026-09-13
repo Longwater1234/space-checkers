@@ -27,12 +27,12 @@ class OnlineGameManager final : public chk::GameManager
 
   protected:
     // Inherited via GameManager
-    void handleMovePiece(const chk::PlayerPtr &player, const chk::PlayerPtr &opponent, const Block &destCell,
+    void handleMovePiece(const chk::PlayerPtr &player, const chk::PlayerPtr &opponent, const CellPtr &destCell,
                          const int currentPieceId) override;
     void handleCapturePiece(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,
-                            const chk::Block &targetCell) override;
+                            const chk::CellPtr &targetCell) override;
     void handleCellTap(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey, chk::CircularBuffer<int> &buffer,
-                       const chk::Block &cell) override;
+                       const chk::CellPtr &cell) override;
 
   private:
     mutable chk::PlayerType myTeam{};
@@ -229,7 +229,7 @@ inline void OnlineGameManager::handleEvents(chk::CircularBuffer<int> &buffer)
  * @param currentPieceId the selected PieceId
  */
 inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, const chk::PlayerPtr &opponent,
-                                               const Block &destCell, const int currentPieceId)
+                                               const CellPtr &destCell, const int currentPieceId)
 {
     // VERIFY if move is successful
     if (!player->movePiece(currentPieceId, destCell->getPos()))
@@ -281,7 +281,7 @@ inline void OnlineGameManager::handleMovePiece(const chk::PlayerPtr &player, con
  * @param targetCell the destination of hunter
  */
 inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,
-                                                  const chk::Block &targetCell)
+                                                  const chk::CellPtr &targetCell)
 {
     if (!this->isMyTurn || GameManager::getPieceFromCell(targetCell->getIndex()) != -1)
     {
@@ -383,14 +383,14 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
  * @param cell Tapped cell
  */
 inline void OnlineGameManager::handleCellTap(const chk::PlayerPtr &hunter, const chk::PlayerPtr &prey,
-                                             chk::CircularBuffer<int> &buffer, const chk::Block &cell)
+                                             chk::CircularBuffer<int> &buffer, const chk::CellPtr &cell)
 {
     if (!this->gameReady || !this->isMyTurn)
     {
         return;
     }
     // reset color of all previous active cells
-    std::for_each(this->blockList.begin(), this->blockList.end(), [](const chk::Block &cell) {
+    std::for_each(this->blockList.begin(), this->blockList.end(), [](const chk::CellPtr &cell) {
         if (cell->getIndex() != -1)
         {
             cell->resetColor();
@@ -505,7 +505,7 @@ inline void OnlineGameManager::startCaptureListener()
         myTeam->losePiece(targetId);                                         // I will lose one piece
 
         const int destCellIdx = payload.destination().cell_index();
-        const auto it = std::find_if(blockList.begin(), blockList.end(), [&destCellIdx](const chk::Block &cell) {
+        const auto it = std::find_if(blockList.begin(), blockList.end(), [&destCellIdx](const chk::CellPtr &cell) {
             return cell->getIndex() == destCellIdx;
         });
 
