@@ -69,7 +69,7 @@ void chk::WsClient::showConnectWindow()
             const char *prefix = sslEnabled ? "wss://" : "ws://";
             this->final_address = prefix + std::string{inputUrl};
             this->connClicked = true;
-            memset(inputUrl, 0, sizeof(inputUrl));
+            std::fill(std::begin(inputUrl), std::end(inputUrl), '\0');
         }
         if (ImGui::Button("< Go Back", ImVec2{100.0f, 0}))
         {
