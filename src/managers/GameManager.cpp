@@ -32,10 +32,18 @@ GameManager::GameManager(sf::RenderWindow *windowPtr) : window(windowPtr)
  * Update main UI message
  *
  * @param msg the message content
+ * @param append whether to append to existing message
  */
-void GameManager::updateMessage(std::string_view msg)
+void GameManager::updateMessage(std::string_view msg, bool append)
 {
-    this->currentMsg = msg;
+    if (append)
+    {
+        this->currentMsg += "\n" + std::string(msg);
+    }
+    else
+    {
+        this->currentMsg = msg;
+    }
 }
 
 /**
@@ -189,7 +197,7 @@ void GameManager::handleCapturePiece(const chk::PlayerPtr &hunter, const chk::Pl
     }
     else
     {
-        this->updateMessage(hunter->getName() + " can CAPTURE another piece!");
+        this->updateMessage(hunter->getName() + " can CAPTURE another piece!", true);
     }
 }
 
@@ -399,7 +407,7 @@ void chk::GameManager::showForcedMoves(const chk::PlayerPtr &player, const chk::
             pieceSet.emplace(hunterId);
         }
         player->showMyHunters(pieceSet);
-        this->updateMessage(fmt::format("{} must capture piece!", player->getName()));
+        this->updateMessage(player->getName() + " must capture piece!");
     }
     else
     {

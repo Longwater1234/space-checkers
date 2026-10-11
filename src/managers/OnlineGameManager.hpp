@@ -366,11 +366,11 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
         // NO MORE JUMPS AVAILABLE. SWITCH TURNS to opponent
         chk::GameManager::identifyTargets(prey);
         this->isMyTurn = !this->isMyTurn;
-        this->updateMessage(fmt::format("It's {}'s turn", prey->getName()));
+        this->updateMessage(fmt::format("It's {}'s turn", prey->getName()), true);
     }
     else
     {
-        this->updateMessage("Continue. You can capture another piece!");
+        this->updateMessage("Continue. You can capture another piece!", true);
     }
 }
 
@@ -521,7 +521,7 @@ inline void OnlineGameManager::startCaptureListener()
             // NO MORE JUMPS AVAILABLE. SWITCH TURNS to myself.
             chk::GameManager::identifyTargets(myTeam);
             this->isMyTurn = !this->isMyTurn;
-            this->updateMessage("It's now your turn!");
+            this->updateMessage("It's now your turn!", true);
         }
     });
 }
