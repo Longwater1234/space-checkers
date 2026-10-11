@@ -149,7 +149,7 @@ inline void LocalGameManager::handleEvents(chk::CircularBuffer<int> &buffer)
         {
             window->close();
         }
-        if (event.type == sf::Event::MouseButtonPressed && sf::Mouse::isButtonPressed(sf::Mouse::Left))
+        if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
         {
             const auto clickedPos = sf::Mouse::getPosition(*window);
             /* Check window bounds */
