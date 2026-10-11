@@ -82,7 +82,7 @@ jobs:
           "@ | Out-File -FilePath "${{github.workspace}}/build/bin/Release/build_info.txt"
 
       - name: Upload a Build Artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: space-checkers-v${{ steps.extract_version.outputs.VERSION }}-${{ runner.os }}-x64
           path: |
