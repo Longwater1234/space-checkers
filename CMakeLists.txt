@@ -85,6 +85,14 @@ if(NOT APPLE)
             $<TARGET_FILE_DIR:SpaceCheckers>/resources)
 endif()
 
+## strip out symbols 
+if(CMAKE_BUILD_TYPE STREQUAL "Release" AND CMAKE_STRIP)
+   add_custom_command(
+   TARGET SpaceCheckers
+   POST_BUILD
+   COMMAND ${CMAKE_STRIP} $<TARGET_FILE:SpaceCheckers>)
+endif()
+
 if(ENABLE_GAME_TESTS)
     enable_testing()
     add_subdirectory(tests)
