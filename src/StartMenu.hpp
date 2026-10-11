@@ -25,6 +25,7 @@ constexpr unsigned FONT_SIZE{16};
 
 enum class UserChoice
 {
+    NONE = 0, 
     LOCAL_PLAY = 38483, // playing offline
     ONLINE_PLAY,        // playing online
 };
