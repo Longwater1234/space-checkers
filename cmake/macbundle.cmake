@@ -27,6 +27,9 @@ set_target_properties(
              XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED "NO"
              LINK_SEARCH_START_STATIC TRUE
              LINK_SEARCH_END_STATIC   TRUE
+             BUILD_WITH_INSTALL_RPATH TRUE
+             INSTALL_RPATH "@executable_path/../Frameworks"
+             BUILD_RPATH "@executable_path/../Frameworks"
              XCODE_ATTRIBUTE_LD_RUNPATH_SEARCH_PATHS "@executable_path/../Frameworks"
              MACOSX_BUNDLE_BUNDLE_NAME "${CMAKE_PROJECT_NAME}"
              MACOSX_BUNDLE_GUI_IDENTIFIER "com.davistiba.${CMAKE_PROJECT_NAME}"
@@ -34,3 +37,26 @@ set_target_properties(
              MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
              MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION}
              RESOURCE "${assets}")
+
+# Copy freetype.framework into the app bundle (unsigned)
+if(sfml_SOURCE_DIR)
+  set(FREETYPE_FW_SRC "${sfml_SOURCE_DIR}/extlibs/libs-osx/Frameworks/freetype.framework")
+elseif(SFML_SOURCE_DIR)
+  set(FREETYPE_FW_SRC "${SFML_SOURCE_DIR}/extlibs/libs-osx/Frameworks/freetype.framework")
+elseif(CPM_PACKAGE_sfml_SOURCE_DIR)
+  set(FREETYPE_FW_SRC "${CPM_PACKAGE_sfml_SOURCE_DIR}/extlibs/libs-osx/Frameworks/freetype.framework")
+elseif(FREETYPE_LIBRARY AND EXISTS "${FREETYPE_LIBRARY}")
+  set(FREETYPE_FW_SRC "${FREETYPE_LIBRARY}")
+endif()
+
+if(FREETYPE_FW_SRC AND EXISTS "${FREETYPE_FW_SRC}")
+  add_custom_command(
+    TARGET ${CMAKE_PROJECT_NAME}
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:${CMAKE_PROJECT_NAME}>/../Frameworks
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${FREETYPE_FW_SRC}"
+            $<TARGET_FILE_DIR:${CMAKE_PROJECT_NAME}>/../Frameworks/freetype.framework
+    COMMENT "Copying freetype.framework to bundle Frameworks (unsigned)"
+  )
+endif()
