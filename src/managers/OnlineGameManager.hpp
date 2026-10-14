@@ -87,9 +87,9 @@ inline void chk::OnlineGameManager::createAllPieces()
             auto redItr = payload.pieces_red().begin();     // red iterator
             auto blackItr = payload.pieces_black().begin(); // black iterator
             // place them on board
-            for (uint16_t row = 0; row < chk::NUM_ROWS; row++)
+            for (uint16_t row = 0; row < chk::NUM_ROWS; ++row)
             {
-                for (uint16_t col = 0; col < chk::NUM_COLS; col++)
+                for (uint16_t col = 0; col < chk::NUM_COLS; ++col)
                 {
                     if ((row + col) % 2 != 0)
                     {
