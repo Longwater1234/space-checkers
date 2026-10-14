@@ -1,25 +1,28 @@
 cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
 
+# Build universal binaries on macOS (Apple Silicon arm64 + Intel x86_64)
+if(CMAKE_HOST_APPLE OR APPLE OR CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin")
+  set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "macOS universal architectures" FORCE)
+endif()
+
 project(
   "SpaceCheckers"
-  VERSION 2.0.1
+  VERSION 2.1.0
   DESCRIPTION "A simple checkers game made with SFML"
   HOMEPAGE_URL "https://github.com/Longwater1234/space-checkers")
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin) 
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 
-# Enable unit tests
+# For unit tests
 option(ENABLE_GAME_TESTS "Enable unit tests" OFF)
 
-# On macOS link SFML as Frameworks
-if(NOT APPLE)
-  set(SFML_STATIC_LIBRARIES TRUE)
-endif()
+# Ensure SFML and dependencies link statically
+set(SFML_STATIC_LIBRARIES TRUE CACHE BOOL "" FORCE)
 
 # write app version into Header
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/src/protos/AppVersion.hpp.in
@@ -31,14 +34,14 @@ set(SFML_HOME "C:/SFML/SFML-2.6.2")
 set(SFML_DIR ${SFML_HOME}/lib/cmake/SFML)
 # ==========================
 
-# comment line below if using CPM to download SFML
-find_package(SFML 2.6 REQUIRED COMPONENTS "graphics" "window" "system") 
+## UNCOMMENT LINE BELOW IF USING SYSTEM-INSTALLED SFML (Linux, MacOS, Windows)
+# find_package(SFML 2.6 REQUIRED COMPONENTS "graphics" "window" "system") 
 
 # download extra libs
 add_subdirectory(dependencies) 
 
 # Collect all sources
-file(GLOB_RECURSE GAME_SRC "src/*.cpp" "src/*.hpp")
+file(GLOB_RECURSE GAME_SRC "src/*.cpp" "src/*.hpp") 
 
 if(WIN32)
   add_executable(SpaceCheckers WIN32 ${GAME_SRC} ${CMAKE_SOURCE_DIR}/resources/win-icon.rc)
