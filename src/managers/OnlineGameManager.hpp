@@ -87,9 +87,9 @@ inline void chk::OnlineGameManager::createAllPieces()
             auto redItr = payload.pieces_red().begin();     // red iterator
             auto blackItr = payload.pieces_black().begin(); // black iterator
             // place them on board
-            for (uint16_t row = 0; row < chk::NUM_ROWS; row++)
+            for (uint16_t row = 0; row < chk::NUM_ROWS; ++row)
             {
-                for (uint16_t col = 0; col < chk::NUM_COLS; col++)
+                for (uint16_t col = 0; col < chk::NUM_COLS; ++col)
                 {
                     if ((row + col) % 2 != 0)
                     {
@@ -195,7 +195,7 @@ inline void OnlineGameManager::handleEvents(chk::CircularBuffer<int> &buffer)
         {
             window->close();
         }
-        if (event.type == sf::Event::MouseButtonPressed && sf::Mouse::isButtonPressed(sf::Mouse::Left))
+        if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
         {
             const auto clickedPos = sf::Mouse::getPosition(*window);
             /* Check window bounds */
@@ -366,11 +366,11 @@ inline void OnlineGameManager::handleCapturePiece(const chk::PlayerPtr &hunter, 
         // NO MORE JUMPS AVAILABLE. SWITCH TURNS to opponent
         chk::GameManager::identifyTargets(prey);
         this->isMyTurn = !this->isMyTurn;
-        this->updateMessage(fmt::format("It's {}'s turn", prey->getName()));
+        this->updateMessage(fmt::format("It's {}'s turn", prey->getName()), true);
     }
     else
     {
-        this->updateMessage("Continue. You can capture another piece!");
+        this->updateMessage("Continue. You can capture another piece!", true);
     }
 }
 
@@ -521,7 +521,7 @@ inline void OnlineGameManager::startCaptureListener()
             // NO MORE JUMPS AVAILABLE. SWITCH TURNS to myself.
             chk::GameManager::identifyTargets(myTeam);
             this->isMyTurn = !this->isMyTurn;
-            this->updateMessage("It's now your turn!");
+            this->updateMessage("It's now your turn!", true);
         }
     });
 }

@@ -69,7 +69,7 @@ void chk::WsClient::showConnectWindow()
             const char *prefix = sslEnabled ? "wss://" : "ws://";
             this->final_address = prefix + std::string{inputUrl};
             this->connClicked = true;
-            memset(inputUrl, 0, sizeof(inputUrl));
+            std::fill(std::begin(inputUrl), std::end(inputUrl), '\0');
         }
         if (ImGui::Button("< Go Back", ImVec2{100.0f, 0}))
         {
@@ -157,19 +157,19 @@ void WsClient::parseServerList(const cpr::Response &response)
     simdjson::dom::parser jsonParser;
     try
     {
-        simdjson::dom::array jsonArray = jsonParser.parse(simdjson::padded_string_view(response.text));
-        std::vector<chk::ServerLocation> tempServers;
-        tempServers.reserve(jsonArray.size());
+        simdjson::dom::array jsonArray = jsonParser.parse(simdjson::padded_string(response.text));
+        std::vector<chk::ServerLocation> tempList;
+        tempList.reserve(jsonArray.size());
         for (const simdjson::dom::object &elem : jsonArray)
         {
             chk::ServerLocation location;
             location.name = elem.at_key("name").get_c_str();
             location.address = elem.at_key("address").get_c_str();
-            tempServers.emplace_back(std::move_if_noexcept(location));
+            tempList.emplace_back(std::move(location));
         }
 
         std::scoped_lock lg{this->mut};
-        this->publicServers = std::move(tempServers);
+        this->publicServers = std::move(tempList);
     }
     catch (const simdjson::simdjson_error &ex)
     {

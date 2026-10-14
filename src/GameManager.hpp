@@ -44,7 +44,7 @@ class GameManager
     virtual void handleEvents(chk::CircularBuffer<int> &buffer) = 0;
     virtual void drawBoard() = 0;
     void drawCheckerboard(const sf::Font &font);
-    void updateMessage(std::string_view msg);
+    void updateMessage(std::string_view msg, bool append = false);
     void matchCellsToPieces(const std::vector<chk::PiecePtr> &pieceList);
     [[nodiscard]] const std::unordered_map<int, chk::CaptureTarget> &getForcedMoves() const;
     [[nodiscard]] const std::string &getCurrentMsg() const;
