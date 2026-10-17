@@ -69,6 +69,7 @@ void chk::WsClient::showConnectWindow()
             const char *prefix = sslEnabled ? "wss://" : "ws://";
             this->final_address = prefix + std::string{inputUrl};
             this->connClicked = true;
+            tryConnect(final_address);
             std::fill(std::begin(inputUrl), std::end(inputUrl), '\0');
         }
         if (ImGui::Button("< Go Back", ImVec2{100.0f, 0}))
@@ -116,6 +117,7 @@ void WsClient::showPublicServerWindow(bool &showPublic)
         {
             this->final_address = publicServers.at(currentIdx).address;
             this->connClicked = true;
+            tryConnect(final_address);
         }
         publicServers.empty() ? ImGui::NewLine() : ImGui::SameLine();
         if (ImGui::Button("Refresh", ImVec2{90.0f, 0}))
@@ -157,19 +159,19 @@ void WsClient::parseServerList(const cpr::Response &response)
     simdjson::dom::parser jsonParser;
     try
     {
-        simdjson::dom::array jsonArray = jsonParser.parse(simdjson::padded_string(response.text));
-        std::vector<chk::ServerLocation> tempList;
-        tempList.reserve(jsonArray.size());
+        simdjson::dom::array jsonArray = jsonParser.parse(simdjson::padded_string_view(response.text));
+        std::vector<chk::ServerLocation> tempServers;
+        tempServers.reserve(jsonArray.size());
         for (const simdjson::dom::object &elem : jsonArray)
         {
             chk::ServerLocation location;
             location.name = elem.at_key("name").get_c_str();
             location.address = elem.at_key("address").get_c_str();
-            tempList.emplace_back(std::move(location));
+            tempServers.emplace_back(std::move_if_noexcept(location));
         }
 
         std::scoped_lock lg{this->mut};
-        this->publicServers = std::move(tempList);
+        this->publicServers = std::move(tempServers);
     }
     catch (const simdjson::simdjson_error &ex)
     {
@@ -214,7 +216,7 @@ void WsClient::resetAllStates()
 }
 
 /**
- * Run the main loop of the websocket client, handling connection, messages, and events.
+ * Run the main loop (at 60 FPS) of the websocket client, handling connection and all events.
  */
 void WsClient::runMainLoop()
 {
@@ -224,7 +226,8 @@ void WsClient::runMainLoop()
         if (!connClicked) {
             showConnectWindow();
         } else {
-            tryConnect(final_address);
+            //this->resetAllStates();
+            showLoadingWindow();
         }
     } else {
         this->readIncomingPayloads();
@@ -255,13 +258,6 @@ void WsClient::runMainLoop()
 void WsClient::tryConnect(std::string_view address)
 {
     this->webSocketPtr->setUrl(address.data());
-    if (!this->isConnected)
-    {
-        ImGui::SetNextWindowSize(ImVec2{400.0f, 100.0f});
-        ImGui::Begin("Loading", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse);
-        ImGui::Text("Connecting to online server");
-        ImGui::End();
-    }
 
     // Setup a callback to be fired when an Async event is received
     this->webSocketPtr->setOnMessageCallback([this](const ix::WebSocketMessagePtr &msg) {
@@ -290,16 +286,20 @@ void WsClient::tryConnect(std::string_view address)
     });
 
     // Start our b/ground thread and receive messages (if websocket not dead)
-    if (!this->isDead)
-    {
-        this->webSocketPtr->start();
-    }
+    this->webSocketPtr->start();
+    spdlog::info("i am inside tryConnect");
+}
 
-    // Handle any connection error/timeout
-    if (this->webSocketPtr->getReadyState() != ix::ReadyState::Open && this->isDead)
+/**
+ * This shows the loading window as we wait to connect to selected game server
+ */
+void WsClient::showLoadingWindow()
+{
+    ImGui::SetNextWindowSize(ImVec2{400.0f, 100.0f});
+    if (ImGui::Begin("Loading", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse))
     {
-        this->webSocketPtr->stop();
-        return;
+        ImGui::Text("Connecting to online server...");
+        ImGui::End();
     }
 }
 
@@ -391,6 +391,7 @@ void WsClient::readIncomingPayloads()
 {
     std::deque<std::string> localMessages;
     {
+        // atomic swap
         std::scoped_lock lg{this->mut};
         localMessages = this->msgBuffer.getAll();
         this->msgBuffer.clean();
@@ -405,11 +406,11 @@ void WsClient::readIncomingPayloads()
         chk::payload::BasePayload basePayload;
         if (!basePayload.ParseFromString(msg))
         {
-            this->markDead("Protobuf: Could not parse payload");
+            this->markDead("Protobuf: Could not parse payload. Invalid content");
             return;
         }
 
-        // =================== BEGIN SWITCH BLOCk =====================
+        // =================== BEGIN SWITCH BLOCK =====================
         switch (basePayload.inner_case())
         {
         case chk::payload::BasePayload::kWelcome:

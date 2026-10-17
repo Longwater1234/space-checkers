@@ -76,6 +76,7 @@ class WsClient final
     void readIncomingPayloads();                           // while connected, keep reading messages from server
     static void showHint(const char *tip);
     void tryConnect(std::string_view address);
+    void showLoadingWindow();
     void showConnectWindow();
     void showWinnerPopup();
     void showPublicServerWindow(bool &showPublic);
