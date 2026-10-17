@@ -10,7 +10,7 @@ namespace chk
 {
 /**
  * (NOT THREAD SAFE!) Rotating container with strict size limit. If `maxCapacity` is reached, remove the first added
- * item before inserting the new element in. Works in FIFO policy
+ * item before inserting the new element in. Works in FIFO policy. Use with mutex.
  */
 template <typename T> class CircularBuffer
 {
@@ -33,8 +33,8 @@ template <typename T> class CircularBuffer
     void clean();
 
   private:
-    const uint32_t max_capacity; // max Capacity
-    std::deque<T> m_deque;       // actual container of elements
+    const uint32_t max_capacity; // max Capacity, set once only.
+    std::deque<T> m_deque;       // actual container of elements.
 };
 
 /**
