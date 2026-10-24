@@ -457,6 +457,9 @@ bool GameManager::hasNoPossibleMoves(const chk::PlayerPtr &player) const
     }
 
     // 2. Check if any piece belonging to player can make a simple move
+    std::vector<sf::Vector2f> possibleMoves;
+    possibleMoves.reserve(4);
+
     for (const auto &cell_ptr : this->blockList)
     {
         if (cell_ptr->getIndex() == -1)
@@ -474,20 +477,20 @@ bool GameManager::hasNoPossibleMoves(const chk::PlayerPtr &player) const
         const bool isKing = piece->getIsKing();
         const auto pType = player->getPlayerType();
 
-        std::vector<sf::Vector2f> candidateDests;
-        candidateDests.reserve(4);
+        possibleMoves.clear();
         if (pType == PlayerType::PLAYER_RED || isKing)
         {
-            candidateDests.emplace_back(currPos.x - chk::SIZE_CELL, currPos.y - chk::SIZE_CELL);
-            candidateDests.emplace_back(currPos.x + chk::SIZE_CELL, currPos.y - chk::SIZE_CELL);
+            possibleMoves.emplace_back(currPos.x - chk::SIZE_CELL, currPos.y - chk::SIZE_CELL);
+            possibleMoves.emplace_back(currPos.x + chk::SIZE_CELL, currPos.y - chk::SIZE_CELL);
         }
         if (pType == PlayerType::PLAYER_BLACK || isKing)
         {
-            candidateDests.emplace_back(currPos.x - chk::SIZE_CELL, currPos.y + chk::SIZE_CELL);
-            candidateDests.emplace_back(currPos.x + chk::SIZE_CELL, currPos.y + chk::SIZE_CELL);
+            possibleMoves.emplace_back(currPos.x - chk::SIZE_CELL, currPos.y + chk::SIZE_CELL);
+            possibleMoves.emplace_back(currPos.x + chk::SIZE_CELL, currPos.y + chk::SIZE_CELL);
         }
 
-        for (const auto &destPos : candidateDests)
+        // 3. validate if any of these possible moves, (within bounds and not occupied), exit early if so.
+        for (const auto &destPos : possibleMoves)
         {
             if (destPos.x < 0.0f || destPos.x > 7.0f * chk::SIZE_CELL || destPos.y < 0.0f ||
                 destPos.y > 7.0f * chk::SIZE_CELL)
