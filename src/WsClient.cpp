@@ -226,7 +226,7 @@ void WsClient::runMainLoop()
         if (!connClicked) {
             showConnectWindow();
         } else {
-            //this->resetAllStates();
+            this->resetAllStates();
             showLoadingWindow();
         }
     } else {
