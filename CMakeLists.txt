@@ -34,7 +34,7 @@ set(SFML_HOME "C:/SFML/SFML-2.6.2")
 set(SFML_DIR ${SFML_HOME}/lib/cmake/SFML)
 # ==========================
 
-## UNCOMMENT LINE BELOW IF USING SYSTEM-INSTALLED SFML (Linux, MacOS, Windows)
+## === UNCOMMENT LINE BELOW IF USING SYSTEM-INSTALLED SFML (ALL PLATFORMS)
 # find_package(SFML 2.6 REQUIRED COMPONENTS "graphics" "window" "system") 
 
 # download extra libs
