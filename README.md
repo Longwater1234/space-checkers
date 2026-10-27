@@ -25,10 +25,10 @@ This game can connect securely to both Private and Public game servers. The back
 ## Requirements for Building
 
 - C++17 (or newer) build tools.
-- Pre-built [SFML 2.6.x](https://www.sfml-dev.org/download/sfml/2.6.2/) libs.
+- Pre-built [SFML 2.6.x](https://www.sfml-dev.org/download/sfml/2.6.2/) libs.**
 - [CMake 3.20+](https://cmake.org/download/) or newer (GUI recommended)
 
-You may auto-build SFML 2.6 from source: uncomment the line shown inside [dependencies/CMakeLists.txt](dependencies/CMakeLists.txt).
+[*]💡 Or, you may auto-build SFML 2.6 from source: see line in [dependencies/CMakeLists.txt](dependencies/CMakeLists.txt).
 
 ### For Windows (10 or later)
 
