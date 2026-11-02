@@ -31,6 +31,7 @@ This game can connect securely to both Private and Public game servers. The back
 
 [^1] Alternatively, You may auto-build SFML 2.6 from source: see the marked line [dependencies/CMakeLists.txt](dependencies/CMakeLists.txt).
 
+
 ### For Windows (10 or later)
 
 - MS Visual Studio 2022 or newer, with "**Desktop C++ Development**" bundle.
