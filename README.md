@@ -19,16 +19,17 @@ This game can connect securely to both Private and Public game servers. The back
 - spdlog
 - mbedtls
 - libcpr (curl for C++17)
-- Google Protobuf v33 (Used entirely during gameplay)
+- Google Protobuf v36 (Used entirely during gameplay)
 - simdjson (Used once, for parsing list of public servers)
+- GoogleTest
 
 ## Requirements for Building
 
 - C++17 (or newer) build tools.
-- Pre-built [SFML 2.6.x](https://www.sfml-dev.org/download/sfml/2.6.2/) libs.
+- Pre-built [SFML 2.6.x](https://www.sfml-dev.org/download/sfml/2.6.2/) libs. [^1]
 - [CMake 3.20+](https://cmake.org/download/) or newer (GUI recommended)
 
-You may auto-build SFML 2.6 from source: uncomment the line shown inside [dependencies/CMakeLists.txt](dependencies/CMakeLists.txt).
+[^1] Alternatively, You may auto-build SFML 2.6 from source: see the marked line [dependencies/CMakeLists.txt](dependencies/CMakeLists.txt).
 
 ### For Windows (10 or later)
 
@@ -39,7 +40,7 @@ You may auto-build SFML 2.6 from source: uncomment the line shown inside [depend
 
 ### For macOS (x64 & arm64)
 
-- XCode 14 or newer from AppStore (with MacOS SDK)
+- XCode 14 or newer from AppStore (with MacOS SDK).
 - Please install SFML 2.6 for macOS as **"Frameworks"**, as shown in [official SFML guide](https://www.sfml-dev.org/tutorials/2.6/start-osx.php).
 - Download Apple Developer tools. After Xcode is installed, run this in your Terminal:
 
