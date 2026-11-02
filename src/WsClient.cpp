@@ -1,4 +1,5 @@
 #include "WsClient.hpp"
+#include <filesystem>
 
 namespace chk
 {
@@ -16,9 +17,21 @@ chk::WsClient::WsClient()
     this->webSocketPtr->setPingInterval(30);
     ix::SocketTLSOptions tlsOptions;
 #ifndef _WIN32
-    // Currently system CAs are not supported on non-Windows platforms with
-    // mbedtls
-    tlsOptions.caFile = "NONE";
+    // Load system CA bundle from standard Unix/macOS paths for mbedtls verification
+    constexpr const char *caPaths[] = {
+        "/etc/ssl/cert.pem",                  // macOS, Alpine, FreeBSD, OpenBSD
+        "/etc/ssl/certs/ca-certificates.crt", // Debian, Ubuntu, Gentoo, Arch
+        "/etc/pki/tls/certs/ca-bundle.crt",   // Fedora, RHEL, CentOS
+        "/etc/ssl/ca-bundle.pem"              // openSUSE
+    };
+    for (const char *path : caPaths)
+    {
+        if (std::filesystem::exists(path))
+        {
+            tlsOptions.caFile = path;
+            break;
+        }
+    }
 #endif // _WIN32
     this->webSocketPtr->setTLSOptions(tlsOptions);
     // prefetch for public server list
@@ -226,7 +239,6 @@ void WsClient::runMainLoop()
         if (!connClicked) {
             showConnectWindow();
         } else {
-            this->resetAllStates();
             showLoadingWindow();
         }
     } else {
