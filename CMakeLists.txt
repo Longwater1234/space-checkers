@@ -20,6 +20,7 @@ set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 
 # For unit tests
 option(ENABLE_GAME_TESTS "Enable unit tests" OFF)
+option(CHECKERS_USE_SYSTEM_SFML "Use manually installed SFML" OFF)
 
 # Ensure SFML and dependencies link statically
 set(SFML_STATIC_LIBRARIES TRUE CACHE BOOL "" FORCE)
@@ -34,8 +35,10 @@ set(SFML_HOME "C:/SFML/SFML-2.6.2")
 set(SFML_DIR ${SFML_HOME}/lib/cmake/SFML)
 # ==========================
 
-## === UNCOMMENT LINE BELOW IF USING SYSTEM-INSTALLED SFML (ALL PLATFORMS)
-# find_package(SFML 2.6 REQUIRED COMPONENTS "graphics" "window" "system") 
+## === UNCOMMENT LINE BELOW IF USING SYSTEM-INSTALLED SFML =====================
+if (CHECKERS_USE_SYSTEM_SFML)
+  find_package(SFML 2.6 REQUIRED COMPONENTS "graphics" "window" "system") 
+endif(CHECKERS_USE_SYSTEM_SFM)
 
 # download extra libs
 add_subdirectory(dependencies) 
