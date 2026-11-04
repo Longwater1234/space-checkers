@@ -58,3 +58,6 @@ bld/
 .DS_Store
 .cache/
 Testing/
+
+# github files
+_codeql_detected_source_root

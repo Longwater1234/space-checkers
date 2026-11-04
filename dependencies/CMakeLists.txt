@@ -9,5 +9,9 @@ include(libcpr.cmake)
 include(spdlog.cmake)
 include(simdjson.cmake)
 include(protobuf.cmake)
-include(sfml.cmake) ## <-- uncomment to download and build SFML from source
+
+if (NOT CHECKERS_USE_SYSTEM_SFML)
+    include(sfml.cmake) ## <-- uncomment to download and build SFML from source
+endif()
+
 include(imgui.cmake)

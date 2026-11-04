@@ -38,7 +38,7 @@ set_target_properties(
              MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION}
              RESOURCE "${assets}")
 
-# Copy freetype.framework into the app bundle (unsigned)
+# Copy 'freetype.framework' into the app bundle (unsigned)
 if(sfml_SOURCE_DIR)
   set(FREETYPE_FW_SRC "${sfml_SOURCE_DIR}/extlibs/libs-osx/Frameworks/freetype.framework")
 elseif(SFML_SOURCE_DIR)

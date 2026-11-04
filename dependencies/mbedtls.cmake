@@ -1,4 +1,4 @@
-# mbedtls v3.6.5 (Apache-2.0 License)
+# Get mbedtls v3.6.7
 
 CPMAddPackage(
     NAME mbedtls
