@@ -59,12 +59,7 @@ This game can connect securely to both Private and Public game servers. The back
 
 - Latest display drivers.
 - Latest stable C++ toolchain.
-- Use your OS package manager to install SFML 2.6.x or newer. Example on Debian/Ubuntu:
-
-```bash
-  sudo apt update
-  sudo apt install build-essential libsfml-dev 
-```
+- Use your OS package manager to install SFML 2.6.x.
 
 ## Build Instructions
 
