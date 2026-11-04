@@ -38,7 +38,7 @@ set(SFML_DIR ${SFML_HOME}/lib/cmake/SFML)
 ## === UNCOMMENT LINE BELOW IF USING SYSTEM-INSTALLED SFML =====================
 if (CHECKERS_USE_SYSTEM_SFML)
   find_package(SFML 2.6 REQUIRED COMPONENTS "graphics" "window" "system") 
-endif(CHECKERS_USE_SYSTEM_SFML)
+endif()
 
 # download extra libs
 add_subdirectory(dependencies) 

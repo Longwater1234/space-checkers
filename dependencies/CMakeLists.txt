@@ -12,6 +12,6 @@ include(protobuf.cmake)
 
 if (NOT CHECKERS_USE_SYSTEM_SFML)
     include(sfml.cmake) ## <-- uncomment to download and build SFML from source
-endif(CHECKERS_USE_SYSTEM_SFML)
+endif()
 
 include(imgui.cmake)
