@@ -71,7 +71,6 @@ jobs:
           $date = Get-Date -Format "yyyy-MM-ddTHH:mm:ss"
           $commit = "${{ github.sha }}"
           $branch = "${{ github.ref_name }}"
-          $run = "${{ github.run_number }}"
           $appversion = "${{ steps.extract_version.outputs.VERSION }}"
 
           @"
@@ -89,5 +88,3 @@ jobs:
             ${{github.workspace}}/build/bin/Release/SpaceCheckers.exe
             ${{github.workspace}}/build/bin/Release/resources/
             ${{github.workspace}}/build/bin/Release/build_info.txt
-
-            
