@@ -21,37 +21,32 @@ struct BoardTheme
 // 2. Cyberpunk
 // 3. Forest Green (Chess.com forest green)
 // 4. Classic Wood (Original)
-inline const std::array<BoardTheme, 4> BOARD_THEMES = {{
-    // clang-format off
-    {
-        "Deep Space",
-        sf::Color{24, 28, 52},        // Deep void indigo
-        sf::Color{130, 145, 185},     // Soft starlight
-        sf::Color{0, 240, 255},       // Neon cyan
-        sf::Color{255, 255, 255, 120} // Translucent white numbers
+inline const std::array BOARD_THEMES = {
+    chk::BoardTheme{
+        "Deep Space", sf::Color{24, 28, 52}, // Deep void indigo
+        sf::Color{130, 145, 185},            // Soft starlight
+        sf::Color{0, 240, 255},              // Neon cyan
+        sf::Color{255, 255, 255, 120}        // Translucent white numbers
     },
-    {
-        "Cyberpunk",
-        sf::Color{20, 22, 28},        // Matte dark charcoal
-        sf::Color{45, 52, 68},        // Slate grid
-        sf::Color{255, 42, 109},      // Hot neon pink
-        sf::Color{255, 255, 255, 150} // White numbers
+    chk::BoardTheme{
+        "Cyberpunk", sf::Color{20, 22, 28}, // Matte dark charcoal
+        sf::Color{45, 52, 68},              // Slate grid
+        sf::Color{255, 42, 109},            // Hot neon pink
+        sf::Color{255, 255, 255, 150}       // White numbers
     },
-    {
-        "Forest Green",
-        sf::Color{118, 150, 86},      // Forest green
-        sf::Color{238, 238, 210},     // Warm parchment/buff
-        sf::Color{247, 247, 105},     // Solar amber/yellow
-        sf::Color{255, 255, 255, 120} // Translucent white numbers
+    chk::BoardTheme{
+        "Forest Green", sf::Color{118, 150, 86}, // Forest green
+        sf::Color{238, 238, 210},                // Warm parchment/buff
+        sf::Color{247, 247, 105},                // Solar amber/yellow
+        sf::Color{255, 255, 255, 120}            // Translucent white numbers
     },
-    {
-        "Classic Wood",
-        sf::Color{82, 55, 27},        // Walnut brown
-        sf::Color{255, 225, 151},     // Cream
-        sf::Color{98, 174, 239},      // Baby blue
-        sf::Color{255, 255, 255, 100} // Original text color
+    chk::BoardTheme{
+        "Classic Wood", sf::Color{82, 55, 27}, // Walnut brown
+        sf::Color{255, 225, 151},              // Cream
+        sf::Color{98, 174, 239},               // Baby blue
+        sf::Color{255, 255, 255, 100}          // Original text color
     }
     // clang-format on
-}};
+};
 
 } // namespace chk
