@@ -33,6 +33,7 @@ target_link_libraries(SpaceCheckersTests
     sfml-graphics
     sfml-window
     sfml-system
+    ImGui-SFML
     spdlog::spdlog
 )
 
