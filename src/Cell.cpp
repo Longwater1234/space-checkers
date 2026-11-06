@@ -4,7 +4,7 @@ namespace chk
 {
 
 Cell::Cell(const int idx, const sf::RectangleShape &rect, const sf::Font &font)
-    : index(idx), cachedBounds(rect.getGlobalBounds())
+    : index(idx), baseColor(rect.getFillColor()), cachedBounds(rect.getGlobalBounds())
 {
     this->rec = rect;
     this->cell_pos = rec.getPosition();
@@ -84,11 +84,11 @@ const sf::Vector2f &Cell::getPos() const
 }
 
 /**
- * (ONLY FOR PLAYABLE CELLS) Highlight with BLUE the currently clicked cell with a piece
+ * (ONLY FOR PLAYABLE CELLS) Highlight the currently clicked cell with a piece
  */
 void Cell::highlightActive()
 {
-    this->rec.setFillColor(BABY_BLUE);
+    this->rec.setFillColor(this->highlightColor);
 }
 
 /**
@@ -96,7 +96,18 @@ void Cell::highlightActive()
  */
 void Cell::resetColor()
 {
-    this->rec.setFillColor(DARK_BROWN);
+    this->rec.setFillColor(this->baseColor);
+}
+
+/**
+ * Set theme colors for this cell
+ */
+void Cell::setTheme(const sf::Color &base, const sf::Color &highlight, const sf::Color &textColor)
+{
+    this->baseColor = base;
+    this->highlightColor = highlight;
+    this->rec.setFillColor(this->baseColor);
+    this->sfText.setFillColor(textColor);
 }
 
 } // namespace chk
