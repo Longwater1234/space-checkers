@@ -27,12 +27,13 @@ class Cell final : public sf::Drawable
     bool getIsEvenRow() const;
     void highlightActive();
     void resetColor();
+    void setTheme(const sf::Color &base, const sf::Color &highlight, const sf::Color &textColor);
 
   private:
     const int index; // Darker cells are in range [1~32]. Lighter cells are all -1
     sf::RectangleShape rec;
-    inline static const sf::Color DARK_BROWN{82, 55, 27};
-    inline static const sf::Color BABY_BLUE{98, 174, 239};
+    sf::Color baseColor{82, 55, 27};
+    sf::Color highlightColor{98, 174, 239};
     bool isEvenRow = false;
     sf::Vector2f cell_pos;
     sf::Text sfText;

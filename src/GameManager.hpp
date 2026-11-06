@@ -3,6 +3,7 @@
 //
 #pragma once
 
+#include "BoardTheme.hpp"
 #include "CaptureTarget.hpp"
 #include "Cell.hpp"
 #include "CircularBuffer.hpp"
@@ -44,6 +45,7 @@ class GameManager
     virtual void handleEvents(chk::CircularBuffer<int> &buffer) = 0;
     virtual void drawBoard() = 0;
     void drawCheckerboard(const sf::Font &font);
+    void drawThemeSelector();
     void updateMessage(std::string_view msg, bool append = false);
     void matchCellsToPieces(const std::vector<chk::PiecePtr> &pieceList);
     [[nodiscard]] const std::unordered_map<int, chk::CaptureTarget> &getForcedMoves() const;
@@ -62,6 +64,7 @@ class GameManager
 
     [[nodiscard]] bool boardContainsCell(const int cell_idx) const;
     [[nodiscard]] bool awayFromEdge(const int cell_idx) const;
+    void applyTheme(const BoardTheme &theme);
     void collectFrontRHS(const chk::PlayerPtr &hunter, const chk::CellPtr &cell_ptr);
     void collectFrontLHS(const chk::PlayerPtr &hunter, const chk::CellPtr &cell_ptr);
     void collectBehindRHS(const chk::PlayerPtr &hunter, const chk::CellPtr &cell_ptr);
@@ -77,6 +80,8 @@ class GameManager
     std::optional<int> sourceCell{};
     // all checkerboard cells
     std::vector<chk::CellPtr> blockList{};
+    // currently active board theme
+    chk::BoardTheme currentTheme = chk::BOARD_THEMES[0];
     // first player (p1)
     chk::PlayerPtr playerRed = nullptr;
     // second player (p2)

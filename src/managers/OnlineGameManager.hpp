@@ -1,14 +1,14 @@
 #pragma once
 
+#include <spdlog/fmt/fmt.h>
+
 #include "../GameManager.hpp"
 #include "../WsClient.hpp"
 #include "../payloads/base_payload.pb.hpp"
-#include <imgui-SFML.h>
-#include <spdlog/fmt/fmt.h>
 
 namespace chk
 {
-using chk::payload::TeamColor;
+class WsClient;
 
 /**
  * This class is responsible for online gameplay
@@ -17,6 +17,7 @@ using chk::payload::TeamColor;
 class OnlineGameManager final : public chk::GameManager
 {
   public:
+    using TeamColor = chk::payload::TeamColor;
     explicit OnlineGameManager(sf::RenderWindow *windowPtr);
     OnlineGameManager() = delete;
 
@@ -529,7 +530,7 @@ inline void OnlineGameManager::startCaptureListener()
 /**
  * Get my current team color
  */
-inline TeamColor OnlineGameManager::getMyTeamColor()
+inline chk::payload::TeamColor OnlineGameManager::getMyTeamColor()
 {
     return this->myTeam == chk::PlayerType::PLAYER_BLACK ? TeamColor::TEAM_BLACK : TeamColor::TEAM_RED;
 }

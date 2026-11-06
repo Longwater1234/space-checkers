@@ -85,9 +85,11 @@ int main()
 
         window.clear();
         manager->drawBoard();
+        manager->drawThemeSelector();
 
         txtPanel.setString(manager->getCurrentMsg());
         window.draw(txtPanel);
+
         ImGui::SFML::Render(window);
         window.display();
     }

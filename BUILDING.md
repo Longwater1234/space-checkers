@@ -9,7 +9,8 @@
 
 ## On MacOS & Linux (using Terminal)
 
-1. Ensure CMake 3.20 or higher is installed. Verify with `cmake --version`
+1. Ensure CMake 3.20 or higher is installed. Verify with `cmake --version`.
+2. We strongly recommend to install [Ninja Tool](https://ninja-build.org/) as well.
 2. Open this project directory in your Terminal.
 3. Next, copy and run the following commands:
 
