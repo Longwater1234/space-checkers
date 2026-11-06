@@ -5,6 +5,9 @@
 #include "../GameManager.hpp"
 #include <spdlog/fmt/fmt.h>
 
+#include <imgui-SFML.h>
+#include <imgui.h>
+
 namespace chk
 {
 
@@ -81,25 +84,79 @@ void GameManager::drawCheckerboard(const sf::Font &font)
             {
                 // even CELL, set LIGHTER color (unused)
                 sf::RectangleShape lightRec(sf::Vector2f{chk::SIZE_CELL, chk::SIZE_CELL});
-                lightRec.setFillColor(sf::Color{255, 225, 151});
+                lightRec.setFillColor(this->currentTheme.lightCell);
                 float x = static_cast<float>(col % NUM_COLS) * chk::SIZE_CELL;
                 lightRec.setPosition(sf::Vector2f(x, row * chk::SIZE_CELL));
                 auto whiteBlock = std::make_unique<chk::Cell>(-1, lightRec, font);
+                whiteBlock->setTheme(this->currentTheme.lightCell, this->currentTheme.lightCell,
+                                     sf::Color::Transparent);
                 blockList.emplace_back(std::move_if_noexcept(whiteBlock));
             }
             else
             {
                 // Odd cell, SET DARKER color (USED BY PIECES)
                 sf::RectangleShape darkRect(sf::Vector2f{chk::SIZE_CELL, chk::SIZE_CELL});
-                darkRect.setFillColor(sf::Color{82, 55, 27});
+                darkRect.setFillColor(this->currentTheme.darkCell);
                 float x = static_cast<float>(col % NUM_COLS) * chk::SIZE_CELL;
                 darkRect.setPosition(sf::Vector2f{x, row * chk::SIZE_CELL});
                 auto redBlock = std::make_unique<chk::Cell>(counter, darkRect, font);
                 redBlock->setEvenRow(row % 2 == 0);
+                redBlock->setTheme(this->currentTheme.darkCell, this->currentTheme.highlightColor,
+                                   this->currentTheme.indexTextColor);
                 blockList.emplace_back(std::move_if_noexcept(redBlock));
                 counter--;
             }
         }
+    }
+}
+
+/**
+ * Apply a board theme to all cells
+ * @param theme The new board theme
+ */
+void GameManager::applyTheme(const BoardTheme &theme)
+{
+    this->currentTheme = theme;
+    for (auto &cell : this->blockList)
+    {
+        if (cell->getIndex() == -1)
+        {
+            cell->setTheme(theme.lightCell, theme.lightCell, sf::Color::Transparent);
+        }
+        else
+        {
+            cell->setTheme(theme.darkCell, theme.highlightColor, theme.indexTextColor);
+        }
+    }
+}
+
+/**
+ * \brief Show theme switcher in the bottom panel ---
+ */
+void GameManager::drawThemeSelector()
+{
+    ImGui::SetNextWindowPos(ImVec2{380.0f, 620.0f}, ImGuiCond_Always);
+    ImGui::SetNextWindowSize(ImVec2{210.0f, 68.0f}, ImGuiCond_Always);
+
+    // Fixed-size string array generated on-demand at compile time
+    static const auto themeItems = []() {
+        std::array<const char *, chk::BOARD_THEMES.size()> items{};
+        for (size_t i = 0; i < chk::BOARD_THEMES.size(); ++i)
+        {
+            items[i] = chk::BOARD_THEMES[i].name.data();
+        }
+        return items;
+    }();
+
+    if (ImGui::Begin("Board Theme", nullptr,
+                     ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse))
+    {
+        static int selectedIdx = 0;
+        if (ImGui::Combo("Theme", &selectedIdx, themeItems.data(), static_cast<int>(themeItems.size())))
+        {
+            this->applyTheme(chk::BOARD_THEMES[selectedIdx]);
+        }
+        ImGui::End();
     }
 }
 
@@ -334,11 +391,11 @@ void chk::GameManager::handleCellTap(const chk::PlayerPtr &hunter, const chk::Pl
     {
         return;
     }
-    // reset color of all previous active cells
-    std::for_each(this->blockList.begin(), this->blockList.end(), [](const chk::CellPtr &cell) {
-        if (cell->getIndex() != -1)
+    // reset color of all playable cells
+    std::for_each(this->blockList.begin(), this->blockList.end(), [](const chk::CellPtr &c) {
+        if (c->getIndex() != -1)
         {
-            cell->resetColor();
+            c->resetColor();
         }
     });
     // CHECK IF this cell has a Piece

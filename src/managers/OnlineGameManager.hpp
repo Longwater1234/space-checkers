@@ -3,8 +3,10 @@
 #include "../GameManager.hpp"
 #include "../WsClient.hpp"
 #include "../payloads/base_payload.pb.hpp"
-#include <imgui-SFML.h>
 #include <spdlog/fmt/fmt.h>
+
+#include <imgui-SFML.h>
+#include <imgui.h>
 
 namespace chk
 {

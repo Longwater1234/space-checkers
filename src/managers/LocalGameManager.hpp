@@ -6,6 +6,9 @@
 #include <numeric>
 #include <spdlog/fmt/fmt.h>
 
+#include <imgui-SFML.h>
+#include <imgui.h>
+
 namespace chk
 {
 /**
@@ -145,6 +148,7 @@ inline void LocalGameManager::handleEvents(chk::CircularBuffer<int> &buffer)
 {
     for (auto event = sf::Event{}; window->pollEvent(event);)
     {
+        ImGui::SFML::ProcessEvent(*this->window, event);
         if (event.type == sf::Event::Closed)
         {
             window->close();
