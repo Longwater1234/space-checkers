@@ -1,8 +1,9 @@
 cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
 
-# Build universal binaries on macOS (Apple Silicon arm64 + Intel x86_64)
+# Build universal macOS binary and target minimal macOS 15 (Sequioa)
 if(CMAKE_HOST_APPLE OR APPLE OR CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin")
   set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "macOS universal architectures" FORCE)
+  set(CMAKE_OSX_DEPLOYMENT_TARGET "15.0" CACHE STRING "Minimum macOS version" FORCE)
 endif()
 
 project(
@@ -71,7 +72,9 @@ target_link_libraries(
           protobuf::libprotobuf)
 
 # include SFML headers
-target_include_directories(SpaceCheckers PUBLIC ${SFML_HOME}/include)
+if(WIN32)
+  target_include_directories(SpaceCheckers PUBLIC ${SFML_HOME}/include)
+endif()
 
 # compiler flags (depending on C++ compiler)
 if(MSVC)
