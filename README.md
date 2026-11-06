@@ -21,7 +21,6 @@ This game can connect securely to both Private and Public game servers. The back
 - libcpr (curl for C++17)
 - Google Protobuf v36 (Used entirely during gameplay)
 - simdjson (Used once, for parsing list of public servers)
-- GoogleTest
 
 ## Requirements for Building
 
@@ -42,7 +41,6 @@ This game can connect securely to both Private and Public game servers. The back
 ### For macOS (x64 & arm64)
 
 - XCode 14 or newer from AppStore (with MacOS SDK).
-- Please install SFML 2.6 for macOS as **"Frameworks"**, as shown in [official SFML guide](https://www.sfml-dev.org/tutorials/2.6/start-osx.php).
 - Download Apple Developer tools. After Xcode is installed, run this in your Terminal:
 
 ```bash
@@ -59,11 +57,10 @@ This game can connect securely to both Private and Public game servers. The back
 
 - Latest display drivers.
 - Latest stable C++ toolchain.
-- Use your OS package manager to install SFML 2.6.x.
 
 ## Build Instructions
 
-Please see [BUILDING.md](BUILDING.md) for detailed instructions for each platform.
+Please see [BUILDING.md](BUILDING.md) for detailed instructions for each desktop platform.
 
 ## Code Contributions
 
