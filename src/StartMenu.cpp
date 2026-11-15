@@ -1,4 +1,7 @@
 #include "StartMenu.hpp"
+#include "AppVersion.hpp"
+#include "Piece.hpp"
+#include "utils/ResourcePath.hpp"
 
 namespace chk
 {
