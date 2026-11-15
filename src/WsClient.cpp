@@ -6,7 +6,7 @@ namespace chk
 
 chk::WsClient::WsClient()
 {
-    ix::initNetSystem();
+    ix::initNetSystem(); 
     // Our websocket object
     this->webSocketPtr = std::make_unique<ix::WebSocket>();
     // set inital connection timeout
