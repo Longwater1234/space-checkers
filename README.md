@@ -34,13 +34,14 @@ This game can connect securely to both Private and Public game servers. The back
 ### For Windows (10 or later)
 
 - MS Visual Studio 2022 or newer, with "**Desktop C++ Development**" bundle.
-- Please download "Visual C++ 64bit" edition of SFML; ignore others.
+- Please download "Visual C++ 64bit SFML" from link above; ignore others.
 - Move your unzipped `SFML-2.6.x` folder to its own home, example: `C:/SFML/SFML-2.6.2`.
 - Edit file [CMakeLists.txt](CMakeLists.txt#L33), to set value `SFML_HOME` to absolute path you moved SFML into (from previous step).
 
 ### For macOS (x64 & arm64)
 
 - XCode 14 or newer from AppStore (with MacOS SDK).
+- Please install SFML 2.6 for macOS as **"Frameworks"**, as shown in [official SFML guide](https://www.sfml-dev.org/tutorials/2.6/start-osx.php).
 - Download Apple Developer tools. After Xcode is installed, run this in your Terminal:
 
 ```bash
@@ -57,6 +58,7 @@ This game can connect securely to both Private and Public game servers. The back
 
 - Latest display drivers.
 - Latest stable C++ toolchain.
+- If possible, use your OS package manager to download SFML 2.6, else build from source.
 
 ## Build Instructions
 
