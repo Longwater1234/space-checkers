@@ -1,0 +1,118 @@
+name: CMake Multi-Platform Build
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+permissions:
+  contents: read
+
+env:
+  BUILD_TYPE: Release
+  SFML_WIN_ZIP: SFML-2.6.2-windows-vc17-64-bit.zip
+
+jobs:
+  build:
+    name: Build (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            arch: x64
+            cmake_flags: >-
+              -DCHECKERS_USE_SYSTEM_SFML=ON
+              -DSFML_DIR=C:/SFML/SFML-2.6.2
+              -DCMAKE_CXX_COMPILER=cl
+              -DCMAKE_C_COMPILER=cl
+            bin_dir: build/bin/Release
+
+          - os: macos-14
+            arch: universal
+            cmake_flags: >-
+              -DCHECKERS_USE_SYSTEM_SFML=OFF
+            bin_dir: build/bin
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Extract version from CMakeLists.txt
+        id: extract_version
+        shell: pwsh
+        run: |
+          $content = Get-Content -Path "CMakeLists.txt" -Raw
+
+          # Match the VERSION in the project() command
+          if ($content -match '(?s)VERSION\s+([0-9]+\.[0-9]+\.[0-9]+)') {
+              $version = $Matches[1]
+              Write-Host "Extracted version: $version"
+
+              # Set as step output
+              "VERSION=$version" | Out-File -FilePath $env:GITHUB_OUTPUT -Append -Encoding utf8
+          }
+          else {
+              Write-Error "Could not find version in CMakeLists.txt"
+              exit 1
+          }
+
+      - name: Download and setup SFML for Windows
+        if: runner.os == 'Windows'
+        shell: cmd
+        run: |
+          mkdir "C:\SFML"
+          curl -fsSL "https://github.com/SFML/SFML/releases/download/2.6.2/%SFML_WIN_ZIP%" -o "C:\SFML\%SFML_WIN_ZIP%"
+          tar -xvf "C:\SFML\%SFML_WIN_ZIP%" -C "C:\SFML\"
+
+      - name: Configure CMake
+        run: >
+          cmake -B ${{ github.workspace }}/build
+          -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }}
+          -DENABLE_GAME_TESTS=ON
+          ${{ matrix.cmake_flags }}
+
+      - name: Build
+        run: cmake --build ${{ github.workspace }}/build --config ${{ env.BUILD_TYPE }}
+
+      - name: Test
+        working-directory: ${{ github.workspace }}/build
+        run: ctest -C ${{ env.BUILD_TYPE }} --output-on-failure
+
+      - name: Generate build info
+        shell: pwsh
+        run: |
+          $date = Get-Date -Format "yyyy-MM-ddTHH:mm:ss"
+          $commit = "${{ github.sha }}"
+          $branch = "${{ github.ref_name }}"
+          $appversion = "${{ steps.extract_version.outputs.VERSION }}"
+
+          @"
+          Build Date:   $date 'UTC'
+          Commit:       $commit
+          Branch:       $branch
+          Game Version: $appversion
+          OS:           ${{ runner.os }} (${{ matrix.arch }})
+          "@ | Out-File -FilePath "${{ github.workspace }}/${{ matrix.bin_dir }}/build_info.txt"
+
+      - name: Stage artifacts
+        shell: pwsh
+        run: |
+          $dist = "${{ github.workspace }}/dist"
+          New-Item -ItemType Directory -Force -Path $dist
+
+          if ("${{ runner.os }}" -eq "Windows") {
+              Copy-Item "${{ github.workspace }}/${{ matrix.bin_dir }}/SpaceCheckers.exe" $dist/
+              Copy-Item -Recurse "${{ github.workspace }}/${{ matrix.bin_dir }}/resources" $dist/resources
+              Copy-Item "${{ github.workspace }}/${{ matrix.bin_dir }}/build_info.txt" $dist/
+          } elseif ("${{ runner.os }}" -eq "macOS") {
+              ditto -c -k --keepParent "${{ github.workspace }}/${{ matrix.bin_dir }}/SpaceCheckers.app" "$dist/SpaceCheckers-macOS.zip"
+              Copy-Item "${{ github.workspace }}/${{ matrix.bin_dir }}/build_info.txt" $dist/
+          }
+
+      - name: Upload a Build Artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: space-checkers-v${{ steps.extract_version.outputs.VERSION }}-${{ runner.os }}-${{ matrix.arch }}
+          path: dist/

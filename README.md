@@ -1,6 +1,6 @@
 # space - checkers
 
-[![CMake on Windows platform](https://github.com/Longwater1234/space-checkers/actions/workflows/cmake-single-platform.yml/badge.svg?branch=main)](https://github.com/Longwater1234/space-checkers/actions/workflows/cmake-single-platform.yml)
+[![CMake Multi-Platform Build](https://github.com/Longwater1234/space-checkers/actions/workflows/cmake-multi-platform.yml/badge.svg?branch=main)](https://github.com/Longwater1234/space-checkers/actions/workflows/cmake-multi-platform.yml)
 |
 ![GitHub License](https://img.shields.io/github/license/longwater1234/space-checkers)
 |
